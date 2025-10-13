@@ -24,7 +24,8 @@ import com.example.notesapp.di.ViewModelFactory
 fun NotesScreen(
     factory: ViewModelFactory,
     onNoteClick: (Int) -> Unit,
-    onAddNoteClick: () -> Unit
+    onAddNoteClick: () -> Unit,
+    onSampleScreenClick: () -> Unit
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -37,18 +38,30 @@ fun NotesScreen(
         }
     ) {
         padding ->
-        LazyColumn(
+        Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            items(state.notes) {
-                note ->
-                NoteItem(
-                    note = note,
-                    onNoteClick = { onNoteClick(note.id) },
-                    onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteNote(note)) }
-                )
+            Button(
+                onClick = onSampleScreenClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp)
+            ) {
+                Text("Go to Sample Screen")
+            }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                items(state.notes) {
+                    note ->
+                    NoteItem(
+                        note = note,
+                        onNoteClick = { onNoteClick(note.id) },
+                        onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteNote(note)) }
+                    )
+                }
             }
         }
     }
