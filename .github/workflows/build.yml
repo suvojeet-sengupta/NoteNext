@@ -34,16 +34,22 @@ jobs:
         fi
         chmod +x gradlew
 
-    
 
-    - name: Clean project
-      run: ./gradlew clean
 
-    - name: Build Debug APK
-      run: ./gradlew assembleDebug
+    - name: Decode Keystore
+      run: |
+        echo "${{ secrets.KEYSTORE_BASE64 }}" | base64 --decode > my-release-key.keystore
+
+    - name: Build and Sign Release APK
+      run: ./gradlew assembleRelease
+      env:
+        KEYSTORE_PATH: "my-release-key.keystore"
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
 
     - name: Find APK files
-      run: find app/build -name "*.apk"
+      run: find app/build/outputs/apk/release -name "*.apk"
 
     
 
@@ -56,7 +62,7 @@ jobs:
       id: apk_path
       run: |
         # Find the APK file dynamically
-        APK_FILE=$(find app/build -name "*.apk" | head -n 1)
+        APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
         
         if [ -n "$APK_FILE" ]; then
           echo "APK_TO_UPLOAD=$APK_FILE" >> $GITHUB_ENV
@@ -70,7 +76,7 @@ jobs:
 
     - name: List APK files
       # Lists the generated APK files for verification.
-      run: ls -l app/build/outputs/apk/release/ || ls -l app/build/outputs/apk/debug/ # List whichever directory exists
+      run: ls -l app/build/outputs/apk/release/
 
     - name: Upload APK as artifact
       # Uploads the generated APK as a workflow artifact.
