@@ -97,7 +97,6 @@ fun NoteItem(
 ) {
     Card(
         modifier = Modifier
-            .fillMaxWidth()
             .padding(8.dp)
             .clickable { onNoteClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
