@@ -53,9 +53,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             is NotesEvent.TogglePinForSelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    val isPinned = selectedNotes.any { it.isPinned }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(isPinned = !isPinned))
+                        noteDao.insertNote(note.copy(isPinned = !note.isPinned))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -72,9 +71,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             is NotesEvent.ArchiveSelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    val isArchived = selectedNotes.any { it.isArchived }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(isArchived = !isArchived))
+                        noteDao.insertNote(note.copy(isArchived = !note.isArchived))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -82,9 +80,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             is NotesEvent.ToggleImportantForSelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    val isImportant = selectedNotes.any { it.isImportant }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(isImportant = !isImportant))
+                        noteDao.insertNote(note.copy(isImportant = !note.isImportant))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -93,7 +90,13 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                 // TODO: Implement color picker
             }
             is NotesEvent.CopySelectedNotes -> {
-                // TODO: Implement copy
+                viewModelScope.launch {
+                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                    for (note in selectedNotes) {
+                        noteDao.insertNote(note.copy(id = 0, title = "${note.title} (Copy)"))
+                    }
+                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                }
             }
             is NotesEvent.SendSelectedNotes -> {
                 // TODO: Implement send
