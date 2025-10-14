@@ -38,34 +38,14 @@ fun NotesScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Notes") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
-                ),
-                actions = {
-                    IconButton(onClick = { /* TODO: Implement search */ }) {
-                        Icon(Icons.Default.Search, contentDescription = "Search")
-                    }
-                }
+            SearchAppBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                onAddNoteClick = onAddNoteClick
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = onAddNoteClick) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-            }
         }
     ) { padding ->
         Column(modifier = Modifier.padding(padding)) {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = { searchQuery = it },
-                label = { Text("Search notes...") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            )
             if (state.notes.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -76,13 +56,16 @@ fun NotesScreen(
                         Icon(
                             imageVector = Icons.Default.Info,
                             contentDescription = null,
-                            modifier = Modifier.size(128.dp),
-                            tint = MaterialTheme.colorScheme.primary
+                            modifier = Modifier.size(96.dp),
+                            tint = MaterialTheme.colorScheme.onBackground
                         )
+                        Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "No notes yet. Tap the + button to add one.",
+                            text = "No notes yet. Tap the '+' button to add one.",
                             textAlign = TextAlign.Center,
-                            modifier = Modifier.padding(16.dp)
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onBackground,
+                            modifier = Modifier.padding(horizontal = 32.dp)
                         )
                     }
                 }
@@ -118,8 +101,7 @@ fun NoteItem(
             .fillMaxWidth()
             .padding(8.dp)
             .clickable { onNoteClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = Color(note.color))
     ) {
         Column(
@@ -139,4 +121,41 @@ fun NoteItem(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SearchAppBar(
+    searchQuery: String,
+    onSearchQueryChange: (String) -> Unit,
+    onAddNoteClick: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = onSearchQueryChange,
+                placeholder = { Text("Search your notes") },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 2.dp),
+                singleLine = true,
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            )
+        },
+        actions = {
+            IconButton(onClick = onAddNoteClick) {
+                Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
+    )
 }
