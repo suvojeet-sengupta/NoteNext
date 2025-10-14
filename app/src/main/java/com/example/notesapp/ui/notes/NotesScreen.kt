@@ -39,8 +39,15 @@ fun NotesScreen(
         topBar = {
             SearchAppBar(
                 searchQuery = searchQuery,
-                onSearchQueryChange = { searchQuery = it },
-                onAddNoteClick = onAddNoteClick
+                onSearchQueryChange = { searchQuery = it }
+            )
+        },
+        floatingActionButton = {
+            FloatingActionButton(
+                onClick = onAddNoteClick,
+                content = {
+                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+                }
             )
         }
     ) { padding ->
@@ -125,8 +132,7 @@ fun NoteItem(
 @Composable
 fun SearchAppBar(
     searchQuery: String,
-    onSearchQueryChange: (String) -> Unit,
-    onAddNoteClick: () -> Unit
+    onSearchQueryChange: (String) -> Unit
 ) {
     TopAppBar(
         title = {
@@ -144,11 +150,6 @@ fun SearchAppBar(
                     cursorColor = MaterialTheme.colorScheme.onPrimaryContainer
                 )
             )
-        },
-        actions = {
-            IconButton(onClick = onAddNoteClick) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-            }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer,
