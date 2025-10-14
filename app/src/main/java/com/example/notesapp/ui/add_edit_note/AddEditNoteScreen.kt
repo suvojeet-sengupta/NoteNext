@@ -60,7 +60,7 @@ fun AddEditNoteScreen(
         Color(0xFFCCFF90).toArgb(), // Green
         Color(0xFFA7FFEB).toArgb(), // Teal
         Color(0xFFCBF0F8).toArgb(), // Blue
-        Color(0xFFAFCBFA).toArgb), // Dark Blue
+        Color(0xFFAFCBFA).toArgb(), // Dark Blue
         Color(0xFFD7AEFB).toArgb(), // Purple
         Color(0xFFFDCFE8).toArgb(), // Pink
         Color(0xFFE6C9A8).toArgb(), // Brown
@@ -135,8 +135,10 @@ fun AddEditNoteScreen(
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
                     placeholder = { Text("Title") },
                     modifier = Modifier.fillMaxWidth(),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
@@ -150,8 +152,10 @@ fun AddEditNoteScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
-                    colors = TextFieldDefaults.textFieldColors(
-                        containerColor = Color.Transparent,
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent
                     ),
