@@ -38,6 +38,37 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                     recentlyDeletedNote = null
                 }
             }
+            is NotesEvent.ToggleNoteSelection -> {
+                val selectedIds = state.value.selectedNoteIds.toMutableList()
+                if (selectedIds.contains(event.noteId)) {
+                    selectedIds.remove(event.noteId)
+                } else {
+                    selectedIds.add(event.noteId)
+                }
+                _state.value = state.value.copy(selectedNoteIds = selectedIds)
+            }
+            is NotesEvent.ClearSelection -> {
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
+            }
+            is NotesEvent.PinSelectedNotes -> {
+                viewModelScope.launch {
+                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                    val isPinned = selectedNotes.any { it.isPinned }
+                    for (note in selectedNotes) {
+                        noteDao.insertNote(note.copy(isPinned = !isPinned))
+                    }
+                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                }
+            }
+            is NotesEvent.DeleteSelectedNotes -> {
+                viewModelScope.launch {
+                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                    for (note in selectedNotes) {
+                        noteDao.deleteNote(note)
+                    }
+                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                }
+            }
         }
     }
 }

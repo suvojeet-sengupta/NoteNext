@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -47,34 +48,48 @@ fun NotesScreen(
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+    val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
 
-    BackHandler(enabled = isSearchActive) {
-        isSearchActive = false
-        searchQuery = ""
+    BackHandler(enabled = isSearchActive || isSelectionModeActive) {
+        if (isSelectionModeActive) {
+            viewModel.onEvent(NotesEvent.ClearSelection)
+        } else if (isSearchActive) {
+            isSearchActive = false
+            searchQuery = ""
+        }
     }
 
     Scaffold(
         topBar = {
-            AnimatedContent(
-                targetState = isSearchActive,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
-                            fadeOut(animationSpec = tween(90))
-                }, label = ""
-            ) { targetState ->
-                if (targetState) {
-                    ExpandedSearchView(
-                        searchQuery = searchQuery,
-                        onSearchQueryChange = { searchQuery = it },
-                        onCloseSearch = {
-                            isSearchActive = false
-                            searchQuery = ""
-                        }
-                    )
-                } else {
-                    CollapsedTopAppBar(
-                        onSearchClick = { isSearchActive = true }
-                    )
+            if (isSelectionModeActive) {
+                ContextualTopAppBar(
+                    selectedItemCount = state.selectedNoteIds.size,
+                    onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                    onPinClick = { viewModel.onEvent(NotesEvent.PinSelectedNotes) },
+                    onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) }
+                )
+            } else {
+                AnimatedContent(
+                    targetState = isSearchActive,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
+                                fadeOut(animationSpec = tween(90))
+                    }, label = ""
+                ) { searchTargetState ->
+                    if (searchTargetState) {
+                        ExpandedSearchView(
+                            searchQuery = searchQuery,
+                            onSearchQueryChange = { searchQuery = it },
+                            onCloseSearch = {
+                                isSearchActive = false
+                                searchQuery = ""
+                            }
+                        )
+                    } else {
+                        CollapsedTopAppBar(
+                            onSearchClick = { isSearchActive = true }
+                        )
+                    }
                 }
             }
         },
@@ -122,8 +137,17 @@ fun NotesScreen(
                     items(state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }) { note ->
                         NoteItem(
                             note = note,
-                            onNoteClick = { onNoteClick(note.id) },
-                            onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteNote(note)) }
+                            isSelected = state.selectedNoteIds.contains(note.id),
+                            onNoteClick = {
+                                if (isSelectionModeActive) {
+                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                } else {
+                                    onNoteClick(note.id)
+                                }
+                            },
+                            onNoteLongClick = {
+                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                            }
                         )
                     }
                 }
@@ -136,19 +160,21 @@ fun NotesScreen(
 @Composable
 fun NoteItem(
     note: Note,
+    isSelected: Boolean,
     onNoteClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onNoteLongClick: () -> Unit,
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .padding(12.dp)
             .combinedClickable(
                 onClick = onNoteClick,
-                onLongClick = { isExpanded = !isExpanded }
+                onLongClick = onNoteLongClick
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(note.color))
+        colors = CardDefaults.cardColors(
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color(note.color)
+        )
     ) {
         Column(
             modifier = Modifier
@@ -160,18 +186,37 @@ fun NoteItem(
             Text(
                 text = note.content,
                 style = MaterialTheme.typography.bodyMedium,
-                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                maxLines = 2,
                 modifier = Modifier.animateContentSize(animationSpec = tween(300))
             )
-            Spacer(modifier = Modifier.height(8.dp))
-            IconButton(
-                onClick = onDeleteClick,
-                modifier = Modifier.align(Alignment.End)
-            ) {
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete note")
-            }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ContextualTopAppBar(
+    selectedItemCount: Int,
+    onClearSelection: () -> Unit,
+    onPinClick: () -> Unit,
+    onDeleteClick: () -> Unit
+) {
+    TopAppBar(
+        title = { Text(text = "$selectedItemCount selected") },
+        navigationIcon = {
+            IconButton(onClick = onClearSelection) {
+                Icon(Icons.Default.ArrowBack, contentDescription = "Clear selection")
+            }
+        },
+        actions = {
+            IconButton(onClick = onPinClick) {
+                Icon(Icons.Default.Star, contentDescription = "Pin note")
+            }
+            IconButton(onClick = onDeleteClick) {
+                Icon(Icons.Default.Delete, contentDescription = "Delete selected notes")
+            }
+        }
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)

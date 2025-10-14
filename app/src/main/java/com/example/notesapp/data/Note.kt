@@ -12,5 +12,8 @@ data class Note(
     val content: String,
     val createdAt: Long,
     val lastEdited: Long,
-    val color: Int
+    val color: Int,
+    val isPinned: Boolean = false,
+    val isArchived: Boolean = false,
+    val reminder: Long? = null
 )
