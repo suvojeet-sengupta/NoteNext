@@ -151,7 +151,7 @@ fun AddEditNoteScreen(
                 TextField(
                     value = state.content,
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                    placeholder = { Text("Content") },
+                    placeholder = { Text("Note") },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f)
