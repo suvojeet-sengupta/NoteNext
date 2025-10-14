@@ -136,8 +136,7 @@ fun AddEditNoteScreen(
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
                     placeholder = { Text("Title") },
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
+                        .fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -155,8 +154,7 @@ fun AddEditNoteScreen(
                     placeholder = { Text("Note") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
-                        .border(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), RoundedCornerShape(8.dp)),
+                        .weight(1f),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
