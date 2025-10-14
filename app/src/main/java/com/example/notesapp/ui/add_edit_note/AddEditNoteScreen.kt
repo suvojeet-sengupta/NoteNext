@@ -9,8 +9,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -18,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -25,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -41,7 +41,10 @@ fun AddEditNoteScreen(
     val viewModel: AddEditNoteViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showColorPicker by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
+
+    val isKeyboardOpen by WindowInsets.ime.isVisible.collectAsState()
 
     LaunchedEffect(state.isNoteSaved) {
         if (state.isNoteSaved) {
@@ -104,6 +107,9 @@ fun AddEditNoteScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
+                    IconButton(onClick = { showColorPicker = !showColorPicker }) {
+                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                    }
                     if (!state.isNewNote) {
                         Text(
                             text = "Last edited: ${dateFormat.format(Date(state.lastEdited))}",
@@ -125,6 +131,12 @@ fun AddEditNoteScreen(
             enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
             modifier = Modifier.padding(padding)
         ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color(state.color))
+                    .imePadding()
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
@@ -165,32 +177,43 @@ fun AddEditNoteScreen(
                     ),
                     textStyle = MaterialTheme.typography.bodyLarge
                 )
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(colors) { color ->
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(color))
-                                .border(
-                                    width = 2.dp,
-                                    color = if (state.color == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                    shape = CircleShape
-                                )
-                                .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (state.color == color) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = MaterialTheme.colorScheme.onPrimary
-                                )
-                            }
+            }
+        }
+        AnimatedVisibility(
+            visible = showColorPicker && isKeyboardOpen,
+            enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .imePadding()
+        ) {
+            LazyRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(vertical = 8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                items(colors) { color ->
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(color))
+                            .border(
+                                width = 2.dp,
+                                color = if (state.color == color) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                shape = CircleShape
+                            )
+                            .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        if (state.color == color) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.onPrimary
+                            )
                         }
                     }
                 }
