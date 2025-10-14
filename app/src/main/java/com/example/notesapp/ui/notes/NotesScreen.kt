@@ -3,7 +3,8 @@ package com.example.notesapp.ui.notes
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -97,16 +98,21 @@ fun NotesScreen(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
     note: Note,
     onNoteClick: () -> Unit,
     onDeleteClick: () -> Unit
 ) {
+    var isExpanded by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .padding(12.dp)
-            .clickable { onNoteClick() },
+            .combinedClickable(
+                onClick = { isExpanded = !isExpanded },
+                onLongClick = onNoteClick
+            ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color(note.color))
     ) {
@@ -117,7 +123,12 @@ fun NoteItem(
         ) {
             Text(text = note.title, style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = note.content, style = MaterialTheme.typography.bodyMedium, maxLines = 10)
+            Text(
+                text = note.content,
+                style = MaterialTheme.typography.bodyMedium,
+                maxLines = if (isExpanded) Int.MAX_VALUE else 2,
+                modifier = Modifier.animateContentSize(animationSpec = tween(300))
+            )
             Spacer(modifier = Modifier.height(8.dp))
             IconButton(
                 onClick = onDeleteClick,
