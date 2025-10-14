@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.dependency_injection.ViewModelFactory
 import java.text.SimpleDateFormat
@@ -126,7 +127,11 @@ fun AddEditNoteScreen(
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface
+                        cursorColor = MaterialTheme.colorScheme.onSurface,
+                        selectionColors = TextSelectionColors(
+                            handleColor = MaterialTheme.colorScheme.primary,
+                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        )
                     ),
                     textStyle = MaterialTheme.typography.headlineMedium
                 )
@@ -144,7 +149,11 @@ fun AddEditNoteScreen(
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface
+                        cursorColor = MaterialTheme.colorScheme.onSurface,
+                        selectionColors = TextSelectionColors(
+                            handleColor = MaterialTheme.colorScheme.primary,
+                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        )
                     ),
                     textStyle = MaterialTheme.typography.bodyLarge
                 )
