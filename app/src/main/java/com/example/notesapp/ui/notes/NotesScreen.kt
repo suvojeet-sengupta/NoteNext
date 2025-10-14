@@ -23,6 +23,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -36,6 +40,9 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.data.Note
 import com.example.notesapp.dependency_injection.ViewModelFactory
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.graphics.toArgb
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -49,6 +56,17 @@ fun NotesScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
+    var showColorPicker by remember { mutableStateOf(false) }
+
+    if (showColorPicker) {
+        ColorPickerDialog(
+            onDismiss = { showColorPicker = false },
+            onColorSelected = { color ->
+                viewModel.onEvent(NotesEvent.ChangeColorForSelectedNotes(color))
+                showColorPicker = false
+            }
+        )
+    }
 
     BackHandler(enabled = isSearchActive || isSelectionModeActive) {
         if (isSelectionModeActive) {
@@ -65,8 +83,14 @@ fun NotesScreen(
                 ContextualTopAppBar(
                     selectedItemCount = state.selectedNoteIds.size,
                     onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                    onPinClick = { viewModel.onEvent(NotesEvent.PinSelectedNotes) },
-                    onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) }
+                    onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                    onImportantClick = { viewModel.onEvent(NotesEvent.ToggleImportantForSelectedNotes) },
+                    onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                    onColorClick = { showColorPicker = true },
+                    onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                    onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
+                    onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                    onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) }
                 )
             } else {
                 AnimatedContent(
@@ -198,9 +222,17 @@ fun NoteItem(
 fun ContextualTopAppBar(
     selectedItemCount: Int,
     onClearSelection: () -> Unit,
-    onPinClick: () -> Unit,
-    onDeleteClick: () -> Unit
+    onTogglePinClick: () -> Unit,
+    onImportantClick: () -> Unit,
+    onReminderClick: () -> Unit,
+    onColorClick: () -> Unit,
+    onArchiveClick: () -> Unit,
+    onDeleteClick: () -> Unit,
+    onCopyClick: () -> Unit,
+    onSendClick: () -> Unit
 ) {
+    var showMenu by remember { mutableStateOf(false) }
+
     TopAppBar(
         title = { Text(text = "$selectedItemCount selected") },
         navigationIcon = {
@@ -209,11 +241,53 @@ fun ContextualTopAppBar(
             }
         },
         actions = {
-            IconButton(onClick = onPinClick) {
-                Icon(Icons.Default.Star, contentDescription = "Pin note")
+            IconButton(onClick = onTogglePinClick) {
+                Icon(Icons.Outlined.PushPin, contentDescription = "Pin note")
             }
-            IconButton(onClick = onDeleteClick) {
-                Icon(Icons.Default.Delete, contentDescription = "Delete selected notes")
+            IconButton(onClick = onReminderClick) {
+                Icon(Icons.Default.Notifications, contentDescription = "Set reminder")
+            }
+            IconButton(onClick = onColorClick) {
+                Icon(Icons.Default.Palette, contentDescription = "Change color")
+            }
+            IconButton(onClick = onImportantClick) {
+                Icon(Icons.Default.Star, contentDescription = "Mark as important")
+            }
+            IconButton(onClick = { showMenu = !showMenu }) {
+                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+            }
+            DropdownMenu(
+                expanded = showMenu,
+                onDismissRequest = { showMenu = false }
+            ) {
+                DropdownMenuItem(
+                    text = { Text("Archive") },
+                    onClick = {
+                        onArchiveClick()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Delete") },
+                    onClick = {
+                        onDeleteClick()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Make a copy") },
+                    onClick = {
+                        onCopyClick()
+                        showMenu = false
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("Send") },
+                    onClick = {
+                        onSendClick()
+                        showMenu = false
+                    }
+                )
             }
         }
     )
@@ -246,6 +320,52 @@ fun CollapsedTopAppBar(onSearchClick: () -> Unit) {
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
+    )
+}
+
+@Composable
+fun ColorPickerDialog(
+    onDismiss: () -> Unit,
+    onColorSelected: (Int) -> Unit
+) {
+    val colors = listOf(
+        Color.White.toArgb(),
+        Color(0xFFF28B82).toArgb(), // Red
+        Color(0xFFFCBC05).toArgb(), // Orange
+        Color(0xFFFFF475).toArgb(), // Yellow
+        Color(0xFFCCFF90).toArgb(), // Green
+        Color(0xFFA7FFEB).toArgb(), // Teal
+        Color(0xFFCBF0F8).toArgb(), // Blue
+        Color(0xFFAFCBFA).toArgb(), // Dark Blue
+        Color(0xFFD7AEFB).toArgb(), // Purple
+        Color(0xFFFDCFE8).toArgb(), // Pink
+        Color(0xFFE6C9A8).toArgb(), // Brown
+        Color(0xFFE8EAED).toArgb()  // Gray
+    )
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose a color") },
+        text = {
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                androidx.compose.foundation.lazy.items(colors) { color ->
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(CircleShape)
+                            .background(Color(color))
+                            .clickable { onColorSelected(color) }
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
     )
 }
 
