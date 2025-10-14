@@ -14,6 +14,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.di.ViewModelFactory
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.notesapp.di.ViewModelFactory
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
@@ -41,31 +55,44 @@ fun AddEditNoteScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick) }) {
-                Icon(imageVector = Icons.Default.Check, contentDescription = "Save note")
+                Icon(imageVector = Icons.Default.Save, contentDescription = "Save note")
             }
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-                .padding(16.dp)
+        AnimatedVisibility(
+            visible = true, // We can control visibility here
+            enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+            modifier = Modifier.padding(padding)
         ) {
-            OutlinedTextField(
-                value = state.title,
-                onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
-                label = { Text("Title") },
-                modifier = Modifier.fillMaxWidth()
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            OutlinedTextField(
-                value = state.content,
-                onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                label = { Text("Content") },
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight()
-            )
+                    .fillMaxSize()
+                    .padding(16.dp)
+            ) {
+                OutlinedTextField(
+                    value = state.title,
+                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
+                    label = { Text("Title") },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = state.content,
+                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
+                    label = { Text("Content") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+                Text(
+                    text = "${state.content.length} characters",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    textAlign = TextAlign.End,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }
