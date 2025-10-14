@@ -16,6 +16,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,7 +36,7 @@ import com.example.notesapp.dependency_injection.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun AddEditNoteScreen(
     factory: ViewModelFactory,
@@ -44,7 +48,7 @@ fun AddEditNoteScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
-    val isKeyboardOpen by WindowInsets.ime.isVisible.collectAsState()
+    val isKeyboardOpen = WindowInsets.isImeVisible
 
     LaunchedEffect(state.isNoteSaved) {
         if (state.isNoteSaved) {
@@ -126,94 +130,90 @@ fun AddEditNoteScreen(
             }
         }
     ) { padding ->
-        AnimatedVisibility(
-            visible = true,
-            enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-            modifier = Modifier.padding(padding)
-        ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(state.color))
-                    .imePadding()
+        Box(modifier = Modifier.fillMaxSize()) {
+            AnimatedVisibility(
+                visible = true,
+                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                modifier = Modifier.padding(padding)
             ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(state.color))
-                    .imePadding()
-            ) {
-                TextField(
-                    value = state.title,
-                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
-                    placeholder = { Text("Title") },
+                Column(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    textStyle = MaterialTheme.typography.headlineMedium
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                TextField(
-                    value = state.content,
-                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                    placeholder = { Text("Note") },
+                        .fillMaxSize()
+                        .background(Color(state.color))
+                        .imePadding()
+                ) {
+                    TextField(
+                        value = state.title,
+                        onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
+                        placeholder = { Text("Title") },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        textStyle = MaterialTheme.typography.headlineMedium
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    TextField(
+                        value = state.content,
+                        onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
+                        placeholder = { Text("Note") },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        textStyle = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+            AnimatedVisibility(
+                visible = showColorPicker && isKeyboardOpen,
+                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .imePadding()
+            ) {
+                LazyRow(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    textStyle = MaterialTheme.typography.bodyLarge
-                )
-            }
-        }
-        AnimatedVisibility(
-            visible = showColorPicker && isKeyboardOpen,
-            enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .imePadding()
-        ) {
-            LazyRow(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .background(MaterialTheme.colorScheme.surface)
-                    .padding(vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                items(colors) { color ->
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(color))
-                            .border(
-                                width = 2.dp,
-                                color = if (state.color == color) MaterialTheme.colorScheme.primary else Color.Transparent,
-                                shape = CircleShape
-                            )
-                            .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        if (state.color == color) {
-                            Icon(
-                                Icons.Default.Check,
-                                contentDescription = "Selected",
-                                tint = MaterialTheme.colorScheme.onPrimary
-                            )
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    items(colors) { color ->
+                        Box(
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
+                                .background(Color(color))
+                                .border(
+                                    width = 2.dp,
+                                    color = if (state.color == color) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                    shape = CircleShape
+                                )
+                                .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (state.color == color) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
                         }
                     }
                 }
