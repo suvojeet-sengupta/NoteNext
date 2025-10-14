@@ -102,89 +102,57 @@ fun AddEditNoteScreen(
                 Icon(imageVector = Icons.Default.Save, contentDescription = "Save note")
             }
         },
-        bottomBar = {
-            BottomAppBar(
-                modifier = Modifier.imePadding(),
-                containerColor = Color(state.color)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    IconButton(onClick = { showColorPicker = !showColorPicker }) {
-                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
-                    }
-                    if (!state.isNewNote) {
-                        Text(
-                            text = "Last edited: ${dateFormat.format(Date(state.lastEdited))}",
-                            style = MaterialTheme.typography.bodySmall
-                        )
-                    }
-                    Text(
-                        text = "${state.content.length} characters",
-                        modifier = Modifier.padding(end = 16.dp),
-                        textAlign = TextAlign.End,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            }
-        }
     ) { padding ->
-        Box(modifier = Modifier.fillMaxSize()) {
-            AnimatedVisibility(
-                visible = true,
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                modifier = Modifier.padding(padding)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .imePadding()
+        ) {
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(padding)
+                    .background(Color(state.color))
             ) {
-                Column(
+                TextField(
+                    value = state.title,
+                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
+                    placeholder = { Text("Title") },
                     modifier = Modifier
-                        .fillMaxSize()
-                        .background(Color(state.color))
-                        .imePadding()
-                ) {
-                    TextField(
-                        value = state.title,
-                        onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
-                        placeholder = { Text("Title") },
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        textStyle = MaterialTheme.typography.headlineMedium
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    TextField(
-                        value = state.content,
-                        onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                        placeholder = { Text("Note") },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        textStyle = MaterialTheme.typography.bodyLarge
-                    )
-                }
+                        .fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    textStyle = MaterialTheme.typography.headlineMedium
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                TextField(
+                    value = state.content,
+                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
+                    placeholder = { Text("Note") },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = MaterialTheme.colorScheme.onSurface
+                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge
+                )
             }
+
             AnimatedVisibility(
                 visible = showColorPicker,
                 enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .imePadding()
             ) {
                 LazyRow(
                     modifier = Modifier
@@ -217,6 +185,32 @@ fun AddEditNoteScreen(
                             }
                         }
                     }
+                }
+            }
+
+            BottomAppBar(
+                containerColor = Color(state.color)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = { showColorPicker = !showColorPicker }) {
+                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                    }
+                    if (!state.isNewNote) {
+                        Text(
+                            text = "Last edited: ${dateFormat.format(Date(state.lastEdited))}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Text(
+                        text = "${state.content.length} characters",
+                        modifier = Modifier.padding(end = 16.dp),
+                        textAlign = TextAlign.End,
+                        style = MaterialTheme.typography.bodySmall
+                    )
                 }
             }
         }
