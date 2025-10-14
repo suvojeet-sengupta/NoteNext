@@ -25,7 +25,8 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
                         title = it.title,
                         content = it.content,
                         color = it.color,
-                        isNewNote = false
+                        isNewNote = false,
+                        lastEdited = it.lastEdited
                     )
                 }
             }
@@ -66,6 +67,16 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
                     }
                     noteDao.insertNote(note)
                     _state.value = state.value.copy(isNoteSaved = true)
+                }
+            }
+            is AddEditNoteEvent.OnDeleteNoteClick -> {
+                viewModelScope.launch {
+                    if (noteId != -1) {
+                        noteDao.getNoteById(noteId)?.let { 
+                            noteDao.deleteNote(it)
+                            _state.value = state.value.copy(isNoteSaved = true)
+                        }
+                    }
                 }
             }
         }

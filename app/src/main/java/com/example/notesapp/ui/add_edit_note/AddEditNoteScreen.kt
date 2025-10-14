@@ -1,6 +1,7 @@
 
 package com.example.notesapp.ui.add_edit_note
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
@@ -12,6 +13,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.*
@@ -36,6 +39,8 @@ fun AddEditNoteScreen(
 ) {
     val viewModel: AddEditNoteViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    var showDeleteDialog by remember { mutableStateOf(false) }
+    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
     LaunchedEffect(state.isNoteSaved) {
         if (state.isNoteSaved) {
@@ -43,25 +48,41 @@ fun AddEditNoteScreen(
         }
     }
 
+    BackHandler {
+        onNoteSaved()
+    }
+
     val colors = listOf(
         Color.White.toArgb(),
-        Color.Red.toArgb(),
-        Color.Green.toArgb(),
-        Color.Blue.toArgb(),
-        Color.Yellow.toArgb()
+        Color(0xFFF28B82).toArgb(), // Red
+        Color(0xFFFCBC05).toArgb(), // Orange
+        Color(0xFFFFF475).toArgb(), // Yellow
+        Color(0xFFCCFF90).toArgb(), // Green
+        Color(0xFFA7FFEB).toArgb(), // Teal
+        Color(0xFFCBF0F8).toArgb(), // Blue
+        Color(0xFFAFCBFA).toArgb), // Dark Blue
+        Color(0xFFD7AEFB).toArgb(), // Purple
+        Color(0xFFFDCFE8).toArgb(), // Pink
+        Color(0xFFE6C9A8).toArgb(), // Brown
+        Color(0xFFE8EAED).toArgb()  // Gray
     )
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(if (state.isNewNote) "Add Note" else "Edit Note") },
+                navigationIcon = {
+                    IconButton(onClick = onNoteSaved) {
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = Color(state.color),
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
                 ),
                 actions = {
                     if (!state.isNewNote) {
-                        IconButton(onClick = { /* TODO: Implement delete */ }) {
+                        IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete note")
                         }
                     }
@@ -72,38 +93,74 @@ fun AddEditNoteScreen(
             FloatingActionButton(onClick = { viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick) }) {
                 Icon(imageVector = Icons.Default.Save, contentDescription = "Save note")
             }
+        },
+        bottomBar = {
+            BottomAppBar(
+                containerColor = Color(state.color)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    if (!state.isNewNote) {
+                        Text(
+                            text = "Last edited: ${dateFormat.format(Date(state.lastEdited))}",
+                            style = MaterialTheme.typography.bodySmall
+                        )
+                    }
+                    Text(
+                        text = "${state.content.length} characters",
+                        modifier = Modifier.padding(end = 16.dp),
+                        textAlign = TextAlign.End,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
         }
     ) { padding ->
         AnimatedVisibility(
-            visible = true, // We can control visibility here
+            visible = true,
             enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
             modifier = Modifier.padding(padding)
         ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(16.dp)
                     .background(Color(state.color))
+                    .padding(16.dp)
             ) {
-                OutlinedTextField(
+                TextField(
                     value = state.title,
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
-                    label = { Text("Title") },
-                    modifier = Modifier.fillMaxWidth()
+                    placeholder = { Text("Title") },
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = MaterialTheme.typography.headlineMedium
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                OutlinedTextField(
+                TextField(
                     value = state.content,
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                    label = { Text("Content") },
+                    placeholder = { Text("Content") },
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f)
+                        .weight(1f),
+                    colors = TextFieldDefaults.textFieldColors(
+                        containerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent
+                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 LazyRow(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     items(colors) { color ->
                         Box(
@@ -116,28 +173,43 @@ fun AddEditNoteScreen(
                                     color = if (state.color == color) MaterialTheme.colorScheme.primary else Color.Transparent,
                                     shape = CircleShape
                                 )
-                                .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) }
-                        )
+                                .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (state.color == color) {
+                                Icon(
+                                    Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.onPrimary
+                                )
+                            }
+                        }
                     }
                 }
-                Spacer(modifier = Modifier.height(16.dp))
-                if (!state.isNewNote) {
-                    Text(
-                        text = "Last edited: ${SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(state.lastEdited))}",
-                        modifier = Modifier.fillMaxWidth(),
-                        textAlign = TextAlign.End,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-                Text(
-                    text = "${state.content.length} characters",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp),
-                    textAlign = TextAlign.End,
-                    style = MaterialTheme.typography.bodySmall
-                )
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Note") },
+            text = { Text("Are you sure you want to delete this note?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        viewModel.onEvent(AddEditNoteEvent.OnDeleteNoteClick)
+                        showDeleteDialog = false
+                    }
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
