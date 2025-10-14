@@ -180,19 +180,22 @@ fun CollapsedTopAppBar(onSearchClick: () -> Unit) {
     TopAppBar(
         title = {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 60.dp)
-                    .clip(RoundedCornerShape(50))
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .clickable { onSearchClick() }
-                    .padding(vertical = 12.dp),
+                modifier = Modifier.fillMaxWidth(),
                 contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Search your notes",
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Box(
+                    modifier = Modifier
+                        .clip(RoundedCornerShape(50))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .clickable { onSearchClick() }
+                        .padding(vertical = 12.dp, horizontal = 60.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = "Search your notes",
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
