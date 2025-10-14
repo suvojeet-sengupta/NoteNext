@@ -39,7 +39,7 @@ android {
     }
     kotlinOptions {
         jvmTarget = "17"
-        freeCompilerArgs += "-Xuse-k2"
+
     }
     buildFeatures {
         compose = true
