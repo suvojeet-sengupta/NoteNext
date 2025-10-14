@@ -13,7 +13,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val database = NoteDatabase.getDatabase(this)
-        val factory = ViewModelFactory(this, database.noteDao())
+        val factory = ViewModelFactory(database.noteDao())
         setContent {
             NotesAppTheme {
                 NavGraph(factory = factory)

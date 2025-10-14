@@ -1,9 +1,11 @@
 
-package com.example.notesapp.di
-
+import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
+import com.example.notesapp.data.NoteDao
+import com.example.notesapp.ui.add_edit_note.AddEditNoteViewModel
+import com.example.notesapp.ui.notes.NotesViewModel
 
 class ViewModelFactory(private val noteDao: NoteDao) : ViewModelProvider.Factory {
 
