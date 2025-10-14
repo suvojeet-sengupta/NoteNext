@@ -90,22 +90,10 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                 }
             }
             is NotesEvent.ChangeColorForSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(color = event.color))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
-                }
+                // TODO: Implement color picker
             }
             is NotesEvent.CopySelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(id = 0, title = "${note.title} (Copy)"))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
-                }
+                // TODO: Implement copy
             }
             is NotesEvent.SendSelectedNotes -> {
                 // TODO: Implement send

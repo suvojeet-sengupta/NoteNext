@@ -40,9 +40,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.data.Note
 import com.example.notesapp.dependency_injection.ViewModelFactory
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.ui.graphics.toArgb
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -56,17 +53,6 @@ fun NotesScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
-    var showColorPicker by remember { mutableStateOf(false) }
-
-    if (showColorPicker) {
-        ColorPickerDialog(
-            onDismiss = { showColorPicker = false },
-            onColorSelected = { color ->
-                viewModel.onEvent(NotesEvent.ChangeColorForSelectedNotes(color))
-                showColorPicker = false
-            }
-        )
-    }
 
     BackHandler(enabled = isSearchActive || isSelectionModeActive) {
         if (isSelectionModeActive) {
@@ -86,7 +72,7 @@ fun NotesScreen(
                     onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
                     onImportantClick = { viewModel.onEvent(NotesEvent.ToggleImportantForSelectedNotes) },
                     onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                    onColorClick = { showColorPicker = true },
+                    onColorClick = { /* TODO */ },
                     onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
                     onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
                     onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
@@ -320,52 +306,6 @@ fun CollapsedTopAppBar(onSearchClick: () -> Unit) {
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
-    )
-}
-
-@Composable
-fun ColorPickerDialog(
-    onDismiss: () -> Unit,
-    onColorSelected: (Int) -> Unit
-) {
-    val colors = listOf(
-        Color.White.toArgb(),
-        Color(0xFFF28B82).toArgb(), // Red
-        Color(0xFFFCBC05).toArgb(), // Orange
-        Color(0xFFFFF475).toArgb(), // Yellow
-        Color(0xFFCCFF90).toArgb(), // Green
-        Color(0xFFA7FFEB).toArgb(), // Teal
-        Color(0xFFCBF0F8).toArgb(), // Blue
-        Color(0xFFAFCBFA).toArgb(), // Dark Blue
-        Color(0xFFD7AEFB).toArgb(), // Purple
-        Color(0xFFFDCFE8).toArgb(), // Pink
-        Color(0xFFE6C9A8).toArgb(), // Brown
-        Color(0xFFE8EAED).toArgb()  // Gray
-    )
-
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text("Choose a color") },
-        text = {
-            LazyRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                androidx.compose.foundation.lazy.items(colors) { color ->
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .clip(CircleShape)
-                            .background(Color(color))
-                            .clickable { onColorSelected(color) }
-                    )
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
     )
 }
 
