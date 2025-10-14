@@ -144,8 +144,8 @@ fun NoteItem(
         modifier = Modifier
             .padding(12.dp)
             .combinedClickable(
-                onClick = { isExpanded = !isExpanded },
-                onLongClick = onNoteClick
+                onClick = onNoteClick,
+                onLongClick = { isExpanded = !isExpanded }
             ),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color(note.color))
