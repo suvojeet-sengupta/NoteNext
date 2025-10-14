@@ -129,7 +129,6 @@ fun AddEditNoteScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(Color(state.color))
-                    .padding(padding)
                     .imePadding()
             ) {
                 TextField(
