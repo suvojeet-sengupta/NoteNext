@@ -129,8 +129,8 @@ fun AddEditNoteScreen(
                         unfocusedIndicatorColor = Color.Transparent,
                         cursorColor = MaterialTheme.colorScheme.onSurface,
                         selectionColors = TextSelectionColors(
-                            handleColor = MaterialTheme.colorScheme.primary,
-                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                            handleColor = Color.Blue,
+                            backgroundColor = Color.Blue.copy(alpha = 0.4f)
                         )
                     ),
                     textStyle = MaterialTheme.typography.headlineMedium
@@ -151,8 +151,8 @@ fun AddEditNoteScreen(
                         unfocusedIndicatorColor = Color.Transparent,
                         cursorColor = MaterialTheme.colorScheme.onSurface,
                         selectionColors = TextSelectionColors(
-                            handleColor = MaterialTheme.colorScheme.primary,
-                            backgroundColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                            handleColor = Color.Blue,
+                            backgroundColor = Color.Blue.copy(alpha = 0.4f)
                         )
                     ),
                     textStyle = MaterialTheme.typography.bodyLarge
