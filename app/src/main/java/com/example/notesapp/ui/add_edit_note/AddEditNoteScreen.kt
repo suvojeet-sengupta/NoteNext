@@ -104,6 +104,7 @@ fun AddEditNoteScreen(
         },
         bottomBar = {
             BottomAppBar(
+                modifier = Modifier.imePadding(),
                 containerColor = Color(state.color)
             ) {
                 Row(
@@ -179,7 +180,7 @@ fun AddEditNoteScreen(
                 }
             }
             AnimatedVisibility(
-                visible = showColorPicker && isKeyboardOpen,
+                visible = showColorPicker,
                 enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
