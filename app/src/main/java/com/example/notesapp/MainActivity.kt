@@ -5,7 +5,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import com.example.notesapp.data.NoteDatabase
-import com.example.notesapp.di.ViewModelFactory
+import com.example.notesapp.dependency_injection.ViewModelFactory
 import com.example.notesapp.navigation.NavGraph
 import com.example.notesapp.ui.theme.NotesAppTheme
 

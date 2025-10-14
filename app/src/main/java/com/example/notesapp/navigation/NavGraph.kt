@@ -12,7 +12,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.notesapp.di.ViewModelFactory
+import com.example.notesapp.dependency_injection.ViewModelFactory
 import com.example.notesapp.ui.add_edit_note.AddEditNoteScreen
 import com.example.notesapp.ui.notes.NotesScreen
 

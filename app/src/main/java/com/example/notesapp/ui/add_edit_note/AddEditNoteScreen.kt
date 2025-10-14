@@ -24,7 +24,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.notesapp.di.ViewModelFactory
+import com.example.notesapp.dependency_injection.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
 
