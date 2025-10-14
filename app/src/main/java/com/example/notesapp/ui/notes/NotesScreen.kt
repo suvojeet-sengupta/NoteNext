@@ -39,6 +39,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.data.Note
+import android.content.Intent
+import androidx.compose.ui.platform.LocalContext
 import com.example.notesapp.dependency_injection.ViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -53,6 +55,23 @@ fun NotesScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
+
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is NotesUiEvent.SendNotes -> {
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, event.title)
+                        putExtra(Intent.EXTRA_TEXT, event.content)
+                    }
+                    val chooser = Intent.createChooser(intent, "Send notes via")
+                    context.startActivity(chooser)
+                }
+            }
+        }
+    }
 
     BackHandler(enabled = isSearchActive || isSelectionModeActive) {
         if (isSelectionModeActive) {

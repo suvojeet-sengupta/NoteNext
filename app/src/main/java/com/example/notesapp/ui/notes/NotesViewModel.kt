@@ -1,11 +1,12 @@
-
 package com.example.notesapp.ui.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notesapp.data.Note
 import com.example.notesapp.data.NoteDao
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -15,6 +16,9 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
     val state = _state.asStateFlow()
+
+    private val _events = MutableSharedFlow<NotesUiEvent>()
+    val events = _events.asSharedFlow()
 
     private var recentlyDeletedNote: Note? = null
 
@@ -99,7 +103,15 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                 }
             }
             is NotesEvent.SendSelectedNotes -> {
-                // TODO: Implement send
+                viewModelScope.launch {
+                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                    if (selectedNotes.isNotEmpty()) {
+                        val title = if (selectedNotes.size == 1) selectedNotes.first().title else "Multiple Notes"
+                        val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.title}\n\n${it.content}" }
+                        _events.emit(NotesUiEvent.SendNotes(title, content))
+                    }
+                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                }
             }
             is NotesEvent.SetReminderForSelectedNotes -> {
                 // TODO: Implement reminder
