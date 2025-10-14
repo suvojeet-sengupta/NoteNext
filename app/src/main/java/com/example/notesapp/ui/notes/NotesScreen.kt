@@ -104,9 +104,9 @@ fun NoteItem(
 ) {
     Card(
         modifier = Modifier
-            .padding(8.dp)
+            .padding(12.dp)
             .clickable { onNoteClick() },
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
         colors = CardDefaults.cardColors(containerColor = Color(note.color))
     ) {
         Column(
@@ -116,7 +116,7 @@ fun NoteItem(
         ) {
             Text(text = note.title, style = MaterialTheme.typography.titleLarge)
             Spacer(modifier = Modifier.height(8.dp))
-            Text(text = note.content, style = MaterialTheme.typography.bodyMedium, maxLines = 5)
+            Text(text = note.content, style = MaterialTheme.typography.bodyMedium, maxLines = 10)
             Spacer(modifier = Modifier.height(8.dp))
             IconButton(
                 onClick = onDeleteClick,
@@ -143,17 +143,18 @@ fun SearchAppBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 2.dp),
+                shape = OutlinedTextFieldDefaults.shape,
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = Color.Transparent,
-                    unfocusedBorderColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    cursorColor = MaterialTheme.colorScheme.onSurface,
+                    focusedContainerColor = MaterialTheme.colorScheme.surface,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer,
-            titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
             actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
         )
     )
