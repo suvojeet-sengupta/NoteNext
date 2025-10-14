@@ -11,7 +11,6 @@ import com.example.notesapp.di.ViewModelFactory
 import com.example.notesapp.ui.add_edit_note.AddEditNoteScreen
 import com.example.notesapp.ui.notes.NotesScreen
 
-import com.example.notesapp.ui.sample.SampleScreen
 
 @Composable
 fun NavGraph(factory: ViewModelFactory) {
@@ -21,8 +20,7 @@ fun NavGraph(factory: ViewModelFactory) {
             NotesScreen(
                 factory = factory,
                 onNoteClick = { navController.navigate("add_edit_note?noteId=$it") },
-                onAddNoteClick = { navController.navigate("add_edit_note") },
-                onSampleScreenClick = { navController.navigate("sample_screen") }
+                onAddNoteClick = { navController.navigate("add_edit_note") }
             )
         }
         composable(
@@ -36,9 +34,6 @@ fun NavGraph(factory: ViewModelFactory) {
                 factory = factory,
                 onNoteSaved = { navController.popBackStack() }
             )
-        }
-        composable("sample_screen") {
-            SampleScreen()
         }
     }
 }

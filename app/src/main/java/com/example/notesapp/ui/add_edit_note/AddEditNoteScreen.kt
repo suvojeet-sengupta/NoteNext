@@ -30,6 +30,15 @@ fun AddEditNoteScreen(
     }
 
     Scaffold(
+        topBar = {
+            TopAppBar(
+                title = { Text(if (state.isNewNote) "Add Note" else "Edit Note") },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.primary,
+                )
+            )
+        },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick) }) {
                 Icon(imageVector = Icons.Default.Check, contentDescription = "Save note")
@@ -55,7 +64,7 @@ fun AddEditNoteScreen(
                 label = { Text("Content") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f)
+                    .fillMaxHeight()
             )
         }
     }

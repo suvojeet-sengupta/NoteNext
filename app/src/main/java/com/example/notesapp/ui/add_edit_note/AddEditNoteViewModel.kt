@@ -15,15 +15,16 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
     private val _state = MutableStateFlow(AddEditNoteState())
     val state = _state.asStateFlow()
 
-    private val noteId: Int? = savedStateHandle.get("noteId")
+    private val noteId: Int = savedStateHandle.get<Int>("noteId") ?: -1
 
     init {
-        if (noteId != null && noteId != -1) {
+        if (noteId != -1) {
             viewModelScope.launch {
                 noteDao.getNoteById(noteId)?.let {
                     _state.value = state.value.copy(
                         title = it.title,
-                        content = it.content
+                        content = it.content,
+                        isNewNote = false
                     )
                 }
             }
@@ -41,7 +42,7 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
             is AddEditNoteEvent.OnSaveNoteClick -> {
                 viewModelScope.launch {
                     val note = Note(
-                        id = noteId ?: 0,
+                        id = if (noteId == -1) 0 else noteId,
                         title = state.value.title,
                         content = state.value.content,
                         timestamp = System.currentTimeMillis()
