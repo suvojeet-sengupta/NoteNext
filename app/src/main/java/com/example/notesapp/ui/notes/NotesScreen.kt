@@ -154,12 +154,12 @@ fun SearchAppBar(
                 placeholder = { Text("Search your notes") },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 30.dp, vertical = 4.dp),
+                    .padding(horizontal = 40.dp, vertical = 4.dp),
                 shape = RoundedCornerShape(50),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.onSurface
