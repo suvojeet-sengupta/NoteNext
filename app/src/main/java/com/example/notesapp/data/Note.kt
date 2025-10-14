@@ -10,5 +10,7 @@ data class Note(
     val id: Int = 0,
     val title: String,
     val content: String,
-    val timestamp: Long
+    val createdAt: Long,
+    val lastEdited: Long,
+    val color: Int
 )

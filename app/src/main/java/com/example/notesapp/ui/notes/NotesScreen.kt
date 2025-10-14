@@ -119,7 +119,8 @@ fun NoteItem(
             .padding(8.dp)
             .clickable { onNoteClick() },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
+        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline),
+        colors = CardDefaults.cardColors(containerColor = Color(note.color))
     ) {
         Column(
             modifier = Modifier

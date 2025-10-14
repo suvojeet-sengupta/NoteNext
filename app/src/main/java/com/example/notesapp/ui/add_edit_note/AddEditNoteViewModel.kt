@@ -24,6 +24,7 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
                     _state.value = state.value.copy(
                         title = it.title,
                         content = it.content,
+                        color = it.color,
                         isNewNote = false
                     )
                 }
@@ -39,14 +40,30 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
             is AddEditNoteEvent.OnContentChange -> {
                 _state.value = state.value.copy(content = event.content)
             }
+            is AddEditNoteEvent.OnColorChange -> {
+                _state.value = state.value.copy(color = event.color)
+            }
             is AddEditNoteEvent.OnSaveNoteClick -> {
                 viewModelScope.launch {
-                    val note = Note(
-                        id = if (noteId == -1) 0 else noteId,
-                        title = state.value.title,
-                        content = state.value.content,
-                        timestamp = System.currentTimeMillis()
-                    )
+                    val currentTime = System.currentTimeMillis()
+                    val note = if (noteId == -1) {
+                        Note(
+                            title = state.value.title,
+                            content = state.value.content,
+                            createdAt = currentTime,
+                            lastEdited = currentTime,
+                            color = state.value.color
+                        )
+                    } else {
+                        Note(
+                            id = noteId,
+                            title = state.value.title,
+                            content = state.value.content,
+                            createdAt = state.value.createdAt, // This should be loaded from the note
+                            lastEdited = currentTime,
+                            color = state.value.color
+                        )
+                    }
                     noteDao.insertNote(note)
                     _state.value = state.value.copy(isNoteSaved = true)
                 }
