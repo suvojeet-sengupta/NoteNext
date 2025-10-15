@@ -63,6 +63,7 @@ fun AddEditNoteScreen(
     }
 
     BackHandler {
+        viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick)
         onNoteSaved()
     }
 
@@ -106,7 +107,10 @@ fun AddEditNoteScreen(
             TopAppBar(
                 title = { Text(if (state.isNewNote) "Add Note" else "Edit Note") },
                 navigationIcon = {
-                    IconButton(onClick = onNoteSaved) {
+                    IconButton(onClick = {
+                        viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick)
+                        onNoteSaved()
+                    }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
@@ -122,11 +126,6 @@ fun AddEditNoteScreen(
                     }
                 }
             )
-        },
-        floatingActionButton = {
-            FloatingActionButton(onClick = { viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick) }) {
-                Icon(imageVector = Icons.Default.Save, contentDescription = "Save note")
-            }
         },
     ) { padding ->
         Column(
