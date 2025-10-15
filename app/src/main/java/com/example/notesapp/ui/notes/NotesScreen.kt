@@ -404,14 +404,14 @@ fun ExpandedSearchView(
 
     TopAppBar(
         title = {
-            OutlinedTextField(
-                value = searchQuery,
-                onValueChange = onSearchQueryChange,
-                placeholder = { Text("Search your notes") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .focusRequester(focusRequester),
-                colors = OutlinedTextFieldDefaults.colors(
+                            OutlinedTextField(
+                                value = searchQuery,
+                                onValueChange = onSearchQueryChange,
+                                placeholder = { Text("Search your notes") },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester)
+                                    .padding(end = 16.dp),                colors = OutlinedTextFieldDefaults.colors(
                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                     unfocusedBorderColor = Color.Transparent,
