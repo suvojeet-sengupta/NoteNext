@@ -374,7 +374,7 @@ fun CollapsedTopAppBar(onSearchClick: () -> Unit, onMenuClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                        .background(Color(0xFF424242))
                         .clickable { onSearchClick() }
                         .padding(vertical = 12.dp, horizontal = 60.dp),
                     contentAlignment = Alignment.Center
@@ -419,8 +419,8 @@ fun ExpandedSearchView(
                                     .fillMaxWidth()
                                     .focusRequester(focusRequester)
                                     .padding(end = 16.dp),                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                    focusedContainerColor = Color(0xFF424242),
+                    unfocusedContainerColor = Color(0xFF424242),
                     unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.onSurface
