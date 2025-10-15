@@ -130,6 +130,9 @@ fun AddEditNoteScreen(
                 TextField(
                     value = state.title,
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
+                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.color))) },
+                    modifier = Modifier
+                        .fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -140,19 +143,15 @@ fun AddEditNoteScreen(
                         selectionColors = TextSelectionColors(
                             handleColor = contentColorFor(backgroundColor = Color(state.color)),
                             backgroundColor = contentColorFor(backgroundColor = Color(state.color)).copy(alpha = 0.4f)
-                        ),
-                        focusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        unfocusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        placeholderColor = contentColorFor(backgroundColor = Color(state.color))
+                        )
                     ),
-                    textStyle = MaterialTheme.typography.headlineMedium
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.color)))
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextField(
                     value = state.content,
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                    placeholder = { Text("Note") },
+                    placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.color))) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -166,13 +165,9 @@ fun AddEditNoteScreen(
                         selectionColors = TextSelectionColors(
                             handleColor = contentColorFor(backgroundColor = Color(state.color)),
                             backgroundColor = contentColorFor(backgroundColor = Color(state.color)).copy(alpha = 0.4f)
-                        ),
-                        focusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        unfocusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        placeholderColor = contentColorFor(backgroundColor = Color(state.color))
+                        )
                     ),
-                    textStyle = MaterialTheme.typography.bodyLarge
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.color)))
                 )
             }
 
