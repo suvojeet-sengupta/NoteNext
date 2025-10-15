@@ -7,6 +7,5 @@ data class AddEditNoteState(
     val createdAt: Long = 0,
     val lastEdited: Long = 0,
     val color: Int = 0,
-    val isNoteSaved: Boolean = false,
     val isNewNote: Boolean = true
 )

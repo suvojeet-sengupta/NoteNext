@@ -6,6 +6,8 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notesapp.data.Note
 import com.example.notesapp.data.NoteDao
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
@@ -14,6 +16,9 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
 
     private val _state = MutableStateFlow(AddEditNoteState())
     val state = _state.asStateFlow()
+
+    private val _uiEvent = MutableSharedFlow<AddEditNoteUiEvent>()
+    val uiEvent = _uiEvent.asSharedFlow()
 
     private val noteId: Int = savedStateHandle.get<Int>("noteId") ?: -1
 
@@ -59,14 +64,14 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
                         Note(
                             id = noteId,
                             title = state.value.title,
-                            content = state.value.content,
+                            content = state.value.content, // Fixed: Use state.value.content
                             createdAt = state.value.createdAt, // This should be loaded from the note
                             lastEdited = currentTime,
                             color = state.value.color
                         )
                     }
                     noteDao.insertNote(note)
-                    _state.value = state.value.copy(isNoteSaved = true)
+                    _uiEvent.emit(AddEditNoteUiEvent.OnNoteSaved)
                 }
             }
             is AddEditNoteEvent.OnDeleteNoteClick -> {
@@ -74,7 +79,7 @@ class AddEditNoteViewModel(private val noteDao: NoteDao, private val savedStateH
                     if (noteId != -1) {
                         noteDao.getNoteById(noteId)?.let { 
                             noteDao.deleteNote(it)
-                            _state.value = state.value.copy(isNoteSaved = true)
+                            _uiEvent.emit(AddEditNoteUiEvent.OnNoteSaved)
                         }
                     }
                 }

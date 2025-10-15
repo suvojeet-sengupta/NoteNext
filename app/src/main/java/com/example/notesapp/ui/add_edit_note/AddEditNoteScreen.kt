@@ -35,6 +35,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.dependency_injection.ViewModelFactory
 import com.example.notesapp.ui.settings.ThemeMode
+import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -52,6 +53,18 @@ fun AddEditNoteScreen(
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
     val isKeyboardOpen = WindowInsets.isImeVisible
+
+    LaunchedEffect(Unit) {
+        viewModel.uiEvent.collectLatest { event ->
+            when (event) {
+                is AddEditNoteUiEvent.OnNoteSaved -> onNoteSaved()
+            }
+        }
+    }
+
+    BackHandler {
+        onNoteSaved()
+    }
 
     val lightNoteColors = listOf(
         Color.White.toArgb(),
