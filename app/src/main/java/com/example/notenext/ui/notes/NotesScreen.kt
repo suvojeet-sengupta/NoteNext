@@ -238,7 +238,7 @@ fun NoteItem(
             ),
         shape = RoundedCornerShape(8.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color(0xFF303134)
+            containerColor = if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
         ),
         elevation = CardDefaults.cardElevation(
             defaultElevation = 2.dp
@@ -253,7 +253,7 @@ fun NoteItem(
                     text = note.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Normal,
-                    color = Color.White,
+                    color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 10,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -265,7 +265,7 @@ fun NoteItem(
                 Text(
                     text = note.content,
                     fontSize = 14.sp,
-                    color = Color.LightGray,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 10,
                     overflow = TextOverflow.Ellipsis
                 )
@@ -362,7 +362,7 @@ fun CollapsedTopAppBar(onSearchClick: () -> Unit, onMenuClick: () -> Unit) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(50))
-                        .background(Color(0xFF424242))
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
                         .clickable { onSearchClick() }
                         .padding(vertical = 12.dp, horizontal = 60.dp),
                     contentAlignment = Alignment.Center
@@ -407,8 +407,8 @@ fun ExpandedSearchView(
                                     .fillMaxWidth()
                                     .focusRequester(focusRequester)
                                     .padding(end = 16.dp),                colors = OutlinedTextFieldDefaults.colors(
-                    focusedContainerColor = Color(0xFF424242),
-                    unfocusedContainerColor = Color(0xFF424242),
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                     unfocusedBorderColor = Color.Transparent,
                     focusedBorderColor = Color.Transparent,
                     cursorColor = MaterialTheme.colorScheme.onSurface
