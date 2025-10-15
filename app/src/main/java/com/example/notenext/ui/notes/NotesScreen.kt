@@ -170,6 +170,7 @@ fun NotesScreen(
         ) { padding ->
             if (showLabelDialog) {
                 LabelDialog(
+                    labels = state.labels,
                     onDismiss = { showLabelDialog = false },
                     onConfirm = { label ->
                         viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
@@ -336,13 +337,17 @@ fun NoteItem(
 
             if (!note.label.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = note.label,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                Surface(
+                    shape = RoundedCornerShape(4.dp),
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = note.label,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
             }
         }
     }
@@ -502,25 +507,40 @@ fun ExpandedSearchView(
 
 @Composable
 fun LabelDialog(
+    labels: List<String>,
     onDismiss: () -> Unit,
     onConfirm: (String) -> Unit
 ) {
-    var label by remember { mutableStateOf("") }
+    var newLabel by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(text = "Add Label") },
         text = {
-            OutlinedTextField(
-                value = label,
-                onValueChange = { label = it },
-                label = { Text("Label") }
-            )
+            Column {
+                OutlinedTextField(
+                    value = newLabel,
+                    onValueChange = { newLabel = it },
+                    label = { Text("New Label") }
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                LazyColumn {
+                    items(labels) { label ->
+                        Text(
+                            text = label,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { onConfirm(label) }
+                                .padding(8.dp)
+                        )
+                    }
+                }
+            }
         },
         confirmButton = {
             TextButton(
                 onClick = {
-                    onConfirm(label)
+                    onConfirm(newLabel)
                     onDismiss()
                 }
             ) {

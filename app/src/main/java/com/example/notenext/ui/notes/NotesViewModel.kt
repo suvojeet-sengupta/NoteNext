@@ -23,8 +23,12 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
     private var recentlyDeletedNote: Note? = null
 
     init {
-        noteDao.getNotes().onEach {
-            _state.value = state.value.copy(notes = it)
+        noteDao.getNotes().onEach { notes ->
+            val labels = notes.mapNotNull { it.label }.filter { it.isNotEmpty() }.distinct()
+            _state.value = state.value.copy(
+                notes = notes,
+                labels = labels
+            )
         }.launchIn(viewModelScope)
     }
 
