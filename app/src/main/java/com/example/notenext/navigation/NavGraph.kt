@@ -14,6 +14,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.example.notenext.dependency_injection.ViewModelFactory
 import com.example.notenext.ui.add_edit_note.AddEditNoteScreen
+import com.example.notenext.ui.archive.ArchiveScreen
 import com.example.notenext.ui.notes.NotesScreen
 import com.example.notenext.ui.settings.SettingsScreen
 import com.example.notenext.ui.settings.ThemeMode
@@ -31,7 +32,8 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
                 factory = factory,
                 onNoteClick = { navController.navigate("add_edit_note?noteId=$it") },
                 onAddNoteClick = { navController.navigate("add_edit_note") },
-                onSettingsClick = { navController.navigate("settings") }
+                onSettingsClick = { navController.navigate("settings") },
+                onArchiveClick = { navController.navigate("archive") }
             )
         }
         composable(
@@ -56,6 +58,16 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
         ) {
             SettingsScreen(
                 onBackClick = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "archive",
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+        ) {
+            ArchiveScreen(
+                factory = factory,
+                onBackPressed = { navController.popBackStack() }
             )
         }
     }

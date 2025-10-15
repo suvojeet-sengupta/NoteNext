@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -58,7 +59,8 @@ fun NotesScreen(
     factory: ViewModelFactory,
     onNoteClick: (Int) -> Unit,
     onAddNoteClick: () -> Unit,
-    onSettingsClick: () -> Unit
+    onSettingsClick: () -> Unit,
+    onArchiveClick: () -> Unit
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -108,15 +110,26 @@ fun NotesScreen(
                     modifier = Modifier.padding(16.dp)
                 )
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Settings", modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
+                    label = { Text("Archive") },
+                    selected = false,
+                    onClick = {
+                        scope.launch { drawerState.close() }
+                        onArchiveClick()
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                )
+                NavigationDrawerItem(
+                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                    label = { Text("Settings") },
+                    selected = false,
+                    onClick = {
                         scope.launch { drawerState.close() }
                         onSettingsClick()
-                    }
-                    .padding(16.dp)
+                    },
+                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                 )
-                // Future items can be added here
             }
         }
     ) {

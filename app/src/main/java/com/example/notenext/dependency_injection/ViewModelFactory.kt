@@ -7,6 +7,7 @@ import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
 import com.example.notenext.data.NoteDao
 import com.example.notenext.ui.add_edit_note.AddEditNoteViewModel
+import com.example.notenext.ui.archive.ArchiveViewModel
 import com.example.notenext.ui.notes.NotesViewModel
 
 class ViewModelFactory(private val noteDao: NoteDao) : ViewModelProvider.Factory {
@@ -20,6 +21,10 @@ class ViewModelFactory(private val noteDao: NoteDao) : ViewModelProvider.Factory
         if (modelClass.isAssignableFrom(AddEditNoteViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return AddEditNoteViewModel(noteDao, savedStateHandle) as T
+        }
+        if (modelClass.isAssignableFrom(ArchiveViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ArchiveViewModel(noteDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
