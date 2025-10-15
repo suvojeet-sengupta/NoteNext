@@ -64,7 +64,6 @@ fun AddEditNoteScreen(
 
     BackHandler {
         viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick)
-        onNoteSaved()
     }
 
     val lightNoteColors = listOf(
@@ -109,7 +108,6 @@ fun AddEditNoteScreen(
                 navigationIcon = {
                     IconButton(onClick = {
                         viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick)
-                        onNoteSaved()
                     }) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
