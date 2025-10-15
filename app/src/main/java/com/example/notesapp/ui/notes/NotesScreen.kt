@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -43,6 +44,7 @@ import com.example.notesapp.data.Note
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
 import com.example.notesapp.dependency_injection.ViewModelFactory
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
 @Composable
@@ -58,6 +60,9 @@ fun NotesScreen(
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val drawerState = rememberDrawerState(DrawerValue.Closed)
+
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -74,8 +79,10 @@ fun NotesScreen(
         }
     }
 
-    BackHandler(enabled = isSearchActive || isSelectionModeActive) {
-        if (isSelectionModeActive) {
+    BackHandler(enabled = isSearchActive || isSelectionModeActive || drawerState.isOpen) {
+        if (drawerState.isOpen) {
+            scope.launch { drawerState.close() }
+        } else if (isSelectionModeActive) {
             viewModel.onEvent(NotesEvent.ClearSelection)
         } else if (isSearchActive) {
             isSearchActive = false
@@ -83,102 +90,113 @@ fun NotesScreen(
         }
     }
 
-    Scaffold(
-        topBar = {
-            if (isSelectionModeActive) {
-                ContextualTopAppBar(
-                    selectedItemCount = state.selectedNoteIds.size,
-                    onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                    onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                    onImportantClick = { viewModel.onEvent(NotesEvent.ToggleImportantForSelectedNotes) },
-                    onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                    onColorClick = { /* TODO */ },
-                    onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                    onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
-                    onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                    onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) }
-                )
-            } else {
-                AnimatedContent(
-                    targetState = isSearchActive,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
-                                fadeOut(animationSpec = tween(90))
-                    }, label = ""
-                ) { searchTargetState ->
-                    if (searchTargetState) {
-                        ExpandedSearchView(
-                            searchQuery = searchQuery,
-                            onSearchQueryChange = { searchQuery = it },
-                            onCloseSearch = {
-                                isSearchActive = false
-                                searchQuery = ""
-                            }
-                        )
-                    } else {
-                        CollapsedTopAppBar(
-                            onSearchClick = { isSearchActive = true }
-                        )
-                    }
-                }
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Text("Settings", modifier = Modifier.padding(16.dp))
+                // Future items can be added here
             }
-        },
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = onAddNoteClick,
-                content = {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-                }
-            )
         }
-    ) { padding ->
-        Column(modifier = Modifier.padding(padding)) {
-            if (state.notes.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.Info,
-                            contentDescription = null,
-                            modifier = Modifier.size(96.dp),
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = "No notes yet. Tap the '+' button to add one.",
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(horizontal = 32.dp)
-                        )
+    ) {
+        Scaffold(
+            topBar = {
+                if (isSelectionModeActive) {
+                    ContextualTopAppBar(
+                        selectedItemCount = state.selectedNoteIds.size,
+                        onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                        onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                        onImportantClick = { viewModel.onEvent(NotesEvent.ToggleImportantForSelectedNotes) },
+                        onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                        onColorClick = { /* TODO */ },
+                        onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                        onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
+                        onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                        onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) }
+                    )
+                } else {
+                    AnimatedContent(
+                        targetState = isSearchActive,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
+                                    fadeOut(animationSpec = tween(90))
+                        }, label = ""
+                    ) { searchTargetState ->
+                        if (searchTargetState) {
+                            ExpandedSearchView(
+                                searchQuery = searchQuery,
+                                onSearchQueryChange = { searchQuery = it },
+                                onCloseSearch = {
+                                    isSearchActive = false
+                                    searchQuery = ""
+                                }
+                            )
+                        } else {
+                            CollapsedTopAppBar(
+                                onSearchClick = { isSearchActive = true },
+                                onMenuClick = { scope.launch { drawerState.open() } }
+                            )
+                        }
                     }
                 }
-            } else {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .animateContentSize(animationSpec = tween(300)),
-                    contentPadding = PaddingValues(16.dp)
-                ) {
-                    items(state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }) { note ->
-                        NoteItem(
-                            note = note,
-                            isSelected = state.selectedNoteIds.contains(note.id),
-                            onNoteClick = {
-                                if (isSelectionModeActive) {
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = onAddNoteClick,
+                    content = {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+                    }
+                )
+            }
+        ) { padding ->
+            Column(modifier = Modifier.padding(padding)) {
+                if (state.notes.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(96.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No notes yet. Tap the '+' button to add one.",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 32.dp)
+                            )
+                        }
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .animateContentSize(animationSpec = tween(300)),
+                        contentPadding = PaddingValues(16.dp)
+                    ) {
+                        items(state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }) { note ->
+                            NoteItem(
+                                note = note,
+                                isSelected = state.selectedNoteIds.contains(note.id),
+                                onNoteClick = {
+                                    if (isSelectionModeActive) {
+                                        viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                    } else {
+                                        onNoteClick(note.id)
+                                    }
+                                },
+                                onNoteLongClick = {
                                     viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                } else {
-                                    onNoteClick(note.id)
                                 }
-                            },
-                            onNoteLongClick = {
-                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                            }
-                        )
+                            )
+                        }
                     }
                 }
             }
@@ -331,7 +349,7 @@ fun ContextualTopAppBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollapsedTopAppBar(onSearchClick: () -> Unit) {
+fun CollapsedTopAppBar(onSearchClick: () -> Unit, onMenuClick: () -> Unit) {
     TopAppBar(
         title = {
             Box(
@@ -351,6 +369,11 @@ fun CollapsedTopAppBar(onSearchClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = onMenuClick) {
+                Icon(Icons.Default.Menu, contentDescription = "Open navigation drawer")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
