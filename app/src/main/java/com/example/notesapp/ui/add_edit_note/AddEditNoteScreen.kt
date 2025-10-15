@@ -87,7 +87,7 @@ fun AddEditNoteScreen(
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = Color(state.color),
-                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    titleContentColor = contentColorFor(backgroundColor = Color(state.color)),
                 ),
                 actions = {
                     if (!state.isNewNote) {
@@ -118,20 +118,20 @@ fun AddEditNoteScreen(
                 TextField(
                     value = state.title,
                     onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
-                    placeholder = { Text("Title") },
-                    modifier = Modifier
-                        .fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface,
+                        cursorColor = contentColorFor(backgroundColor = Color(state.color)),
                         selectionColors = TextSelectionColors(
-                            handleColor = Color.Blue,
-                            backgroundColor = Color.Blue.copy(alpha = 0.4f)
-                        )
+                            handleColor = contentColorFor(backgroundColor = Color(state.color)),
+                            backgroundColor = contentColorFor(backgroundColor = Color(state.color)).copy(alpha = 0.4f)
+                        ),
+                        focusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
+                        unfocusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
+                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color))
                     ),
                     textStyle = MaterialTheme.typography.headlineMedium
                 )
@@ -149,11 +149,14 @@ fun AddEditNoteScreen(
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface,
+                        cursorColor = contentColorFor(backgroundColor = Color(state.color)),
                         selectionColors = TextSelectionColors(
-                            handleColor = Color.Blue,
-                            backgroundColor = Color.Blue.copy(alpha = 0.4f)
-                        )
+                            handleColor = contentColorFor(backgroundColor = Color(state.color)),
+                            backgroundColor = contentColorFor(backgroundColor = Color(state.color)).copy(alpha = 0.4f)
+                        ),
+                        focusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
+                        unfocusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
+                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color))
                     ),
                     textStyle = MaterialTheme.typography.bodyLarge
                 )
@@ -189,7 +192,7 @@ fun AddEditNoteScreen(
                                 Icon(
                                     Icons.Default.Check,
                                     contentDescription = "Selected",
-                                    tint = MaterialTheme.colorScheme.onPrimary
+                                    tint = contentColorFor(backgroundColor = Color(color))
                                 )
                             }
                         }
@@ -206,19 +209,21 @@ fun AddEditNoteScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = { showColorPicker = !showColorPicker }) {
-                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker", tint = contentColorFor(backgroundColor = Color(state.color)))
                     }
                     if (!state.isNewNote) {
                         Text(
                             text = "Last edited: ${dateFormat.format(Date(state.lastEdited))}",
-                            style = MaterialTheme.typography.bodySmall
+                            style = MaterialTheme.typography.bodySmall,
+                            color = contentColorFor(backgroundColor = Color(state.color))
                         )
                     }
                     Text(
                         text = "${state.content.length} characters",
                         modifier = Modifier.padding(end = 16.dp),
                         textAlign = TextAlign.End,
-                        style = MaterialTheme.typography.bodySmall
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColorFor(backgroundColor = Color(state.color))
                     )
                 }
             }
