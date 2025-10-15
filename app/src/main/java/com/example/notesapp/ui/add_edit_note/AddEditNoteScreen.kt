@@ -143,7 +143,8 @@ fun AddEditNoteScreen(
                         ),
                         focusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
                         unfocusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color))
+                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color)),
+                        placeholderColor = contentColorFor(backgroundColor = Color(state.color))
                     ),
                     textStyle = MaterialTheme.typography.headlineMedium
                 )
@@ -168,7 +169,8 @@ fun AddEditNoteScreen(
                         ),
                         focusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
                         unfocusedTextColor = contentColorFor(backgroundColor = Color(state.color)),
-                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color))
+                        disabledTextColor = contentColorFor(backgroundColor = Color(state.color)),
+                        placeholderColor = contentColorFor(backgroundColor = Color(state.color))
                     ),
                     textStyle = MaterialTheme.typography.bodyLarge
                 )
