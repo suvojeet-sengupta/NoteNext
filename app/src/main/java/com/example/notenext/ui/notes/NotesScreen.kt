@@ -12,10 +12,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
-import androidx.compose.foundation.lazy.staggeredgrid.items
+import androidx.compose.foundation.lazy.staggeredgrid.items as StaggeredGridItems
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -223,7 +225,7 @@ fun NotesScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            items(pinnedNotes) { note ->
+                            StaggeredGridItems(pinnedNotes) { note ->
                                 NoteItem(
                                     note = note,
                                     isSelected = state.selectedNoteIds.contains(note.id),
@@ -252,7 +254,7 @@ fun NotesScreen(
                                     )
                                 }
                             }
-                            items(otherNotes) { note ->
+                            StaggeredGridItems(otherNotes) { note ->
                                 NoteItem(
                                     note = note,
                                     isSelected = state.selectedNoteIds.contains(note.id),
