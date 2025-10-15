@@ -1,5 +1,5 @@
 
-package com.example.notesapp.navigation
+package com.example.notenext.navigation
 
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -12,11 +12,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
-import com.example.notesapp.dependency_injection.ViewModelFactory
-import com.example.notesapp.ui.add_edit_note.AddEditNoteScreen
-import com.example.notesapp.ui.notes.NotesScreen
-import com.example.notesapp.ui.settings.SettingsScreen
-import com.example.notesapp.ui.settings.ThemeMode
+import com.example.notenext.dependency_injection.ViewModelFactory
+import com.example.notenext.ui.add_edit_note.AddEditNoteScreen
+import com.example.notenext.ui.notes.NotesScreen
+import com.example.notenext.ui.settings.SettingsScreen
+import com.example.notenext.ui.settings.ThemeMode
 
 @Composable
 fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {

@@ -1,11 +1,11 @@
 
-package com.example.notesapp.ui.add_edit_note
+package com.example.notenext.ui.add_edit_note
 
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notesapp.data.Note
-import com.example.notesapp.data.NoteDao
+import com.example.notenext.data.Note
+import com.example.notenext.data.NoteDao
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow

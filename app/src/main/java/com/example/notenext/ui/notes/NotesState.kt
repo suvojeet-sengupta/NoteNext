@@ -1,7 +1,7 @@
 
-package com.example.notesapp.ui.notes
+package com.example.notenext.ui.notes
 
-import com.example.notesapp.data.Note
+import com.example.notenext.data.Note
 
 data class NotesState(
     val notes: List<Note> = emptyList(),

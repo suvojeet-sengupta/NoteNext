@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.notes
+package com.example.notenext.ui.notes
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
@@ -38,12 +38,13 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.notesapp.data.Note
 import android.content.Intent
 import androidx.compose.ui.platform.LocalContext
-import com.example.notesapp.dependency_injection.ViewModelFactory
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.notenext.data.Note
+import com.example.notenext.dependency_injection.ViewModelFactory
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
@@ -94,7 +95,13 @@ fun NotesScreen(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
+                Text(
+                    text = "NoteNext",
+                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                    modifier = Modifier.padding(16.dp)
+                )
+                Spacer(modifier = Modifier.height(16.dp))
                 Text("Settings", modifier = Modifier
                     .fillMaxWidth()
                     .clickable { 

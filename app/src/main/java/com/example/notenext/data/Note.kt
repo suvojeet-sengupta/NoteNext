@@ -1,5 +1,5 @@
 
-package com.example.notesapp.data
+package com.example.notenext.data
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

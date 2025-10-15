@@ -1,9 +1,9 @@
-package com.example.notesapp.ui.notes
+package com.example.notenext.ui.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.notesapp.data.Note
-import com.example.notesapp.data.NoteDao
+import com.example.notenext.data.Note
+import com.example.notenext.data.NoteDao
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow

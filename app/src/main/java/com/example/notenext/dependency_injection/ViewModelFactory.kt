@@ -1,13 +1,13 @@
 
-package com.example.notesapp.dependency_injection
+package com.example.notenext.dependency_injection
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.example.notesapp.data.NoteDao
-import com.example.notesapp.ui.add_edit_note.AddEditNoteViewModel
-import com.example.notesapp.ui.notes.NotesViewModel
+import com.example.notenext.data.NoteDao
+import com.example.notenext.ui.add_edit_note.AddEditNoteViewModel
+import com.example.notenext.ui.notes.NotesViewModel
 
 class ViewModelFactory(private val noteDao: NoteDao) : ViewModelProvider.Factory {
 

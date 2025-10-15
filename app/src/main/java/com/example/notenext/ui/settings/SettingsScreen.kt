@@ -1,4 +1,4 @@
-package com.example.notesapp.ui.settings
+package com.example.notenext.ui.settings
 
 import android.content.Context
 import androidx.compose.foundation.clickable

@@ -1,7 +1,7 @@
 
-package com.example.notesapp.ui.notes
+package com.example.notenext.ui.notes
 
-import com.example.notesapp.data.Note
+import com.example.notenext.data.Note
 
 sealed class NotesEvent {
     data class DeleteNote(val note: Note) : NotesEvent()

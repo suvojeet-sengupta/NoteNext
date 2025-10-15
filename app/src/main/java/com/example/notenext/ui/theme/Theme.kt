@@ -1,5 +1,5 @@
 
-package com.example.notesapp.ui.theme
+package com.example.notenext.ui.theme
 
 import android.app.Activity
 import android.os.Build
@@ -15,8 +15,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.example.notesapp.ui.settings.ThemeMode
-import com.example.notesapp.ui.theme.Shapes
+import com.example.notenext.ui.settings.ThemeMode
+import com.example.notenext.ui.theme.Shapes
 
 private val LightColorScheme = lightColorScheme(
     primary = md_theme_light_primary,
@@ -83,7 +83,7 @@ private val DarkColorScheme = darkColorScheme(
 )
 
 @Composable
-fun NotesAppTheme(
+fun NoteNextTheme(
     themeMode: ThemeMode,
     content: @Composable () -> Unit
 ) {

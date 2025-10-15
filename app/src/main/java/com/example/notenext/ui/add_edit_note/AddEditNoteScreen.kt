@@ -1,5 +1,5 @@
 
-package com.example.notesapp.ui.add_edit_note
+package com.example.notenext.ui.add_edit_note
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
@@ -33,8 +33,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.notesapp.dependency_injection.ViewModelFactory
-import com.example.notesapp.ui.settings.ThemeMode
+import com.example.notenext.dependency_injection.ViewModelFactory
+import com.example.notenext.ui.settings.ThemeMode
 import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.*
