@@ -391,41 +391,43 @@ fun ContextualTopAppBar(
             IconButton(onClick = onLabelClick) {
                 Icon(Icons.Outlined.Label, contentDescription = "Add label")
             }
-            IconButton(onClick = { showMenu = !showMenu }) {
-                Icon(Icons.Default.MoreVert, contentDescription = "More options")
-            }
-            DropdownMenu(
-                expanded = showMenu,
-                onDismissRequest = { showMenu = false }
-            ) {
-                DropdownMenuItem(
-                    text = { Text("Archive") },
-                    onClick = {
-                        onArchiveClick()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Delete") },
-                    onClick = {
-                        onDeleteClick()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Make a copy") },
-                    onClick = {
-                        onCopyClick()
-                        showMenu = false
-                    }
-                )
-                DropdownMenuItem(
-                    text = { Text("Send") },
-                    onClick = {
-                        onSendClick()
-                        showMenu = false
-                    }
-                )
+            Box {
+                IconButton(onClick = { showMenu = !showMenu }) {
+                    Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                }
+                DropdownMenu(
+                    expanded = showMenu,
+                    onDismissRequest = { showMenu = false }
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Archive") },
+                        onClick = {
+                            onArchiveClick()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Delete") },
+                        onClick = {
+                            onDeleteClick()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Make a copy") },
+                        onClick = {
+                            onCopyClick()
+                            showMenu = false
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Send") },
+                        onClick = {
+                            onSendClick()
+                            showMenu = false
+                        }
+                    )
+                }
             }
         }
     )
