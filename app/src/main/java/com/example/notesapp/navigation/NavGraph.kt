@@ -15,6 +15,7 @@ import androidx.navigation.navArgument
 import com.example.notesapp.dependency_injection.ViewModelFactory
 import com.example.notesapp.ui.add_edit_note.AddEditNoteScreen
 import com.example.notesapp.ui.notes.NotesScreen
+import com.example.notesapp.ui.settings.SettingsScreen
 
 @Composable
 fun NavGraph(factory: ViewModelFactory) {
@@ -28,7 +29,8 @@ fun NavGraph(factory: ViewModelFactory) {
             NotesScreen(
                 factory = factory,
                 onNoteClick = { navController.navigate("add_edit_note?noteId=$it") },
-                onAddNoteClick = { navController.navigate("add_edit_note") }
+                onAddNoteClick = { navController.navigate("add_edit_note") },
+                onSettingsClick = { navController.navigate("settings") }
             )
         }
         composable(
@@ -43,6 +45,15 @@ fun NavGraph(factory: ViewModelFactory) {
             AddEditNoteScreen(
                 factory = factory,
                 onNoteSaved = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = "settings",
+            enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+            exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+        ) {
+            SettingsScreen(
+                onBackClick = { navController.popBackStack() }
             )
         }
     }

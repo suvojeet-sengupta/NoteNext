@@ -51,7 +51,8 @@ import kotlinx.coroutines.launch
 fun NotesScreen(
     factory: ViewModelFactory,
     onNoteClick: (Int) -> Unit,
-    onAddNoteClick: () -> Unit
+    onAddNoteClick: () -> Unit,
+    onSettingsClick: () -> Unit
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -94,7 +95,14 @@ fun NotesScreen(
         drawerState = drawerState,
         drawerContent = {
             ModalDrawerSheet {
-                Text("Settings", modifier = Modifier.padding(16.dp))
+                Text("Settings", modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { 
+                        scope.launch { drawerState.close() }
+                        onSettingsClick()
+                    }
+                    .padding(16.dp)
+                )
                 // Future items can be added here
             }
         }

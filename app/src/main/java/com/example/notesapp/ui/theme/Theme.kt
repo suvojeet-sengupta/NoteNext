@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
+import com.example.notesapp.ui.settings.ThemeMode
 import com.example.notesapp.ui.theme.Shapes
 
 private val LightColorScheme = lightColorScheme(
@@ -83,26 +84,35 @@ private val DarkColorScheme = darkColorScheme(
 
 @Composable
 fun NotesAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = false,
+    themeMode: ThemeMode,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
-            val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-        }
+    val systemInDarkTheme = isSystemInDarkTheme()
+    val useDarkTheme = when (themeMode) {
+        ThemeMode.SYSTEM -> systemInDarkTheme
+        ThemeMode.LIGHT -> false
+        ThemeMode.DARK -> true
+    }
 
-        darkTheme -> DarkColorScheme
+    val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    val useDynamicColor = when (themeMode) {
+        ThemeMode.SYSTEM -> dynamicColor
+        else -> false // Only use dynamic color for system theme
+    }
+
+    val colorScheme = when {
+        useDynamicColor && useDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
+        useDynamicColor && !useDarkTheme -> dynamicLightColorScheme(LocalContext.current)
+        useDarkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
+
     val view = LocalView.current
     if (!view.isInEditMode) {
         SideEffect {
             val window = (view.context as Activity).window
             window.statusBarColor = colorScheme.background.toArgb()
-            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !darkTheme
+            WindowCompat.getInsetsController(window, view).isAppearanceLightStatusBars = !useDarkTheme
         }
     }
 
