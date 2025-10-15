@@ -7,4 +7,6 @@ sealed interface AddEditNoteEvent {
     data class OnColorChange(val color: Int) : AddEditNoteEvent
     object OnSaveNoteClick : AddEditNoteEvent
     object OnDeleteNoteClick : AddEditNoteEvent
+    object OnUndoClick : AddEditNoteEvent
+    object OnRedoClick : AddEditNoteEvent
 }
