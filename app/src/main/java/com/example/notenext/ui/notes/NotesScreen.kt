@@ -191,6 +191,10 @@ fun NotesScreen(
                         }
                     }
                 } else {
+                    val filteredNotes = state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }
+                    val pinnedNotes = filteredNotes.filter { it.isPinned }
+                    val otherNotes = filteredNotes.filter { !it.isPinned }
+
                     LazyVerticalStaggeredGrid(
                         columns = StaggeredGridCells.Fixed(2),
                         modifier = Modifier.fillMaxSize(),
@@ -198,21 +202,60 @@ fun NotesScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalItemSpacing = 8.dp
                     ) {
-                        items(state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }) { note ->
-                            NoteItem(
-                                note = note,
-                                isSelected = state.selectedNoteIds.contains(note.id),
-                                onNoteClick = {
-                                    if (isSelectionModeActive) {
+                        if (pinnedNotes.isNotEmpty()) {
+                            item(span = StaggeredGridItemSpan.FullLine) {
+                                Text(
+                                    text = "PINNED",
+                                    modifier = Modifier.padding(8.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            items(pinnedNotes) { note ->
+                                NoteItem(
+                                    note = note,
+                                    isSelected = state.selectedNoteIds.contains(note.id),
+                                    onNoteClick = {
+                                        if (isSelectionModeActive) {
+                                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                        } else {
+                                            onNoteClick(note.id)
+                                        }
+                                    },
+                                    onNoteLongClick = {
                                         viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                    } else {
-                                        onNoteClick(note.id)
                                     }
-                                },
-                                onNoteLongClick = {
-                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                )
+                            }
+                        }
+
+                        if (otherNotes.isNotEmpty()) {
+                            if (pinnedNotes.isNotEmpty()) {
+                                item(span = StaggeredGridItemSpan.FullLine) {
+                                    Text(
+                                        text = "OTHERS",
+                                        modifier = Modifier.padding(8.dp),
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
                                 }
-                            )
+                            }
+                            items(otherNotes) { note ->
+                                NoteItem(
+                                    note = note,
+                                    isSelected = state.selectedNoteIds.contains(note.id),
+                                    onNoteClick = {
+                                        if (isSelectionModeActive) {
+                                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                        } else {
+                                            onNoteClick(note.id)
+                                        }
+                                    },
+                                    onNoteLongClick = {
+                                        viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                    }
+                                )
+                            }
                         }
                     }
                 }
@@ -247,6 +290,15 @@ fun NoteItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
+            if (note.isPinned) {
+                Icon(
+                    imageVector = Icons.Outlined.PushPin,
+                    contentDescription = "Pinned note",
+                    modifier = Modifier.size(16.dp).align(Alignment.End),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
             // Title
             if (note.title.isNotEmpty()) {
                 Text(
