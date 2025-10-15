@@ -3,7 +3,6 @@ package com.example.notenext.ui.notes
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.ExperimentalAnimationApi
-import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -64,6 +63,7 @@ fun NotesScreen(
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
+    var showLabelDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -108,7 +108,7 @@ fun NotesScreen(
                 Spacer(modifier = Modifier.height(16.dp))
                 Text("Settings", modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { 
+                    .clickable {
                         scope.launch { drawerState.close() }
                         onSettingsClick()
                     }
@@ -131,7 +131,7 @@ fun NotesScreen(
                         onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
                         onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
                         onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                        onLabelClick = { /* TODO: Show label dialog */ }
+                        onLabelClick = { showLabelDialog = true }
                     )
                 } else {
                     AnimatedContent(
@@ -168,6 +168,15 @@ fun NotesScreen(
                 )
             }
         ) { padding ->
+            if (showLabelDialog) {
+                LabelDialog(
+                    onDismiss = { showLabelDialog = false },
+                    onConfirm = { label ->
+                        viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
+                        showLabelDialog = false
+                    }
+                )
+            }
             Column(modifier = Modifier.padding(padding)) {
                 if (state.notes.isEmpty()) {
                     Box(
@@ -488,5 +497,40 @@ fun ExpandedSearchView(
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.surface
         )
+    )
+}
+
+@Composable
+fun LabelDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var label by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = "Add Label") },
+        text = {
+            OutlinedTextField(
+                value = label,
+                onValueChange = { label = it },
+                label = { Text("Label") }
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirm(label)
+                    onDismiss()
+                }
+            ) {
+                Text("OK")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
     )
 }
