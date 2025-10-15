@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notesapp.dependency_injection.ViewModelFactory
+import com.example.notesapp.ui.settings.ThemeMode
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -41,7 +42,8 @@ import java.util.*
 @Composable
 fun AddEditNoteScreen(
     factory: ViewModelFactory,
-    onNoteSaved: () -> Unit
+    onNoteSaved: () -> Unit,
+    themeMode: ThemeMode
 ) {
     val viewModel: AddEditNoteViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -51,17 +53,7 @@ fun AddEditNoteScreen(
 
     val isKeyboardOpen = WindowInsets.isImeVisible
 
-    LaunchedEffect(state.isNoteSaved) {
-        if (state.isNoteSaved) {
-            onNoteSaved()
-        }
-    }
-
-    BackHandler {
-        onNoteSaved()
-    }
-
-    val colors = listOf(
+    val lightNoteColors = listOf(
         Color.White.toArgb(),
         Color(0xFFF28B82).toArgb(), // Red
         Color(0xFFFCBC05).toArgb(), // Orange
@@ -75,6 +67,26 @@ fun AddEditNoteScreen(
         Color(0xFFE6C9A8).toArgb(), // Brown
         Color(0xFFE8EAED).toArgb()  // Gray
     )
+
+    val darkNoteColors = listOf(
+        Color(0xFF424242).toArgb(), // Dark Gray (default for dark mode)
+        Color(0xFFB71C1C).toArgb(), // Dark Red
+        Color(0xFFE65100).toArgb(), // Dark Orange
+        Color(0xFFF57F17).toArgb(), // Dark Yellow
+        Color(0xFF2E7D32).toArgb(), // Dark Green
+        Color(0xFF006064).toArgb(), // Dark Teal
+        Color(0xFF01579B).toArgb(), // Dark Blue
+        Color(0xFF1A237E).toArgb(), // Very Dark Blue
+        Color(0xFF4A148C).toArgb(), // Dark Purple
+        Color(0xFF880E4F).toArgb(), // Dark Pink
+        Color(0xFF3E2723).toArgb(), // Dark Brown
+        Color(0xFF212121).toArgb()  // Very Dark Gray
+    )
+
+    val colors = when (themeMode) {
+        ThemeMode.DARK -> darkNoteColors
+        else -> lightNoteColors
+    }
 
     Scaffold(
         topBar = {

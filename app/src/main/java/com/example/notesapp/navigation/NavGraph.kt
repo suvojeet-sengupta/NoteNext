@@ -16,9 +16,10 @@ import com.example.notesapp.dependency_injection.ViewModelFactory
 import com.example.notesapp.ui.add_edit_note.AddEditNoteScreen
 import com.example.notesapp.ui.notes.NotesScreen
 import com.example.notesapp.ui.settings.SettingsScreen
+import com.example.notesapp.ui.settings.ThemeMode
 
 @Composable
-fun NavGraph(factory: ViewModelFactory) {
+fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
     val navController = rememberNavController()
     NavHost(navController = navController, startDestination = "notes") {
         composable(
@@ -44,7 +45,8 @@ fun NavGraph(factory: ViewModelFactory) {
         ) {
             AddEditNoteScreen(
                 factory = factory,
-                onNoteSaved = { navController.popBackStack() }
+                onNoteSaved = { navController.popBackStack() },
+                themeMode = themeMode
             )
         }
         composable(

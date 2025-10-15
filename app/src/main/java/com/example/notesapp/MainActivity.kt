@@ -23,7 +23,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             NotesAppTheme(themeMode = themeMode) {
-                NavGraph(factory = factory)
+                NavGraph(factory = factory, themeMode = themeMode)
             }
         }
     }
