@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NoteDao {
 
-    @Query("SELECT * FROM notes ORDER BY createdAt DESC")
+    @Query("SELECT * FROM notes ORDER BY isPinned DESC, lastEdited DESC")
     fun getNotes(): Flow<List<Note>>
 
     @Query("SELECT * FROM notes WHERE id = :id")
