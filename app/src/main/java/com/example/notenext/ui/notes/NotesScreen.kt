@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
@@ -124,13 +125,13 @@ fun NotesScreen(
                         selectedItemCount = state.selectedNoteIds.size,
                         onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
                         onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                        onImportantClick = { viewModel.onEvent(NotesEvent.ToggleImportantForSelectedNotes) },
                         onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
                         onColorClick = { /* TODO */ },
                         onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
                         onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
                         onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                        onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) }
+                        onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                        onLabelClick = { /* TODO: Show label dialog */ }
                     )
                 } else {
                     AnimatedContent(
@@ -323,6 +324,17 @@ fun NoteItem(
                     overflow = TextOverflow.Ellipsis
                 )
             }
+
+            if (!note.label.isNullOrEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = note.label,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
         }
     }
 }
@@ -333,13 +345,13 @@ fun ContextualTopAppBar(
     selectedItemCount: Int,
     onClearSelection: () -> Unit,
     onTogglePinClick: () -> Unit,
-    onImportantClick: () -> Unit,
     onReminderClick: () -> Unit,
     onColorClick: () -> Unit,
     onArchiveClick: () -> Unit,
     onDeleteClick: () -> Unit,
     onCopyClick: () -> Unit,
-    onSendClick: () -> Unit
+    onSendClick: () -> Unit,
+    onLabelClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -360,8 +372,8 @@ fun ContextualTopAppBar(
             IconButton(onClick = onColorClick) {
                 Icon(Icons.Default.Palette, contentDescription = "Change color")
             }
-            IconButton(onClick = onImportantClick) {
-                Icon(Icons.Default.Star, contentDescription = "Mark as important")
+            IconButton(onClick = onLabelClick) {
+                Icon(Icons.Outlined.Label, contentDescription = "Add label")
             }
             IconButton(onClick = { showMenu = !showMenu }) {
                 Icon(Icons.Default.MoreVert, contentDescription = "More options")

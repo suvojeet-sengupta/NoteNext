@@ -16,4 +16,5 @@ sealed class NotesEvent {
     object SendSelectedNotes : NotesEvent()
     data class SetReminderForSelectedNotes(val reminder: Long?) : NotesEvent()
     object ToggleImportantForSelectedNotes : NotesEvent()
+    data class SetLabelForSelectedNotes(val label: String) : NotesEvent()
 }

@@ -116,6 +116,15 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             is NotesEvent.SetReminderForSelectedNotes -> {
                 // TODO: Implement reminder
             }
+            is NotesEvent.SetLabelForSelectedNotes -> {
+                viewModelScope.launch {
+                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                    for (note in selectedNotes) {
+                        noteDao.insertNote(note.copy(label = event.label))
+                    }
+                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                }
+            }
         }
     }
 }
