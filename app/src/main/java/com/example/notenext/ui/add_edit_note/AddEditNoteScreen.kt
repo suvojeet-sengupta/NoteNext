@@ -208,57 +208,53 @@ fun AddEditNoteScreen(
                 }
             }
 
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center
+            BottomAppBar(
+                containerColor = Color(state.editingColor)
             ) {
-                BottomAppBar(
-                    containerColor = Color(state.editingColor)
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.SpaceEvenly,
-                        verticalAlignment = Alignment.CenterVertically
+                    FloatingActionButton(
+                        onClick = { showColorPicker = !showColorPicker },
+                        shape = CircleShape,
+                        modifier = Modifier.size(40.dp),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
-                        FloatingActionButton(
-                            onClick = { showColorPicker = !showColorPicker },
-                            shape = CircleShape,
-                            modifier = Modifier.size(40.dp),
-                            containerColor = MaterialTheme.colorScheme.primaryContainer,
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                    }
+                    if (state.editingHistory.size > 1) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
-                        }
-                        if (state.editingHistory.size > 1) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                            // Undo Button
+                            FloatingActionButton(
+                                onClick = { onEvent(NotesEvent.OnUndoClick) },
+                                shape = CircleShape,
+                                modifier = Modifier.size(40.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             ) {
-                                // Undo Button
-                                FloatingActionButton(
-                                    onClick = { onEvent(NotesEvent.OnUndoClick) },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Undo,
-                                        contentDescription = "Undo"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Rounded.Undo,
+                                    contentDescription = "Undo"
+                                )
+                            }
 
-                                // Redo Button
-                                FloatingActionButton(
-                                    onClick = { onEvent(NotesEvent.OnRedoClick) },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Redo,
-                                        contentDescription = "Redo"
-                                    )
-                                }
+                            // Redo Button
+                            FloatingActionButton(
+                                onClick = { onEvent(NotesEvent.OnRedoClick) },
+                                shape = CircleShape,
+                                modifier = Modifier.size(40.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Redo,
+                                    contentDescription = "Redo"
+                                )
                             }
                         }
                     }
