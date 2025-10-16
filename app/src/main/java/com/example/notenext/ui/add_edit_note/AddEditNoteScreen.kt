@@ -16,8 +16,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Redo
+import androidx.compose.material.icons.rounded.Redo
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material.icons.filled.Undo
+import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.lazy.LazyRow
@@ -243,16 +245,14 @@ fun AddEditNoteScreen(
                         IconButton(
                             onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
                             enabled = state.historyIndex > 0,
-                            modifier = Modifier.clip(CircleShape).border(1.dp, contentColorFor(backgroundColor = Color(state.color)), CircleShape)
                         ) {
-                            Icon(Icons.Default.Undo, contentDescription = "Undo", tint = contentColorFor(backgroundColor = Color(state.color)))
+                            Icon(Icons.Rounded.Undo, contentDescription = "Undo", tint = contentColorFor(backgroundColor = Color(state.color)))
                         }
                         IconButton(
                             onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
                             enabled = state.historyIndex < state.history.size - 1,
-                            modifier = Modifier.clip(CircleShape).border(1.dp, contentColorFor(backgroundColor = Color(state.color)), CircleShape)
                         ) {
-                            Icon(Icons.Default.Redo, contentDescription = "Redo", tint = contentColorFor(backgroundColor = Color(state.color)))
+                            Icon(Icons.Rounded.Redo, contentDescription = "Redo", tint = contentColorFor(backgroundColor = Color(state.color)))
                         }
                     }
                 }
