@@ -1,38 +1,24 @@
 package com.example.notenext.ui.notes
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items as StaggeredGridItems
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.outlined.Label
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material.icons.filled.Palette
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Archive
-import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -41,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
@@ -51,16 +38,17 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notenext.data.Note
 import com.example.notenext.dependency_injection.ViewModelFactory
+import com.example.notenext.ui.add_edit_note.AddEditNoteScreen
+import com.example.notenext.ui.settings.ThemeMode
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun NotesScreen(
     factory: ViewModelFactory,
-    onNoteClick: (Int) -> Unit,
-    onAddNoteClick: () -> Unit,
     onSettingsClick: () -> Unit,
-    onArchiveClick: () -> Unit
+    onArchiveClick: () -> Unit,
+    themeMode: ThemeMode
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -89,204 +77,224 @@ fun NotesScreen(
         }
     }
 
-    BackHandler(enabled = isSearchActive || isSelectionModeActive || drawerState.isOpen) {
-        if (drawerState.isOpen) {
-            scope.launch { drawerState.close() }
-        } else if (isSelectionModeActive) {
-            viewModel.onEvent(NotesEvent.ClearSelection)
-        } else if (isSearchActive) {
-            isSearchActive = false
-            searchQuery = ""
+    BackHandler(enabled = isSearchActive || isSelectionModeActive || drawerState.isOpen || state.expandedNoteId != null) {
+        when {
+            drawerState.isOpen -> scope.launch { drawerState.close() }
+            isSelectionModeActive -> viewModel.onEvent(NotesEvent.ClearSelection)
+            isSearchActive -> {
+                isSearchActive = false
+                searchQuery = ""
+            }
+            state.expandedNoteId != null -> viewModel.onEvent(NotesEvent.CollapseNote)
         }
     }
 
-    ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
-            ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
-                Text(
-                    text = "NoteNext",
-                    style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                    modifier = Modifier.padding(16.dp)
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
-                    label = { Text("Archive") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onArchiveClick()
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-                NavigationDrawerItem(
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                    label = { Text("Settings") },
-                    selected = false,
-                    onClick = {
-                        scope.launch { drawerState.close() }
-                        onSettingsClick()
-                    },
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                )
-            }
-        }
-    ) {
-        Scaffold(
-            topBar = {
-                if (isSelectionModeActive) {
-                    ContextualTopAppBar(
-                        selectedItemCount = state.selectedNoteIds.size,
-                        onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                        onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                        onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                        onColorClick = { /* TODO */ },
-                        onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                        onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
-                        onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                        onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                        onLabelClick = { showLabelDialog = true }
+    Box(modifier = Modifier.fillMaxSize()) {
+        ModalNavigationDrawer(
+            drawerState = drawerState,
+            drawerContent = {
+                ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
+                    Text(
+                        text = "NoteNext",
+                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                        modifier = Modifier.padding(16.dp)
                     )
-                } else {
-                    AnimatedContent(
-                        targetState = isSearchActive,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
-                                    fadeOut(animationSpec = tween(90))
-                        }, label = ""
-                    ) { searchTargetState ->
-                        if (searchTargetState) {
-                            ExpandedSearchView(
-                                searchQuery = searchQuery,
-                                onSearchQueryChange = { searchQuery = it },
-                                onCloseSearch = {
-                                    isSearchActive = false
-                                    searchQuery = ""
-                                }
-                            )
-                        } else {
-                            CollapsedTopAppBar(
-                                onSearchClick = { isSearchActive = true },
-                                onMenuClick = { scope.launch { drawerState.open() } }
-                            )
-                        }
-                    }
+                    Spacer(modifier = Modifier.height(16.dp))
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
+                        label = { Text("Archive") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onArchiveClick()
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                        label = { Text("Settings") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onSettingsClick()
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
                 }
-            },
-            floatingActionButton = {
-                FloatingActionButton(
-                    onClick = onAddNoteClick,
-                    content = {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-                    }
-                )
             }
-        ) { padding ->
-            if (showLabelDialog) {
-                LabelDialog(
-                    labels = state.labels,
-                    onDismiss = { showLabelDialog = false },
-                    onConfirm = { label ->
-                        viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
-                        showLabelDialog = false
-                    }
-                )
-            }
-            Column(modifier = Modifier.padding(padding)) {
-                if (state.notes.isEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Icon(
-                                imageVector = Icons.Default.Info,
-                                contentDescription = null,
-                                modifier = Modifier.size(96.dp),
-                                tint = MaterialTheme.colorScheme.onBackground
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            Text(
-                                text = "No notes yet. Tap the '+' button to add one.",
-                                textAlign = TextAlign.Center,
-                                style = MaterialTheme.typography.titleMedium,
-                                color = MaterialTheme.colorScheme.onBackground,
-                                modifier = Modifier.padding(horizontal = 32.dp)
-                            )
-                        }
-                    }
-                } else {
-                    val filteredNotes = state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }
-                    val pinnedNotes = filteredNotes.filter { it.isPinned }
-                    val otherNotes = filteredNotes.filter { !it.isPinned }
-
-                    LazyVerticalStaggeredGrid(
-                        columns = StaggeredGridCells.Fixed(2),
-                        modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalItemSpacing = 8.dp
-                    ) {
-                        if (pinnedNotes.isNotEmpty()) {
-                            item(span = StaggeredGridItemSpan.FullLine) {
-                                Text(
-                                    text = "PINNED",
-                                    modifier = Modifier.padding(8.dp),
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                            StaggeredGridItems(pinnedNotes) { note ->
-                                NoteItem(
-                                    note = note,
-                                    isSelected = state.selectedNoteIds.contains(note.id),
-                                    onNoteClick = {
-                                        if (isSelectionModeActive) {
-                                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                        } else {
-                                            onNoteClick(note.id)
-                                        }
-                                    },
-                                    onNoteLongClick = {
-                                        viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+        ) {
+            Scaffold(
+                topBar = {
+                    if (isSelectionModeActive) {
+                        ContextualTopAppBar(
+                            selectedItemCount = state.selectedNoteIds.size,
+                            onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                            onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                            onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                            onColorClick = { /* TODO */ },
+                            onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                            onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
+                            onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                            onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                            onLabelClick = { showLabelDialog = true }
+                        )
+                    } else {
+                        AnimatedContent(
+                            targetState = isSearchActive,
+                            transitionSpec = {
+                                fadeIn(animationSpec = tween(220, delayMillis = 90)) togetherWith
+                                        fadeOut(animationSpec = tween(90))
+                            }, label = ""
+                        ) { searchTargetState ->
+                            if (searchTargetState) {
+                                ExpandedSearchView(
+                                    searchQuery = searchQuery,
+                                    onSearchQueryChange = { searchQuery = it },
+                                    onCloseSearch = {
+                                        isSearchActive = false
+                                        searchQuery = ""
                                     }
                                 )
+                            } else {
+                                CollapsedTopAppBar(
+                                    onSearchClick = { isSearchActive = true },
+                                    onMenuClick = { scope.launch { drawerState.open() } }
+                                )
                             }
                         }
+                    }
+                },
+                floatingActionButton = {
+                    FloatingActionButton(
+                        onClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
+                        content = {
+                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+                        }
+                    )
+                }
+            ) { padding ->
+                if (showLabelDialog) {
+                    LabelDialog(
+                        labels = state.labels,
+                        onDismiss = { showLabelDialog = false },
+                        onConfirm = { label ->
+                            viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
+                            showLabelDialog = false
+                        }
+                    )
+                }
+                Column(modifier = Modifier.padding(padding)) {
+                    if (state.notes.isEmpty()) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                Icon(
+                                    imageVector = Icons.Default.Info,
+                                    contentDescription = null,
+                                    modifier = Modifier.size(96.dp),
+                                    tint = MaterialTheme.colorScheme.onBackground
+                                )
+                                Spacer(modifier = Modifier.height(16.dp))
+                                Text(
+                                    text = "No notes yet. Tap the '+' button to add one.",
+                                    textAlign = TextAlign.Center,
+                                    style = MaterialTheme.typography.titleMedium,
+                                    color = MaterialTheme.colorScheme.onBackground,
+                                    modifier = Modifier.padding(horizontal = 32.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        val filteredNotes = state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }
+                        val pinnedNotes = filteredNotes.filter { it.isPinned }
+                        val otherNotes = filteredNotes.filter { !it.isPinned }
 
-                        if (otherNotes.isNotEmpty()) {
+                        LazyVerticalStaggeredGrid(
+                            columns = StaggeredGridCells.Fixed(2),
+                            modifier = Modifier.fillMaxSize(),
+                            contentPadding = PaddingValues(8.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            verticalItemSpacing = 8.dp
+                        ) {
                             if (pinnedNotes.isNotEmpty()) {
                                 item(span = StaggeredGridItemSpan.FullLine) {
                                     Text(
-                                        text = "OTHERS",
+                                        text = "PINNED",
                                         modifier = Modifier.padding(8.dp),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                            }
-                            StaggeredGridItems(otherNotes) { note ->
-                                NoteItem(
-                                    note = note,
-                                    isSelected = state.selectedNoteIds.contains(note.id),
-                                    onNoteClick = {
-                                        if (isSelectionModeActive) {
+                                StaggeredGridItems(pinnedNotes, key = { it.id }) { note ->
+                                    val isExpanded = state.expandedNoteId == note.id
+                                    NoteItem(
+                                        modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                        note = note,
+                                        isSelected = state.selectedNoteIds.contains(note.id),
+                                        onNoteClick = {
+                                            if (isSelectionModeActive) {
+                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                            } else {
+                                                viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                            }
+                                        },
+                                        onNoteLongClick = {
                                             viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                        } else {
-                                            onNoteClick(note.id)
                                         }
-                                    },
-                                    onNoteLongClick = {
-                                        viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                    )
+                                }
+                            }
+
+                            if (otherNotes.isNotEmpty()) {
+                                if (pinnedNotes.isNotEmpty()) {
+                                    item(span = StaggeredGridItemSpan.FullLine) {
+                                        Text(
+                                            text = "OTHERS",
+                                            modifier = Modifier.padding(8.dp),
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
                                     }
-                                )
+                                }
+                                StaggeredGridItems(otherNotes, key = { it.id }) { note ->
+                                    val isExpanded = state.expandedNoteId == note.id
+                                    NoteItem(
+                                        modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                        note = note,
+                                        isSelected = state.selectedNoteIds.contains(note.id),
+                                        onNoteClick = {
+                                            if (isSelectionModeActive) {
+                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                            } else {
+                                                viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                            }
+                                        },
+                                        onNoteLongClick = {
+                                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
+        }
+
+        AnimatedVisibility(
+            visible = state.expandedNoteId != null,
+            enter = scaleIn(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
+            exit = scaleOut(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+        ) {
+            AddEditNoteScreen(
+                state = state,
+                onEvent = viewModel::onEvent,
+                onDismiss = { viewModel.onEvent(NotesEvent.CollapseNote) },
+                themeMode = themeMode
+            )
         }
     }
 }
@@ -294,13 +302,14 @@ fun NotesScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
+    modifier: Modifier = Modifier,
     note: Note,
     isSelected: Boolean,
     onNoteClick: () -> Unit,
     onNoteLongClick: () -> Unit,
 ) {
     Card(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .combinedClickable(
                 onClick = onNoteClick,
@@ -448,7 +457,10 @@ fun ContextualTopAppBar(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CollapsedTopAppBar(onSearchClick: () -> Unit, onMenuClick: () -> Unit) {
+fun CollapsedTopAppBar(
+    onSearchClick: () -> Unit,
+    onMenuClick: () -> Unit
+) {
     TopAppBar(
         title = {
             Box(

@@ -17,4 +17,15 @@ sealed class NotesEvent {
     data class SetReminderForSelectedNotes(val reminder: Long?) : NotesEvent()
     object ToggleImportantForSelectedNotes : NotesEvent()
     data class SetLabelForSelectedNotes(val label: String) : NotesEvent()
+    data class ExpandNote(val noteId: Int) : NotesEvent()
+    object CollapseNote : NotesEvent()
+
+    // Events from AddEditNoteEvent
+    data class OnTitleChange(val title: String) : NotesEvent()
+    data class OnContentChange(val content: String) : NotesEvent()
+    data class OnColorChange(val color: Int) : NotesEvent()
+    object OnSaveNoteClick : NotesEvent()
+    object OnDeleteNoteClick : NotesEvent()
+    object OnUndoClick : NotesEvent()
+    object OnRedoClick : NotesEvent()
 }

@@ -10,20 +10,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Redo
 import androidx.compose.material.icons.rounded.Redo
-import androidx.compose.material.icons.filled.Save
-import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.rounded.Undo
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -32,42 +26,28 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.notenext.dependency_injection.ViewModelFactory
+import com.example.notenext.ui.notes.NotesEvent
+import com.example.notenext.ui.notes.NotesState
 import com.example.notenext.ui.settings.ThemeMode
-import kotlinx.coroutines.flow.collectLatest
 import java.text.SimpleDateFormat
 import java.util.*
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
-    factory: ViewModelFactory,
-    onNoteSaved: () -> Unit,
+    state: NotesState,
+    onEvent: (NotesEvent) -> Unit,
+    onDismiss: () -> Unit,
     themeMode: ThemeMode
 ) {
-    val viewModel: AddEditNoteViewModel = viewModel(factory = factory)
-    val state by viewModel.state.collectAsState()
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
-    val isKeyboardOpen = WindowInsets.isImeVisible
-
-    LaunchedEffect(Unit) {
-        viewModel.uiEvent.collectLatest { event ->
-            when (event) {
-                is AddEditNoteUiEvent.OnNoteSaved -> onNoteSaved()
-            }
-        }
-    }
-
     BackHandler {
-        viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick)
+        onDismiss()
     }
 
     val lightNoteColors = listOf(
@@ -108,20 +88,18 @@ fun AddEditNoteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.isNewNote) "Add Note" else "Edit Note") },
+                title = { Text(if (state.editingIsNewNote) "Add Note" else "Edit Note") },
                 navigationIcon = {
-                    IconButton(onClick = {
-                        viewModel.onEvent(AddEditNoteEvent.OnSaveNoteClick)
-                    }) {
+                    IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color(state.color),
-                    titleContentColor = contentColorFor(backgroundColor = Color(state.color)),
+                    containerColor = Color(state.editingColor),
+                    titleContentColor = contentColorFor(backgroundColor = Color(state.editingColor)),
                 ),
                 actions = {
-                    if (!state.isNewNote) {
+                    if (!state.editingIsNewNote) {
                         IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete note")
                         }
@@ -139,12 +117,12 @@ fun AddEditNoteScreen(
                 modifier = Modifier
                     .weight(1f)
                     .padding(padding)
-                    .background(Color(state.color))
+                    .background(Color(state.editingColor))
             ) {
                 TextField(
-                    value = state.title,
-                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnTitleChange(it)) },
-                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.color))) },
+                    value = state.editingTitle,
+                    onValueChange = { onEvent(NotesEvent.OnTitleChange(it)) },
+                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
                     modifier = Modifier
                         .fillMaxWidth(),
                     colors = TextFieldDefaults.colors(
@@ -153,19 +131,19 @@ fun AddEditNoteScreen(
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = contentColorFor(backgroundColor = Color(state.color)),
+                        cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
                         selectionColors = TextSelectionColors(
-                            handleColor = contentColorFor(backgroundColor = Color(state.color)),
-                            backgroundColor = contentColorFor(backgroundColor = Color(state.color)).copy(alpha = 0.4f)
+                            handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
                         )
                     ),
-                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.color)))
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 TextField(
-                    value = state.content,
-                    onValueChange = { viewModel.onEvent(AddEditNoteEvent.OnContentChange(it)) },
-                    placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.color))) },
+                    value = state.editingContent,
+                    onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
+                    placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f),
@@ -175,13 +153,13 @@ fun AddEditNoteScreen(
                         disabledContainerColor = Color.Transparent,
                         focusedIndicatorColor = Color.Transparent,
                         unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = contentColorFor(backgroundColor = Color(state.color)),
+                        cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
                         selectionColors = TextSelectionColors(
-                            handleColor = contentColorFor(backgroundColor = Color(state.color)),
-                            backgroundColor = contentColorFor(backgroundColor = Color(state.color)).copy(alpha = 0.4f)
+                            handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
                         )
                     ),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.color)))
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                 )
             }
 
@@ -205,13 +183,13 @@ fun AddEditNoteScreen(
                                 .background(Color(color), CircleShape)
                                 .border(
                                     width = 2.dp,
-                                    color = if (state.color == color) contentColorFor(backgroundColor = Color(color)) else Color.Transparent,
+                                    color = if (state.editingColor == color) contentColorFor(backgroundColor = Color(color)) else Color.Transparent,
                                     shape = CircleShape
                                 )
-                                .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
+                                .clickable { onEvent(NotesEvent.OnColorChange(color)) },
                             contentAlignment = Alignment.Center
                         ) {
-                            if (state.color == color) {
+                            if (state.editingColor == color) {
                                 Icon(
                                     Icons.Default.Check,
                                     contentDescription = "Selected",
@@ -224,7 +202,7 @@ fun AddEditNoteScreen(
             }
 
             BottomAppBar(
-                containerColor = Color(state.color)
+                containerColor = Color(state.editingColor)
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -240,25 +218,25 @@ fun AddEditNoteScreen(
                     ) {
                         Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
                     }
-                    if (!state.isNewNote) {
+                    if (!state.editingIsNewNote) {
                         Text(
-                            text = "Last edited: ${dateFormat.format(Date(state.lastEdited))}",
+                            text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
                             style = MaterialTheme.typography.bodySmall,
-                            color = contentColorFor(backgroundColor = Color(state.color))
+                            color = contentColorFor(backgroundColor = Color(state.editingColor))
                         )
                     }
-                    AnimatedVisibility(visible = state.history.size > 1) {
+                    AnimatedVisibility(visible = state.editingHistory.size > 1) {
                         Row {
                             Row(
                                 horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
                                 // Undo Button
                                 FloatingActionButton(
-                                    onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
+                                    onClick = { onEvent(NotesEvent.OnUndoClick) },
                                     shape = CircleShape,
                                     modifier = Modifier.size(40.dp),
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (state.historyIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Rounded.Undo,
@@ -268,11 +246,11 @@ fun AddEditNoteScreen(
 
                                 // Redo Button
                                 FloatingActionButton(
-                                    onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
+                                    onClick = { onEvent(NotesEvent.OnRedoClick) },
                                     shape = CircleShape,
                                     modifier = Modifier.size(40.dp),
                                     containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (state.historyIndex < state.history.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                    contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 ) {
                                     Icon(
                                         imageVector = Icons.Rounded.Redo,
@@ -295,7 +273,7 @@ fun AddEditNoteScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.onEvent(AddEditNoteEvent.OnDeleteNoteClick)
+                        onEvent(NotesEvent.OnDeleteNoteClick)
                         showDeleteDialog = false
                     }
                 ) {
