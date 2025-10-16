@@ -139,7 +139,7 @@ fun AddEditNoteScreen(
                     ),
                     textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(8.dp))
                 TextField(
                     value = state.editingContent,
                     onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
@@ -161,6 +161,14 @@ fun AddEditNoteScreen(
                     ),
                     textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                 )
+                if (!state.editingIsNewNote) {
+                    Text(
+                        text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = contentColorFor(backgroundColor = Color(state.editingColor)),
+                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                    )
+                }
             }
 
             AnimatedVisibility(
@@ -206,7 +214,7 @@ fun AddEditNoteScreen(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     FloatingActionButton(
@@ -218,45 +226,36 @@ fun AddEditNoteScreen(
                     ) {
                         Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
                     }
-                    if (!state.editingIsNewNote) {
-                        Text(
-                            text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = contentColorFor(backgroundColor = Color(state.editingColor))
-                        )
-                    }
-                    AnimatedVisibility(visible = state.editingHistory.size > 1) {
-                        Row {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    if (state.editingHistory.size > 1) {
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        ) {
+                            // Undo Button
+                            FloatingActionButton(
+                                onClick = { onEvent(NotesEvent.OnUndoClick) },
+                                shape = CircleShape,
+                                modifier = Modifier.size(40.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             ) {
-                                // Undo Button
-                                FloatingActionButton(
-                                    onClick = { onEvent(NotesEvent.OnUndoClick) },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Undo,
-                                        contentDescription = "Undo"
-                                    )
-                                }
+                                Icon(
+                                    imageVector = Icons.Rounded.Undo,
+                                    contentDescription = "Undo"
+                                )
+                            }
 
-                                // Redo Button
-                                FloatingActionButton(
-                                    onClick = { onEvent(NotesEvent.OnRedoClick) },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Redo,
-                                        contentDescription = "Redo"
-                                    )
-                                }
+                            // Redo Button
+                            FloatingActionButton(
+                                onClick = { onEvent(NotesEvent.OnRedoClick) },
+                                shape = CircleShape,
+                                modifier = Modifier.size(40.dp),
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Redo,
+                                    contentDescription = "Redo"
+                                )
                             }
                         }
                     }
