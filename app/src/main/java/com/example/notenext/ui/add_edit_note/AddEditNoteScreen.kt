@@ -218,7 +218,7 @@ fun AddEditNoteScreen(
                         onClick = { showColorPicker = !showColorPicker },
                         shape = CircleShape,
                         modifier = Modifier.size(40.dp),
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
                         Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
@@ -232,7 +232,7 @@ fun AddEditNoteScreen(
                                 onClick = { onEvent(NotesEvent.OnUndoClick) },
                                 shape = CircleShape,
                                 modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                                 contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             ) {
                                 Icon(
@@ -246,7 +246,7 @@ fun AddEditNoteScreen(
                                 onClick = { onEvent(NotesEvent.OnRedoClick) },
                                 shape = CircleShape,
                                 modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.7f),
                                 contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             ) {
                                 Icon(
