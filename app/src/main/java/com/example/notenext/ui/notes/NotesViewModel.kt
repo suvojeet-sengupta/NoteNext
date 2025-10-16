@@ -159,10 +159,7 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                 }
             }
             is NotesEvent.CollapseNote -> {
-                viewModelScope.launch {
-                    onEvent(NotesEvent.OnSaveNoteClick)
-                    _state.value = state.value.copy(expandedNoteId = null)
-                }
+                onEvent(NotesEvent.OnSaveNoteClick)
             }
             is NotesEvent.OnTitleChange -> {
                 val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
@@ -207,40 +204,50 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             }
             is NotesEvent.OnSaveNoteClick -> {
                 viewModelScope.launch {
-                    val currentTime = System.currentTimeMillis()
                     val noteId = state.value.expandedNoteId
-                    if (noteId == null || (state.value.editingTitle.isEmpty() && state.value.editingContent.isEmpty())) {
-                        if (noteId != -1) { // Don't delete if it was a new note
-                            // If the note is empty, delete it
-                            state.value.expandedNoteId?.let { id ->
-                                noteDao.getNoteById(id)?.let { noteDao.deleteNote(it) }
-                            }
+                    if (noteId == null) return@launch
+
+                    val title = state.value.editingTitle
+                    val content = state.value.editingContent
+
+                    if (title.isBlank() && content.isBlank()) {
+                        if (noteId != -1) { // It's an existing note, so delete it
+                            noteDao.getNoteById(noteId)?.let { noteDao.deleteNote(it) }
                         }
-                        _state.value = state.value.copy(expandedNoteId = null)
-                        return@launch
-                    }
-
-
-                    val note = if (noteId == -1) {
-                        Note(
-                            title = state.value.editingTitle,
-                            content = state.value.editingContent,
-                            createdAt = currentTime,
-                            lastEdited = currentTime,
-                            color = state.value.editingColor
-                        )
                     } else {
-                        Note(
-                            id = noteId,
-                            title = state.value.editingTitle,
-                            content = state.value.editingContent,
-                            createdAt = noteDao.getNoteById(noteId)?.createdAt ?: System.currentTimeMillis(),
-                            lastEdited = currentTime,
-                            color = state.value.editingColor
-                        )
+                        val currentTime = System.currentTimeMillis()
+                        val note = if (noteId == -1) { // New note
+                            Note(
+                                title = title,
+                                content = content,
+                                createdAt = currentTime,
+                                lastEdited = currentTime,
+                                color = state.value.editingColor
+                            )
+                        } else { // Existing note
+                            Note(
+                                id = noteId,
+                                title = title,
+                                content = content,
+                                createdAt = noteDao.getNoteById(noteId)?.createdAt ?: currentTime,
+                                lastEdited = currentTime,
+                                color = state.value.editingColor
+                            )
+                        }
+                        noteDao.insertNote(note)
                     }
-                    noteDao.insertNote(note)
-                    _state.value = state.value.copy(expandedNoteId = null)
+
+                    // Reset editing state and collapse
+                    _state.value = state.value.copy(
+                        expandedNoteId = null,
+                        editingTitle = "",
+                        editingContent = "",
+                        editingColor = 0,
+                        editingIsNewNote = true,
+                        editingLastEdited = 0,
+                        editingHistory = listOf("" to ""),
+                        editingHistoryIndex = 0
+                    )
                 }
             }
             is NotesEvent.OnDeleteNoteClick -> {

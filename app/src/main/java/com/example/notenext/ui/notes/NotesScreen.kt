@@ -340,7 +340,7 @@ fun NoteItem(
                 Text(
                     text = note.title,
                     fontSize = 16.sp,
-                    fontWeight = FontWeight.Normal,
+                    fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
                     maxLines = 10,
                     overflow = TextOverflow.Ellipsis
