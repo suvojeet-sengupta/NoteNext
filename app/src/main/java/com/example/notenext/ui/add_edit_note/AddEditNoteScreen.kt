@@ -240,31 +240,38 @@ fun AddEditNoteScreen(
                         )
                     }
                     Row {
-                        IconButton(
-                            onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
-                            enabled = state.historyIndex > 0,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .border(
-                                    width = 1.dp,
-                                    color = contentColorFor(backgroundColor = Color(state.color)),
-                                    shape = CircleShape
-                                )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
-                            Icon(Icons.Rounded.Undo, contentDescription = "Undo", tint = contentColorFor(backgroundColor = Color(state.color)))
-                        }
-                        IconButton(
-                            onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
-                            enabled = state.historyIndex < state.history.size - 1,
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .border(
-                                    width = 1.dp,
-                                    color = contentColorFor(backgroundColor = Color(state.color)),
-                                    shape = CircleShape
+                            // Undo Button
+                            FloatingActionButton(
+                                onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
+                                modifier = Modifier.size(56.dp),
+                                containerColor = Color(0xFFb8728f), // M3 burgundy/maroon
+                                contentColor = Color.White,
+                                enabled = state.historyIndex > 0
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Undo,
+                                    contentDescription = "Undo",
+                                    modifier = Modifier.size(24.dp)
                                 )
-                        ) {
-                            Icon(Icons.Rounded.Redo, contentDescription = "Redo", tint = contentColorFor(backgroundColor = Color(state.color)))
+                            }
+
+                            // Redo Button
+                            FloatingActionButton(
+                                onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
+                                modifier = Modifier.size(56.dp),
+                                containerColor = Color(0xFFb8728f),
+                                contentColor = Color.White,
+                                enabled = state.historyIndex < state.history.size - 1
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Rounded.Redo,
+                                    contentDescription = "Redo",
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            }
                         }
                     }
                 }
