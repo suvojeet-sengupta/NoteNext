@@ -247,7 +247,7 @@ fun AddEditNoteScreen(
                             FloatingActionButton(
                                 onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
                                 shape = CircleShape,
-                                modifier = Modifier.size(56.dp),
+                                modifier = Modifier.size(40.dp),
                                 containerColor = Color(0xFFb8728f),
                                 contentColor = Color.White
                             ) {
@@ -261,7 +261,7 @@ fun AddEditNoteScreen(
                             FloatingActionButton(
                                 onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
                                 shape = CircleShape,
-                                modifier = Modifier.size(56.dp),
+                                modifier = Modifier.size(40.dp),
                                 containerColor = Color(0xFFb8728f),
                                 contentColor = Color.White
                             ) {
