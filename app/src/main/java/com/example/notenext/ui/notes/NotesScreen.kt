@@ -208,7 +208,9 @@ fun NotesScreen(
                             }
                         }
                     } else {
-                        val filteredNotes = state.notes.filter { it.title.contains(searchQuery, ignoreCase = true) || it.content.contains(searchQuery, ignoreCase = true) }
+                        val filteredNotes = state.notes.filter { note ->
+                            !note.isArchived && (note.title.contains(searchQuery, ignoreCase = true) || note.content.contains(searchQuery, ignoreCase = true))
+                        }
                         val pinnedNotes = filteredNotes.filter { it.isPinned }
                         val otherNotes = filteredNotes.filter { !it.isPinned }
 

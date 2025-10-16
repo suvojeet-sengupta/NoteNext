@@ -111,13 +111,15 @@ fun AddEditNoteScreen(
                         IconButton(onClick = { onEvent(NotesEvent.OnTogglePinClick) }) {
                             Icon(
                                 imageVector = Icons.Filled.PushPin,
-                                contentDescription = if (state.isPinned) "Unpin note" else "Pin note"
+                                contentDescription = if (state.isPinned) "Unpin note" else "Pin note",
+                                tint = if (state.isPinned) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor))
                             )
                         }
                         IconButton(onClick = { onEvent(NotesEvent.OnToggleArchiveClick) }) {
                             Icon(
                                 imageVector = Icons.Filled.Archive,
-                                contentDescription = if (state.isArchived) "Unarchive note" else "Archive note"
+                                contentDescription = if (state.isArchived) "Unarchive note" else "Archive note",
+                                tint = if (state.isArchived) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor))
                             )
                         }
                         IconButton(onClick = { showDeleteDialog = true }) {
