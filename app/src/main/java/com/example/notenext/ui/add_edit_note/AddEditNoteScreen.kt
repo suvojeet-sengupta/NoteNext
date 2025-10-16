@@ -200,12 +200,10 @@ fun AddEditNoteScreen(
                     items(colors) { color ->
                         Box(
                             modifier = Modifier
-                                .size(40.dp)
                                 .clip(CircleShape)
-                                .background(Color(color))
                                 .border(
-                                    width = 2.dp,
-                                    color = if (state.color == color) MaterialTheme.colorScheme.primary else Color.Transparent,
+                                    width = 1.dp,
+                                    color = contentColorFor(backgroundColor = Color(state.color)),
                                     shape = CircleShape
                                 )
                                 .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
@@ -245,12 +243,26 @@ fun AddEditNoteScreen(
                         IconButton(
                             onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
                             enabled = state.historyIndex > 0,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .border(
+                                    width = 1.dp,
+                                    color = contentColorFor(backgroundColor = Color(state.color)),
+                                    shape = CircleShape
+                                )
                         ) {
                             Icon(Icons.Rounded.Undo, contentDescription = "Undo", tint = contentColorFor(backgroundColor = Color(state.color)))
                         }
                         IconButton(
                             onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
                             enabled = state.historyIndex < state.history.size - 1,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .border(
+                                    width = 1.dp,
+                                    color = contentColorFor(backgroundColor = Color(state.color)),
+                                    shape = CircleShape
+                                )
                         ) {
                             Icon(Icons.Rounded.Redo, contentDescription = "Redo", tint = contentColorFor(backgroundColor = Color(state.color)))
                         }
