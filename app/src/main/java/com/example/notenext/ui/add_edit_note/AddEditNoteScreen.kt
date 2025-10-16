@@ -249,7 +249,7 @@ fun AddEditNoteScreen(
                                 shape = CircleShape,
                                 modifier = Modifier.size(40.dp),
                                 containerColor = Color(0xFFb8728f),
-                                contentColor = Color.White
+                                contentColor = if (state.historyIndex > 0) Color.White else Color.Gray
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Undo,
@@ -263,7 +263,7 @@ fun AddEditNoteScreen(
                                 shape = CircleShape,
                                 modifier = Modifier.size(40.dp),
                                 containerColor = Color(0xFFb8728f),
-                                contentColor = Color.White
+                                contentColor = if (state.historyIndex < state.history.size - 1) Color.White else Color.Gray
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Redo,
