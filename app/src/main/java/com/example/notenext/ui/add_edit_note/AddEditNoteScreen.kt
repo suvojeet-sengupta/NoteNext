@@ -235,8 +235,8 @@ fun AddEditNoteScreen(
                         onClick = { showColorPicker = !showColorPicker },
                         shape = CircleShape,
                         modifier = Modifier.size(40.dp),
-                        containerColor = Color(0xFFb8728f),
-                        contentColor = contentColorFor(backgroundColor = Color(state.color))
+                        containerColor = MaterialTheme.colorScheme.primaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
                         Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
                     }
@@ -256,8 +256,8 @@ fun AddEditNoteScreen(
                                 onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
                                 shape = CircleShape,
                                 modifier = Modifier.size(40.dp),
-                                containerColor = Color(0xFFb8728f),
-                                contentColor = if (state.historyIndex > 0) Color.White else Color.Gray
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (state.historyIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Undo,
@@ -270,8 +270,8 @@ fun AddEditNoteScreen(
                                 onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
                                 shape = CircleShape,
                                 modifier = Modifier.size(40.dp),
-                                containerColor = Color(0xFFb8728f),
-                                contentColor = if (state.historyIndex < state.history.size - 1) Color.White else Color.Gray
+                                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                contentColor = if (state.historyIndex < state.history.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Redo,
