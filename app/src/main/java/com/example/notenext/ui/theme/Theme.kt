@@ -95,10 +95,7 @@ fun NoteNextTheme(
     }
 
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val useDynamicColor = when (themeMode) {
-        ThemeMode.SYSTEM -> dynamicColor
-        else -> false // Only use dynamic color for system theme
-    }
+    val useDynamicColor = dynamicColor
 
     val colorScheme = when {
         useDynamicColor && useDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
