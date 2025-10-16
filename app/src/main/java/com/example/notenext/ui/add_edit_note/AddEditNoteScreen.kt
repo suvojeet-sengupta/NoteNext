@@ -21,6 +21,10 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.rounded.Redo
 import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.Archive
+
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -90,7 +94,7 @@ fun AddEditNoteScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(if (state.editingIsNewNote) "Add Note" else "Edit Note") },
+                title = { Text(if (state.editingIsNewNote) "Add Note" else "") },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.Default.ArrowBack, contentDescription = "Back")
@@ -102,6 +106,18 @@ fun AddEditNoteScreen(
                 ),
                 actions = {
                     if (!state.editingIsNewNote) {
+                        IconButton(onClick = { onEvent(NotesEvent.OnTogglePinClick) }) {
+                            Icon(
+                                imageVector = if (state.isPinned) Icons.Filled.PushPin else Icons.Filled.PushPin,
+                                contentDescription = if (state.isPinned) "Unpin note" else "Pin note"
+                            )
+                        }
+                        IconButton(onClick = { onEvent(NotesEvent.OnToggleArchiveClick) }) {
+                            Icon(
+                                imageVector = if (state.isArchived) Icons.Filled.Archive else Icons.Filled.Archive,
+                                contentDescription = if (state.isArchived) "Unarchive note" else "Archive note"
+                            )
+                        }
                         IconButton(onClick = { showDeleteDialog = true }) {
                             Icon(Icons.Default.Delete, contentDescription = "Delete note")
                         }

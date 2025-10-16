@@ -15,6 +15,8 @@ data class NotesState(
     val editingColor: Int = 0,
     val editingIsNewNote: Boolean = true,
     val editingLastEdited: Long = 0,
+    val isPinned: Boolean = false,
+    val isArchived: Boolean = false,
     val editingHistory: List<Pair<String, String>> = listOf("" to ""),
     val editingHistoryIndex: Int = 0
 )

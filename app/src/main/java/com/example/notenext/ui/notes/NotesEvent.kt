@@ -26,6 +26,8 @@ sealed class NotesEvent {
     data class OnColorChange(val color: Int) : NotesEvent()
     object OnSaveNoteClick : NotesEvent()
     object OnDeleteNoteClick : NotesEvent()
+    object OnTogglePinClick : NotesEvent()
+    object OnToggleArchiveClick : NotesEvent()
     object OnUndoClick : NotesEvent()
     object OnRedoClick : NotesEvent()
 }
