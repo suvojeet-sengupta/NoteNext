@@ -254,19 +254,25 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                                 content = content,
                                 createdAt = currentTime,
                                 lastEdited = currentTime,
-                                color = state.value.editingColor
+                                color = state.value.editingColor,
+                                isPinned = state.value.isPinned,
+                                isArchived = state.value.isArchived
                             )
                         } else { // Existing note
-                            Note(
-                                id = noteId,
-                                title = title,
-                                content = content,
-                                createdAt = noteDao.getNoteById(noteId)?.createdAt ?: currentTime,
-                                lastEdited = currentTime,
-                                color = state.value.editingColor
-                            )
+                            noteDao.getNoteById(noteId)?.let { existingNote ->
+                                existingNote.copy(
+                                    title = title,
+                                    content = content,
+                                    lastEdited = currentTime,
+                                    color = state.value.editingColor,
+                                    isPinned = state.value.isPinned,
+                                    isArchived = state.value.isArchived
+                                )
+                            }
                         }
-                        noteDao.insertNote(note)
+                        if (note != null) {
+                            noteDao.insertNote(note)
+                        }
                     }
 
                     // Reset editing state and collapse
@@ -278,7 +284,9 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                         editingIsNewNote = true,
                         editingLastEdited = 0,
                         editingHistory = listOf("" to ""),
-                        editingHistoryIndex = 0
+                        editingHistoryIndex = 0,
+                        isPinned = false,
+                        isArchived = false
                     )
                 }
             }
