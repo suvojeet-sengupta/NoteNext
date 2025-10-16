@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 class ArchiveViewModel(private val noteDao: NoteDao) : ViewModel() {
 
@@ -17,4 +18,14 @@ class ArchiveViewModel(private val noteDao: NoteDao) : ViewModel() {
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = ArchiveState()
         )
+
+    fun onEvent(event: ArchiveEvent) {
+        when (event) {
+            is ArchiveEvent.UnarchiveNote -> {
+                viewModelScope.launch {
+                    noteDao.insertNote(event.note.copy(isArchived = false))
+                }
+            }
+        }
+    }
 }

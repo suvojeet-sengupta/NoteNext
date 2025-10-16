@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notenext.dependency_injection.ViewModelFactory
 import com.example.notenext.ui.notes.NoteItem
+import com.example.notenext.ui.archive.ArchiveEvent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -75,7 +76,7 @@ fun ArchiveScreen(
                     NoteItem(
                         note = note,
                         isSelected = false, // Not selectable in archive
-                        onNoteClick = { /* TODO: Handle click if needed */ },
+                        onNoteClick = { viewModel.onEvent(ArchiveEvent.UnarchiveNote(note)) },
                         onNoteLongClick = { /* TODO: Handle long click if needed */ }
                     )
                 }
