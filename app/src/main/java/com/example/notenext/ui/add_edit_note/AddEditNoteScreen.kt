@@ -10,6 +10,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -145,10 +146,8 @@ fun AddEditNoteScreen(
                         value = state.editingContent,
                         onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
                         placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f),
-                        colors = TextFieldDefaults.colors(
+                                            modifier = Modifier
+                                                .fillMaxWidth(),                        colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
                             disabledContainerColor = Color.Transparent,
@@ -164,12 +163,10 @@ fun AddEditNoteScreen(
                     )
                     if (!state.editingIsNewNote) {
                         Text(
-                            text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = contentColorFor(backgroundColor = Color(state.editingColor)),
-                            modifier = Modifier.align(Alignment.CenterHorizontally)
-                        )
-                    }
+                                                    text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
+                                                    style = MaterialTheme.typography.bodySmall,
+                                                    color = contentColorFor(backgroundColor = Color(state.editingColor))
+                                                )                    }
                 }
             }
 
