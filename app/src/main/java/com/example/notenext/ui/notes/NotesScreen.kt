@@ -434,7 +434,7 @@ fun ContextualTopAppBar(
                         }
                     )
                     DropdownMenuItem(
-                        text = { Text("Send") },
+                        text = { Text("Share") },
                         onClick = {
                             onSendClick()
                             showMenu = false
