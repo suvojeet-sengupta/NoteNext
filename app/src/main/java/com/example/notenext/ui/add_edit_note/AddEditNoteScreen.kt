@@ -247,36 +247,38 @@ fun AddEditNoteScreen(
                             color = contentColorFor(backgroundColor = Color(state.color))
                         )
                     }
-                    Row {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            // Undo Button
-                            FloatingActionButton(
-                                onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
-                                shape = CircleShape,
-                                modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = if (state.historyIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                    AnimatedVisibility(visible = state.history.size > 1) {
+                        Row {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Undo,
-                                    contentDescription = "Undo"
-                                )
-                            }
+                                // Undo Button
+                                FloatingActionButton(
+                                    onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = if (state.historyIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Undo,
+                                        contentDescription = "Undo"
+                                    )
+                                }
 
-                            // Redo Button
-                            FloatingActionButton(
-                                onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
-                                shape = CircleShape,
-                                modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = if (state.historyIndex < state.history.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Redo,
-                                    contentDescription = "Redo"
-                                )
+                                // Redo Button
+                                FloatingActionButton(
+                                    onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = if (state.historyIndex < state.history.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Redo,
+                                        contentDescription = "Redo"
+                                    )
+                                }
                             }
                         }
                     }
