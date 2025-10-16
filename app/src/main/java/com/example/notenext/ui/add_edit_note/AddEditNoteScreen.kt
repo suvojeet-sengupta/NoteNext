@@ -23,6 +23,8 @@ import androidx.compose.material.icons.rounded.Undo
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.outlined.Archive
+import androidx.compose.material.icons.outlined.PushPin
 
 
 import androidx.compose.material3.*
@@ -108,13 +110,13 @@ fun AddEditNoteScreen(
                     if (!state.editingIsNewNote) {
                         IconButton(onClick = { onEvent(NotesEvent.OnTogglePinClick) }) {
                             Icon(
-                                imageVector = if (state.isPinned) Icons.Filled.PushPin else Icons.Filled.PushPin,
+                                imageVector = Icons.Filled.PushPin,
                                 contentDescription = if (state.isPinned) "Unpin note" else "Pin note"
                             )
                         }
                         IconButton(onClick = { onEvent(NotesEvent.OnToggleArchiveClick) }) {
                             Icon(
-                                imageVector = if (state.isArchived) Icons.Filled.Archive else Icons.Filled.Archive,
+                                imageVector = Icons.Filled.Archive,
                                 contentDescription = if (state.isArchived) "Unarchive note" else "Archive note"
                             )
                         }

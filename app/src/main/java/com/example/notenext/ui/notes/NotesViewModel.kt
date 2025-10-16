@@ -188,7 +188,11 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                         noteDao.getNoteById(noteId)?.let { note ->
                             val updatedNote = note.copy(isPinned = !note.isPinned)
                             noteDao.insertNote(updatedNote)
-                            _state.value = state.value.copy(isPinned = updatedNote.isPinned)
+                            val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
+                            _state.value = state.value.copy(
+                                isPinned = updatedNote.isPinned,
+                                notes = updatedNotesList
+                            )
                         }
                     }
                 }
@@ -199,7 +203,11 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                         noteDao.getNoteById(noteId)?.let { note ->
                             val updatedNote = note.copy(isArchived = !note.isArchived)
                             noteDao.insertNote(updatedNote)
-                            _state.value = state.value.copy(isArchived = updatedNote.isArchived)
+                            val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
+                            _state.value = state.value.copy(
+                                isArchived = updatedNote.isArchived,
+                                notes = updatedNotesList
+                            )
                         }
                     }
                 }
