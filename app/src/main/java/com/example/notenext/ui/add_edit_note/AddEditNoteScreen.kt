@@ -247,14 +247,12 @@ fun AddEditNoteScreen(
                             FloatingActionButton(
                                 onClick = { viewModel.onEvent(AddEditNoteEvent.OnUndoClick) },
                                 modifier = Modifier.size(56.dp),
-                                containerColor = Color(0xFFb8728f), // M3 burgundy/maroon
-                                contentColor = Color.White,
-                                enabled = state.historyIndex > 0
+                                containerColor = Color(0xFFb8728f),
+                                contentColor = Color.White
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Undo,
-                                    contentDescription = "Undo",
-                                    modifier = Modifier.size(24.dp)
+                                    contentDescription = "Undo"
                                 )
                             }
 
@@ -263,13 +261,11 @@ fun AddEditNoteScreen(
                                 onClick = { viewModel.onEvent(AddEditNoteEvent.OnRedoClick) },
                                 modifier = Modifier.size(56.dp),
                                 containerColor = Color(0xFFb8728f),
-                                contentColor = Color.White,
-                                enabled = state.historyIndex < state.history.size - 1
+                                contentColor = Color.White
                             ) {
                                 Icon(
                                     imageVector = Icons.Rounded.Redo,
-                                    contentDescription = "Redo",
-                                    modifier = Modifier.size(24.dp)
+                                    contentDescription = "Redo"
                                 )
                             }
                         }
