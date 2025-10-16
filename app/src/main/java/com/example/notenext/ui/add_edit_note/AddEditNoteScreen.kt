@@ -200,10 +200,12 @@ fun AddEditNoteScreen(
                     items(colors) { color ->
                         Box(
                             modifier = Modifier
+                                .size(40.dp)
                                 .clip(CircleShape)
+                                .background(Color(color), CircleShape)
                                 .border(
-                                    width = 1.dp,
-                                    color = contentColorFor(backgroundColor = Color(state.color)),
+                                    width = 2.dp,
+                                    color = if (state.color == color) contentColorFor(backgroundColor = Color(color)) else Color.Transparent,
                                     shape = CircleShape
                                 )
                                 .clickable { viewModel.onEvent(AddEditNoteEvent.OnColorChange(color)) },
@@ -229,8 +231,14 @@ fun AddEditNoteScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { showColorPicker = !showColorPicker }) {
-                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker", tint = contentColorFor(backgroundColor = Color(state.color)))
+                    FloatingActionButton(
+                        onClick = { showColorPicker = !showColorPicker },
+                        shape = CircleShape,
+                        modifier = Modifier.size(40.dp),
+                        containerColor = Color(0xFFb8728f),
+                        contentColor = contentColorFor(backgroundColor = Color(state.color))
+                    ) {
+                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
                     }
                     if (!state.isNewNote) {
                         Text(
