@@ -140,6 +140,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                                 editingColor = note.color,
                                 editingIsNewNote = false,
                                 editingLastEdited = note.lastEdited,
+                                isPinned = note.isPinned,
+                                isArchived = note.isArchived,
                                 editingHistory = listOf(note.title to note.content),
                                 editingHistoryIndex = 0
                             )
