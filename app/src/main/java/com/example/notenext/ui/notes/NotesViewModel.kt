@@ -180,6 +180,28 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             is NotesEvent.OnColorChange -> {
                 _state.value = state.value.copy(editingColor = event.color)
             }
+            is NotesEvent.OnTogglePinClick -> {
+                viewModelScope.launch {
+                    state.value.expandedNoteId?.let { noteId ->
+                        noteDao.getNoteById(noteId)?.let { note ->
+                            val updatedNote = note.copy(isPinned = !note.isPinned)
+                            noteDao.insertNote(updatedNote)
+                            _state.value = state.value.copy(isPinned = updatedNote.isPinned)
+                        }
+                    }
+                }
+            }
+            is NotesEvent.OnToggleArchiveClick -> {
+                viewModelScope.launch {
+                    state.value.expandedNoteId?.let { noteId ->
+                        noteDao.getNoteById(noteId)?.let { note ->
+                            val updatedNote = note.copy(isArchived = !note.isArchived)
+                            noteDao.insertNote(updatedNote)
+                            _state.value = state.value.copy(isArchived = updatedNote.isArchived)
+                        }
+                    }
+                }
+            }
             is NotesEvent.OnUndoClick -> {
                 if (state.value.editingHistoryIndex > 0) {
                     val newIndex = state.value.editingHistoryIndex - 1
