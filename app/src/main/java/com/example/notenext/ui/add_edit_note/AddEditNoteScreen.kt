@@ -162,11 +162,8 @@ fun AddEditNoteScreen(
                         textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                     )
                     if (!state.editingIsNewNote) {
-                        Text(
-                                                    text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
-                                                    style = MaterialTheme.typography.bodySmall,
-                                                    color = contentColorFor(backgroundColor = Color(state.editingColor))
-                                                )                    }
+                        
+                    }
                 }
             }
 
