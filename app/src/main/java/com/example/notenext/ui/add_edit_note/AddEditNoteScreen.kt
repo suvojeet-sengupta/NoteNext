@@ -170,6 +170,7 @@ fun AddEditNoteScreen(
             AnimatedVisibility(
                 visible = showColorPicker,
                 enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
             ) {
                 LazyRow(
                     modifier = Modifier
