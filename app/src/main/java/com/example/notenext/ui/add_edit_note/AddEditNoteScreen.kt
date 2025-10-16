@@ -113,61 +113,63 @@ fun AddEditNoteScreen(
                 .fillMaxSize()
                 .imePadding()
         ) {
-            Column(
+            LazyColumn(
                 modifier = Modifier
                     .weight(1f)
                     .padding(padding)
                     .background(Color(state.editingColor))
             ) {
-                TextField(
-                    value = state.editingTitle,
-                    onValueChange = { onEvent(NotesEvent.OnTitleChange(it)) },
-                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                        selectionColors = TextSelectionColors(
-                            handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                            backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
-                        )
-                    ),
-                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                TextField(
-                    value = state.editingContent,
-                    onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
-                    placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .weight(1f),
-                    colors = TextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        disabledContainerColor = Color.Transparent,
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                        selectionColors = TextSelectionColors(
-                            handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                            backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
-                        )
-                    ),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
-                )
-                if (!state.editingIsNewNote) {
-                    Text(
-                        text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = contentColorFor(backgroundColor = Color(state.editingColor)),
-                        modifier = Modifier.align(Alignment.CenterHorizontally)
+                item {
+                    TextField(
+                        value = state.editingTitle,
+                        onValueChange = { onEvent(NotesEvent.OnTitleChange(it)) },
+                        placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            selectionColors = TextSelectionColors(
+                                handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                            )
+                        ),
+                        textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    TextField(
+                        value = state.editingContent,
+                        onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
+                        placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .weight(1f),
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
+                            disabledContainerColor = Color.Transparent,
+                            focusedIndicatorColor = Color.Transparent,
+                            unfocusedIndicatorColor = Color.Transparent,
+                            cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            selectionColors = TextSelectionColors(
+                                handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                            )
+                        ),
+                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
+                    )
+                    if (!state.editingIsNewNote) {
+                        Text(
+                            text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            modifier = Modifier.align(Alignment.CenterHorizontally)
+                        )
+                    }
                 }
             }
 
@@ -209,53 +211,57 @@ fun AddEditNoteScreen(
                 }
             }
 
-            BottomAppBar(
-                containerColor = Color(state.editingColor)
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
             ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceEvenly,
-                    verticalAlignment = Alignment.CenterVertically
+                BottomAppBar(
+                    containerColor = Color(state.editingColor)
                 ) {
-                    FloatingActionButton(
-                        onClick = { showColorPicker = !showColorPicker },
-                        shape = CircleShape,
-                        modifier = Modifier.size(40.dp),
-                        containerColor = MaterialTheme.colorScheme.primaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    Row(
+                        horizontalArrangement = Arrangement.SpaceEvenly,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
-                    }
-                    if (state.editingHistory.size > 1) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        FloatingActionButton(
+                            onClick = { showColorPicker = !showColorPicker },
+                            shape = CircleShape,
+                            modifier = Modifier.size(40.dp),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer,
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                         ) {
-                            // Undo Button
-                            FloatingActionButton(
-                                onClick = { onEvent(NotesEvent.OnUndoClick) },
-                                shape = CircleShape,
-                                modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                        }
+                        if (state.editingHistory.size > 1) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(16.dp)
                             ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Undo,
-                                    contentDescription = "Undo"
-                                )
-                            }
+                                // Undo Button
+                                FloatingActionButton(
+                                    onClick = { onEvent(NotesEvent.OnUndoClick) },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Undo,
+                                        contentDescription = "Undo"
+                                    )
+                                }
 
-                            // Redo Button
-                            FloatingActionButton(
-                                onClick = { onEvent(NotesEvent.OnRedoClick) },
-                                shape = CircleShape,
-                                modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Redo,
-                                    contentDescription = "Redo"
-                                )
+                                // Redo Button
+                                FloatingActionButton(
+                                    onClick = { onEvent(NotesEvent.OnRedoClick) },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Redo,
+                                        contentDescription = "Redo"
+                                    )
+                                }
                             }
                         }
                     }
