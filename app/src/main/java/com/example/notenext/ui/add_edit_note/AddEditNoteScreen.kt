@@ -27,6 +27,11 @@ import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.PushPin
 
 
+import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Label
+
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -53,6 +58,7 @@ fun AddEditNoteScreen(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
+    var showMoreOptions by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
 
     BackHandler {
@@ -241,41 +247,99 @@ fun AddEditNoteScreen(
                     FloatingActionButton(
                         onClick = { showColorPicker = !showColorPicker },
                         shape = CircleShape,
-                        modifier = Modifier.size(45.dp),
+                        modifier = Modifier.size(40.dp),
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
                         Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
                     }
-                    if (state.editingHistory.size > 1) {
-                        Row(
-                            horizontalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            // Undo Button
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        if (state.editingHistory.size > 1) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            ) {
+                                // Undo Button
+                                FloatingActionButton(
+                                    onClick = { onEvent(NotesEvent.OnUndoClick) },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                    contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Undo,
+                                        contentDescription = "Undo"
+                                    )
+                                }
+
+                                // Redo Button
+                                FloatingActionButton(
+                                    onClick = { onEvent(NotesEvent.OnRedoClick) },
+                                    shape = CircleShape,
+                                    modifier = Modifier.size(40.dp),
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                    contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Rounded.Redo,
+                                        contentDescription = "Redo"
+                                    )
+                                }
+                            }
+                        }
+
+                        // 3-dot button
+                        Box {
                             FloatingActionButton(
-                                onClick = { onEvent(NotesEvent.OnUndoClick) },
+                                onClick = { showMoreOptions = true },
                                 shape = CircleShape,
-                        modifier = Modifier.size(45.dp),
+                                modifier = Modifier.size(40.dp),
                                 containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             ) {
                                 Icon(
-                                    imageVector = Icons.Rounded.Undo,
-                                    contentDescription = "Undo"
+                                    imageVector = Icons.Default.MoreVert,
+                                    contentDescription = "More options"
                                 )
                             }
 
-                            // Redo Button
-                            FloatingActionButton(
-                                onClick = { onEvent(NotesEvent.OnRedoClick) },
-                                shape = CircleShape,
-                                modifier = Modifier.size(45.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            DropdownMenu(
+                                expanded = showMoreOptions,
+                                onDismissRequest = { showMoreOptions = false }
                             ) {
-                                Icon(
-                                    imageVector = Icons.Rounded.Redo,
-                                    contentDescription = "Redo"
+                                DropdownMenuItem(
+                                    text = { Text("Delete") },
+                                    onClick = {
+                                        showDeleteDialog = true
+                                        showMoreOptions = false
+                                    },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Make a copy") },
+                                    onClick = { /* Handle make a copy */ showMoreOptions = false },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Share") },
+                                    onClick = { /* Handle share */ showMoreOptions = false },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Share, contentDescription = "Share")
+                                    }
+                                )
+                                DropdownMenuItem(
+                                    text = { Text("Labels") },
+                                    onClick = { /* Handle labels */ showMoreOptions = false },
+                                    leadingIcon = {
+                                        Icon(Icons.Default.Label, contentDescription = "Labels")
+                                    }
                                 )
                             }
                         }
