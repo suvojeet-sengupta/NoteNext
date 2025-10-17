@@ -225,35 +225,32 @@ fun NotesScreen(
         ) {
             Scaffold(
                 topBar = {
-                    Column {
-                        Spacer(modifier = Modifier.height(48.dp))
-                        if (isSelectionModeActive) {
-                            ContextualTopAppBar(
-                                selectedItemCount = state.selectedNoteIds.size,
-                                onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                                onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                                onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                                onColorClick = { /* TODO */ },
-                                onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                                onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
-                                onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                                onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                                onLabelClick = { showLabelDialog = true }
-                            )
-                        } else {
-                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                }
-                                SearchBar(
-                                    searchQuery = searchQuery,
-                                    isSearchActive = isSearchActive,
-                                    onSearchQueryChange = { searchQuery = it },
-                                    onSearchActiveChange = { isSearchActive = it },
-                                    onLayoutToggleClick = { /*TODO*/ },
-                                    onSortClick = { /*TODO*/ }
-                                )
+                    if (isSelectionModeActive) {
+                        ContextualTopAppBar(
+                            selectedItemCount = state.selectedNoteIds.size,
+                            onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                            onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                            onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                            onColorClick = { /* TODO */ },
+                            onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                            onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
+                            onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                            onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                            onLabelClick = { showLabelDialog = true }
+                        )
+                    } else {
+                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
                             }
+                            SearchBar(
+                                searchQuery = searchQuery,
+                                isSearchActive = isSearchActive,
+                                onSearchQueryChange = { searchQuery = it },
+                                onSearchActiveChange = { isSearchActive = it },
+                                onLayoutToggleClick = { /*TODO*/ },
+                                onSortClick = { /*TODO*/ }
+                            )
                         }
                     }
                 },
