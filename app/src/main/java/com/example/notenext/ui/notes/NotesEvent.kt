@@ -30,4 +30,6 @@ sealed class NotesEvent {
     object OnToggleArchiveClick : NotesEvent()
     object OnUndoClick : NotesEvent()
     object OnRedoClick : NotesEvent()
+    object OnCopyCurrentNoteClick : NotesEvent()
+    object OnAddLabelsToCurrentNoteClick : NotesEvent()
 }

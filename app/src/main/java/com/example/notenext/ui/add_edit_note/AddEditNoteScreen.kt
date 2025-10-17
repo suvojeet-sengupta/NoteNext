@@ -42,6 +42,9 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.platform.LocalContext
+import android.content.Intent
+
 import com.example.notenext.ui.notes.NotesEvent
 import com.example.notenext.ui.notes.NotesState
 import com.example.notenext.ui.settings.ThemeMode
@@ -60,6 +63,7 @@ fun AddEditNoteScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var showMoreOptions by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
+    val context = LocalContext.current
 
     BackHandler {
         onDismiss()
@@ -322,21 +326,31 @@ fun AddEditNoteScreen(
                                 )
                                 DropdownMenuItem(
                                     text = { Text("Make a copy") },
-                                    onClick = { /* Handle make a copy */ showMoreOptions = false },
+                                    onClick = { onEvent(NotesEvent.OnCopyCurrentNoteClick); showMoreOptions = false },
                                     leadingIcon = {
                                         Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy")
                                     }
                                 )
                                 DropdownMenuItem(
                                     text = { Text("Share") },
-                                    onClick = { /* Handle share */ showMoreOptions = false },
+                                    onClick = {
+                                        val sendIntent: Intent = Intent().apply {
+                                            action = Intent.ACTION_SEND
+                                            putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent}")
+                                            putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
+                                            type = "text/plain"
+                                        }
+                                        val shareIntent = Intent.createChooser(sendIntent, null)
+                                        context.startActivity(shareIntent)
+                                        showMoreOptions = false
+                                    },
                                     leadingIcon = {
                                         Icon(Icons.Default.Share, contentDescription = "Share")
                                     }
                                 )
                                 DropdownMenuItem(
                                     text = { Text("Labels") },
-                                    onClick = { /* Handle labels */ showMoreOptions = false },
+                                    onClick = { onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick); showMoreOptions = false },
                                     leadingIcon = {
                                         Icon(Icons.Default.Label, contentDescription = "Labels")
                                     }

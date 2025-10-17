@@ -302,6 +302,19 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                     _state.value = state.value.copy(expandedNoteId = null)
                 }
             }
+            is NotesEvent.OnCopyCurrentNoteClick -> {
+                viewModelScope.launch {
+                    state.value.expandedNoteId?.let { noteId ->
+                        noteDao.getNoteById(noteId)?.let { note ->
+                            val copiedNote = note.copy(id = 0, title = "${note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
+                            noteDao.insertNote(copiedNote)
+                        }
+                    }
+                }
+            }
+            is NotesEvent.OnAddLabelsToCurrentNoteClick -> {
+                // TODO: Implement add labels to current note logic
+            }
         }
     }
 }
