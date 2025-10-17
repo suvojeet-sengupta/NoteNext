@@ -173,52 +173,65 @@ fun NotesScreen(
 
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = "LABELS",
-                            style = MaterialTheme.typography.labelSmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        IconButton(onClick = {
-                            scope.launch { drawerState.close() }
-                            onEditLabelsClick()
-                        }) {
-                            Icon(
-                                imageVector = Icons.Default.Edit,
-                                contentDescription = "Edit Labels",
-                                tint = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                    }
-
-                    NavigationDrawerItem(
-                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "All Notes") },
-                        label = { Text("All Notes") },
-                        selected = state.filteredLabel == null,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            viewModel.onEvent(NotesEvent.FilterByLabel(null))
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-
-                    state.labels.forEach { label ->
+                    if (state.labels.isEmpty()) {
                         NavigationDrawerItem(
-                            icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
-                            label = { Text(label) },
-                            selected = state.filteredLabel == label,
+                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Create new label") },
+                            label = { Text("Create new label") },
+                            selected = false,
                             onClick = {
                                 scope.launch { drawerState.close() }
-                                viewModel.onEvent(NotesEvent.FilterByLabel(label))
+                                onEditLabelsClick()
                             },
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                         )
+                    } else {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Text(
+                                text = "LABELS",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            IconButton(onClick = {
+                                scope.launch { drawerState.close() }
+                                onEditLabelsClick()
+                            }) {
+                                Icon(
+                                    imageVector = Icons.Default.Edit,
+                                    contentDescription = "Edit Labels",
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+
+                        NavigationDrawerItem(
+                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "All Notes") },
+                            label = { Text("All Notes") },
+                            selected = state.filteredLabel == null,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                viewModel.onEvent(NotesEvent.FilterByLabel(null))
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+
+                        state.labels.forEach { label ->
+                            NavigationDrawerItem(
+                                icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
+                                label = { Text(label) },
+                                selected = state.filteredLabel == label,
+                                onClick = {
+                                    scope.launch { drawerState.close() }
+                                    viewModel.onEvent(NotesEvent.FilterByLabel(label))
+                                },
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                            )
+                        }
                     }
                 }
             }
