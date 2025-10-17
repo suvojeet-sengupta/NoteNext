@@ -10,11 +10,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.notenext.data.Note
 import com.example.notenext.dependency_injection.ViewModelFactory
 import com.example.notenext.ui.notes.NoteItem
 import com.example.notenext.ui.archive.ArchiveEvent
@@ -27,6 +31,8 @@ fun ArchiveScreen(
 ) {
     val viewModel: ArchiveViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    var showRestoreDialog by remember { mutableStateOf(false) }
+    var noteToRestore by remember { mutableStateOf<Note?>(null) }
 
     Scaffold(
         topBar = {
@@ -76,11 +82,48 @@ fun ArchiveScreen(
                     NoteItem(
                         note = note,
                         isSelected = false, // Not selectable in archive
-                        onNoteClick = { viewModel.onEvent(ArchiveEvent.UnarchiveNote(note)) },
+                        onNoteClick = {
+                            noteToRestore = note
+                            showRestoreDialog = true
+                        },
                         onNoteLongClick = { /* TODO: Handle long click if needed */ }
                     )
                 }
             }
+        }
+
+        if (showRestoreDialog && noteToRestore != null) {
+            AlertDialog(
+                onDismissRequest = {
+                    showRestoreDialog = false
+                    noteToRestore = null
+                },
+                title = { Text("Restore Note") },
+                text = { Text("Are you sure you want to restore this note from the archive?") },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            noteToRestore?.let {
+                                viewModel.onEvent(ArchiveEvent.UnarchiveNote(it))
+                            }
+                            showRestoreDialog = false
+                            noteToRestore = null
+                        }
+                    ) {
+                        Text("Restore")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showRestoreDialog = false
+                            noteToRestore = null
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
     }
 }
