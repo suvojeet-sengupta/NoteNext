@@ -42,7 +42,6 @@ fun SearchBar(
     isSearchActive: Boolean,
     onSearchQueryChange: (String) -> Unit,
     onSearchActiveChange: (Boolean) -> Unit,
-    onMenuClick: () -> Unit,
     onLayoutToggleClick: () -> Unit,
     onSortClick: () -> Unit
 ) {
@@ -51,7 +50,7 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(horizontal = 32.dp),
+            .padding(horizontal = 48.dp),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF2C2C2C)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -81,13 +80,6 @@ fun SearchBar(
                     singleLine = true
                 )
             } else {
-                IconButton(onClick = onMenuClick) {
-                    Icon(
-                        imageVector = Icons.Default.Menu,
-                        contentDescription = "Menu",
-                        tint = Color.White
-                    )
-                }
                 Text("Search Notes", color = Color(0xFFCCCCCC), modifier = Modifier.weight(1f))
             }
 
@@ -125,7 +117,6 @@ fun SearchBarPreview() {
         isSearchActive = isSearchActive,
         onSearchQueryChange = { searchQuery = it },
         onSearchActiveChange = { isSearchActive = it },
-        onMenuClick = {},
         onLayoutToggleClick = {},
         onSortClick = {}
     )

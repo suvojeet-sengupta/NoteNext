@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
@@ -237,14 +238,19 @@ fun NotesScreen(
                                 onLabelClick = { showLabelDialog = true }
                             )
                         } else {
-                            SearchBar(
-                                searchQuery = searchQuery,
-                                isSearchActive = isSearchActive,
-                                onSearchQueryChange = { searchQuery = it },
-                                onSearchActiveChange = { isSearchActive = it },
-                                onMenuClick = { scope.launch { drawerState.open() } },
-                                onLayoutToggleClick = { /*TODO*/ },
-                                onSortClick = { /*TODO*/ }                            )
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                                SearchBar(
+                                    searchQuery = searchQuery,
+                                    isSearchActive = isSearchActive,
+                                    onSearchQueryChange = { searchQuery = it },
+                                    onSearchActiveChange = { isSearchActive = it },
+                                    onLayoutToggleClick = { /*TODO*/ },
+                                    onSortClick = { /*TODO*/ }
+                                )
+                            }
                         }
                     }
                 },
