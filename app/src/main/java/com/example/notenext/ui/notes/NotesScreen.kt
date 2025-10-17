@@ -239,19 +239,28 @@ fun NotesScreen(
                             onLabelClick = { showLabelDialog = true }
                         )
                     } else {
-                        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
-                            }
-                            SearchBar(
-                                searchQuery = searchQuery,
-                                isSearchActive = isSearchActive,
-                                onSearchQueryChange = { searchQuery = it },
-                                onSearchActiveChange = { isSearchActive = it },
-                                onLayoutToggleClick = { /*TODO*/ },
-                                onSortClick = { /*TODO*/ }
+                        TopAppBar(
+                            title = {
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    SearchBar(
+                                        searchQuery = searchQuery,
+                                        isSearchActive = isSearchActive,
+                                        onSearchQueryChange = { searchQuery = it },
+                                        onSearchActiveChange = { isSearchActive = it },
+                                        onLayoutToggleClick = { /*TODO*/ },
+                                        onSortClick = { /*TODO*/ }
+                                    )
+                                }
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                            },
+                            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent
                             )
-                        }
+                        )
                     }
                 },
                 floatingActionButton = {
