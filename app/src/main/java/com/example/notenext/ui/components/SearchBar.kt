@@ -29,7 +29,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.example.notenext.R
@@ -50,7 +53,7 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(horizontal = 48.dp),
+            .padding(horizontal = 0.dp),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF2C2C2C)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -80,7 +83,8 @@ fun SearchBar(
                     singleLine = true
                 )
             } else {
-                Text("Search Notes", color = Color(0xFFCCCCCC), modifier = Modifier.weight(1f))
+                Spacer(modifier = Modifier.width(16.dp))
+                Text("Search Notes", color = Color(0xFFCCCCCC), modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
 
             Row(

@@ -223,7 +223,7 @@ fun NotesScreen(
             Scaffold(
                 topBar = {
                     Column {
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Spacer(modifier = Modifier.height(48.dp))
                         if (isSelectionModeActive) {
                             ContextualTopAppBar(
                                 selectedItemCount = state.selectedNoteIds.size,
@@ -238,7 +238,7 @@ fun NotesScreen(
                                 onLabelClick = { showLabelDialog = true }
                             )
                         } else {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
+                            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(horizontal = 16.dp)) {
                                 IconButton(onClick = { scope.launch { drawerState.open() } }) {
                                     Icon(Icons.Default.Menu, contentDescription = "Menu")
                                 }
