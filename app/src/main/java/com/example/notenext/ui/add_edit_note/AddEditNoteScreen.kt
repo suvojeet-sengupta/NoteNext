@@ -73,7 +73,25 @@ fun AddEditNoteScreen(
         Color(0xFF424242).toArgb()  // Dark Gray
     )
 
-    val colors = darkNoteColors
+    val lightNoteColors = listOf(
+        Color.White.toArgb(),
+        Color(0xFFF28B82).toArgb(), // Red
+        Color(0xFFFCBC05).toArgb(), // Orange
+        Color(0xFFFFF475).toArgb(), // Yellow
+        Color(0xFFCCFF90).toArgb(), // Green
+        Color(0xFFA7FFEB).toArgb(), // Teal
+        Color(0xFFCBF0F8).toArgb(), // Blue
+        Color(0xFFAFCBFA).toArgb(), // Dark Blue
+        Color(0xFFD7AEFB).toArgb(), // Purple
+        Color(0xFFFDCFE8).toArgb(), // Pink
+        Color(0xFFE6C9A8).toArgb(), // Brown
+        Color(0xFFE8EAED).toArgb()  // Gray
+    )
+
+    val colors = when (themeMode) {
+        ThemeMode.DARK -> darkNoteColors
+        else -> lightNoteColors
+    }
 
     Scaffold(
         topBar = {
