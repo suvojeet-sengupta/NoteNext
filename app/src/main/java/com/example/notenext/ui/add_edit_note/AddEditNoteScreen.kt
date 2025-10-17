@@ -195,8 +195,28 @@ fun AddEditNoteScreen(
                         ),
                         textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                     )
-                    if (!state.editingIsNewNote) {
-                        
+                    if (!state.editingIsNewNote && !state.editingLabel.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                        shape = MaterialTheme.shapes.small
+                                    )
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            ) {
+                                Text(
+                                    text = state.editingLabel,
+                                    color = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
                     }
                 }
             }
