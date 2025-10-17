@@ -347,42 +347,103 @@ fun AddEditNoteScreen(
                                     leadingIcon = {
                                         Icon(Icons.Default.Share, contentDescription = "Share")
                                     }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Labels") },
-                                    onClick = { onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick); showMoreOptions = false },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.Label, contentDescription = "Labels")
+                                                                 )
+                                                                DropdownMenuItem(
+                                                                    text = { Text("Labels") },
+                                                                    onClick = { showMoreOptions = false; onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) },
+                                                                    leadingIcon = {
+                                                                        Icon(Icons.Default.Label, contentDescription = "Labels")
+                                                                    }
+                                                                )
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    if (showDeleteDialog) {
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Delete Note") },
-            text = { Text("Are you sure you want to delete this note?") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onEvent(NotesEvent.OnDeleteNoteClick)
-                        showDeleteDialog = false
-                    }
-                ) {
-                    Text("Delete")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
-}
+                                
+                                    if (showDeleteDialog) {
+                                        AlertDialog(
+                                            onDismissRequest = { showDeleteDialog = false },
+                                            title = { Text("Delete Note") },
+                                            text = { Text("Are you sure you want to delete this note?") },
+                                            confirmButton = {
+                                                TextButton(
+                                                    onClick = {
+                                                        onEvent(NotesEvent.OnDeleteNoteClick)
+                                                        showDeleteDialog = false
+                                                    }
+                                                ) {
+                                                    Text("Delete")
+                                                }
+                                            },
+                                            dismissButton = {
+                                                TextButton(onClick = { showDeleteDialog = false }) {
+                                                    Text("Cancel")
+                                                }
+                                            }
+                                        )
+                                    }
+                                
+                                        if (state.showLabelDialog) {
+                                            LabelDialog(
+                                                labels = state.labels,
+                                                onDismiss = { onEvent(NotesEvent.CollapseNote) },
+                                                onConfirm = { label ->
+                                                    onEvent(NotesEvent.OnLabelChange(label))
+                                                }
+                                            )
+                                        }                                }
+                                
+                                @Composable
+                                fun LabelDialog(
+                                    labels: List<String>,
+                                    onDismiss: () -> Unit,
+                                    onConfirm: (String) -> Unit
+                                ) {
+                                    var newLabel by remember { mutableStateOf("") }
+                                
+                                    AlertDialog(
+                                        onDismissRequest = onDismiss,
+                                        title = { Text(text = "Add Label") },
+                                        text = {
+                                            Column {
+                                                OutlinedTextField(
+                                                    value = newLabel,
+                                                    onValueChange = { newLabel = it },
+                                                    label = { Text("New Label") }
+                                                )
+                                                Spacer(modifier = Modifier.height(16.dp))
+                                                LazyColumn {
+                                                    items(labels) { label ->
+                                                        Text(
+                                                            text = label,
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .clickable { onConfirm(label) }
+                                                                .padding(8.dp)
+                                                        )
+                                                    }
+                                                }
+                                            }
+                                        },
+                                        confirmButton = {
+                                            TextButton(
+                                                onClick = {
+                                                    if (newLabel.isNotBlank()) {
+                                                        onConfirm(newLabel)
+                                                    }
+                                                    onDismiss()
+                                                }
+                                            ) {
+                                                Text("OK")
+                                            }
+                                        },
+                                        dismissButton = {
+                                            TextButton(onClick = onDismiss) {
+                                                Text("Cancel")
+                                            }
+                                        }
+                                    )
+                                }

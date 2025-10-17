@@ -32,4 +32,6 @@ sealed class NotesEvent {
     object OnRedoClick : NotesEvent()
     object OnCopyCurrentNoteClick : NotesEvent()
     object OnAddLabelsToCurrentNoteClick : NotesEvent()
+    data class OnLabelChange(val label: String) : NotesEvent()
+    data class FilterByLabel(val label: String?) : NotesEvent()
 }

@@ -120,6 +120,39 @@ fun NotesScreen(
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
+
+                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    Text(
+                        text = "LABELS",
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.Default.Label, contentDescription = "All Notes") },
+                        label = { Text("All Notes") },
+                        selected = state.filteredLabel == null,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            viewModel.onEvent(NotesEvent.FilterByLabel(null))
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+
+                    state.labels.forEach { label ->
+                        NavigationDrawerItem(
+                            icon = { Icon(Icons.Outlined.Label, contentDescription = label) },
+                            label = { Text(label) },
+                            selected = state.filteredLabel == label,
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                viewModel.onEvent(NotesEvent.FilterByLabel(label))
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+                    }
                 }
             }
         ) {
@@ -184,7 +217,13 @@ fun NotesScreen(
                     )
                 }
                 Column(modifier = Modifier.padding(padding)) {
-                    if (state.notes.isEmpty()) {
+                    val notesToDisplay = if (state.filteredLabel == null) {
+                        state.notes
+                    } else {
+                        state.notes.filter { it.label == state.filteredLabel }
+                    }
+
+                    if (notesToDisplay.isEmpty()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxSize(),
@@ -208,7 +247,7 @@ fun NotesScreen(
                             }
                         }
                     } else {
-                        val filteredNotes = state.notes.filter { note ->
+                        val filteredNotes = notesToDisplay.filter { note ->
                             !note.isArchived && (note.title.contains(searchQuery, ignoreCase = true) || note.content.contains(searchQuery, ignoreCase = true))
                         }
                         val pinnedNotes = filteredNotes.filter { it.isPinned }

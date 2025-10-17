@@ -142,6 +142,7 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                                 editingLastEdited = note.lastEdited,
                                 isPinned = note.isPinned,
                                 isArchived = note.isArchived,
+                                editingLabel = note.label,
                                 editingHistory = listOf(note.title to note.content),
                                 editingHistoryIndex = 0
                             )
@@ -155,7 +156,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                             editingIsNewNote = true,
                             editingLastEdited = 0,
                             editingHistory = listOf("" to ""),
-                            editingHistoryIndex = 0
+                            editingHistoryIndex = 0,
+                            editingLabel = null
                         )
                     }
                 }
@@ -181,6 +183,9 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             }
             is NotesEvent.OnColorChange -> {
                 _state.value = state.value.copy(editingColor = event.color)
+            }
+            is NotesEvent.OnLabelChange -> {
+                _state.value = state.value.copy(editingLabel = event.label)
             }
             is NotesEvent.OnTogglePinClick -> {
                 viewModelScope.launch {
@@ -256,7 +261,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                                 lastEdited = currentTime,
                                 color = state.value.editingColor,
                                 isPinned = state.value.isPinned,
-                                isArchived = state.value.isArchived
+                                isArchived = state.value.isArchived,
+                                label = state.value.editingLabel
                             )
                         } else { // Existing note
                             noteDao.getNoteById(noteId)?.let { existingNote ->
@@ -266,7 +272,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                                     lastEdited = currentTime,
                                     color = state.value.editingColor,
                                     isPinned = state.value.isPinned,
-                                    isArchived = state.value.isArchived
+                                    isArchived = state.value.isArchived,
+                                    label = state.value.editingLabel
                                 )
                             }
                         }
@@ -286,7 +293,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                         editingHistory = listOf("" to ""),
                         editingHistoryIndex = 0,
                         isPinned = false,
-                        isArchived = false
+                        isArchived = false,
+                        editingLabel = null
                     )
                 }
             }
@@ -304,8 +312,8 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             }
             is NotesEvent.OnCopyCurrentNoteClick -> {
                 viewModelScope.launch {
-                    state.value.expandedNoteId?.let { noteId ->
-                        noteDao.getNoteById(noteId)?.let { note ->
+                    state.value.expandedNoteId?.let {
+                        noteDao.getNoteById(it)?.let { note ->
                             val copiedNote = note.copy(id = 0, title = "${note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
                             noteDao.insertNote(copiedNote)
                         }
@@ -313,7 +321,10 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                 }
             }
             is NotesEvent.OnAddLabelsToCurrentNoteClick -> {
-                // TODO: Implement add labels to current note logic
+                _state.value = state.value.copy(showLabelDialog = true)
+            }
+            is NotesEvent.FilterByLabel -> {
+                _state.value = state.value.copy(filteredLabel = event.label)
             }
         }
     }
