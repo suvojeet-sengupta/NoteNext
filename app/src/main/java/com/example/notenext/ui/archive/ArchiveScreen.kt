@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notenext.data.Note
 import com.example.notenext.dependency_injection.ViewModelFactory
-import com.example.notenext.ui.notes.NoteItem
+import com.example.notenext.ui.components.NoteItem
 import com.example.notenext.ui.archive.ArchiveEvent
 
 @OptIn(ExperimentalMaterial3Api::class)

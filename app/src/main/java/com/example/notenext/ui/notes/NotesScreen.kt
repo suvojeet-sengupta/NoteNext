@@ -84,6 +84,9 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notenext.data.Note
 import com.example.notenext.dependency_injection.ViewModelFactory
 import com.example.notenext.ui.add_edit_note.AddEditNoteScreen
+import com.example.notenext.ui.components.ContextualTopAppBar
+import com.example.notenext.ui.components.LabelDialog
+import com.example.notenext.ui.components.NoteItem
 import com.example.notenext.ui.components.SearchBar
 import com.example.notenext.ui.settings.ThemeMode
 import kotlinx.coroutines.launch
@@ -248,7 +251,10 @@ fun NotesScreen(
                                     onSearchQueryChange = { searchQuery = it },
                                     onSearchActiveChange = { isSearchActive = it },
                                     onLayoutToggleClick = { /*TODO*/ },
+                                    onSortClick = { /*TODO*/ }
                                 )
+                            }
+                        }
                     }
                 },
                 floatingActionButton = {
@@ -394,211 +400,8 @@ fun NotesScreen(
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
-@Composable
-fun NoteItem(
-    modifier: Modifier = Modifier,
-    note: Note,
-    isSelected: Boolean,
-    onNoteClick: () -> Unit,
-    onNoteLongClick: () -> Unit,
-) {
-    Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(
-                onClick = onNoteClick,
-                onLongClick = onNoteLongClick
-            ),
-        shape = RoundedCornerShape(8.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        ),
-        border = if (isSelected) BorderStroke(2.dp, MaterialTheme.colorScheme.primary) else null,
-        elevation = CardDefaults.cardElevation(
-            defaultElevation = 2.dp
-        )
-    ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
-        ) {
-            if (note.isPinned) {
-                Icon(
-                    imageVector = Icons.Outlined.PushPin,
-                    contentDescription = "Pinned note",
-                    modifier = Modifier.size(16.dp).align(Alignment.End),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            // Title
-            if (note.title.isNotEmpty()) {
-                Text(
-                    text = note.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            // Content
-            if (note.content.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = note.content,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
-            }
-
-            if (!note.label.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                ) {
-                    Text(
-                        text = note.label,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ContextualTopAppBar(
-    selectedItemCount: Int,
-    onClearSelection: () -> Unit,
-    onTogglePinClick: () -> Unit,
-    onReminderClick: () -> Unit,
-    onColorClick: () -> Unit,
-    onArchiveClick: () -> Unit,
-    onDeleteClick: () -> Unit,
-    onCopyClick: () -> Unit,
-    onSendClick: () -> Unit,
-    onLabelClick: () -> Unit
-) {
-    var showMenu by remember { mutableStateOf(false) }
-
-    TopAppBar(
-        title = { Text(text = "$selectedItemCount selected") },
-        navigationIcon = {
-            IconButton(onClick = onClearSelection) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Clear selection")
-            }
-        },
-        actions = {
-            IconButton(onClick = onTogglePinClick) {
-                Icon(Icons.Outlined.PushPin, contentDescription = "Pin note")
-            }
-            IconButton(onClick = onReminderClick) {
-                Icon(Icons.Default.Notifications, contentDescription = "Set reminder")
-            }
-            IconButton(onClick = onColorClick) {
-                Icon(Icons.Default.Palette, contentDescription = "Change color")
-            }
-            IconButton(onClick = onLabelClick) {
-                Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = "Add label")
-            }
-            Box {
-                IconButton(onClick = { showMenu = !showMenu }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More options")
-                }
-                DropdownMenu(
-                    expanded = showMenu,
-                    onDismissRequest = { showMenu = false }
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Archive") },
-                        onClick = {
-                            onArchiveClick()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Delete") },
-                        onClick = {
-                            onDeleteClick()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Make a copy") },
-                        onClick = {
-                            onCopyClick()
-                            showMenu = false
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Share") },
-                        onClick = {
-                            onSendClick()
-                            showMenu = false
-                        }
-                    )
-                }
-            }
-        }
-    )
-}
 
 
 
-@Composable
-fun LabelDialog(
-    labels: List<String>,
-    onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
-) {
-    var newLabel by remember { mutableStateOf("") }
 
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = "Add Label") },
-        text = {
-            Column {
-                OutlinedTextField(
-                    value = newLabel,
-                    onValueChange = { newLabel = it },
-                    label = { Text("New Label") }
-                )
-                Spacer(modifier = Modifier.height(16.dp))
-                LazyColumn {
-                    items(labels) { label ->
-                        Text(
-                            text = label,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable { onConfirm(label) }
-                                .padding(8.dp)
-                        )
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirm(newLabel)
-                    onDismiss()
-                }
-            ) {
-                Text("OK")
-            }
-        },
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text("Cancel")
-            }
-        }
-    )
-}
+
