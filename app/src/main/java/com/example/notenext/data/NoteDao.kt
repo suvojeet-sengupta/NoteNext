@@ -1,4 +1,3 @@
-
 package com.example.notenext.data
 
 import androidx.room.*
@@ -21,4 +20,10 @@ interface NoteDao {
 
     @Delete
     suspend fun deleteNote(note: Note)
+
+    @Query("UPDATE notes SET label = :newName WHERE label = :oldName")
+    suspend fun updateLabelName(oldName: String, newName: String)
+
+    @Query("UPDATE notes SET label = NULL WHERE label = :labelName")
+    suspend fun removeLabelFromNotes(labelName: String)
 }

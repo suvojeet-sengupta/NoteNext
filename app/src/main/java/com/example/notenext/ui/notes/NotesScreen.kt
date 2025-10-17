@@ -49,6 +49,7 @@ fun NotesScreen(
     factory: ViewModelFactory,
     onSettingsClick: () -> Unit,
     onArchiveClick: () -> Unit,
+    onEditLabelsClick: () -> Unit,
     themeMode: ThemeMode
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
@@ -124,12 +125,29 @@ fun NotesScreen(
 
                     Divider(modifier = Modifier.padding(vertical = 8.dp))
 
-                    Text(
-                        text = "LABELS",
-                        style = MaterialTheme.typography.labelSmall,
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(
+                            text = "LABELS",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        IconButton(onClick = {
+                            scope.launch { drawerState.close() }
+                            onEditLabelsClick()
+                        }) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Edit Labels",
+                                tint = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
 
                     NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Label, contentDescription = "All Notes") },
