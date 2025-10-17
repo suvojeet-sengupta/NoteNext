@@ -248,10 +248,7 @@ fun NotesScreen(
                                     onSearchQueryChange = { searchQuery = it },
                                     onSearchActiveChange = { isSearchActive = it },
                                     onLayoutToggleClick = { /*TODO*/ },
-                                    onSortClick = { /*TODO*/ }
                                 )
-                            }
-                        }
                     }
                 },
                 floatingActionButton = {
