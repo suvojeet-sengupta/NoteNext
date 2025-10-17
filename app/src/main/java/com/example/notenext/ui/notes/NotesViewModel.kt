@@ -123,6 +123,9 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             }
             is NotesEvent.SetLabelForSelectedNotes -> {
                 viewModelScope.launch {
+                    if (event.label.isNotBlank()) {
+                        labelDao.insertLabel(Label(event.label))
+                    }
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
                     for (note in selectedNotes) {
                         noteDao.insertNote(note.copy(label = event.label))
