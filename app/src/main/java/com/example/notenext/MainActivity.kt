@@ -17,7 +17,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val database = NoteDatabase.getDatabase(this)
-        val factory = ViewModelFactory(database.noteDao())
+        val factory = ViewModelFactory(database.noteDao(), database.labelDao())
         val settingsRepository = SettingsRepository(this)
 
         setContent {
