@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.foundation.isSystemInDarkTheme
 import com.example.notenext.ui.notes.NotesEvent
 import com.example.notenext.ui.notes.NotesState
 import com.example.notenext.ui.settings.ThemeMode
@@ -88,8 +89,10 @@ fun AddEditNoteScreen(
         Color(0xFFE8EAED).toArgb()  // Gray
     )
 
+    val systemInDarkTheme = isSystemInDarkTheme()
     val colors = when (themeMode) {
         ThemeMode.DARK -> darkNoteColors
+        ThemeMode.SYSTEM -> if (systemInDarkTheme) darkNoteColors else lightNoteColors
         else -> lightNoteColors
     }
 
