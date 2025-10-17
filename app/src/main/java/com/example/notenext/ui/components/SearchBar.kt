@@ -17,6 +17,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -55,7 +56,7 @@ fun SearchBar(
             .height(48.dp)
             .padding(horizontal = 0.dp),
         shape = RoundedCornerShape(28.dp),
-        colors = CardDefaults.cardColors(containerColor = Color(0xFF2C2C2C)),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Row(
@@ -69,7 +70,7 @@ fun SearchBar(
                 OutlinedTextField(
                     value = searchQuery,
                     onValueChange = onSearchQueryChange,
-                    placeholder = { Text("Search Notes", color = Color(0xFFCCCCCC)) },
+                    placeholder = { Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     modifier = Modifier
                         .weight(1f)
                         .padding(start = 16.dp),
@@ -78,13 +79,13 @@ fun SearchBar(
                         unfocusedContainerColor = Color.Transparent,
                         unfocusedBorderColor = Color.Transparent,
                         focusedBorderColor = Color.Transparent,
-                        cursorColor = Color.White
+                        cursorColor = MaterialTheme.colorScheme.onSurface
                     ),
                     singleLine = true
                 )
             } else {
                 Spacer(modifier = Modifier.width(16.dp))
-                Text("Search Notes", color = Color(0xFFCCCCCC), modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+                Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
             }
 
             Row(
@@ -95,14 +96,14 @@ fun SearchBar(
                     Icon(
                         imageVector = Icons.Default.ViewModule,
                         contentDescription = "Layout Toggle",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 IconButton(onClick = onSortClick) {
                     Icon(
                         imageVector = Icons.Default.Sort,
                         contentDescription = "Sort",
-                        tint = Color.White
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
 
