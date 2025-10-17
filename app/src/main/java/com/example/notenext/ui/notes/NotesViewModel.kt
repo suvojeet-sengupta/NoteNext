@@ -4,9 +4,6 @@ import com.example.notenext.data.Note
 import com.example.notenext.data.NoteDao
 import com.example.notenext.data.Label
 import com.example.notenext.data.LabelDao
-import com.example.notenext.ui.notes.NotesEvent
-import com.example.notenext.ui.notes.NotesState
-import com.example.notenext.ui.notes.NotesUiEvent
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
