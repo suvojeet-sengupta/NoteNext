@@ -1,3 +1,5 @@
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.notenext.data.Note
 import com.example.notenext.data.NoteDao
 import com.example.notenext.data.Label
