@@ -221,30 +221,33 @@ fun NotesScreen(
         ) {
             Scaffold(
                 topBar = {
-                    if (isSelectionModeActive) {
-                        ContextualTopAppBar(
-                            selectedItemCount = state.selectedNoteIds.size,
-                            onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                            onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                            onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                            onColorClick = { /* TODO */ },
-                            onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                            onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
-                            onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                            onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                            onLabelClick = { showLabelDialog = true }
-                        )
-                    } else {
-                    SearchBar(
-                        searchQuery = searchQuery,
-                        isSearchActive = isSearchActive,
-                        onSearchQueryChange = { searchQuery = it },
-                        onSearchActiveChange = { isSearchActive = it },
-                        onMenuClick = { scope.launch { drawerState.open() } },
-                        onLayoutToggleClick = { /*TODO*/ },
-                        onSortClick = { /*TODO*/ },
-                        onProfileClick = { /*TODO*/ }
-                    )
+                    Column {
+                        Spacer(modifier = Modifier.height(32.dp))
+                        if (isSelectionModeActive) {
+                            ContextualTopAppBar(
+                                selectedItemCount = state.selectedNoteIds.size,
+                                onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                                onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                                onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                                onColorClick = { /* TODO */ },
+                                onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                                onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
+                                onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                                onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                                onLabelClick = { showLabelDialog = true }
+                            )
+                        } else {
+                            SearchBar(
+                                searchQuery = searchQuery,
+                                isSearchActive = isSearchActive,
+                                onSearchQueryChange = { searchQuery = it },
+                                onSearchActiveChange = { isSearchActive = it },
+                                onMenuClick = { scope.launch { drawerState.open() } },
+                                onLayoutToggleClick = { /*TODO*/ },
+                                onSortClick = { /*TODO*/ },
+                                onProfileClick = { /*TODO*/ }
+                            )
+                        }
                     }
                 },
                 floatingActionButton = {
