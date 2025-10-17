@@ -2,17 +2,19 @@ package com.example.notenext.ui.notes
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.notenext.data.Label
+import com.example.notenext.data.LabelDao
 import com.example.notenext.data.Note
 import com.example.notenext.data.NoteDao
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
+class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDao) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
     val state = _state.asStateFlow()
@@ -23,11 +25,10 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
     private var recentlyDeletedNote: Note? = null
 
     init {
-        noteDao.getNotes().onEach { notes ->
-            val labels = notes.mapNotNull { it.label }.filter { it.isNotEmpty() }.distinct()
+        combine(noteDao.getNotes(), labelDao.getLabels()) { notes, labels ->
             _state.value = state.value.copy(
                 notes = notes,
-                labels = labels
+                labels = labels.map { it.name }
             )
         }.launchIn(viewModelScope)
     }
@@ -185,7 +186,10 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
                 _state.value = state.value.copy(editingColor = event.color)
             }
             is NotesEvent.OnLabelChange -> {
-                _state.value = state.value.copy(editingLabel = event.label)
+                viewModelScope.launch {
+                    labelDao.insertLabel(Label(event.label))
+                    _state.value = state.value.copy(editingLabel = event.label)
+                }
             }
             is NotesEvent.OnTogglePinClick -> {
                 viewModelScope.launch {
