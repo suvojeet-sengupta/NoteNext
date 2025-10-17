@@ -15,11 +15,11 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.rounded.Redo
-import androidx.compose.material.icons.rounded.Undo
+import androidx.compose.material.icons.automirrored.rounded.Redo
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.PushPin
 import androidx.compose.material.icons.filled.Archive
@@ -30,7 +30,7 @@ import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.filled.Label
+import androidx.compose.material.icons.automirrored.filled.Label
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -112,7 +112,7 @@ fun AddEditNoteScreen(
                 title = { Text(if (state.editingIsNewNote) "Add Note" else "") },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -294,7 +294,7 @@ fun AddEditNoteScreen(
                                     contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Undo,
+                                        imageVector = Icons.AutoMirrored.Rounded.Undo,
                                         contentDescription = "Undo"
                                     )
                                 }
@@ -308,7 +308,7 @@ fun AddEditNoteScreen(
                                     contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Rounded.Redo,
+                                        imageVector = Icons.AutoMirrored.Rounded.Redo,
                                         contentDescription = "Redo"
                                     )
                                 }
@@ -372,7 +372,7 @@ fun AddEditNoteScreen(
                                                                     text = { Text("Labels") },
                                                                     onClick = { showMoreOptions = false; onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) },
                                                                     leadingIcon = {
-                                                                        Icon(Icons.Default.Label, contentDescription = "Labels")
+                                                                        Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Labels")
                                                                     }
                                                                 )
                                                             }

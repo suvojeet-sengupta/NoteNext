@@ -17,8 +17,9 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.material.icons.outlined.Label
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -123,7 +124,7 @@ fun NotesScreen(
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )
 
-                    Divider(modifier = Modifier.padding(vertical = 8.dp))
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
 
                     Row(
                         modifier = Modifier
@@ -150,7 +151,7 @@ fun NotesScreen(
                     }
 
                     NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Label, contentDescription = "All Notes") },
+                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "All Notes") },
                         label = { Text("All Notes") },
                         selected = state.filteredLabel == null,
                         onClick = {
@@ -162,7 +163,7 @@ fun NotesScreen(
 
                     state.labels.forEach { label ->
                         NavigationDrawerItem(
-                            icon = { Icon(Icons.Outlined.Label, contentDescription = label) },
+                            icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
                             label = { Text(label) },
                             selected = state.filteredLabel == label,
                             onClick = {
@@ -458,7 +459,7 @@ fun ContextualTopAppBar(
         title = { Text(text = "$selectedItemCount selected") },
         navigationIcon = {
             IconButton(onClick = onClearSelection) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Clear selection")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Clear selection")
             }
         },
         actions = {
@@ -472,7 +473,7 @@ fun ContextualTopAppBar(
                 Icon(Icons.Default.Palette, contentDescription = "Change color")
             }
             IconButton(onClick = onLabelClick) {
-                Icon(Icons.Outlined.Label, contentDescription = "Add label")
+                Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = "Add label")
             }
             Box {
                 IconButton(onClick = { showMenu = !showMenu }) {
@@ -586,7 +587,7 @@ fun ExpandedSearchView(
         },
         navigationIcon = {
             IconButton(onClick = onCloseSearch) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "Close Search")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Close Search")
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
