@@ -323,6 +323,9 @@ class NotesViewModel(private val noteDao: NoteDao) : ViewModel() {
             is NotesEvent.OnAddLabelsToCurrentNoteClick -> {
                 _state.value = state.value.copy(showLabelDialog = true)
             }
+            is NotesEvent.DismissLabelDialog -> {
+                _state.value = state.value.copy(showLabelDialog = false)
+            }
             is NotesEvent.FilterByLabel -> {
                 _state.value = state.value.copy(filteredLabel = event.label)
             }

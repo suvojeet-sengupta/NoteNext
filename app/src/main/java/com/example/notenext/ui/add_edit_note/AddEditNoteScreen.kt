@@ -386,15 +386,16 @@ fun AddEditNoteScreen(
                                         )
                                     }
                                 
-                                        if (state.showLabelDialog) {
-                                            LabelDialog(
-                                                labels = state.labels,
-                                                onDismiss = { onEvent(NotesEvent.CollapseNote) },
-                                                onConfirm = { label ->
-                                                    onEvent(NotesEvent.OnLabelChange(label))
-                                                }
-                                            )
-                                        }                                }
+                                if (state.showLabelDialog) {
+                                    LabelDialog(
+                                        labels = state.labels,
+                                        onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
+                                        onConfirm = { label ->
+                                            onEvent(NotesEvent.OnLabelChange(label))
+                                            onEvent(NotesEvent.DismissLabelDialog)
+                                        }
+                                    )
+                                }                                }
                                 
                                 @Composable
                                 fun LabelDialog(

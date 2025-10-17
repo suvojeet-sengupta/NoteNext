@@ -33,5 +33,6 @@ sealed class NotesEvent {
     object OnCopyCurrentNoteClick : NotesEvent()
     object OnAddLabelsToCurrentNoteClick : NotesEvent()
     data class OnLabelChange(val label: String) : NotesEvent()
+    object DismissLabelDialog : NotesEvent()
     data class FilterByLabel(val label: String?) : NotesEvent()
 }
