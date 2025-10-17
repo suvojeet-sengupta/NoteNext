@@ -277,6 +277,7 @@ fun NotesScreen(
                     )
                 }
                 Column(modifier = Modifier.padding(padding)) {
+                    Spacer(modifier = Modifier.height(8.dp))
                     val notesToDisplay = if (state.filteredLabel == null) {
                         state.notes
                     } else {
