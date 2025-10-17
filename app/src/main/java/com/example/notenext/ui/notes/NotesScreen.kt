@@ -244,9 +244,7 @@ fun NotesScreen(
                                 onSearchActiveChange = { isSearchActive = it },
                                 onMenuClick = { scope.launch { drawerState.open() } },
                                 onLayoutToggleClick = { /*TODO*/ },
-                                onSortClick = { /*TODO*/ },
-                                onProfileClick = { /*TODO*/ }
-                            )
+                                onSortClick = { /*TODO*/ }                            )
                         }
                     }
                 },

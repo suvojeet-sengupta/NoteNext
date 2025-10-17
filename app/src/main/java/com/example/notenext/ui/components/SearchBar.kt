@@ -44,15 +44,14 @@ fun SearchBar(
     onSearchActiveChange: (Boolean) -> Unit,
     onMenuClick: () -> Unit,
     onLayoutToggleClick: () -> Unit,
-    onSortClick: () -> Unit,
-    onProfileClick: () -> Unit
+    onSortClick: () -> Unit
 ) {
 
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(48.dp)
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 32.dp),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF2C2C2C)),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -110,18 +109,7 @@ fun SearchBar(
                         tint = Color.White
                     )
                 }
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(R.drawable.profile_image_placeholder)
-                        .crossfade(true)
-                        .build(),
-                    contentDescription = "Profile",
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
-                        .size(40.dp)
-                        .clip(CircleShape)
-                        .clickable { onProfileClick() }
-                )
+
             }
         }
     }
@@ -139,7 +127,6 @@ fun SearchBarPreview() {
         onSearchActiveChange = { isSearchActive = it },
         onMenuClick = {},
         onLayoutToggleClick = {},
-        onSortClick = {},
-        onProfileClick = {}
+        onSortClick = {}
     )
 }
