@@ -1,5 +1,7 @@
 package com.example.notenext.ui.notes
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notenext.data.Label
@@ -143,14 +145,14 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                             _state.value = state.value.copy(
                                 expandedNoteId = event.noteId,
                                 editingTitle = note.title,
-                                editingContent = note.content,
+                                editingContent = TextFieldValue(note.content),
                                 editingColor = note.color,
                                 editingIsNewNote = false,
                                 editingLastEdited = note.lastEdited,
                                 isPinned = note.isPinned,
                                 isArchived = note.isArchived,
                                 editingLabel = note.label,
-                                editingHistory = listOf(note.title to note.content),
+                                editingHistory = listOf(note.title to TextFieldValue(note.content)),
                                 editingHistoryIndex = 0
                             )
                         }
@@ -158,11 +160,11 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                         _state.value = state.value.copy(
                             expandedNoteId = -1,
                             editingTitle = "",
-                            editingContent = "",
+                            editingContent = TextFieldValue(),
                             editingColor = 0,
                             editingIsNewNote = true,
                             editingLastEdited = 0,
-                            editingHistory = listOf("" to ""),
+                            editingHistory = listOf("" to TextFieldValue()),
                             editingHistoryIndex = 0,
                             editingLabel = null
                         )
@@ -186,6 +188,18 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     editingContent = event.content,
                     editingHistory = newHistory,
                     editingHistoryIndex = newHistory.lastIndex
+                )
+            }
+            is NotesEvent.ApplyStyleToContent -> {
+                val selection = state.value.editingContent.selection
+                if (selection.collapsed) return
+
+                val newAnnotatedString = AnnotatedString.Builder(state.value.editingContent.annotatedString).apply {
+                    addStyle(event.style, selection.start, selection.end)
+                }.toAnnotatedString()
+
+                _state.value = state.value.copy(
+                    editingContent = state.value.editingContent.copy(annotatedString = newAnnotatedString)
                 )
             }
             is NotesEvent.OnColorChange -> {
@@ -255,11 +269,11 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     if (noteId == null) return@launch
 
                     val title = state.value.editingTitle
-                    val content = state.value.editingContent
+                    val content = state.value.editingContent.text
 
                     if (title.isBlank() && content.isBlank()) {
                         if (noteId != -1) { // It's an existing note, so delete it
-                            noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true)) }
+                            noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
                         }
                     } else {
                         val currentTime = System.currentTimeMillis()
@@ -296,11 +310,11 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     _state.value = state.value.copy(
                         expandedNoteId = null,
                         editingTitle = "",
-                        editingContent = "",
+                        editingContent = TextFieldValue(),
                         editingColor = 0,
                         editingIsNewNote = true,
                         editingLastEdited = 0,
-                        editingHistory = listOf("" to ""),
+                        editingHistory = listOf("" to TextFieldValue()),
                         editingHistoryIndex = 0,
                         isPinned = false,
                         isArchived = false,

@@ -31,7 +31,10 @@ import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.ContentCopy
-import androidx.compose.material.icons.automirrored.filled.Label
+import androidx.compose.material.icons.filled.FormatBold
+import androidx.compose.material.icons.filled.FormatItalic
+import androidx.compose.material.icons.filled.FormatUnderlined
+import androidx.compose.material.icons.filled.TextFields
 
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -40,6 +43,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.isSystemInDarkTheme
@@ -62,6 +71,7 @@ fun AddEditNoteScreen(
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
+    var showFormatBar by remember { mutableStateOf(false) }
     var showMoreOptions by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
     val context = LocalContext.current
@@ -223,6 +233,37 @@ fun AddEditNoteScreen(
             }
 
             AnimatedVisibility(
+                visible = showFormatBar,
+                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+            ) {
+                LazyRow(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surface)
+                        .padding(vertical = 8.dp),
+                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    item {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(Icons.Default.FormatBold, contentDescription = "Bold")
+                        }
+                    }
+                    item {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
+                        }
+                    }
+                    item {
+                        IconButton(onClick = { /*TODO*/ }) {
+                            Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
+                        }
+                    }
+                }
+            }
+
+            AnimatedVisibility(
                 visible = showColorPicker,
                 enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
                 exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
@@ -269,14 +310,25 @@ fun AddEditNoteScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    FloatingActionButton(
-                        onClick = { showColorPicker = !showColorPicker },
-                        shape = CircleShape,
-                        modifier = Modifier.size(40.dp),
-                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                    ) {
-                        Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        FloatingActionButton(
+                            onClick = { showColorPicker = !showColorPicker },
+                            shape = CircleShape,
+                            modifier = Modifier.size(40.dp),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                        }
+                        FloatingActionButton(
+                            onClick = { showFormatBar = !showFormatBar },
+                            shape = CircleShape,
+                            modifier = Modifier.size(40.dp),
+                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                        ) {
+                            Icon(Icons.Default.TextFields, contentDescription = "Toggle format bar")
+                        }
                     }
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),

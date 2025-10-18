@@ -1,6 +1,7 @@
 
 package com.example.notenext.ui.notes
 
+import androidx.compose.ui.text.input.TextFieldValue
 import com.example.notenext.data.Note
 
 data class NotesState(
@@ -13,13 +14,13 @@ data class NotesState(
 
     // Properties from AddEditNoteState
     val editingTitle: String = "",
-    val editingContent: String = "",
+    val editingContent: TextFieldValue = TextFieldValue(),
     val editingColor: Int = 0,
     val editingIsNewNote: Boolean = true,
     val editingLastEdited: Long = 0,
     val isPinned: Boolean = false,
     val isArchived: Boolean = false,
     val editingLabel: String? = null,
-    val editingHistory: List<Pair<String, String>> = listOf("" to ""),
+    val editingHistory: List<Pair<String, TextFieldValue>> = listOf("" to TextFieldValue()),
     val editingHistoryIndex: Int = 0
 )

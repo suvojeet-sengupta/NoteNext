@@ -1,6 +1,8 @@
 
 package com.example.notenext.ui.notes
 
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.input.TextFieldValue
 import com.example.notenext.data.Note
 
 sealed class NotesEvent {
@@ -22,7 +24,8 @@ sealed class NotesEvent {
 
     // Events from AddEditNoteEvent
     data class OnTitleChange(val title: String) : NotesEvent()
-    data class OnContentChange(val content: String) : NotesEvent()
+    data class OnContentChange(val content: TextFieldValue) : NotesEvent()
+    data class ApplyStyleToContent(val style: SpanStyle) : NotesEvent()
     data class OnColorChange(val color: Int) : NotesEvent()
     object OnSaveNoteClick : NotesEvent()
     object OnDeleteNoteClick : NotesEvent()
