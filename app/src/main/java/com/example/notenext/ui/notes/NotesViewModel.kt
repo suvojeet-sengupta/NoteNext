@@ -219,7 +219,10 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 }
                 newContent.copy(annotatedString = newAnnotatedString)
             } else {
-                newContent
+                // When only the selection changes, trust the old AnnotatedString from our state
+                // and just update the selection from the new value. This prevents the TextField
+                // from stripping styles on selection/deselection.
+                oldContent.copy(selection = newContent.selection)
             }
 
             val selection = finalContent.selection
