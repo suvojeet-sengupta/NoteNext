@@ -23,6 +23,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.notenext.ui.notes.HtmlConverter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +66,7 @@ fun BinnedNoteScreen(
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = note.content,
+                            text = HtmlConverter.htmlToAnnotatedString(note.content),
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
