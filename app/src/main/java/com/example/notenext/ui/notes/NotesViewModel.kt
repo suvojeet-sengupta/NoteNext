@@ -242,7 +242,13 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 } else {
                     currentStyles.add(styleToAddOrRemove)
                 }
-                _state.value = state.value.copy(activeStyles = currentStyles)
+
+                _state.value = state.value.copy(
+                    activeStyles = currentStyles,
+                    isBoldActive = currentStyles.any { it.fontWeight == FontWeight.Bold },
+                    isItalicActive = currentStyles.any { it.fontStyle == FontStyle.Italic },
+                    isUnderlineActive = currentStyles.any { it.textDecoration == TextDecoration.Underline }
+                )
             } else {
                 val newAnnotatedString = AnnotatedString.Builder(state.value.editingContent.annotatedString).apply {
                     addStyle(event.style, selection.start, selection.end)
