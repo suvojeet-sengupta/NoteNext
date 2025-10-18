@@ -37,7 +37,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
         when (event) {
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
-                    val noteToBin = event.note.copy(isBinned = true)
+                    val noteToBin = event.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
                     noteDao.updateNote(noteToBin)
                     recentlyDeletedNote = event.note
                 }
@@ -75,7 +75,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
                     for (note in selectedNotes) {
-                        noteDao.updateNote(note.copy(isBinned = true))
+                        noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -313,7 +313,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     state.value.expandedNoteId?.let {
                         if (it != -1) {
                             noteDao.getNoteById(it)?.let { note ->
-                                noteDao.updateNote(note.copy(isBinned = true))
+                                noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                             }
                         }
                     }

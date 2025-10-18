@@ -28,7 +28,7 @@ class BinViewModel(private val noteDao: NoteDao, private val savedStateHandle: a
             is BinEvent.RestoreNote -> {
                 viewModelScope.launch {
                     try {
-                        noteDao.updateNote(event.note.copy(isBinned = false))
+                        noteDao.updateNote(event.note.copy(isBinned = false, binnedOn = null))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -68,7 +68,7 @@ class BinViewModel(private val noteDao: NoteDao, private val savedStateHandle: a
                 viewModelScope.launch {
                     val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
                     selectedNotes.forEach { note ->
-                        noteDao.updateNote(note.copy(isBinned = false))
+                        noteDao.updateNote(note.copy(isBinned = false, binnedOn = null))
                     }
                     _state.value = _state.value.copy(selectedNoteIds = emptySet())
                 }
