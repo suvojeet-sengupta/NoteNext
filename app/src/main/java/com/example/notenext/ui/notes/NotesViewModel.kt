@@ -209,7 +209,9 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     // 2. Append the changed part from newText with activeStyles
                     val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
                     withStyle(styleToApply) {
-                        append(newText.substring(prefixLength, newText.length - suffixLength))
+                        if (prefixLength + suffixLength <= newText.length) {
+                            append(newText.substring(prefixLength, newText.length - suffixLength))
+                        }
                     }
 
                     // 3. Append the suffix from oldAnnotated
