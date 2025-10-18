@@ -2,6 +2,7 @@ package com.example.notenext.ui.settings
 
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
@@ -118,8 +119,8 @@ fun SettingsScreen(onBackClick: () -> Unit) {
 
     AnimatedVisibility(
         visible = showThemeDialog,
-        enter = scaleIn(),
-        exit = scaleOut()
+        enter = scaleIn(animationSpec = tween(200)),
+        exit = scaleOut(animationSpec = tween(200))
     ) {
         ThemeChooserDialog(
             selectedThemeMode = selectedThemeMode,
