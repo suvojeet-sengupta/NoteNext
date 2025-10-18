@@ -220,9 +220,9 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 editingContent = finalContent,
                 editingHistory = newHistory,
                 editingHistoryIndex = newHistory.lastIndex,
-                isBoldActive = finalContent.annotatedString.getSpanStyles(selection.start, selection.end).any { it.item.fontWeight == FontWeight.Bold },
-                isItalicActive = finalContent.annotatedString.getSpanStyles(selection.start, selection.end).any { it.item.fontStyle == FontStyle.Italic },
-                isUnderlineActive = finalContent.annotatedString.getSpanStyles(selection.start, selection.end).any { it.item.textDecoration == TextDecoration.Underline }
+                isBoldActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontWeight == FontWeight.Bold },
+                isItalicActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontStyle == FontStyle.Italic },
+                isUnderlineActive = finalContent.annotatedString.spanStyles.any { style -> style.item.textDecoration == TextDecoration.Underline }
             )
         }
         is NotesEvent.ApplyStyleToContent -> {
@@ -231,7 +231,11 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 val currentStyles = state.value.activeStyles.toMutableSet()
                 val styleToAddOrRemove = event.style
 
-                val existingStyle = currentStyles.find { it.fontWeight == styleToAddOrRemove.fontWeight && it.fontStyle == styleToAddOrRemove.fontStyle && it.textDecoration == styleToAddOrRemove.textDecoration }
+                val existingStyle = currentStyles.find { style ->
+                    (style.fontWeight != null && style.fontWeight == styleToAddOrRemove.fontWeight) ||
+                    (style.fontStyle != null && style.fontStyle == styleToAddOrRemove.fontStyle) ||
+                    (style.textDecoration != null && style.textDecoration == styleToAddOrRemove.textDecoration)
+                }
 
                 if (existingStyle != null) {
                     currentStyles.remove(existingStyle)

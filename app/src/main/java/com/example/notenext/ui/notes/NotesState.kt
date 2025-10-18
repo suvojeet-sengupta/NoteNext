@@ -1,6 +1,7 @@
 
 package com.example.notenext.ui.notes
 
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.notenext.data.Note
 
