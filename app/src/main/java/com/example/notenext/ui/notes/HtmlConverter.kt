@@ -50,7 +50,7 @@ object HtmlConverter {
             sb.append(text.substring(lastIndex))
         }
 
-        return sb.toString().replace("\n", "<br>")
+        return sb.toString().replace("\r\n", "<br>").replace("\n", "<br>")
     }
 
     fun htmlToAnnotatedString(html: String): AnnotatedString {
