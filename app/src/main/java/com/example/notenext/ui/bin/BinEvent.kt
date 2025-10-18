@@ -6,4 +6,8 @@ sealed class BinEvent {
     data class RestoreNote(val note: Note) : BinEvent()
     data class DeleteNotePermanently(val note: Note) : BinEvent()
     object EmptyBin : BinEvent()
+    data class ToggleNoteSelection(val noteId: Int) : BinEvent()
+    object ClearSelection : BinEvent()
+    object RestoreSelectedNotes : BinEvent()
+    object DeleteSelectedNotesPermanently : BinEvent()
 }

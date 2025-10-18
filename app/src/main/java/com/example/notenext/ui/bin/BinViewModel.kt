@@ -52,6 +52,36 @@ class BinViewModel(private val noteDao: NoteDao, private val savedStateHandle: a
                     }
                 }
             }
+            is BinEvent.ToggleNoteSelection -> {
+                val selectedIds = _state.value.selectedNoteIds.toMutableSet()
+                if (selectedIds.contains(event.noteId)) {
+                    selectedIds.remove(event.noteId)
+                } else {
+                    selectedIds.add(event.noteId)
+                }
+                _state.value = _state.value.copy(selectedNoteIds = selectedIds)
+            }
+            is BinEvent.ClearSelection -> {
+                _state.value = _state.value.copy(selectedNoteIds = emptySet())
+            }
+            is BinEvent.RestoreSelectedNotes -> {
+                viewModelScope.launch {
+                    val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
+                    selectedNotes.forEach { note ->
+                        noteDao.updateNote(note.copy(isBinned = false))
+                    }
+                    _state.value = _state.value.copy(selectedNoteIds = emptySet())
+                }
+            }
+            is BinEvent.DeleteSelectedNotesPermanently -> {
+                viewModelScope.launch {
+                    val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
+                    selectedNotes.forEach { note ->
+                        noteDao.deleteNote(note)
+                    }
+                    _state.value = _state.value.copy(selectedNoteIds = emptySet())
+                }
+            }
         }
     }
 }
