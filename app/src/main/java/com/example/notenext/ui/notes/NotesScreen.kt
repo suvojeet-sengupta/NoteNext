@@ -98,6 +98,7 @@ fun NotesScreen(
     onSettingsClick: () -> Unit,
     onArchiveClick: () -> Unit,
     onEditLabelsClick: () -> Unit,
+    onBinClick: () -> Unit,
     themeMode: ThemeMode
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
@@ -157,6 +158,16 @@ fun NotesScreen(
                         onClick = {
                             scope.launch { drawerState.close() }
                             onArchiveClick()
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                    NavigationDrawerItem(
+                        icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
+                        label = { Text("Bin") },
+                        selected = false,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            onBinClick()
                         },
                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                     )

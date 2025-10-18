@@ -37,14 +37,17 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
         when (event) {
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
-                    noteDao.deleteNote(event.note)
+                    val noteToBin = event.note.copy(isBinned = true)
+                    noteDao.updateNote(noteToBin)
                     recentlyDeletedNote = event.note
                 }
             }
             is NotesEvent.RestoreNote -> {
                 viewModelScope.launch {
-                    noteDao.insertNote(recentlyDeletedNote ?: return@launch)
-                    recentlyDeletedNote = null
+                    recentlyDeletedNote?.let { restoredNote ->
+                        noteDao.updateNote(restoredNote.copy(isBinned = false))
+                        recentlyDeletedNote = null
+                    }
                 }
             }
             is NotesEvent.ToggleNoteSelection -> {
@@ -72,7 +75,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
                     for (note in selectedNotes) {
-                        noteDao.deleteNote(note)
+                        noteDao.updateNote(note.copy(isBinned = true))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -256,7 +259,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
 
                     if (title.isBlank() && content.isBlank()) {
                         if (noteId != -1) { // It's an existing note, so delete it
-                            noteDao.getNoteById(noteId)?.let { noteDao.deleteNote(it) }
+                            noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true)) }
                         }
                     } else {
                         val currentTime = System.currentTimeMillis()
@@ -310,7 +313,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     state.value.expandedNoteId?.let {
                         if (it != -1) {
                             noteDao.getNoteById(it)?.let { note ->
-                                noteDao.deleteNote(note)
+                                noteDao.updateNote(note.copy(isBinned = true))
                             }
                         }
                     }

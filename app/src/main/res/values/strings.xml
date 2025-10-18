@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">NoteNext</string>
+    <string name="bin_title">Bin</string>
+    <string name="empty_bin">Empty Bin</string>
+    <string name="bin_empty_message">Bin is empty</string>
+    <string name="restore_note">Restore Note</string>
+    <string name="delete_permanently">Delete Permanently</string>
 </resources>

@@ -1,12 +1,15 @@
 package com.example.notenext.dependency_injection
 
+package com.example.notenext.dependency_injection
+
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle
 import androidx.lifecycle.viewmodel.CreationExtras
-import com.example.notenext.data.NoteDao
 import com.example.notenext.data.LabelDao
+import com.example.notenext.data.NoteDao
 import com.example.notenext.ui.archive.ArchiveViewModel
+import com.example.notenext.ui.bin.BinViewModel
 import com.example.notenext.ui.labels.EditLabelsViewModel
 import com.example.notenext.ui.notes.NotesViewModel
 
@@ -25,6 +28,10 @@ class ViewModelFactory(private val noteDao: NoteDao, private val labelDao: Label
         if (modelClass.isAssignableFrom(EditLabelsViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return EditLabelsViewModel(labelDao, noteDao) as T
+        }
+        if (modelClass.isAssignableFrom(BinViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BinViewModel(noteDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

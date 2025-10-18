@@ -17,5 +17,6 @@ data class Note(
     val isArchived: Boolean = false,
     val reminder: Long? = null,
     val isImportant: Boolean = false,
-    val label: String? = null
+    val label: String? = null,
+    val isBinned: Boolean = false
 )
