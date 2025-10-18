@@ -69,7 +69,12 @@ fun BinScreen(
                     )
                 } else {
                     TopAppBar(
-                        title = { Text(stringResource(id = R.string.bin_title)) }
+                        title = { Text(stringResource(id = R.string.bin_title)) },
+                        navigationIcon = {
+                            IconButton(onClick = onNavigateBack) {
+                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            }
+                        }
                     )
                 }
             }
