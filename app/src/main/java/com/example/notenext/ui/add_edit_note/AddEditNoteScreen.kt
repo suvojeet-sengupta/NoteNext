@@ -201,18 +201,7 @@ fun AddEditNoteScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
                         value = state.editingContent,
-                        onValueChange = { newTextFieldValue ->
-                            val oldAnnotatedString = state.editingContent.annotatedString
-                            val newAnnotatedString = AnnotatedString(
-                                text = newTextFieldValue.text,
-                                spanStyles = oldAnnotatedString.spanStyles
-                            )
-                            onEvent(NotesEvent.OnContentChange(
-                                newTextFieldValue.copy(
-                                    annotatedString = newAnnotatedString
-                                )
-                            ))
-                        },
+                        onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
                         placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
                         modifier = Modifier
                             .fillMaxWidth(),

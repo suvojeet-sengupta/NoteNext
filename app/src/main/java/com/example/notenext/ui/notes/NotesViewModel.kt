@@ -192,23 +192,47 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
         }
         is NotesEvent.OnContentChange -> {
             val newContent = event.content
-            val selection = newContent.selection
+            val oldContent = state.value.editingContent
+
+            val finalContent = if (newContent.text.length > oldContent.text.length) {
+                val insertedTextLength = newContent.text.length - oldContent.text.length
+                val insertedTextStart = newContent.selection.start - insertedTextLength
+                if (insertedTextStart >= 0) {
+                    val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
+                    val newAnnotatedString = buildAnnotatedString {
+                        append(oldContent.annotatedString.subSequence(0, insertedTextStart))
+                        withStyle(style = styleToApply) {
+                            append(newContent.text.substring(insertedTextStart, newContent.selection.start))
+                        }
+                        if (insertedTextStart < oldContent.annotatedString.length) {
+                            append(oldContent.annotatedString.subSequence(insertedTextStart, oldContent.annotatedString.length))
+                        }
+                    }
+                    newContent.copy(annotatedString = newAnnotatedString)
+                } else {
+                    newContent
+                }
+            } else {
+                newContent
+            }
+
+            val selection = finalContent.selection
             val styles = if (selection.collapsed) {
                 if (selection.start > 0) {
-                    newContent.annotatedString.spanStyles.filter {
+                    finalContent.annotatedString.spanStyles.filter {
                         it.start <= selection.start - 1 && it.end >= selection.start
                     }
                 } else {
                     emptyList()
                 }
             } else {
-                newContent.annotatedString.spanStyles.filter {
+                finalContent.annotatedString.spanStyles.filter {
                     maxOf(selection.start, it.start) < minOf(selection.end, it.end)
                 }
             }
-            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newContent)
+            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
             _state.value = state.value.copy(
-                editingContent = newContent,
+                editingContent = finalContent,
                 editingHistory = newHistory,
                 editingHistoryIndex = newHistory.lastIndex,
                 isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
