@@ -194,22 +194,16 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             val newContent = event.content
             val oldContent = state.value.editingContent
 
-            val newStyles = state.value.activeStyles
             var finalContent = newContent
 
             if (newContent.text.length > oldContent.text.length) {
                 val insertedTextLength = newContent.text.length - oldContent.text.length
                 val insertedTextStart = newContent.selection.start - insertedTextLength
                 if (insertedTextStart >= 0) {
-                    val newAnnotatedString = buildAnnotatedString {
-                        append(newContent.annotatedString)
-                        addStyle(
-                            style = newStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle(),
-                            start = insertedTextStart,
-                            end = newContent.selection.start
-                        )
-                    }
-                    finalContent = newContent.copy(annotatedString = newAnnotatedString)
+                    val builder = newContent.annotatedString.toBuilder()
+                    val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
+                    builder.addStyle(styleToApply, insertedTextStart, newContent.selection.start)
+                    finalContent = newContent.copy(annotatedString = builder.toAnnotatedString())
                 }
             }
 
