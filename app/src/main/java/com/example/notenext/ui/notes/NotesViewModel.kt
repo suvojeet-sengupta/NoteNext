@@ -215,8 +215,18 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             }
 
             val selection = finalContent.selection
-            val styles = finalContent.annotatedString.spanStyles.filter {
-                maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+            val styles = if (selection.collapsed) {
+                if (selection.start > 0) {
+                    finalContent.annotatedString.spanStyles.filter {
+                        it.start <= selection.start - 1 && it.end >= selection.start
+                    }
+                } else {
+                    emptyList()
+                }
+            } else {
+                finalContent.annotatedString.spanStyles.filter {
+                    maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+                }
             }
             val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
             _state.value = state.value.copy(
