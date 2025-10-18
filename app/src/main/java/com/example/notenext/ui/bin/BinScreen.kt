@@ -69,12 +69,7 @@ fun BinScreen(
                     )
                 } else {
                     TopAppBar(
-                        title = { Text(stringResource(id = R.string.bin_title)) },
-                        actions = {
-                            IconButton(onClick = { viewModel.onEvent(BinEvent.EmptyBin) }) {
-                                Icon(Icons.Default.DeleteForever, contentDescription = stringResource(id = R.string.empty_bin))
-                            }
-                        }
+                        title = { Text(stringResource(id = R.string.bin_title)) }
                     )
                 }
             }
