@@ -280,12 +280,33 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     isUnderlineActive = activeStyles.any { it.textDecoration == TextDecoration.Underline }
                 )
             } else {
+                val selection = state.value.editingContent.selection
                 val newAnnotatedString = AnnotatedString.Builder(state.value.editingContent.annotatedString).apply {
-                    addStyle(event.style, selection.start, selection.end)
+                    val style = event.style
+                    val isApplyingBold = style.fontWeight == FontWeight.Bold
+                    val isApplyingItalic = style.fontStyle == FontStyle.Italic
+                    val isApplyingUnderline = style.textDecoration == TextDecoration.Underline
+
+                    val selectionIsAlreadyBold = state.value.isBoldActive
+                    val selectionIsAlreadyItalic = state.value.isItalicActive
+                    val selectionIsAlreadyUnderline = state.value.isUnderlineActive
+
+                    val styleToApply = when {
+                        isApplyingBold -> if (selectionIsAlreadyBold) SpanStyle(fontWeight = FontWeight.Normal) else SpanStyle(fontWeight = FontWeight.Bold)
+                        isApplyingItalic -> if (selectionIsAlreadyItalic) SpanStyle(fontStyle = FontStyle.Normal) else SpanStyle(fontStyle = FontStyle.Italic)
+                        isApplyingUnderline -> if (selectionIsAlreadyUnderline) SpanStyle(textDecoration = TextDecoration.None) else SpanStyle(textDecoration = TextDecoration.Underline)
+                        else -> style
+                    }
+                    addStyle(styleToApply, selection.start, selection.end)
                 }.toAnnotatedString()
 
+                val newTextFieldValue = state.value.editingContent.copy(annotatedString = newAnnotatedString)
+                val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newTextFieldValue)
+
                 _state.value = state.value.copy(
-                    editingContent = state.value.editingContent.copy(annotatedString = newAnnotatedString)
+                    editingContent = newTextFieldValue,
+                    editingHistory = newHistory,
+                    editingHistoryIndex = newHistory.lastIndex
                 )
             }
         }
