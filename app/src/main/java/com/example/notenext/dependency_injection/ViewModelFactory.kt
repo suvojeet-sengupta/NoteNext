@@ -1,7 +1,5 @@
 package com.example.notenext.dependency_injection
 
-package com.example.notenext.dependency_injection
-
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.createSavedStateHandle

@@ -1,7 +1,22 @@
 package com.example.notenext.navigation
 
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.runtime.Composable
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.example.notenext.dependency_injection.ViewModelFactory
+import com.example.notenext.ui.archive.ArchiveScreen
 import com.example.notenext.ui.bin.BinScreen
 import com.example.notenext.ui.bin.BinViewModel
+import com.example.notenext.ui.labels.EditLabelsScreen
+import com.example.notenext.ui.notes.NotesScreen
+import com.example.notenext.ui.settings.SettingsScreen
+import com.example.notenext.ui.settings.ThemeMode
 
 @Composable
 fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {

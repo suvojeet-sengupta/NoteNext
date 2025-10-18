@@ -63,17 +63,17 @@ fun BinScreen(
                         NoteItem(
                             note = note,
                             onNoteClick = { /* No-op for bin */ },
-                            onLongClick = { /* No-op for bin */ },
-                            isSelected = false,
-                            actions = {
-                                IconButton(onClick = { viewModel.onEvent(BinEvent.RestoreNote(note)) }) {
-                                    Icon(Icons.Default.Restore, contentDescription = stringResource(id = R.string.restore_note))
-                                }
-                                IconButton(onClick = { viewModel.onEvent(BinEvent.DeleteNotePermanently(note)) }) {
-                                    Icon(Icons.Default.DeleteForever, contentDescription = stringResource(id = R.string.delete_permanently))
-                                }
-                            }
+                            onNoteLongClick = { /* No-op for bin */ },
+                            isSelected = false
                         )
+                        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp), horizontalArrangement = Arrangement.End) {
+                            IconButton(onClick = { viewModel.onEvent(BinEvent.RestoreNote(note)) }) {
+                                Icon(Icons.Default.Restore, contentDescription = stringResource(id = R.string.restore_note))
+                            }
+                            IconButton(onClick = { viewModel.onEvent(BinEvent.DeleteNotePermanently(note)) }) {
+                                Icon(Icons.Default.DeleteForever, contentDescription = stringResource(id = R.string.delete_permanently))
+                            }
+                        }
                     }
                 }
             }
