@@ -16,41 +16,46 @@ object HtmlConverter {
     fun annotatedStringToHtml(annotatedString: AnnotatedString): String {
         val text = annotatedString.text
         val spans = annotatedString.spanStyles
-        val sb = StringBuilder()
-        var lastIndex = 0
 
-        spans.sortedBy { it.start }.forEach { span ->
-            if (span.start > lastIndex) {
-                sb.append(text.substring(lastIndex, span.start))
-            }
-            val styledText = text.substring(span.start, span.end)
-            val style = span.item
-            val openTags = mutableListOf<String>()
-            val closeTags = mutableListOf<String>()
+        if (spans.isEmpty()) {
+            return text.replace("\n", "<br>").replace("\n", "<br>")
+        }
 
+        val events = mutableListOf<Pair<Int, String>>()
+        spans.forEach {
+            val style = it.item
             if (style.fontWeight == FontWeight.Bold) {
-                openTags.add("<b>")
-                closeTags.add("</b>")
+                events.add(it.start to "<b>")
+                events.add(it.end to "</b>")
             }
             if (style.fontStyle == FontStyle.Italic) {
-                openTags.add("<i>")
-                closeTags.add("</i>")
+                events.add(it.start to "<i>")
+                events.add(it.end to "</i>")
             }
             if (style.textDecoration == TextDecoration.Underline) {
-                openTags.add("<u>")
-                closeTags.add("</u>")
+                events.add(it.start to "<u>")
+                events.add(it.end to "</u>")
             }
-            sb.append(openTags.joinToString(""))
-            sb.append(styledText)
-            sb.append(closeTags.reversed().joinToString(""))
-            lastIndex = span.end
+        }
+
+        // Sort events by index. If indices are same, closing tags must come first to ensure proper nesting.
+        events.sortWith(compareBy({ it.first }, { if (it.second.startsWith("</")) 0 else 1 }))
+
+        val sb = StringBuilder()
+        var lastIndex = 0
+        events.forEach { (index, tag) ->
+            if (index > lastIndex) {
+                sb.append(text.substring(lastIndex, index))
+            }
+            sb.append(tag)
+            lastIndex = index
         }
 
         if (lastIndex < text.length) {
             sb.append(text.substring(lastIndex))
         }
 
-        return sb.toString().replace("\r\n", "<br>").replace("\n", "<br>")
+        return sb.toString().replace("\n", "<br>").replace("\n", "<br>")
     }
 
     fun htmlToAnnotatedString(html: String): AnnotatedString {
