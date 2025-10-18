@@ -82,6 +82,12 @@ class BinViewModel(private val noteDao: NoteDao, private val savedStateHandle: a
                     _state.value = _state.value.copy(selectedNoteIds = emptySet())
                 }
             }
+            is BinEvent.ExpandNote -> {
+                _state.value = _state.value.copy(expandedNoteId = event.noteId)
+            }
+            is BinEvent.CollapseNote -> {
+                _state.value = _state.value.copy(expandedNoteId = null)
+            }
         }
     }
 }

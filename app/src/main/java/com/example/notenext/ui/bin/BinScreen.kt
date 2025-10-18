@@ -1,5 +1,11 @@
 package com.example.notenext.ui.bin
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -51,82 +57,94 @@ fun BinScreen(
     val state by viewModel.state.collectAsState()
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
 
-    Scaffold(
-        topBar = {
-            if (isSelectionModeActive) {
-                BinContextualTopAppBar(
-                    selectedItemCount = state.selectedNoteIds.size,
-                    onClearSelection = { viewModel.onEvent(BinEvent.ClearSelection) },
-                    onRestoreClick = { viewModel.onEvent(BinEvent.RestoreSelectedNotes) },
-                    onDeletePermanentlyClick = { viewModel.onEvent(BinEvent.DeleteSelectedNotesPermanently) }
-                )
-            } else {
-                TopAppBar(
-                    title = { Text(stringResource(id = R.string.bin_title)) },
-                    actions = {
-                        IconButton(onClick = { viewModel.onEvent(BinEvent.EmptyBin) }) {
-                            Icon(Icons.Default.DeleteForever, contentDescription = stringResource(id = R.string.empty_bin))
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(
+            topBar = {
+                if (isSelectionModeActive) {
+                    BinContextualTopAppBar(
+                        selectedItemCount = state.selectedNoteIds.size,
+                        onClearSelection = { viewModel.onEvent(BinEvent.ClearSelection) },
+                        onRestoreClick = { viewModel.onEvent(BinEvent.RestoreSelectedNotes) },
+                        onDeletePermanentlyClick = { viewModel.onEvent(BinEvent.DeleteSelectedNotesPermanently) }
+                    )
+                } else {
+                    TopAppBar(
+                        title = { Text(stringResource(id = R.string.bin_title)) },
+                        actions = {
+                            IconButton(onClick = { viewModel.onEvent(BinEvent.EmptyBin) }) {
+                                Icon(Icons.Default.DeleteForever, contentDescription = stringResource(id = R.string.empty_bin))
+                            }
+                        }
+                    )
+                }
+            }
+        ) { paddingValues ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            ) {
+                if (state.notes.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = null,
+                                modifier = Modifier.size(96.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = stringResource(id = R.string.bin_empty_message),
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 32.dp)
+                            )
                         }
                     }
-                )
+                } else {
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalItemSpacing = 8.dp
+                    ) {
+                        items(
+                            items = state.notes,
+                            key = { note -> note.id }
+                        ) { note ->
+                            NoteItem(
+                                note = note,
+                                onNoteClick = {
+                                    if (isSelectionModeActive) {
+                                        viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id))
+                                    } else {
+                                        viewModel.onEvent(BinEvent.ExpandNote(note.id))
+                                    }
+                                },
+                                onNoteLongClick = { viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id)) },
+                                isSelected = state.selectedNoteIds.contains(note.id)
+                            )
+                        }
+                    }
+                }
             }
         }
-    ) { paddingValues ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(paddingValues)
+        AnimatedVisibility(
+            visible = state.expandedNoteId != null,
+            enter = scaleIn(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
+            exit = scaleOut(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
         ) {
-            if (state.notes.isEmpty()) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = null,
-                            modifier = Modifier.size(96.dp),
-                            tint = MaterialTheme.colorScheme.onBackground
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(id = R.string.bin_empty_message),
-                            textAlign = TextAlign.Center,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onBackground,
-                            modifier = Modifier.padding(horizontal = 32.dp)
-                        )
-                    }
-                }
-            } else {
-                LazyVerticalStaggeredGrid(
-                    columns = StaggeredGridCells.Fixed(2),
-                    modifier = Modifier.fillMaxSize(),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalItemSpacing = 8.dp
-                ) {
-                    items(
-                        items = state.notes,
-                        key = { note -> note.id }
-                    ) { note ->
-                        NoteItem(
-                            note = note,
-                            onNoteClick = {
-                                if (isSelectionModeActive) {
-                                    viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id))
-                                } else {
-                                    // No-op
-                                }
-                            },
-                            onNoteLongClick = { viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id)) },
-                            isSelected = state.selectedNoteIds.contains(note.id)
-                        )
-                    }
-                }
-            }
+            BinnedNoteScreen(
+                state = state,
+                onDismiss = { viewModel.onEvent(BinEvent.CollapseNote) }
+            )
         }
     }
 }

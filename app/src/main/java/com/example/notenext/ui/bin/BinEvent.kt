@@ -10,4 +10,6 @@ sealed class BinEvent {
     object ClearSelection : BinEvent()
     object RestoreSelectedNotes : BinEvent()
     object DeleteSelectedNotesPermanently : BinEvent()
+    data class ExpandNote(val noteId: Int) : BinEvent()
+    object CollapseNote : BinEvent()
 }
