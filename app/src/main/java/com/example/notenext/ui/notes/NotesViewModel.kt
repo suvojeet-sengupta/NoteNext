@@ -203,25 +203,17 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 val suffixLength = commonSuffixWith(oldText, newText).length
 
                 val newAnnotatedString = buildAnnotatedString {
-                    append(newText)
+                    // 1. Append the prefix from oldAnnotated
+                    append(oldAnnotated.subSequence(0, prefixLength))
 
-                    oldAnnotated.spanStyles.forEach {
-                        val oldStart = it.start
-                        val oldEnd = it.end
-                        val style = it.item
-
-                        if (oldEnd <= prefixLength) {
-                            addStyle(style, oldStart, oldEnd)
-                        } else if (oldStart >= oldText.length - suffixLength) {
-                            val lengthDifference = newText.length - oldText.length
-                            addStyle(style, oldStart + lengthDifference, oldEnd + lengthDifference)
-                        }
-                    }
-
+                    // 2. Append the changed part from newText with activeStyles
                     val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
-                    if (prefixLength < newText.length - suffixLength) {
-                        addStyle(styleToApply, prefixLength, newText.length - suffixLength)
+                    withStyle(styleToApply) {
+                        append(newText.substring(prefixLength, newText.length - suffixLength))
                     }
+
+                    // 3. Append the suffix from oldAnnotated
+                    append(oldAnnotated.subSequence(oldText.length - suffixLength, oldText.length))
                 }
                 newContent.copy(annotatedString = newAnnotatedString)
             } else {
