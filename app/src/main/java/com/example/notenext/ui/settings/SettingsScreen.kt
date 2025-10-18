@@ -124,12 +124,11 @@ fun SettingsScreen(onBackClick: () -> Unit) {
     ) {
         ThemeChooserDialog(
             selectedThemeMode = selectedThemeMode,
-            onThemeSelected = {
-                themeMode ->
+            onThemeSelected = { themeMode ->
                 scope.launch {
                     settingsRepository.saveThemeMode(themeMode)
+                    showThemeDialog = false
                 }
-                showThemeDialog = false
             },
             onDismiss = { showThemeDialog = false }
         )
@@ -157,7 +156,7 @@ private fun ThemeChooserDialog(
                     ) {
                         RadioButton(
                             selected = (themeMode == selectedThemeMode),
-                            onClick = { onThemeSelected(themeMode) }
+                            onClick = null
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(themeMode.name.lowercase().replaceFirstChar { it.uppercase() })
