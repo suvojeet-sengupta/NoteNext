@@ -201,10 +201,18 @@ fun AddEditNoteScreen(
                     Spacer(modifier = Modifier.height(8.dp))
                     TextField(
                         value = state.editingContent,
-                        onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
+                        onValueChange = {
+                            onEvent(NotesEvent.OnContentChange(
+                                state.editingContent.copy(
+                                    annotatedString = state.editingContent.annotatedString.copy(text = it.text),
+                                    selection = it.selection
+                                )
+                            ))
+                        },
                         placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                                            modifier = Modifier
-                                                .fillMaxWidth(),                        colors = TextFieldDefaults.colors(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        colors = TextFieldDefaults.colors(
                             focusedContainerColor = Color.Transparent,
                             unfocusedContainerColor = Color.Transparent,
                             disabledContainerColor = Color.Transparent,
