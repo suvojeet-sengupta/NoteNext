@@ -194,38 +194,37 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             val newContent = event.content
             val oldContent = state.value.editingContent
 
-            val finalContent = if (newContent.text.length > oldContent.text.length) {
-                // Text inserted
-                val insertedTextLength = newContent.text.length - oldContent.text.length
-                val insertedTextStart = newContent.selection.start - insertedTextLength
-                if (insertedTextStart >= 0) {
-                    val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
-                    val newAnnotatedString = buildAnnotatedString {
-                        append(oldContent.annotatedString.subSequence(0, insertedTextStart))
-                        withStyle(style = styleToApply) {
-                            append(newContent.text.substring(insertedTextStart, newContent.selection.start))
-                        }
-                        if (insertedTextStart < oldContent.annotatedString.length) {
-                            append(oldContent.annotatedString.subSequence(insertedTextStart, oldContent.annotatedString.length))
+            val finalContent = if (newContent.text != oldContent.text) {
+                val oldAnnotated = oldContent.annotatedString
+                val oldText = oldContent.text
+                val newText = newContent.text
+
+                val prefixLength = commonPrefixWith(oldText, newText).length
+                val suffixLength = commonSuffixWith(oldText, newText).length
+
+                val newAnnotatedString = buildAnnotatedString {
+                    append(newText)
+
+                    oldAnnotated.spanStyles.forEach {
+                        val oldStart = it.start
+                        val oldEnd = it.end
+                        val style = it.item
+
+                        if (oldEnd <= prefixLength) {
+                            addStyle(style, oldStart, oldEnd)
+                        } else if (oldStart >= oldText.length - suffixLength) {
+                            val lengthDifference = newText.length - oldText.length
+                            addStyle(style, oldStart + lengthDifference, oldEnd + lengthDifference)
                         }
                     }
-                    newContent.copy(annotatedString = newAnnotatedString)
-                } else {
-                    newContent
-                }
-            } else if (oldContent.text.length > newContent.text.length) {
-                // Deletion occurred
-                val deletedRangeStart = newContent.selection.start
-                val deletedRangeEnd = deletedRangeStart + (oldContent.text.length - newContent.text.length)
 
-                val updatedAnnotatedString = updateAnnotatedStringOnDelete(
-                    oldContent.annotatedString,
-                    deletedRangeStart,
-                    deletedRangeEnd
-                )
-                newContent.copy(annotatedString = updatedAnnotatedString)
+                    val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
+                    if (prefixLength < newText.length - suffixLength) {
+                        addStyle(styleToApply, prefixLength, newText.length - suffixLength)
+                    }
+                }
+                newContent.copy(annotatedString = newAnnotatedString)
             } else {
-                // Text replaced or no change
                 newContent
             }
 
@@ -454,42 +453,23 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
     }
 }
 
-fun updateAnnotatedStringOnDelete(
-    currentAnnotatedString: AnnotatedString,
-    deletedRangeStart: Int,
-    deletedRangeEnd: Int
-): AnnotatedString {
-    val builder = AnnotatedString.Builder()
-    val originalText = currentAnnotatedString.text
-
-    // Append text before the deleted range
-    builder.append(originalText.substring(0, deletedRangeStart))
-
-    // Append text after the deleted range
-    builder.append(originalText.substring(deletedRangeEnd, originalText.length))
-
-    // Reapply styles, adjusting their ranges
-    currentAnnotatedString.spanStyles.forEach { spanStyleRange ->
-        val style = spanStyleRange.item
-        var start = spanStyleRange.start
-        var end = spanStyleRange.end
-
-        // Adjust start and end based on deletion
-        if (start >= deletedRangeEnd) {
-            start -= (deletedRangeEnd - deletedRangeStart)
-            end -= (deletedRangeEnd - deletedRangeStart)
-        } else if (end > deletedRangeStart) {
-            // Style overlaps with or contains the deleted range
-            end -= (deletedRangeEnd - deletedRangeStart)
-            if (end < start) end = start // Ensure end is not before start
+    private fun commonPrefixWith(a: CharSequence, b: CharSequence): String {
+        val minLength = minOf(a.length, b.length)
+        for (i in 0 until minLength) {
+            if (a[i] != b[i]) {
+                return a.substring(0, i)
+            }
         }
-
-        // Only add style if it's still valid and within the new text bounds
-        if (start < end && start < builder.length && end <= builder.length) {
-            builder.addStyle(style, start, end)
-        }
+        return a.substring(0, minLength)
     }
 
-    return builder.toAnnotatedString()
-}
+    private fun commonSuffixWith(a: CharSequence, b: CharSequence): String {
+        val minLength = minOf(a.length, b.length)
+        for (i in 0 until minLength) {
+            if (a[a.length - 1 - i] != b[b.length - 1 - i]) {
+                return a.substring(a.length - i)
+            }
+        }
+        return a.substring(a.length - minLength)
+    }
 }
