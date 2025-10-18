@@ -215,15 +215,17 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             }
 
             val selection = finalContent.selection
-            val styles = finalContent.annotatedString.getSpanStyles(selection.start, selection.end)
+            val styles = finalContent.annotatedString.spanStyles.filter {
+                maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+            }
             val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
             _state.value = state.value.copy(
                 editingContent = finalContent,
                 editingHistory = newHistory,
                 editingHistoryIndex = newHistory.lastIndex,
-                isBoldActive = styles.any { it.item.fontWeight == FontWeight.Bold },
-                isItalicActive = styles.any { it.item.fontStyle == FontStyle.Italic },
-                isUnderlineActive = styles.any { it.item.textDecoration == TextDecoration.Underline }
+                isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
+                isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
+                isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
             )
         }
         is NotesEvent.ApplyStyleToContent -> {
