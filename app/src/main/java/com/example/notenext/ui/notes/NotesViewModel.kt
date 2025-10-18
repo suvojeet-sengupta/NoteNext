@@ -228,26 +228,35 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
         is NotesEvent.ApplyStyleToContent -> {
             val selection = state.value.editingContent.selection
             if (selection.collapsed) {
-                val currentStyles = state.value.activeStyles.toMutableSet()
                 val styleToAddOrRemove = event.style
+                val activeStyles = state.value.activeStyles.toMutableSet()
 
-                val existingStyle = currentStyles.find { style ->
-                    (style.fontWeight != null && style.fontWeight == styleToAddOrRemove.fontWeight) ||
-                    (style.fontStyle != null && style.fontStyle == styleToAddOrRemove.fontStyle) ||
-                    (style.textDecoration != null && style.textDecoration == styleToAddOrRemove.textDecoration)
+                val isBold = styleToAddOrRemove.fontWeight == FontWeight.Bold
+                val isItalic = styleToAddOrRemove.fontStyle == FontStyle.Italic
+                val isUnderline = styleToAddOrRemove.textDecoration == TextDecoration.Underline
+
+                val wasBold = activeStyles.any { it.fontWeight == FontWeight.Bold }
+                val wasItalic = activeStyles.any { it.fontStyle == FontStyle.Italic }
+                val wasUnderline = activeStyles.any { it.textDecoration == TextDecoration.Underline }
+
+                if (isBold) {
+                    if (wasBold) activeStyles.removeAll { it.fontWeight == FontWeight.Bold }
+                    else activeStyles.add(SpanStyle(fontWeight = FontWeight.Bold))
                 }
-
-                if (existingStyle != null) {
-                    currentStyles.remove(existingStyle)
-                } else {
-                    currentStyles.add(styleToAddOrRemove)
+                if (isItalic) {
+                    if (wasItalic) activeStyles.removeAll { it.fontStyle == FontStyle.Italic }
+                    else activeStyles.add(SpanStyle(fontStyle = FontStyle.Italic))
+                }
+                if (isUnderline) {
+                    if (wasUnderline) activeStyles.removeAll { it.textDecoration == TextDecoration.Underline }
+                    else activeStyles.add(SpanStyle(textDecoration = TextDecoration.Underline))
                 }
 
                 _state.value = state.value.copy(
-                    activeStyles = currentStyles,
-                    isBoldActive = currentStyles.any { it.fontWeight == FontWeight.Bold },
-                    isItalicActive = currentStyles.any { it.fontStyle == FontStyle.Italic },
-                    isUnderlineActive = currentStyles.any { it.textDecoration == TextDecoration.Underline }
+                    activeStyles = activeStyles,
+                    isBoldActive = activeStyles.any { it.fontWeight == FontWeight.Bold },
+                    isItalicActive = activeStyles.any { it.fontStyle == FontStyle.Italic },
+                    isUnderlineActive = activeStyles.any { it.textDecoration == TextDecoration.Underline }
                 )
             } else {
                 val newAnnotatedString = AnnotatedString.Builder(state.value.editingContent.annotatedString).apply {
