@@ -195,6 +195,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             val oldContent = state.value.editingContent
 
             val finalContent = if (newContent.text.length > oldContent.text.length) {
+                // Text inserted
                 val insertedTextLength = newContent.text.length - oldContent.text.length
                 val insertedTextStart = newContent.selection.start - insertedTextLength
                 if (insertedTextStart >= 0) {
@@ -212,7 +213,19 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 } else {
                     newContent
                 }
+            } else if (oldContent.text.length > newContent.text.length) {
+                // Deletion occurred
+                val deletedRangeStart = newContent.selection.start
+                val deletedRangeEnd = deletedRangeStart + (oldContent.text.length - newContent.text.length)
+
+                val updatedAnnotatedString = updateAnnotatedStringOnDelete(
+                    oldContent.annotatedString,
+                    deletedRangeStart,
+                    deletedRangeEnd
+                )
+                newContent.copy(annotatedString = updatedAnnotatedString)
             } else {
+                // Text replaced or no change
                 newContent
             }
 
@@ -439,5 +452,44 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             _state.value = state.value.copy(filteredLabel = event.label)
         }
     }
+}
+
+fun updateAnnotatedStringOnDelete(
+    currentAnnotatedString: AnnotatedString,
+    deletedRangeStart: Int,
+    deletedRangeEnd: Int
+): AnnotatedString {
+    val builder = AnnotatedString.Builder()
+    val originalText = currentAnnotatedString.text
+
+    // Append text before the deleted range
+    builder.append(originalText.substring(0, deletedRangeStart))
+
+    // Append text after the deleted range
+    builder.append(originalText.substring(deletedRangeEnd, originalText.length))
+
+    // Reapply styles, adjusting their ranges
+    currentAnnotatedString.spanStyles.forEach { spanStyleRange ->
+        val style = spanStyleRange.item
+        var start = spanStyleRange.start
+        var end = spanStyleRange.end
+
+        // Adjust start and end based on deletion
+        if (start >= deletedRangeEnd) {
+            start -= (deletedRangeEnd - deletedRangeStart)
+            end -= (deletedRangeEnd - deletedRangeStart)
+        } else if (end > deletedRangeStart) {
+            // Style overlaps with or contains the deleted range
+            end -= (deletedRangeEnd - deletedRangeStart)
+            if (end < start) end = start // Ensure end is not before start
+        }
+
+        // Only add style if it's still valid and within the new text bounds
+        if (start < end && start < builder.length && end <= builder.length) {
+            builder.addStyle(style, start, end)
+        }
+    }
+
+    return builder.toAnnotatedString()
 }
 }
