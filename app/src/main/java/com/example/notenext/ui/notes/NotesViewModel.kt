@@ -191,38 +191,37 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
             )
         }
         is NotesEvent.OnContentChange -> {
-            val content = event.content
-            val selection = content.selection
-            val isBold = state.value.activeStyles.any { it.fontWeight == FontWeight.Bold }
-            val isItalic = state.value.activeStyles.any { it.fontStyle == FontStyle.Italic }
-            val isUnderline = state.value.activeStyles.any { it.textDecoration == TextDecoration.Underline }
+            val newContent = event.content
+            val oldContent = state.value.editingContent
 
-            val newStyles = mutableSetOf<SpanStyle>()
-            if (isBold) newStyles.add(SpanStyle(fontWeight = FontWeight.Bold))
-            if (isItalic) newStyles.add(SpanStyle(fontStyle = FontStyle.Italic))
-            if (isUnderline) newStyles.add(SpanStyle(textDecoration = TextDecoration.Underline))
+            val newStyles = state.value.activeStyles
+            var finalContent = newContent
 
-            val newAnnotatedString = if (content.text.length > state.value.editingContent.text.length) {
-                val newText = content.annotatedString.subSequence(selection.start - (content.text.length - state.value.editingContent.text.length), selection.start)
-                buildAnnotatedString {
-                    append(state.value.editingContent.annotatedString)
-                    withStyle(style = newStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()) {
-                        append(newText)
+            if (newContent.text.length > oldContent.text.length) {
+                val insertedTextLength = newContent.text.length - oldContent.text.length
+                val insertedTextStart = newContent.selection.start - insertedTextLength
+                if (insertedTextStart >= 0) {
+                    val newAnnotatedString = buildAnnotatedString {
+                        append(newContent.annotatedString)
+                        addStyle(
+                            style = newStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle(),
+                            start = insertedTextStart,
+                            end = newContent.selection.start
+                        )
                     }
+                    finalContent = newContent.copy(annotatedString = newAnnotatedString)
                 }
-            } else {
-                content.annotatedString
             }
 
-            val finalContent = content.copy(annotatedString = newAnnotatedString)
+            val selection = finalContent.selection
             val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
             _state.value = state.value.copy(
                 editingContent = finalContent,
                 editingHistory = newHistory,
                 editingHistoryIndex = newHistory.lastIndex,
-                isBoldActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontWeight == FontWeight.Bold },
-                isItalicActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontStyle == FontStyle.Italic },
-                isUnderlineActive = finalContent.annotatedString.spanStyles.any { style -> style.item.textDecoration == TextDecoration.Underline }
+                isBoldActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontWeight == FontWeight.Bold && selection.start >= style.start && selection.end <= style.end },
+                isItalicActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontStyle == FontStyle.Italic && selection.start >= style.start && selection.end <= style.end },
+                isUnderlineActive = finalContent.annotatedString.spanStyles.any { style -> style.item.textDecoration == TextDecoration.Underline && selection.start >= style.start && selection.end <= style.end }
             )
         }
         is NotesEvent.ApplyStyleToContent -> {
