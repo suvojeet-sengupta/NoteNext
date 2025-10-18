@@ -258,17 +258,17 @@ fun AddEditNoteScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     item {
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) }) {
                             Icon(Icons.Default.FormatBold, contentDescription = "Bold")
                         }
                     }
                     item {
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) }) {
                             Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
                         }
                     }
                     item {
-                        IconButton(onClick = { /*TODO*/ }) {
+                        IconButton(onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) }) {
                             Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
                         }
                     }
