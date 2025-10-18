@@ -8,6 +8,7 @@ import com.example.notenext.data.Label
 import com.example.notenext.data.LabelDao
 import com.example.notenext.data.Note
 import com.example.notenext.data.NoteDao
+import com.example.notenext.ui.notes.HtmlConverter
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -145,14 +146,14 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                             _state.value = state.value.copy(
                                 expandedNoteId = event.noteId,
                                 editingTitle = note.title,
-                                editingContent = TextFieldValue(note.content),
+                                editingContent = TextFieldValue(HtmlConverter.htmlToAnnotatedString(note.content)),
                                 editingColor = note.color,
                                 editingIsNewNote = false,
                                 editingLastEdited = note.lastEdited,
                                 isPinned = note.isPinned,
                                 isArchived = note.isArchived,
                                 editingLabel = note.label,
-                                editingHistory = listOf(note.title to TextFieldValue(note.content)),
+                                editingHistory = listOf(note.title to TextFieldValue(HtmlConverter.htmlToAnnotatedString(note.content))),
                                 editingHistoryIndex = 0
                             )
                         }
@@ -269,7 +270,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     if (noteId == null) return@launch
 
                     val title = state.value.editingTitle
-                    val content = state.value.editingContent.text
+                    val content = HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
 
                     if (title.isBlank() && content.isBlank()) {
                         if (noteId != -1) { // It's an existing note, so delete it
