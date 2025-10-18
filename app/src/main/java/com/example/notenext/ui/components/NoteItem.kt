@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.notenext.data.Note
+import com.example.notenext.ui.notes.HtmlConverter
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -75,7 +76,7 @@ fun NoteItem(
             if (note.content.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
-                    text = note.content,
+                    text = HtmlConverter.htmlToAnnotatedString(note.content),
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 10,

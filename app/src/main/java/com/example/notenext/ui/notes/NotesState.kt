@@ -22,5 +22,9 @@ data class NotesState(
     val isArchived: Boolean = false,
     val editingLabel: String? = null,
     val editingHistory: List<Pair<String, TextFieldValue>> = listOf("" to TextFieldValue()),
-    val editingHistoryIndex: Int = 0
+    val editingHistoryIndex: Int = 0,
+    val isBoldActive: Boolean = false,
+    val isItalicActive: Boolean = false,
+    val isUnderlineActive: Boolean = false,
+    val activeStyles: Set<SpanStyle> = emptySet()
 )

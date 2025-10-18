@@ -258,17 +258,32 @@ fun AddEditNoteScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     item {
-                        IconButton(onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) }) {
+                        IconButton(
+                            onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            )
+                        ) {
                             Icon(Icons.Default.FormatBold, contentDescription = "Bold")
                         }
                     }
                     item {
-                        IconButton(onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) }) {
+                        IconButton(
+                            onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            )
+                        ) {
                             Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
                         }
                     }
                     item {
-                        IconButton(onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) }) {
+                        IconButton(
+                            onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
+                            colors = IconButtonDefaults.iconButtonColors(
+                                containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                            )
+                        ) {
                             Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
                         }
                     }

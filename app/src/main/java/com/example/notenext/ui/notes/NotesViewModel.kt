@@ -1,7 +1,13 @@
 package com.example.notenext.ui.notes
 
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.notenext.data.Label
@@ -37,164 +43,203 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
     }
 
     fun onEvent(event: NotesEvent) {
-        when (event) {
-            is NotesEvent.DeleteNote -> {
-                viewModelScope.launch {
-                    val noteToBin = event.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
-                    noteDao.updateNote(noteToBin)
-                    recentlyDeletedNote = event.note
+    when (event) {
+        is NotesEvent.DeleteNote -> {
+            viewModelScope.launch {
+                val noteToBin = event.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
+                noteDao.updateNote(noteToBin)
+                recentlyDeletedNote = event.note
+            }
+        }
+        is NotesEvent.RestoreNote -> {
+            viewModelScope.launch {
+                recentlyDeletedNote?.let { restoredNote ->
+                    noteDao.updateNote(restoredNote.copy(isBinned = false))
+                    recentlyDeletedNote = null
                 }
             }
-            is NotesEvent.RestoreNote -> {
-                viewModelScope.launch {
-                    recentlyDeletedNote?.let { restoredNote ->
-                        noteDao.updateNote(restoredNote.copy(isBinned = false))
-                        recentlyDeletedNote = null
-                    }
-                }
+        }
+        is NotesEvent.ToggleNoteSelection -> {
+            val selectedIds = state.value.selectedNoteIds.toMutableList()
+            if (selectedIds.contains(event.noteId)) {
+                selectedIds.remove(event.noteId)
+            } else {
+                selectedIds.add(event.noteId)
             }
-            is NotesEvent.ToggleNoteSelection -> {
-                val selectedIds = state.value.selectedNoteIds.toMutableList()
-                if (selectedIds.contains(event.noteId)) {
-                    selectedIds.remove(event.noteId)
-                } else {
-                    selectedIds.add(event.noteId)
+            _state.value = state.value.copy(selectedNoteIds = selectedIds)
+        }
+        is NotesEvent.ClearSelection -> {
+            _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.TogglePinForSelectedNotes -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                for (note in selectedNotes) {
+                    noteDao.insertNote(note.copy(isPinned = !note.isPinned))
                 }
-                _state.value = state.value.copy(selectedNoteIds = selectedIds)
-            }
-            is NotesEvent.ClearSelection -> {
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.TogglePinForSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(isPinned = !note.isPinned))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.DeleteSelectedNotes -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                for (note in selectedNotes) {
+                    noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                 }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.DeleteSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.ArchiveSelectedNotes -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                for (note in selectedNotes) {
+                    noteDao.insertNote(note.copy(isArchived = !note.isArchived))
                 }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.ArchiveSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(isArchived = !note.isArchived))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.ToggleImportantForSelectedNotes -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                for (note in selectedNotes) {
+                    noteDao.insertNote(note.copy(isImportant = !note.isImportant))
                 }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.ToggleImportantForSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(isImportant = !note.isImportant))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.ChangeColorForSelectedNotes -> {
+            // TODO: Implement color picker
+        }
+        is NotesEvent.CopySelectedNotes -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                for (note in selectedNotes) {
+                    noteDao.insertNote(note.copy(id = 0, title = "${note.title} (Copy)"))
                 }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.ChangeColorForSelectedNotes -> {
-                // TODO: Implement color picker
-            }
-            is NotesEvent.CopySelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(id = 0, title = "${note.title} (Copy)"))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.SendSelectedNotes -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                if (selectedNotes.isNotEmpty()) {
+                    val title = if (selectedNotes.size == 1) selectedNotes.first().title else "Multiple Notes"
+                    val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.title}\n\n${it.content}" }
+                    _events.emit(NotesUiEvent.SendNotes(title, content))
                 }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.SendSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    if (selectedNotes.isNotEmpty()) {
-                        val title = if (selectedNotes.size == 1) selectedNotes.first().title else "Multiple Notes"
-                        val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.title}\n\n${it.content}" }
-                        _events.emit(NotesUiEvent.SendNotes(title, content))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+        }
+        is NotesEvent.SetReminderForSelectedNotes -> {
+            // TODO: Implement reminder
+        }
+        is NotesEvent.SetLabelForSelectedNotes -> {
+            viewModelScope.launch {
+                if (event.label.isNotBlank()) {
+                    labelDao.insertLabel(Label(event.label))
                 }
-            }
-            is NotesEvent.SetReminderForSelectedNotes -> {
-                // TODO: Implement reminder
-            }
-            is NotesEvent.SetLabelForSelectedNotes -> {
-                viewModelScope.launch {
-                    if (event.label.isNotBlank()) {
-                        labelDao.insertLabel(Label(event.label))
-                    }
-                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
-                    for (note in selectedNotes) {
-                        noteDao.insertNote(note.copy(label = event.label))
-                    }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                for (note in selectedNotes) {
+                    noteDao.insertNote(note.copy(label = event.label))
                 }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
-            is NotesEvent.ExpandNote -> {
-                viewModelScope.launch {
-                    if (event.noteId != -1) {
-                        noteDao.getNoteById(event.noteId)?.let { note ->
-                            _state.value = state.value.copy(
-                                expandedNoteId = event.noteId,
-                                editingTitle = note.title,
-                                editingContent = TextFieldValue(HtmlConverter.htmlToAnnotatedString(note.content)),
-                                editingColor = note.color,
-                                editingIsNewNote = false,
-                                editingLastEdited = note.lastEdited,
-                                isPinned = note.isPinned,
-                                isArchived = note.isArchived,
-                                editingLabel = note.label,
-                                editingHistory = listOf(note.title to TextFieldValue(HtmlConverter.htmlToAnnotatedString(note.content))),
-                                editingHistoryIndex = 0
-                            )
-                        }
-                    } else {
+        }
+        is NotesEvent.ExpandNote -> {
+            viewModelScope.launch {
+                if (event.noteId != -1) {
+                    noteDao.getNoteById(event.noteId)?.let { note ->
+                        val content = HtmlConverter.htmlToAnnotatedString(note.content)
                         _state.value = state.value.copy(
-                            expandedNoteId = -1,
-                            editingTitle = "",
-                            editingContent = TextFieldValue(),
-                            editingColor = 0,
-                            editingIsNewNote = true,
-                            editingLastEdited = 0,
-                            editingHistory = listOf("" to TextFieldValue()),
-                            editingHistoryIndex = 0,
-                            editingLabel = null
+                            expandedNoteId = event.noteId,
+                            editingTitle = note.title,
+                            editingContent = TextFieldValue(content),
+                            editingColor = note.color,
+                            editingIsNewNote = false,
+                            editingLastEdited = note.lastEdited,
+                            isPinned = note.isPinned,
+                            isArchived = note.isArchived,
+                            editingLabel = note.label,
+                            editingHistory = listOf(note.title to TextFieldValue(content)),
+                            editingHistoryIndex = 0
                         )
                     }
+                } else {
+                    _state.value = state.value.copy(
+                        expandedNoteId = -1,
+                        editingTitle = "",
+                        editingContent = TextFieldValue(),
+                        editingColor = 0,
+                        editingIsNewNote = true,
+                        editingLastEdited = 0,
+                        editingHistory = listOf("" to TextFieldValue()),
+                        editingHistoryIndex = 0,
+                        editingLabel = null
+                    )
                 }
             }
-            is NotesEvent.CollapseNote -> {
-                onEvent(NotesEvent.OnSaveNoteClick)
-            }
-            is NotesEvent.OnTitleChange -> {
-                val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
-                _state.value = state.value.copy(
-                    editingTitle = event.title,
-                    editingHistory = newHistory,
-                    editingHistoryIndex = newHistory.lastIndex
-                )
-            }
-            is NotesEvent.OnContentChange -> {
-                val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to event.content)
-                _state.value = state.value.copy(
-                    editingContent = event.content,
-                    editingHistory = newHistory,
-                    editingHistoryIndex = newHistory.lastIndex
-                )
-            }
-            is NotesEvent.ApplyStyleToContent -> {
-                val selection = state.value.editingContent.selection
-                if (selection.collapsed) return
+        }
+        is NotesEvent.CollapseNote -> {
+            onEvent(NotesEvent.OnSaveNoteClick)
+        }
+        is NotesEvent.OnTitleChange -> {
+            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
+            _state.value = state.value.copy(
+                editingTitle = event.title,
+                editingHistory = newHistory,
+                editingHistoryIndex = newHistory.lastIndex
+            )
+        }
+        is NotesEvent.OnContentChange -> {
+            val content = event.content
+            val selection = content.selection
+            val isBold = state.value.activeStyles.any { it.fontWeight == FontWeight.Bold }
+            val isItalic = state.value.activeStyles.any { it.fontStyle == FontStyle.Italic }
+            val isUnderline = state.value.activeStyles.any { it.textDecoration == TextDecoration.Underline }
 
+            val newStyles = mutableSetOf<SpanStyle>()
+            if (isBold) newStyles.add(SpanStyle(fontWeight = FontWeight.Bold))
+            if (isItalic) newStyles.add(SpanStyle(fontStyle = FontStyle.Italic))
+            if (isUnderline) newStyles.add(SpanStyle(textDecoration = TextDecoration.Underline))
+
+            val newAnnotatedString = if (content.text.length > state.value.editingContent.text.length) {
+                val newText = content.annotatedString.subSequence(selection.start - (content.text.length - state.value.editingContent.text.length), selection.start)
+                buildAnnotatedString {
+                    append(state.value.editingContent.annotatedString)
+                    withStyle(style = newStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()) {
+                        append(newText)
+                    }
+                }
+            } else {
+                content.annotatedString
+            }
+
+            val finalContent = content.copy(annotatedString = newAnnotatedString)
+            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
+            _state.value = state.value.copy(
+                editingContent = finalContent,
+                editingHistory = newHistory,
+                editingHistoryIndex = newHistory.lastIndex,
+                isBoldActive = finalContent.annotatedString.getSpanStyles(selection.start, selection.end).any { it.item.fontWeight == FontWeight.Bold },
+                isItalicActive = finalContent.annotatedString.getSpanStyles(selection.start, selection.end).any { it.item.fontStyle == FontStyle.Italic },
+                isUnderlineActive = finalContent.annotatedString.getSpanStyles(selection.start, selection.end).any { it.item.textDecoration == TextDecoration.Underline }
+            )
+        }
+        is NotesEvent.ApplyStyleToContent -> {
+            val selection = state.value.editingContent.selection
+            if (selection.collapsed) {
+                val currentStyles = state.value.activeStyles.toMutableSet()
+                val styleToAddOrRemove = event.style
+
+                val existingStyle = currentStyles.find { it.fontWeight == styleToAddOrRemove.fontWeight && it.fontStyle == styleToAddOrRemove.fontStyle && it.textDecoration == styleToAddOrRemove.textDecoration }
+
+                if (existingStyle != null) {
+                    currentStyles.remove(existingStyle)
+                } else {
+                    currentStyles.add(styleToAddOrRemove)
+                }
+                _state.value = state.value.copy(activeStyles = currentStyles)
+            } else {
                 val newAnnotatedString = AnnotatedString.Builder(state.value.editingContent.annotatedString).apply {
                     addStyle(event.style, selection.start, selection.end)
                 }.toAnnotatedString()
@@ -203,157 +248,162 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     editingContent = state.value.editingContent.copy(annotatedString = newAnnotatedString)
                 )
             }
-            is NotesEvent.OnColorChange -> {
-                _state.value = state.value.copy(editingColor = event.color)
+        }
+        is NotesEvent.OnColorChange -> {
+            _state.value = state.value.copy(editingColor = event.color)
+        }
+        is NotesEvent.OnLabelChange -> {
+            viewModelScope.launch {
+                labelDao.insertLabel(Label(event.label))
+                _state.value = state.value.copy(editingLabel = event.label)
             }
-            is NotesEvent.OnLabelChange -> {
-                viewModelScope.launch {
-                    labelDao.insertLabel(Label(event.label))
-                    _state.value = state.value.copy(editingLabel = event.label)
-                }
-            }
-            is NotesEvent.OnTogglePinClick -> {
-                viewModelScope.launch {
-                    state.value.expandedNoteId?.let { noteId ->
-                        noteDao.getNoteById(noteId)?.let { note ->
-                            val updatedNote = note.copy(isPinned = !note.isPinned)
-                            noteDao.insertNote(updatedNote)
-                            val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
-                            _state.value = state.value.copy(
-                                isPinned = updatedNote.isPinned,
-                                notes = updatedNotesList
-                            )
-                        }
+        }
+        is NotesEvent.OnTogglePinClick -> {
+            viewModelScope.launch {
+                state.value.expandedNoteId?.let { noteId ->
+                    noteDao.getNoteById(noteId)?.let { note ->
+                        val updatedNote = note.copy(isPinned = !note.isPinned)
+                        noteDao.insertNote(updatedNote)
+                        val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
+                        _state.value = state.value.copy(
+                            isPinned = updatedNote.isPinned,
+                            notes = updatedNotesList
+                        )
                     }
                 }
             }
-            is NotesEvent.OnToggleArchiveClick -> {
-                viewModelScope.launch {
-                    state.value.expandedNoteId?.let { noteId ->
-                        noteDao.getNoteById(noteId)?.let { note ->
-                            val updatedNote = note.copy(isArchived = !note.isArchived)
-                            noteDao.insertNote(updatedNote)
-                            val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
-                            _state.value = state.value.copy(
-                                isArchived = updatedNote.isArchived,
-                                notes = updatedNotesList
-                            )
-                        }
+        }
+        is NotesEvent.OnToggleArchiveClick -> {
+            viewModelScope.launch {
+                state.value.expandedNoteId?.let { noteId ->
+                    noteDao.getNoteById(noteId)?.let { note ->
+                        val updatedNote = note.copy(isArchived = !note.isArchived)
+                        noteDao.insertNote(updatedNote)
+                        val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
+                        _state.value = state.value.copy(
+                            isArchived = updatedNote.isArchived,
+                            notes = updatedNotesList
+                        )
                     }
                 }
             }
-            is NotesEvent.OnUndoClick -> {
-                if (state.value.editingHistoryIndex > 0) {
-                    val newIndex = state.value.editingHistoryIndex - 1
-                    val (title, content) = state.value.editingHistory[newIndex]
-                    _state.value = state.value.copy(
-                        editingTitle = title,
-                        editingContent = content,
-                        editingHistoryIndex = newIndex
-                    )
-                }
+        }
+        is NotesEvent.OnUndoClick -> {
+            if (state.value.editingHistoryIndex > 0) {
+                val newIndex = state.value.editingHistoryIndex - 1
+                val (title, content) = state.value.editingHistory[newIndex]
+                _state.value = state.value.copy(
+                    editingTitle = title,
+                    editingContent = content,
+                    editingHistoryIndex = newIndex
+                )
             }
-            is NotesEvent.OnRedoClick -> {
-                if (state.value.editingHistoryIndex < state.value.editingHistory.lastIndex) {
-                    val newIndex = state.value.editingHistoryIndex + 1
-                    val (title, content) = state.value.editingHistory[newIndex]
-                    _state.value = state.value.copy(
-                        editingTitle = title,
-                        editingContent = content,
-                        editingHistoryIndex = newIndex
-                    )
-                }
+        }
+        is NotesEvent.OnRedoClick -> {
+            if (state.value.editingHistoryIndex < state.value.editingHistory.lastIndex) {
+                val newIndex = state.value.editingHistoryIndex + 1
+                val (title, content) = state.value.editingHistory[newIndex]
+                _state.value = state.value.copy(
+                    editingTitle = title,
+                    editingContent = content,
+                    editingHistoryIndex = newIndex
+                )
             }
-            is NotesEvent.OnSaveNoteClick -> {
-                viewModelScope.launch {
-                    val noteId = state.value.expandedNoteId
-                    if (noteId == null) return@launch
+        }
+        is NotesEvent.OnSaveNoteClick -> {
+            viewModelScope.launch {
+                val noteId = state.value.expandedNoteId
+                if (noteId == null) return@launch
 
-                    val title = state.value.editingTitle
-                    val content = HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
+                val title = state.value.editingTitle
+                val content = HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
 
-                    if (title.isBlank() && content.isBlank()) {
-                        if (noteId != -1) { // It's an existing note, so delete it
-                            noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
-                        }
-                    } else {
-                        val currentTime = System.currentTimeMillis()
-                        val note = if (noteId == -1) { // New note
-                            Note(
+                if (title.isBlank() && content.isBlank()) {
+                    if (noteId != -1) { // It's an existing note, so delete it
+                        noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
+                    }
+                } else {
+                    val currentTime = System.currentTimeMillis()
+                    val note = if (noteId == -1) { // New note
+                        Note(
+                            title = title,
+                            content = content,
+                            createdAt = currentTime,
+                            lastEdited = currentTime,
+                            color = state.value.editingColor,
+                            isPinned = state.value.isPinned,
+                            isArchived = state.value.isArchived,
+                            label = state.value.editingLabel
+                        )
+                    } else { // Existing note
+                        noteDao.getNoteById(noteId)?.let { existingNote ->
+                            existingNote.copy(
                                 title = title,
                                 content = content,
-                                createdAt = currentTime,
                                 lastEdited = currentTime,
                                 color = state.value.editingColor,
                                 isPinned = state.value.isPinned,
                                 isArchived = state.value.isArchived,
                                 label = state.value.editingLabel
                             )
-                        } else { // Existing note
-                            noteDao.getNoteById(noteId)?.let { existingNote ->
-                                existingNote.copy(
-                                    title = title,
-                                    content = content,
-                                    lastEdited = currentTime,
-                                    color = state.value.editingColor,
-                                    isPinned = state.value.isPinned,
-                                    isArchived = state.value.isArchived,
-                                    label = state.value.editingLabel
-                                )
-                            }
-                        }
-                        if (note != null) {
-                            noteDao.insertNote(note)
                         }
                     }
+                    if (note != null) {
+                        noteDao.insertNote(note)
+                    }
+                }
 
-                    // Reset editing state and collapse
-                    _state.value = state.value.copy(
-                        expandedNoteId = null,
-                        editingTitle = "",
-                        editingContent = TextFieldValue(),
-                        editingColor = 0,
-                        editingIsNewNote = true,
-                        editingLastEdited = 0,
-                        editingHistory = listOf("" to TextFieldValue()),
-                        editingHistoryIndex = 0,
-                        isPinned = false,
-                        isArchived = false,
-                        editingLabel = null
-                    )
-                }
-            }
-            is NotesEvent.OnDeleteNoteClick -> {
-                viewModelScope.launch {
-                    state.value.expandedNoteId?.let {
-                        if (it != -1) {
-                            noteDao.getNoteById(it)?.let { note ->
-                                noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
-                            }
-                        }
-                    }
-                    _state.value = state.value.copy(expandedNoteId = null)
-                }
-            }
-            is NotesEvent.OnCopyCurrentNoteClick -> {
-                viewModelScope.launch {
-                    state.value.expandedNoteId?.let {
-                        noteDao.getNoteById(it)?.let { note ->
-                            val copiedNote = note.copy(id = 0, title = "${note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
-                            noteDao.insertNote(copiedNote)
-                        }
-                    }
-                }
-            }
-            is NotesEvent.OnAddLabelsToCurrentNoteClick -> {
-                _state.value = state.value.copy(showLabelDialog = true)
-            }
-            is NotesEvent.DismissLabelDialog -> {
-                _state.value = state.value.copy(showLabelDialog = false)
-            }
-            is NotesEvent.FilterByLabel -> {
-                _state.value = state.value.copy(filteredLabel = event.label)
+                // Reset editing state and collapse
+                _state.value = state.value.copy(
+                    expandedNoteId = null,
+                    editingTitle = "",
+                    editingContent = TextFieldValue(),
+                    editingColor = 0,
+                    editingIsNewNote = true,
+                    editingLastEdited = 0,
+                    editingHistory = listOf("" to TextFieldValue()),
+                    editingHistoryIndex = 0,
+                    isPinned = false,
+                    isArchived = false,
+                    editingLabel = null,
+                    isBoldActive = false,
+                    isItalicActive = false,
+                    isUnderlineActive = false,
+                    activeStyles = emptySet()
+                )
             }
         }
+        is NotesEvent.OnDeleteNoteClick -> {
+            viewModelScope.launch {
+                state.value.expandedNoteId?.let {
+                    if (it != -1) {
+                        noteDao.getNoteById(it)?.let { note ->
+                            noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
+                        }
+                    }
+                }
+                _state.value = state.value.copy(expandedNoteId = null)
+            }
+        }
+        is NotesEvent.OnCopyCurrentNoteClick -> {
+            viewModelScope.launch {
+                state.value.expandedNoteId?.let {
+                    noteDao.getNoteById(it)?.let { note ->
+                        val copiedNote = note.copy(id = 0, title = "${note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
+                        noteDao.insertNote(copiedNote)
+                    }
+                }
+            }
+        }
+        is NotesEvent.OnAddLabelsToCurrentNoteClick -> {
+            _state.value = state.value.copy(showLabelDialog = true)
+        }
+        is NotesEvent.DismissLabelDialog -> {
+            _state.value = state.value.copy(showLabelDialog = false)
+        }
+        is NotesEvent.FilterByLabel -> {
+            _state.value = state.value.copy(filteredLabel = event.label)
+        }
     }
+}
 }
