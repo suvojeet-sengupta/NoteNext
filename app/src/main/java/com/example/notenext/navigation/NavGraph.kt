@@ -70,7 +70,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
             enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
             exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
         ) {
-            val binViewModel: BinViewModel = factory.create(BinViewModel::class.java)
+            val binViewModel: BinViewModel = androidx.lifecycle.viewmodel.compose.viewModel(factory = factory)
             BinScreen(
                 viewModel = binViewModel,
                 onNavigateBack = { navController.popBackStack() }
