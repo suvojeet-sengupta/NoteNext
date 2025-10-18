@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 
-class BinViewModel(private val noteDao: NoteDao) : ViewModel() {
+class BinViewModel(private val noteDao: NoteDao, private val savedStateHandle: androidx.lifecycle.SavedStateHandle) : ViewModel() {
 
     private val _state = MutableStateFlow(BinState())
     val state = _state.asStateFlow()

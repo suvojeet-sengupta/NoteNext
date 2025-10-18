@@ -29,7 +29,7 @@ class ViewModelFactory(private val noteDao: NoteDao, private val labelDao: Label
         }
         if (modelClass.isAssignableFrom(BinViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return BinViewModel(noteDao) as T
+            return BinViewModel(noteDao, savedStateHandle) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
