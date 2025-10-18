@@ -82,12 +82,6 @@ fun NoteItem(
                     maxLines = 10,
                     overflow = TextOverflow.Ellipsis
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "DEBUG_HTML: [${note.content}]",
-                    fontSize = 10.sp,
-                    color = androidx.compose.ui.graphics.Color.Red
-                )
             }
 
             if (!note.label.isNullOrEmpty()) {

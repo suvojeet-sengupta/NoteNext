@@ -1,5 +1,7 @@
 package com.example.notenext.ui.notes
 
+import android.text.Spannable
+import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.StyleSpan
 import android.text.style.UnderlineSpan
@@ -14,60 +16,39 @@ import androidx.core.text.HtmlCompat
 object HtmlConverter {
 
     fun annotatedStringToHtml(annotatedString: AnnotatedString): String {
-        val text = annotatedString.text
-        val spans = annotatedString.spanStyles
+        val spanned = annotatedStringToSpanned(annotatedString)
+        return HtmlCompat.toHtml(spanned, HtmlCompat.TO_HTML_PARAGRAPH_LINES_CONSECUTIVE)
+    }
 
-        if (spans.isEmpty()) {
-            return text.replace("\n", "<br>").replace("\n", "<br>")
-        }
+    private fun annotatedStringToSpanned(annotatedString: AnnotatedString): Spanned {
+        val spannable = SpannableStringBuilder(annotatedString.text)
+        annotatedString.spanStyles.forEach { range ->
+            val style = range.item
+            if (style.fontWeight == FontWeight.Bold && style.fontStyle == FontStyle.Italic) {
+                spannable.setSpan(StyleSpan(android.graphics.Typeface.BOLD_ITALIC), range.start, range.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            } else if (style.fontWeight == FontWeight.Bold) {
+                spannable.setSpan(StyleSpan(android.graphics.Typeface.BOLD), range.start, range.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            } else if (style.fontStyle == FontStyle.Italic) {
+                spannable.setSpan(StyleSpan(android.graphics.Typeface.ITALIC), range.start, range.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
 
-        val events = mutableListOf<Pair<Int, String>>()
-        spans.forEach {
-            val style = it.item
-            if (style.fontWeight == FontWeight.Bold) {
-                events.add(it.start to "<b>")
-                events.add(it.end to "</b>")
-            }
-            if (style.fontStyle == FontStyle.Italic) {
-                events.add(it.start to "<i>")
-                events.add(it.end to "</i>")
-            }
             if (style.textDecoration == TextDecoration.Underline) {
-                events.add(it.start to "<u>")
-                events.add(it.end to "</u>")
+                spannable.setSpan(UnderlineSpan(), range.start, range.end, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
             }
         }
-
-        // Sort events by index. If indices are same, closing tags must come first to ensure proper nesting.
-        events.sortWith(compareBy({ it.first }, { if (it.second.startsWith("</")) 0 else 1 }))
-
-        val sb = StringBuilder()
-        var lastIndex = 0
-        events.forEach { (index, tag) ->
-            if (index > lastIndex) {
-                sb.append(text.substring(lastIndex, index))
-            }
-            sb.append(tag)
-            lastIndex = index
-        }
-
-        if (lastIndex < text.length) {
-            sb.append(text.substring(lastIndex))
-        }
-
-        return sb.toString().replace("\n", "<br>").replace("\n", "<br>")
+        return spannable
     }
 
     fun htmlToAnnotatedString(html: String): AnnotatedString {
-        val spanned = HtmlCompat.fromHtml(html.replace("<br>", "\n"), HtmlCompat.FROM_HTML_MODE_LEGACY)
+        val spanned = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
         return buildAnnotatedString {
             append(spanned.toString())
-            spanned.getSpans(0, spanned.length, Any::class.java).forEach {
-                val start = spanned.getSpanStart(it)
-                val end = spanned.getSpanEnd(it)
-                when (it) {
+            spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
+                val start = spanned.getSpanStart(span)
+                val end = spanned.getSpanEnd(span)
+                when (span) {
                     is StyleSpan -> {
-                        when (it.style) {
+                        when (span.style) {
                             android.graphics.Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
                             android.graphics.Typeface.ITALIC -> addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
                             android.graphics.Typeface.BOLD_ITALIC -> addStyle(SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic), start, end)
