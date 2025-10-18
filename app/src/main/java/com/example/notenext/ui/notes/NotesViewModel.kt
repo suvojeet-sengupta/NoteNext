@@ -200,22 +200,30 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 val insertedTextLength = newContent.text.length - oldContent.text.length
                 val insertedTextStart = newContent.selection.start - insertedTextLength
                 if (insertedTextStart >= 0) {
-                    val builder = newContent.annotatedString.toBuilder()
                     val styleToApply = state.value.activeStyles.reduceOrNull { acc, spanStyle -> acc.merge(spanStyle) } ?: SpanStyle()
-                    builder.addStyle(styleToApply, insertedTextStart, newContent.selection.start)
-                    finalContent = newContent.copy(annotatedString = builder.toAnnotatedString())
+                    val newAnnotatedString = buildAnnotatedString {
+                        append(oldContent.annotatedString.subSequence(0, insertedTextStart))
+                        withStyle(style = styleToApply) {
+                            append(newContent.text.substring(insertedTextStart, newContent.selection.start))
+                        }
+                        if (insertedTextStart < oldContent.annotatedString.length) {
+                            append(oldContent.annotatedString.subSequence(insertedTextStart, oldContent.annotatedString.length))
+                        }
+                    }
+                    finalContent = newContent.copy(annotatedString = newAnnotatedString)
                 }
             }
 
             val selection = finalContent.selection
+            val styles = finalContent.annotatedString.getSpanStyles(selection.start, selection.end)
             val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
             _state.value = state.value.copy(
                 editingContent = finalContent,
                 editingHistory = newHistory,
                 editingHistoryIndex = newHistory.lastIndex,
-                isBoldActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontWeight == FontWeight.Bold && selection.start >= style.start && selection.end <= style.end },
-                isItalicActive = finalContent.annotatedString.spanStyles.any { style -> style.item.fontStyle == FontStyle.Italic && selection.start >= style.start && selection.end <= style.end },
-                isUnderlineActive = finalContent.annotatedString.spanStyles.any { style -> style.item.textDecoration == TextDecoration.Underline && selection.start >= style.start && selection.end <= style.end }
+                isBoldActive = styles.any { it.item.fontWeight == FontWeight.Bold },
+                isItalicActive = styles.any { it.item.fontStyle == FontStyle.Italic },
+                isUnderlineActive = styles.any { it.item.textDecoration == TextDecoration.Underline }
             )
         }
         is NotesEvent.ApplyStyleToContent -> {
