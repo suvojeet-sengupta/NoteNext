@@ -27,17 +27,29 @@ class BinViewModel(private val noteDao: NoteDao) : ViewModel() {
         when (event) {
             is BinEvent.RestoreNote -> {
                 viewModelScope.launch {
-                    noteDao.updateNote(event.note.copy(isBinned = false))
+                    try {
+                        noteDao.updateNote(event.note.copy(isBinned = false))
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
             is BinEvent.DeleteNotePermanently -> {
                 viewModelScope.launch {
-                    noteDao.deleteNote(event.note)
+                    try {
+                        noteDao.deleteNote(event.note)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
             is BinEvent.EmptyBin -> {
                 viewModelScope.launch {
-                    noteDao.emptyBin()
+                    try {
+                        noteDao.emptyBin()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
                 }
             }
         }

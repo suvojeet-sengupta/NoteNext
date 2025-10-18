@@ -62,7 +62,10 @@ fun BinScreen(
                 LazyColumn(
                     modifier = Modifier.fillMaxSize()
                 ) {
-                    items(state.notes) { note ->
+                    items(
+                        items = state.notes,
+                        key = { note -> note.id }
+                    ) { note ->
                         NoteItem(
                             note = note,
                             onNoteClick = { /* No-op for bin */ },
