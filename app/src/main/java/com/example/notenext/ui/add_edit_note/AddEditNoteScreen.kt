@@ -363,7 +363,7 @@ fun AddEditNoteScreen(
                     
                                 BottomAppBar(
                                     containerColor = Color(state.editingColor),
-                                    windowInsets = WindowInsets.Empty
+                                    windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
                                 ) {
                                     Row(
                                         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
