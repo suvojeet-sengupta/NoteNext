@@ -100,7 +100,7 @@ fun AddEditNoteScreen(
     var showColorPicker by remember { mutableStateOf(false) }
     var showFormatBar by remember { mutableStateOf(false) }
     var showMoreOptions by remember { mutableStateOf(false) }
-    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
+    val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
     val scrollState = rememberScrollState()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -203,9 +203,10 @@ fun AddEditNoteScreen(
                     .background(Color(state.editingColor))
                     .verticalScroll(scrollState)
             ) {
+                val titleTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
                 TextField(
                     value = state.editingTitle,
-                    onValueChange = { newTitle -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
+                    onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
                     placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
                     modifier = Modifier
                         .fillMaxWidth(),
@@ -221,9 +222,10 @@ fun AddEditNoteScreen(
                             backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
                         )
                     ),
-                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor)
                 )
                 Spacer(modifier = Modifier.height(8.dp))
+                val contentTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
                 TextField(
                     value = state.editingContent,
                     onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
@@ -242,7 +244,7 @@ fun AddEditNoteScreen(
                             backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
                         )
                     ),
-                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentTextColor)
                 )
                                     if (!state.editingIsNewNote && !state.editingLabel.isNullOrBlank()) {
                                         Spacer(modifier = Modifier.height(16.dp))
@@ -461,6 +463,15 @@ fun AddEditNoteScreen(
                                                                 .fillMaxHeight(0.45f)
                                                                 .padding(vertical = 16.dp)
                                                         ) {
+                                                            if (!state.editingIsNewNote && state.editingLastEdited != 0L) {
+                                                                Text(
+                                                                    text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
+                                                                    style = MaterialTheme.typography.labelSmall,
+                                                                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                                                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                                                )
+                                                                Divider() // Add a divider for separation
+                                                            }
                                                             ListItem(
                                                                 headlineContent = { Text("Delete") },
                                                                 leadingContent = { Icon(Icons.Default.Delete, contentDescription = "Delete") },
