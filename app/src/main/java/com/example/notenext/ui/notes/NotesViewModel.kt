@@ -57,6 +57,7 @@ class NotesViewModel(
                 val noteToBin = event.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
                 noteDao.updateNote(noteToBin)
                 recentlyDeletedNote = event.note
+                _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
             }
         }
         is NotesEvent.RestoreNote -> {
@@ -95,6 +96,7 @@ class NotesViewModel(
                     noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
+                _events.emit(NotesUiEvent.ShowToast("${selectedNotes.size} notes moved to Bin"))
             }
         }
         is NotesEvent.ArchiveSelectedNotes -> {
@@ -478,6 +480,7 @@ class NotesViewModel(
                     if (it != -1) {
                         noteDao.getNoteById(it)?.let { note ->
                             noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
+                            _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
                         }
                     }
                 }

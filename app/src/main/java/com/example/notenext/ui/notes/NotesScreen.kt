@@ -78,6 +78,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.notenext.data.Note
@@ -124,6 +125,10 @@ fun NotesScreen(
                     }
                     val chooser = Intent.createChooser(intent, "Send notes via")
                     context.startActivity(chooser)
+                }
+
+                is NotesUiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
             }
         }
