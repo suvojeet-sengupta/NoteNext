@@ -17,6 +17,8 @@ import com.example.notenext.data.NoteDao
 import com.example.notenext.ui.notes.HtmlConverter
 import com.example.notenext.data.LinkPreview
 import com.example.notenext.data.LinkPreviewRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -264,25 +266,20 @@ class NotesViewModel(
 
             // Link detection
             val urlRegex = "(https?://[\\w.-]+\\.[a-zA-Z]{2,}(?:/[^\\s]*)?)".toRegex()
-            val detectedUrls = urlRegex.findAll(finalContent.text).map { it.value }.toList()
-            val currentLinkUrls = state.value.linkPreviews.map { it.url }
+            val detectedUrls = urlRegex.findAll(finalContent.text).map { it.value }.toSet() // Use Set for efficient lookup
 
-            // Remove previews for links that are no longer in the content
-            val updatedLinkPreviews = state.value.linkPreviews.filter { detectedUrls.contains(it.url) }.toMutableList()
+            val existingLinkPreviews = state.value.linkPreviews.filter { detectedUrls.contains(it.url) }
+            val newUrlsToFetch = detectedUrls.filter { url -> existingLinkPreviews.none { it.url == url } }
 
-            // Fetch new link previews
-            detectedUrls.forEach { url ->
-                if (!currentLinkUrls.contains(url)) {
-                    viewModelScope.launch {
-                        val linkPreview = linkPreviewRepository.getLinkPreview(url)
-                        // Directly update the state with the new link preview
-                        _state.value = _state.value.copy(
-                            linkPreviews = _state.value.linkPreviews + linkPreview
-                        )
-                    }
-                }
+            viewModelScope.launch {
+                val fetchedNewLinkPreviews = newUrlsToFetch.map { url ->
+                    async { linkPreviewRepository.getLinkPreview(url) }
+                }.awaitAll()
+
+                val combinedLinkPreviews = (existingLinkPreviews + fetchedNewLinkPreviews).distinctBy { it.url }
+
+                _state.value = _state.value.copy(linkPreviews = combinedLinkPreviews)
             }
-            _state.value = state.value.copy(linkPreviews = updatedLinkPreviews)
         }
         is NotesEvent.ApplyStyleToContent -> {
             val selection = state.value.editingContent.selection
