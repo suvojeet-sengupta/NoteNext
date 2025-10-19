@@ -15,6 +15,8 @@ import com.example.notenext.data.LabelDao
 import com.example.notenext.data.Note
 import com.example.notenext.data.NoteDao
 import com.example.notenext.ui.notes.HtmlConverter
+import com.example.notenext.data.LinkPreview
+import com.example.notenext.data.LinkPreviewRepository
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
@@ -23,7 +25,11 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
-class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDao) : ViewModel() {
+class NotesViewModel(
+    private val noteDao: NoteDao,
+    private val labelDao: LabelDao,
+    private val linkPreviewRepository: LinkPreviewRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
     val state = _state.asStateFlow()
@@ -253,6 +259,28 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                 isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
                 isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
             )
+
+            // Link detection
+            val urlRegex = "(https?://[\\w.-]+\\.[a-zA-Z]{2,}(?:/[^\\s]*)?)".toRegex()
+            val detectedUrls = urlRegex.findAll(finalContent.text).map { it.value }.toList()
+            val currentLinkUrls = state.value.linkPreviews.map { it.url }
+
+            // Remove previews for links that are no longer in the content
+            val updatedLinkPreviews = state.value.linkPreviews.filter { detectedUrls.contains(it.url) }.toMutableList()
+
+            // Fetch new link previews
+            detectedUrls.forEach { url ->
+                if (!currentLinkUrls.contains(url)) {
+                    viewModelScope.launch {
+                        val linkPreview = linkPreviewRepository.getLinkPreview(url)
+                        // Directly update the state with the new link preview
+                        _state.value = _state.value.copy(
+                            linkPreviews = _state.value.linkPreviews + linkPreview
+                        )
+                    }
+                }
+            }
+            _state.value = state.value.copy(linkPreviews = updatedLinkPreviews)
         }
         is NotesEvent.ApplyStyleToContent -> {
             val selection = state.value.editingContent.selection
@@ -438,7 +466,8 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
                     isBoldActive = false,
                     isItalicActive = false,
                     isUnderlineActive = false,
-                    activeStyles = emptySet()
+                    activeStyles = emptySet(),
+                    linkPreviews = emptyList()
                 )
             }
         }
@@ -473,6 +502,7 @@ class NotesViewModel(private val noteDao: NoteDao, private val labelDao: LabelDa
         is NotesEvent.FilterByLabel -> {
             _state.value = state.value.copy(filteredLabel = event.label)
         }
+        else -> {}
     }
 }
 

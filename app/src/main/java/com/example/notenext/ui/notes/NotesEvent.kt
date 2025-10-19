@@ -4,6 +4,7 @@ package com.example.notenext.ui.notes
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.notenext.data.Note
+import com.example.notenext.data.LinkPreview
 
 sealed class NotesEvent {
     data class DeleteNote(val note: Note) : NotesEvent()
@@ -38,4 +39,7 @@ sealed class NotesEvent {
     data class OnLabelChange(val label: String) : NotesEvent()
     object DismissLabelDialog : NotesEvent()
     data class FilterByLabel(val label: String?) : NotesEvent()
+
+    data class OnLinkDetected(val url: String) : NotesEvent()
+    data class OnLinkPreviewFetched(val url: String, val title: String?, val description: String?, val imageUrl: String?) : NotesEvent()
 }

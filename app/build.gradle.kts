@@ -97,6 +97,12 @@ dependencies {
     // Coil
     implementation("io.coil-kt:coil-compose:2.7.0")
 
+    // Jsoup for HTML parsing
+    implementation("org.jsoup:jsoup:1.21.2")
+
+    // Gson for JSON serialization/deserialization
+    implementation("com.google.code.gson:gson:2.13.2")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.7.0")

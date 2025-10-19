@@ -28,6 +28,7 @@ import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.Switch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -45,6 +46,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -60,6 +62,7 @@ enum class ThemeMode {
 object PreferencesKeys {
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val AUTO_DELETE_DAYS = intPreferencesKey("auto_delete_days")
+    val ENABLE_RICH_LINK_PREVIEW = booleanPreferencesKey("enable_rich_link_preview")
 }
 
 class SettingsRepository(private val context: Context) {
@@ -89,6 +92,19 @@ class SettingsRepository(private val context: Context) {
             preferences[PreferencesKeys.AUTO_DELETE_DAYS] = days
         }
     }
+
+    val enableRichLinkPreview: Flow<Boolean> = context.dataStore.data
+        .map {
+            preferences ->
+            preferences[PreferencesKeys.ENABLE_RICH_LINK_PREVIEW] ?: false
+        }
+
+    suspend fun saveEnableRichLinkPreview(enable: Boolean) {
+        context.dataStore.edit {
+            preferences ->
+            preferences[PreferencesKeys.ENABLE_RICH_LINK_PREVIEW] = enable
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -100,6 +116,7 @@ fun SettingsScreen(onBackClick: () -> Unit) {
 
     val selectedThemeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
     val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
+    val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
@@ -138,6 +155,31 @@ fun SettingsScreen(onBackClick: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("Rich Link Preview", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Show preview for links in notes",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = enableRichLinkPreview,
+                        onCheckedChange = {
+                            scope.launch {
+                                settingsRepository.saveEnableRichLinkPreview(it)
+                            }
+                        }
+                    )
                 }
             }
 

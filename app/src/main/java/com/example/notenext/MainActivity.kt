@@ -12,12 +12,14 @@ import com.example.notenext.navigation.NavGraph
 import com.example.notenext.ui.settings.SettingsRepository
 import com.example.notenext.ui.settings.ThemeMode
 import com.example.notenext.ui.theme.NoteNextTheme
+import com.example.notenext.data.LinkPreviewRepository
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val database = NoteDatabase.getDatabase(this)
-        val factory = ViewModelFactory(database.noteDao(), database.labelDao())
+        val linkPreviewRepository = LinkPreviewRepository()
+        val factory = ViewModelFactory(database.noteDao(), database.labelDao(), linkPreviewRepository)
         val settingsRepository = SettingsRepository(this)
 
         setContent {

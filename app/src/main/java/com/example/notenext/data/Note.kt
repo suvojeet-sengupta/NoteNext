@@ -19,5 +19,6 @@ data class Note(
     val isImportant: Boolean = false,
     val label: String? = null,
     val isBinned: Boolean = false,
-    val binnedOn: Long? = null
+    val binnedOn: Long? = null,
+    val linkPreviews: List<LinkPreview> = emptyList()
 )

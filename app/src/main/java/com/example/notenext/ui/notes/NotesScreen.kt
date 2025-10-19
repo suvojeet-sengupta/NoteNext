@@ -8,7 +8,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -89,6 +88,7 @@ import com.example.notenext.ui.components.LabelDialog
 import com.example.notenext.ui.components.NoteItem
 import com.example.notenext.ui.components.SearchBar
 import com.example.notenext.ui.settings.ThemeMode
+import com.example.notenext.ui.settings.SettingsRepository
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
@@ -99,7 +99,8 @@ fun NotesScreen(
     onArchiveClick: () -> Unit,
     onEditLabelsClick: () -> Unit,
     onBinClick: () -> Unit,
-    themeMode: ThemeMode
+    themeMode: ThemeMode,
+    settingsRepository: SettingsRepository
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -425,7 +426,8 @@ fun NotesScreen(
                 state = state,
                 onEvent = viewModel::onEvent,
                 onDismiss = { viewModel.onEvent(NotesEvent.CollapseNote) },
-                themeMode = themeMode
+                themeMode = themeMode,
+                settingsRepository = settingsRepository
             )
         }
     }

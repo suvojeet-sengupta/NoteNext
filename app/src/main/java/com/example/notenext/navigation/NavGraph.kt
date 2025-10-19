@@ -6,6 +6,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -17,10 +18,17 @@ import com.example.notenext.ui.labels.EditLabelsScreen
 import com.example.notenext.ui.notes.NotesScreen
 import com.example.notenext.ui.settings.SettingsScreen
 import com.example.notenext.ui.settings.ThemeMode
+import com.example.notenext.data.LinkPreviewRepository
+import com.example.notenext.ui.settings.SettingsRepository
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
     val navController = rememberNavController()
+    val context = LocalContext.current
+    val settingsRepository = remember { SettingsRepository(context) }
+    val linkPreviewRepository = remember { LinkPreviewRepository() }
+
     NavHost(navController = navController, startDestination = "notes") {
         composable(
             route = "notes",
@@ -28,12 +36,13 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
             exitTransition = { fadeOut(animationSpec = tween(300)) }
         ) {
             NotesScreen(
-                factory = factory,
+                factory = ViewModelFactory(factory.noteDao, factory.labelDao, linkPreviewRepository),
                 onSettingsClick = { navController.navigate("settings") },
                 onArchiveClick = { navController.navigate("archive") },
                 onEditLabelsClick = { navController.navigate("edit_labels") },
                 onBinClick = { navController.navigate("bin") },
-                themeMode = themeMode
+                themeMode = themeMode,
+                settingsRepository = settingsRepository
             )
         }
         composable(

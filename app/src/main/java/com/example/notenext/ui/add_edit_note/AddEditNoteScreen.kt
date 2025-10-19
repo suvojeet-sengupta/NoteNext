@@ -70,6 +70,16 @@ import android.content.Intent
 import com.example.notenext.ui.notes.NotesEvent
 import com.example.notenext.ui.notes.NotesState
 import com.example.notenext.ui.settings.ThemeMode
+import com.example.notenext.data.LinkPreview
+import com.example.notenext.ui.settings.SettingsRepository
+import com.example.notenext.ui.settings.PreferencesKeys
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.compose.runtime.collectAsState
+import coil.compose.AsyncImage
+import androidx.compose.foundation.text.ClickableText
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.platform.LocalUriHandler
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -79,7 +89,8 @@ fun AddEditNoteScreen(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
-    themeMode: ThemeMode
+    themeMode: ThemeMode,
+    settingsRepository: SettingsRepository
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -87,6 +98,7 @@ fun AddEditNoteScreen(
     var showMoreOptions by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
     val context = LocalContext.current
+    val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
 
     BackHandler {
         onDismiss()
@@ -219,284 +231,345 @@ fun AddEditNoteScreen(
                         ),
                         textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
                     )
-                    if (!state.editingIsNewNote && !state.editingLabel.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(
+                                        if (!state.editingIsNewNote && !state.editingLabel.isNullOrBlank()) {
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(horizontal = 16.dp)
+                                            ) {
+                                                Box(
+                                                    modifier = Modifier
+                                                        .background(
+                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                                            shape = MaterialTheme.shapes.small
+                                                        )
+                                                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                                                ) {
+                                                    Text(
+                                                        text = state.editingLabel,
+                                                        color = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                                        style = MaterialTheme.typography.bodyMedium
+                                                    )
+                                                }
+                                            }
+                                        }
+                    
+                                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                                            Spacer(modifier = Modifier.height(16.dp))
+                                            state.linkPreviews.forEach { linkPreview ->
+                                                LinkPreviewCard(linkPreview = linkPreview)
+                                                Spacer(modifier = Modifier.height(8.dp))
+                                            }
+                                        }
+                                    }
+                                }
+                    
+                                AnimatedVisibility(
+                                    visible = showFormatBar,
+                                    enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                                    exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+                                ) {
+                                    LazyRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(MaterialTheme.colorScheme.surface)
+                                            .padding(vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        item {
+                                            IconButton(
+                                                onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
+                                                colors = IconButtonDefaults.iconButtonColors(
+                                                    containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                                                )
+                                            ) {
+                                                Icon(Icons.Default.FormatBold, contentDescription = "Bold")
+                                            }
+                                        }
+                                        item {
+                                            IconButton(
+                                                onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
+                                                colors = IconButtonDefaults.iconButtonColors(
+                                                    containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                                                )
+                                            ) {
+                                                Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
+                                            }
+                                        }
+                                        item {
+                                            IconButton(
+                                                onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
+                                                colors = IconButtonDefaults.iconButtonColors(
+                                                    containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                                                )
+                                            ) {
+                                                Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
+                                            }
+                                        }
+                                    }
+                                }
+                    
+                                AnimatedVisibility(
+                                    visible = showColorPicker,
+                                    enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                                    exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+                                ) {
+                                    LazyRow(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .background(MaterialTheme.colorScheme.surface)
+                                            .padding(vertical = 8.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        items(colors) { color ->
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .clip(CircleShape)
+                                                    .background(Color(color), CircleShape)
+                                                    .border(
+                                                        width = 2.dp,
+                                                        color = if (state.editingColor == color) contentColorFor(backgroundColor = Color(color)) else Color.Transparent,
+                                                        shape = CircleShape
+                                                    )
+                                                    .clickable { onEvent(NotesEvent.OnColorChange(color)) },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                if (state.editingColor == color) {
+                                                    Icon(
+                                                        Icons.Default.Check,
+                                                        contentDescription = "Selected",
+                                                        tint = contentColorFor(backgroundColor = Color(color))
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                    
+                                BottomAppBar(
+                                    containerColor = Color(state.editingColor)
+                                ) {
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            FloatingActionButton(
+                                                onClick = { showColorPicker = !showColorPicker },
+                                                shape = CircleShape,
+                                                modifier = Modifier.size(40.dp),
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            ) {
+                                                Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                                            }
+                                            FloatingActionButton(
+                                                onClick = { showFormatBar = !showFormatBar },
+                                                shape = CircleShape,
+                                                modifier = Modifier.size(40.dp),
+                                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                            ) {
+                                                Icon(Icons.Default.TextFields, contentDescription = "Toggle format bar")
+                                            }
+                                        }
+                                        Row(
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalAlignment = Alignment.CenterVertically
+                                        ) {
+                                            if (state.editingHistory.size > 1) {
+                                                Row(
+                                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                                ) {
+                                                    // Undo Button
+                                                    FloatingActionButton(
+                                                        onClick = { onEvent(NotesEvent.OnUndoClick) },
+                                                        shape = CircleShape,
+                                                        modifier = Modifier.size(40.dp),
+                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                                        contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.AutoMirrored.Rounded.Undo,
+                                                            contentDescription = "Undo"
+                                                        )
+                                                    }
+                    
+                                                    // Redo Button
+                                                    FloatingActionButton(
+                                                        onClick = { onEvent(NotesEvent.OnRedoClick) },
+                                                        shape = CircleShape,
+                                                        modifier = Modifier.size(40.dp),
+                                                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                                        contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                                    ) {
+                                                        Icon(
+                                                            imageVector = Icons.AutoMirrored.Rounded.Redo,
+                                                            contentDescription = "Redo"
+                                                        )
+                                                    }
+                                                }
+                                            }
+                    
+                                            // 3-dot button
+                                            Box {
+                                                FloatingActionButton(
+                                                    onClick = { showMoreOptions = true },
+                                                    shape = CircleShape,
+                                                    modifier = Modifier.size(40.dp),
+                                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                                                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                                                ) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.MoreVert,
+                                                        contentDescription = "More options"
+                                                    )
+                                                }
+                    
+                                                DropdownMenu(
+                                                    expanded = showMoreOptions,
+                                                    onDismissRequest = { showMoreOptions = false }
+                                                ) {
+                                                    DropdownMenuItem(
+                                                        text = { Text("Delete") },
+                                                        onClick = {
+                                                            showDeleteDialog = true
+                                                            showMoreOptions = false
+                                                        },
+                                                        leadingIcon = {
+                                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Make a copy") },
+                                                        onClick = { onEvent(NotesEvent.OnCopyCurrentNoteClick); showMoreOptions = false },
+                                                        leadingIcon = {
+                                                            Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy")
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Share") },
+                                                        onClick = {
+                                                            val sendIntent: Intent = Intent().apply {
+                                                                action = Intent.ACTION_SEND
+                                                                putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent}")
+                                                                putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
+                                                                type = "text/plain"
+                                                            }
+                                                            val shareIntent = Intent.createChooser(sendIntent, null)
+                                                            context.startActivity(shareIntent)
+                                                            showMoreOptions = false
+                                                        },
+                                                        leadingIcon = {
+                                                            Icon(Icons.Default.Share, contentDescription = "Share")
+                                                        }
+                                                    )
+                                                    DropdownMenuItem(
+                                                        text = { Text("Labels") },
+                                                        onClick = { showMoreOptions = false; onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) },
+                                                        leadingIcon = {
+                                                            Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Labels")
+                                                        }
+                                                    )
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    
+                        if (showDeleteDialog) {
+                            AlertDialog(
+                                onDismissRequest = { showDeleteDialog = false },
+                                title = { Text("Delete Note") },
+                                text = { Text("Are you sure you want to delete this note?") },
+                                confirmButton = {
+                                    TextButton(
+                                        onClick = {
+                                            onEvent(NotesEvent.OnDeleteNoteClick)
+                                            showDeleteDialog = false
+                                        }
+                                    ) {
+                                        Text("Delete")
+                                    }
+                                },
+                                dismissButton = {
+                                    TextButton(onClick = { showDeleteDialog = false }) {
+                                        Text("Cancel")
+                                    }
+                                }
+                            )
+                        }
+                    
+                        if (state.showLabelDialog) {
+                            LabelDialog(
+                                labels = state.labels,
+                                onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
+                                onConfirm = { label ->
+                                    onEvent(NotesEvent.OnLabelChange(label))
+                                    onEvent(NotesEvent.DismissLabelDialog)
+                                }
+                            )
+                        }
+                    }
+                    
+                    @Composable
+                    fun LinkPreviewCard(linkPreview: LinkPreview) {
+                        val uriHandler = LocalUriHandler.current
+                    
+                        Card(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 16.dp)
+                                .clickable { linkPreview.url.let { uriHandler.openUri(it) } },
+                            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .background(
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                        shape = MaterialTheme.shapes.small
+                            Column(modifier = Modifier.padding(12.dp)) {
+                                linkPreview.imageUrl?.let { imageUrl ->
+                                    AsyncImage(
+                                        model = imageUrl,
+                                        contentDescription = "Link preview image",
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .height(150.dp)
+                                            .clip(MaterialTheme.shapes.medium)
                                     )
-                                    .padding(horizontal = 12.dp, vertical = 6.dp)
-                            ) {
-                                Text(
-                                    text = state.editingLabel,
-                                    color = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                    style = MaterialTheme.typography.bodyMedium
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            AnimatedVisibility(
-                visible = showFormatBar,
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-            ) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    item {
-                        IconButton(
-                            onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-                            )
-                        ) {
-                            Icon(Icons.Default.FormatBold, contentDescription = "Bold")
-                        }
-                    }
-                    item {
-                        IconButton(
-                            onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-                            )
-                        ) {
-                            Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
-                        }
-                    }
-                    item {
-                        IconButton(
-                            onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
-                            colors = IconButtonDefaults.iconButtonColors(
-                                containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
-                            )
-                        ) {
-                            Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
-                        }
-                    }
-                }
-            }
-
-            AnimatedVisibility(
-                visible = showColorPicker,
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-            ) {
-                LazyRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surface)
-                        .padding(vertical = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    items(colors) { color ->
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Color(color), CircleShape)
-                                .border(
-                                    width = 2.dp,
-                                    color = if (state.editingColor == color) contentColorFor(backgroundColor = Color(color)) else Color.Transparent,
-                                    shape = CircleShape
-                                )
-                                .clickable { onEvent(NotesEvent.OnColorChange(color)) },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (state.editingColor == color) {
-                                Icon(
-                                    Icons.Default.Check,
-                                    contentDescription = "Selected",
-                                    tint = contentColorFor(backgroundColor = Color(color))
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
-            BottomAppBar(
-                containerColor = Color(state.editingColor)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        FloatingActionButton(
-                            onClick = { showColorPicker = !showColorPicker },
-                            shape = CircleShape,
-                            modifier = Modifier.size(40.dp),
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ) {
-                            Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
-                        }
-                        FloatingActionButton(
-                            onClick = { showFormatBar = !showFormatBar },
-                            shape = CircleShape,
-                            modifier = Modifier.size(40.dp),
-                            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                        ) {
-                            Icon(Icons.Default.TextFields, contentDescription = "Toggle format bar")
-                        }
-                    }
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        if (state.editingHistory.size > 1) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(8.dp)
-                            ) {
-                                // Undo Button
-                                FloatingActionButton(
-                                    onClick = { onEvent(NotesEvent.OnUndoClick) },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                    contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Rounded.Undo,
-                                        contentDescription = "Undo"
-                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
-
-                                // Redo Button
-                                FloatingActionButton(
-                                    onClick = { onEvent(NotesEvent.OnRedoClick) },
-                                    shape = CircleShape,
-                                    modifier = Modifier.size(40.dp),
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                    contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Rounded.Redo,
-                                        contentDescription = "Redo"
+                                linkPreview.title?.let { title ->
+                                    Text(
+                                        text = title,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
+                                    Spacer(modifier = Modifier.height(4.dp))
                                 }
+                                linkPreview.description?.let { description ->
+                                    Text(
+                                        text = description,
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+                                ClickableText(
+                                    text = buildAnnotatedString {
+                                        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline)) {
+                                            append(linkPreview.url)
+                                        }
+                                    },
+                                    onClick = { uriHandler.openUri(linkPreview.url) },
+                                    style = MaterialTheme.typography.bodySmall
+                                )
                             }
                         }
-
-                        // 3-dot button
-                        Box {
-                            FloatingActionButton(
-                                onClick = { showMoreOptions = true },
-                                shape = CircleShape,
-                                modifier = Modifier.size(40.dp),
-                                containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                                contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.MoreVert,
-                                    contentDescription = "More options"
-                                )
-                            }
-
-                            DropdownMenu(
-                                expanded = showMoreOptions,
-                                onDismissRequest = { showMoreOptions = false }
-                            ) {
-                                DropdownMenuItem(
-                                    text = { Text("Delete") },
-                                    onClick = {
-                                        showDeleteDialog = true
-                                        showMoreOptions = false
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.Delete, contentDescription = "Delete")
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Make a copy") },
-                                    onClick = { onEvent(NotesEvent.OnCopyCurrentNoteClick); showMoreOptions = false },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy")
-                                    }
-                                )
-                                DropdownMenuItem(
-                                    text = { Text("Share") },
-                                    onClick = {
-                                        val sendIntent: Intent = Intent().apply {
-                                            action = Intent.ACTION_SEND
-                                            putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent}")
-                                            putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
-                                            type = "text/plain"
-                                        }
-                                        val shareIntent = Intent.createChooser(sendIntent, null)
-                                        context.startActivity(shareIntent)
-                                        showMoreOptions = false
-                                    },
-                                    leadingIcon = {
-                                        Icon(Icons.Default.Share, contentDescription = "Share")
-                                    }
-                                                                 )
-                                                                DropdownMenuItem(
-                                                                    text = { Text("Labels") },
-                                                                    onClick = { showMoreOptions = false; onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) },
-                                                                    leadingIcon = {
-                                                                        Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Labels")
-                                                                    }
-                                                                )
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
-                                
-                                    if (showDeleteDialog) {
-                                        AlertDialog(
-                                            onDismissRequest = { showDeleteDialog = false },
-                                            title = { Text("Delete Note") },
-                                            text = { Text("Are you sure you want to delete this note?") },
-                                            confirmButton = {
-                                                TextButton(
-                                                    onClick = {
-                                                        onEvent(NotesEvent.OnDeleteNoteClick)
-                                                        showDeleteDialog = false
-                                                    }
-                                                ) {
-                                                    Text("Delete")
-                                                }
-                                            },
-                                            dismissButton = {
-                                                TextButton(onClick = { showDeleteDialog = false }) {
-                                                    Text("Cancel")
-                                                }
-                                            }
-                                        )
-                                    }
-                                
-                                if (state.showLabelDialog) {
-                                    LabelDialog(
-                                        labels = state.labels,
-                                        onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
-                                        onConfirm = { label ->
-                                            onEvent(NotesEvent.OnLabelChange(label))
-                                            onEvent(NotesEvent.DismissLabelDialog)
-                                        }
-                                    )
-                                }                                }
+                    }
                                 
                                 @Composable
                                 fun LabelDialog(

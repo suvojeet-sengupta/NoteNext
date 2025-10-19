@@ -4,6 +4,7 @@ package com.example.notenext.ui.notes
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.example.notenext.data.Note
+import com.example.notenext.data.LinkPreview
 
 data class NotesState(
     val notes: List<Note> = emptyList(),
@@ -27,5 +28,6 @@ data class NotesState(
     val isBoldActive: Boolean = false,
     val isItalicActive: Boolean = false,
     val isUnderlineActive: Boolean = false,
-    val activeStyles: Set<SpanStyle> = emptySet()
+    val activeStyles: Set<SpanStyle> = emptySet(),
+    val linkPreviews: List<LinkPreview> = emptyList()
 )
