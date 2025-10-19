@@ -10,10 +10,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Check
@@ -183,85 +185,84 @@ fun AddEditNoteScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
+                .padding(padding)
         ) {
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(padding)
                     .background(Color(state.editingColor))
+                    .verticalScroll(rememberScrollState())
             ) {
-                item {
-                    TextField(
-                        value = state.editingTitle,
-                        onValueChange = { onEvent(NotesEvent.OnTitleChange(it)) },
-                        placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                            selectionColors = TextSelectionColors(
-                                handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
-                            )
-                        ),
-                        textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
-                    )
-                    Spacer(modifier = Modifier.height(8.dp))
-                    TextField(
-                        value = state.editingContent,
-                        onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
-                        placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
-                            disabledContainerColor = Color.Transparent,
-                            focusedIndicatorColor = Color.Transparent,
-                            unfocusedIndicatorColor = Color.Transparent,
-                            cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                            selectionColors = TextSelectionColors(
-                                handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
-                            )
-                        ),
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
-                    )
-                                        if (!state.editingIsNewNote && !state.editingLabel.isNullOrBlank()) {
-                                            Spacer(modifier = Modifier.height(16.dp))
-                                            Row(
+                TextField(
+                    value = state.editingTitle,
+                    onValueChange = { onEvent(NotesEvent.OnTitleChange(it)) },
+                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                        selectionColors = TextSelectionColors(
+                            handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                        )
+                    ),
+                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                TextField(
+                    value = state.editingContent,
+                    onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
+                    placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    colors = TextFieldDefaults.colors(
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        disabledContainerColor = Color.Transparent,
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                        selectionColors = TextSelectionColors(
+                            handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                            backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                        )
+                    ),
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(color = contentColorFor(backgroundColor = Color(state.editingColor)))
+                )
+                                    if (!state.editingIsNewNote && !state.editingLabel.isNullOrBlank()) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(horizontal = 16.dp)
+                                        ) {
+                                            Box(
                                                 modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .padding(horizontal = 16.dp)
-                                            ) {
-                                                Box(
-                                                    modifier = Modifier
-                                                        .background(
-                                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                                                            shape = MaterialTheme.shapes.small
-                                                        )
-                                                        .padding(horizontal = 12.dp, vertical = 6.dp)
-                                                ) {
-                                                    Text(
-                                                        text = state.editingLabel,
-                                                        color = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                                        style = MaterialTheme.typography.bodyMedium
+                                                    .background(
+                                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                                                        shape = MaterialTheme.shapes.small
                                                     )
-                                                }
+                                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                                            ) {
+                                                Text(
+                                                    text = state.editingLabel,
+                                                    color = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                                    style = MaterialTheme.typography.bodyMedium
+                                                )
                                             }
                                         }
-                    
-                                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                                            Spacer(modifier = Modifier.height(16.dp))
-                                            state.linkPreviews.forEach { linkPreview ->
-                                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                                                Spacer(modifier = Modifier.height(8.dp))
-                                            }
+                                    }
+                
+                                    if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                                        Spacer(modifier = Modifier.height(16.dp))
+                                        state.linkPreviews.forEach { linkPreview ->
+                                            LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                            Spacer(modifier = Modifier.height(8.dp))
                                         }
                                     }
                                 }
