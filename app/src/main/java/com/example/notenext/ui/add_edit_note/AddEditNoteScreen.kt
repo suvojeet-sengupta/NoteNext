@@ -105,6 +105,7 @@ fun AddEditNoteScreen(
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
+    val sheetState = rememberModalBottomSheetState()
 
     BackHandler {
         onDismiss()
@@ -443,51 +444,80 @@ fun AddEditNoteScreen(
                                                     )
                                                 }
                     
-                                                DropdownMenu(
-                                                    expanded = showMoreOptions,
-                                                    onDismissRequest = { showMoreOptions = false }
-                                                ) {
-                                                    DropdownMenuItem(
-                                                        text = { Text("Delete") },
-                                                        onClick = {
-                                                            showDeleteDialog = true
-                                                            showMoreOptions = false
-                                                        },
-                                                        leadingIcon = {
-                                                            Icon(Icons.Default.Delete, contentDescription = "Delete")
-                                                        }
-                                                    )
-                                                    DropdownMenuItem(
-                                                        text = { Text("Make a copy") },
-                                                        onClick = { onEvent(NotesEvent.OnCopyCurrentNoteClick); showMoreOptions = false },
-                                                        leadingIcon = {
-                                                            Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy")
-                                                        }
-                                                    )
-                                                    DropdownMenuItem(
-                                                        text = { Text("Share") },
-                                                        onClick = {
-                                                            val sendIntent: Intent = Intent().apply {
-                                                                action = Intent.ACTION_SEND
-                                                                putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent}")
-                                                                putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
-                                                                type = "text/plain"
+                                                if (showMoreOptions) {
+                                                    ModalBottomSheet(
+                                                        onDismissRequest = {
+                                                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                                if (!sheetState.isVisible) {
+                                                                    showMoreOptions = false
+                                                                }
                                                             }
-                                                            val shareIntent = Intent.createChooser(sendIntent, null)
-                                                            context.startActivity(shareIntent)
-                                                            showMoreOptions = false
                                                         },
-                                                        leadingIcon = {
-                                                            Icon(Icons.Default.Share, contentDescription = "Share")
+                                                        sheetState = sheetState
+                                                    ) {
+                                                        Column(
+                                                            modifier = Modifier
+                                                                .fillMaxWidth()
+                                                                .fillMaxHeight(0.45f)
+                                                                .padding(vertical = 16.dp)
+                                                        ) {
+                                                            ListItem(
+                                                                headlineContent = { Text("Delete") },
+                                                                leadingContent = { Icon(Icons.Default.Delete, contentDescription = "Delete") },
+                                                                modifier = Modifier.clickable {
+                                                                    showDeleteDialog = true
+                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                                        if (!sheetState.isVisible) {
+                                                                            showMoreOptions = false
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                            ListItem(
+                                                                headlineContent = { Text("Make a copy") },
+                                                                leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy") },
+                                                                modifier = Modifier.clickable {
+                                                                    onEvent(NotesEvent.OnCopyCurrentNoteClick)
+                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                                        if (!sheetState.isVisible) {
+                                                                            showMoreOptions = false
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                            ListItem(
+                                                                headlineContent = { Text("Share") },
+                                                                leadingContent = { Icon(Icons.Default.Share, contentDescription = "Share") },
+                                                                modifier = Modifier.clickable {
+                                                                    val sendIntent: Intent = Intent().apply {
+                                                                        action = Intent.ACTION_SEND
+                                                                        putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent}")
+                                                                        putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
+                                                                        type = "text/plain"
+                                                                    }
+                                                                    val shareIntent = Intent.createChooser(sendIntent, null)
+                                                                    context.startActivity(shareIntent)
+                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                                        if (!sheetState.isVisible) {
+                                                                            showMoreOptions = false
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
+                                                            ListItem(
+                                                                headlineContent = { Text("Labels") },
+                                                                leadingContent = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Labels") },
+                                                                modifier = Modifier.clickable {
+                                                                    onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
+                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                                        if (!sheetState.isVisible) {
+                                                                            showMoreOptions = false
+                                                                        }
+                                                                    }
+                                                                }
+                                                            )
                                                         }
-                                                    )
-                                                    DropdownMenuItem(
-                                                        text = { Text("Labels") },
-                                                        onClick = { showMoreOptions = false; onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) },
-                                                        leadingIcon = {
-                                                            Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Labels")
-                                                        }
-                                                    )
+                                                    }
                                                 }
                                             }
                                         }
