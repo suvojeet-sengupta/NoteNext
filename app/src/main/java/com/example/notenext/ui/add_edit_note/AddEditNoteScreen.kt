@@ -154,6 +154,7 @@ fun AddEditNoteScreen(
     }
 
     Scaffold(
+        modifier = Modifier.imePadding(),
         topBar = {
             TopAppBar(
                 title = { Text(if (state.editingIsNewNote) "Add Note" else "") },
@@ -193,7 +194,6 @@ fun AddEditNoteScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .imePadding()
                 .padding(padding)
         ) {
             Column(
