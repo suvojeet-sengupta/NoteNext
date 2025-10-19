@@ -66,6 +66,7 @@ import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
 import android.content.Intent
+import androidx.compose.ui.platform.LocalClipboardManager
 
 import com.example.notenext.ui.notes.NotesEvent
 import com.example.notenext.ui.notes.NotesState
@@ -258,7 +259,7 @@ fun AddEditNoteScreen(
                                         if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
                                             Spacer(modifier = Modifier.height(16.dp))
                                             state.linkPreviews.forEach { linkPreview ->
-                                                LinkPreviewCard(linkPreview = linkPreview)
+                                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
                                                 Spacer(modifier = Modifier.height(8.dp))
                                             }
                                         }
@@ -520,9 +521,11 @@ fun AddEditNoteScreen(
                     }
                     
                     @Composable
-                    fun LinkPreviewCard(linkPreview: LinkPreview) {
+                    fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                         val uriHandler = LocalUriHandler.current
-                    
+                        val clipboardManager = LocalClipboardManager.current
+                        var showMenu by remember { mutableStateOf(false) }
+
                         Card(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -531,6 +534,46 @@ fun AddEditNoteScreen(
                             colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                         ) {
                             Column(modifier = Modifier.padding(12.dp)) {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    linkPreview.title?.let { title ->
+                                        Text(
+                                            text = title,
+                                            style = MaterialTheme.typography.titleMedium,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                            modifier = Modifier.weight(1f)
+                                        )
+                                    }
+                                    Box {
+                                        IconButton(onClick = { showMenu = true }) {
+                                            Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                                        }
+                                        DropdownMenu(
+                                            expanded = showMenu,
+                                            onDismissRequest = { showMenu = false }
+                                        ) {
+                                            DropdownMenuItem(
+                                                text = { Text("Remove preview") },
+                                                onClick = {
+                                                    onEvent(NotesEvent.OnRemoveLinkPreview(linkPreview.url))
+                                                    showMenu = false
+                                                },
+                                                leadingIcon = { Icon(Icons.Default.Delete, contentDescription = "Remove preview") }
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text("Copy URL") },
+                                                onClick = {
+                                                    clipboardManager.setText(AnnotatedString(linkPreview.url))
+                                                    showMenu = false
+                                                },
+                                                leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = "Copy URL") }
+                                            )
+                                        }
+                                    }
+                                }
                                 linkPreview.imageUrl?.let { imageUrl ->
                                     AsyncImage(
                                         model = imageUrl,
@@ -541,14 +584,6 @@ fun AddEditNoteScreen(
                                             .clip(MaterialTheme.shapes.medium)
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
-                                }
-                                linkPreview.title?.let { title ->
-                                    Text(
-                                        text = title,
-                                        style = MaterialTheme.typography.titleMedium,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                    Spacer(modifier = Modifier.height(4.dp))
                                 }
                                 linkPreview.description?.let { description ->
                                     Text(

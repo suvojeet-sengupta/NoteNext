@@ -167,7 +167,8 @@ class NotesViewModel(
                             isArchived = note.isArchived,
                             editingLabel = note.label,
                             editingHistory = listOf(note.title to TextFieldValue(content)),
-                            editingHistoryIndex = 0
+                            editingHistoryIndex = 0,
+                            linkPreviews = note.linkPreviews
                         )
                     }
                 } else {
@@ -180,7 +181,8 @@ class NotesViewModel(
                         editingLastEdited = 0,
                         editingHistory = listOf("" to TextFieldValue()),
                         editingHistoryIndex = 0,
-                        editingLabel = null
+                        editingLabel = null,
+                        linkPreviews = emptyList()
                     )
                 }
             }
@@ -430,7 +432,8 @@ class NotesViewModel(
                             color = state.value.editingColor,
                             isPinned = state.value.isPinned,
                             isArchived = state.value.isArchived,
-                            label = state.value.editingLabel
+                            label = state.value.editingLabel,
+                            linkPreviews = state.value.linkPreviews
                         )
                     } else { // Existing note
                         noteDao.getNoteById(noteId)?.let { existingNote ->
@@ -441,7 +444,8 @@ class NotesViewModel(
                                 color = state.value.editingColor,
                                 isPinned = state.value.isPinned,
                                 isArchived = state.value.isArchived,
-                                label = state.value.editingLabel
+                                label = state.value.editingLabel,
+                                linkPreviews = state.value.linkPreviews
                             )
                         }
                     }
@@ -501,6 +505,10 @@ class NotesViewModel(
         }
         is NotesEvent.FilterByLabel -> {
             _state.value = state.value.copy(filteredLabel = event.label)
+        }
+        is NotesEvent.OnRemoveLinkPreview -> {
+            val updatedLinkPreviews = state.value.linkPreviews.filter { it.url != event.url }
+            _state.value = state.value.copy(linkPreviews = updatedLinkPreviews)
         }
         else -> {}
     }
