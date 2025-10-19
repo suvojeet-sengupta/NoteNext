@@ -85,6 +85,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.platform.LocalUriHandler
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -100,11 +101,19 @@ fun AddEditNoteScreen(
     var showFormatBar by remember { mutableStateOf(false) }
     var showMoreOptions by remember { mutableStateOf(false) }
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()) }
+    val scrollState = rememberScrollState()
+    val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
 
     BackHandler {
         onDismiss()
+    }
+
+    LaunchedEffect(state.editingContent) {
+        if (state.editingContent.selection.end == state.editingContent.text.length) {
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
     }
 
     val darkNoteColors = listOf(
@@ -191,11 +200,11 @@ fun AddEditNoteScreen(
                 modifier = Modifier
                     .weight(1f)
                     .background(Color(state.editingColor))
-                    .verticalScroll(rememberScrollState())
+                    .verticalScroll(scrollState)
             ) {
                 TextField(
                     value = state.editingTitle,
-                    onValueChange = { onEvent(NotesEvent.OnTitleChange(it)) },
+                    onValueChange = { newTitle -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
                     placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
                     modifier = Modifier
                         .fillMaxWidth(),
