@@ -1,7 +1,9 @@
 package com.suvojeet.notenext.ui.notes
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -256,42 +258,50 @@ fun NotesScreen(
         ) {
             Scaffold(
                 topBar = {
-                    if (isSelectionModeActive) {
-                        ContextualTopAppBar(
-                            selectedItemCount = state.selectedNoteIds.size,
-                            onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                            onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                            onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                            onColorClick = { /* TODO */ },
-                            onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                            onDeleteClick = { showDeleteDialog = true },
-                            onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                            onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                            onLabelClick = { showLabelDialog = true }
-                        )
-                    } else {
-                        TopAppBar(
-                            title = {
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    SearchBar(
-                                        searchQuery = searchQuery,
-                                        isSearchActive = isSearchActive,
-                                        onSearchQueryChange = { searchQuery = it },
-                                        onSearchActiveChange = { isSearchActive = it },
-                                        onLayoutToggleClick = { /*TODO*/ },
-                                        onSortClick = { /*TODO*/ }
-                                    )
-                                }
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                }
-                            },
-                            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent
+                    AnimatedContent(
+                        targetState = isSelectionModeActive,
+                        transitionSpec = {
+                            fadeIn(animationSpec = tween(220, delayMillis = 90)).togetherWith(fadeOut(animationSpec = tween(90)))
+                        },
+                        label = "TopAppBar Animation"
+                    ) { targetState ->
+                        if (targetState) {
+                            ContextualTopAppBar(
+                                selectedItemCount = state.selectedNoteIds.size,
+                                onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                                onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                                onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                                onColorClick = { /* TODO */ },
+                                onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                                onDeleteClick = { showDeleteDialog = true },
+                                onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                                onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                                onLabelClick = { showLabelDialog = true }
                             )
-                        )
+                        } else {
+                            TopAppBar(
+                                title = {
+                                    Row(modifier = Modifier.fillMaxWidth()) {
+                                        SearchBar(
+                                            searchQuery = searchQuery,
+                                            isSearchActive = isSearchActive,
+                                            onSearchQueryChange = { searchQuery = it },
+                                            onSearchActiveChange = { isSearchActive = it },
+                                            onLayoutToggleClick = { /*TODO*/ },
+                                            onSortClick = { /*TODO*/ }
+                                        )
+                                    }
+                                },
+                                navigationIcon = {
+                                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                    }
+                                },
+                                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                                    containerColor = Color.Transparent
+                                )
+                            )
+                        }
                     }
                 },
                 floatingActionButton = {
