@@ -574,15 +574,14 @@ private fun MoreOptionsItem(
 ) {
     Column(
         modifier = modifier
-            .shadow(
-                elevation = 8.dp,
-                shape = MaterialTheme.shapes.medium,
-                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
-                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                shape = MaterialTheme.shapes.medium
             )
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
-            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
+            .background(Color.Transparent)
             .padding(vertical = 12.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
