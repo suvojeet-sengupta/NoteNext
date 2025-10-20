@@ -53,7 +53,7 @@ fun SearchBar(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(51.dp)
+            .height(56.dp)
             .padding(horizontal = 18.dp, vertical = 8.dp),
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
