@@ -14,6 +14,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -57,11 +60,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.selection.TextSelectionColors
@@ -458,75 +463,62 @@ fun AddEditNoteScreen(
                                                         sheetState = sheetState
                                                     ) {
                                                         Column(
-                                                            modifier = Modifier
-                                                                .fillMaxWidth()
-                                                                .fillMaxHeight(0.45f)
-                                                                .padding(vertical = 16.dp)
+                                                            modifier = Modifier.fillMaxWidth(),
+                                                            horizontalAlignment = Alignment.CenterHorizontally
                                                         ) {
                                                             if (!state.editingIsNewNote && state.editingLastEdited != 0L) {
                                                                 Text(
                                                                     text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
                                                                     style = MaterialTheme.typography.labelSmall,
                                                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                                                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                                                                    modifier = Modifier.padding(vertical = 16.dp)
                                                                 )
-                                                                Divider() // Add a divider for separation
+                                                                Divider()
                                                             }
-                                                            ListItem(
-                                                                headlineContent = { Text("Delete") },
-                                                                leadingContent = { Icon(Icons.Default.Delete, contentDescription = "Delete") },
-                                                                modifier = Modifier.clickable {
-                                                                    showDeleteDialog = true
-                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                                                        if (!sheetState.isVisible) {
-                                                                            showMoreOptions = false
-                                                                        }
-                                                                    }
-                                                                }
+
+                                                            val options = listOf(
+                                                                "Delete" to Icons.Default.Delete,
+                                                                "Make a copy" to Icons.Default.ContentCopy,
+                                                                "Share" to Icons.Default.Share,
+                                                                "Labels" to Icons.AutoMirrored.Filled.Label
                                                             )
-                                                            ListItem(
-                                                                headlineContent = { Text("Make a copy") },
-                                                                leadingContent = { Icon(Icons.Default.ContentCopy, contentDescription = "Make a copy") },
-                                                                modifier = Modifier.clickable {
-                                                                    onEvent(NotesEvent.OnCopyCurrentNoteClick)
-                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                                                        if (!sheetState.isVisible) {
-                                                                            showMoreOptions = false
+
+                                                            LazyVerticalGrid(
+                                                                columns = GridCells.Adaptive(minSize = 100.dp),
+                                                                contentPadding = PaddingValues(16.dp),
+                                                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                                                modifier = Modifier.fillMaxHeight(0.45f)
+                                                            ) {
+                                                                items(options) { (label, icon) ->
+                                                                    MoreOptionsItem(
+                                                                        icon = icon,
+                                                                        label = label,
+                                                                        onClick = {
+                                                                            scope.launch { sheetState.hide() }.invokeOnCompletion {
+                                                                                if (!sheetState.isVisible) {
+                                                                                    showMoreOptions = false
+                                                                                }
+                                                                            }
+                                                                            when (label) {
+                                                                                "Delete" -> showDeleteDialog = true
+                                                                                "Make a copy" -> onEvent(NotesEvent.OnCopyCurrentNoteClick)
+                                                                                "Share" -> {
+                                                                                    val sendIntent: Intent = Intent().apply {
+                                                                                        action = Intent.ACTION_SEND
+                                                                                        putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent.text}")
+                                                                                        putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
+                                                                                        type = "text/plain"
+                                                                                    }
+                                                                                    val shareIntent = Intent.createChooser(sendIntent, null)
+                                                                                    context.startActivity(shareIntent)
+                                                                                }
+                                                                                "Labels" -> onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
+                                                                            }
                                                                         }
-                                                                    }
+                                                                    )
                                                                 }
-                                                            )
-                                                            ListItem(
-                                                                headlineContent = { Text("Share") },
-                                                                leadingContent = { Icon(Icons.Default.Share, contentDescription = "Share") },
-                                                                modifier = Modifier.clickable {
-                                                                    val sendIntent: Intent = Intent().apply {
-                                                                        action = Intent.ACTION_SEND
-                                                                        putExtra(Intent.EXTRA_TEXT, "${state.editingTitle}\n\n${state.editingContent}")
-                                                                        putExtra(Intent.EXTRA_SUBJECT, state.editingTitle)
-                                                                        type = "text/plain"
-                                                                    }
-                                                                    val shareIntent = Intent.createChooser(sendIntent, null)
-                                                                    context.startActivity(shareIntent)
-                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                                                        if (!sheetState.isVisible) {
-                                                                            showMoreOptions = false
-                                                                        }
-                                                                    }
-                                                                }
-                                                            )
-                                                            ListItem(
-                                                                headlineContent = { Text("Labels") },
-                                                                leadingContent = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Labels") },
-                                                                modifier = Modifier.clickable {
-                                                                    onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
-                                                                    scope.launch { sheetState.hide() }.invokeOnCompletion {
-                                                                        if (!sheetState.isVisible) {
-                                                                            showMoreOptions = false
-                                                                        }
-                                                                    }
-                                                                }
-                                                            )
+                                                            }
                                                         }
                                                     }
                                                 }
@@ -572,6 +564,37 @@ fun AddEditNoteScreen(
                         }
                     }
                     
+                    @Composable
+private fun MoreOptionsItem(
+    icon: ImageVector,
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.medium)
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 8.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = label,
+            modifier = Modifier.size(24.dp),
+            tint = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(modifier = Modifier.height(8.dp))
+        Text(
+            text = label,
+            style = MaterialTheme.typography.labelMedium,
+            textAlign = TextAlign.Center,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
                     @Composable
                     fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                         val uriHandler = LocalUriHandler.current
