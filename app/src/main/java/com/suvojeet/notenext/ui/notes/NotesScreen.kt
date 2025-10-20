@@ -109,6 +109,7 @@ fun NotesScreen(
     var isSearchActive by remember { mutableStateOf(false) }
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
     var showLabelDialog by remember { mutableStateOf(false) }
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -263,7 +264,7 @@ fun NotesScreen(
                             onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
                             onColorClick = { /* TODO */ },
                             onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                            onDeleteClick = { viewModel.onEvent(NotesEvent.DeleteSelectedNotes) },
+                            onDeleteClick = { showDeleteDialog = true },
                             onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
                             onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
                             onLabelClick = { showLabelDialog = true }
@@ -302,6 +303,29 @@ fun NotesScreen(
                     )
                 }
             ) { padding ->
+                val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
+                if (showDeleteDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showDeleteDialog = false },
+                        title = { Text("Move notes to bin?") },
+                        text = { Text("Selected notes will be moved to the bin and permanently deleted after ${autoDeleteDays} days.") },
+                        confirmButton = {
+                            TextButton(
+                                onClick = {
+                                    viewModel.onEvent(NotesEvent.DeleteSelectedNotes)
+                                    showDeleteDialog = false
+                                }
+                            ) {
+                                Text("Move to bin")
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showDeleteDialog = false }) {
+                                Text("Cancel")
+                            }
+                        }
+                    )
+                }
                 if (showLabelDialog) {
                     LabelDialog(
                         labels = state.labels,

@@ -531,10 +531,11 @@ fun AddEditNoteScreen(
                         }
                     
                         if (showDeleteDialog) {
+                            val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
                             AlertDialog(
                                 onDismissRequest = { showDeleteDialog = false },
-                                title = { Text("Delete Note") },
-                                text = { Text("Are you sure you want to delete this note?") },
+                                title = { Text("Move note to bin?") },
+                                text = { Text("This note will be moved to the bin and will be permanently deleted after $autoDeleteDays days.") },
                                 confirmButton = {
                                     TextButton(
                                         onClick = {
@@ -542,7 +543,7 @@ fun AddEditNoteScreen(
                                             showDeleteDialog = false
                                         }
                                     ) {
-                                        Text("Delete")
+                                        Text("Move to bin")
                                     }
                                 },
                                 dismissButton = {
