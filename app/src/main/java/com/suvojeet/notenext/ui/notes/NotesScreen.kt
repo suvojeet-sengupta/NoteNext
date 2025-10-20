@@ -161,6 +161,16 @@ fun NotesScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     NavigationDrawerItem(
+                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
+                        label = { Text("Notes") },
+                        selected = state.filteredLabel == null,
+                        onClick = {
+                            scope.launch { drawerState.close() }
+                            viewModel.onEvent(NotesEvent.FilterByLabel(null))
+                        },
+                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                    )
+                    NavigationDrawerItem(
                         icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
                         label = { Text("Archive") },
                         selected = false,
@@ -229,16 +239,6 @@ fun NotesScreen(
                             }
                         }
 
-                        NavigationDrawerItem(
-                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "All Notes") },
-                            label = { Text("All Notes") },
-                            selected = state.filteredLabel == null,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                viewModel.onEvent(NotesEvent.FilterByLabel(null))
-                            },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                        )
 
                         state.labels.forEach { label ->
                             NavigationDrawerItem(
