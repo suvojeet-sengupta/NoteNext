@@ -48,6 +48,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.suvojeet.notenext.ui.theme.ShapeFamily
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -63,6 +64,7 @@ object PreferencesKeys {
     val THEME_MODE = stringPreferencesKey("theme_mode")
     val AUTO_DELETE_DAYS = intPreferencesKey("auto_delete_days")
     val ENABLE_RICH_LINK_PREVIEW = booleanPreferencesKey("enable_rich_link_preview")
+    val SHAPE_FAMILY = stringPreferencesKey("shape_family")
 }
 
 class SettingsRepository(private val context: Context) {
@@ -105,6 +107,17 @@ class SettingsRepository(private val context: Context) {
             preferences[PreferencesKeys.ENABLE_RICH_LINK_PREVIEW] = enable
         }
     }
+
+    val shapeFamily: Flow<ShapeFamily> = context.dataStore.data
+        .map { preferences ->
+            ShapeFamily.valueOf(preferences[PreferencesKeys.SHAPE_FAMILY] ?: ShapeFamily.EXPRESSIVE.name)
+        }
+
+    suspend fun saveShapeFamily(shapeFamily: ShapeFamily) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHAPE_FAMILY] = shapeFamily.name
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -120,6 +133,7 @@ fun SettingsScreen(onBackClick: () -> Unit) {
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
+    var showShapeFamilyDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
@@ -181,6 +195,23 @@ fun SettingsScreen(onBackClick: () -> Unit) {
                         }
                     )
                 }
+
+                val selectedShapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { showShapeFamilyDialog = true }
+                        .padding(vertical = 16.dp)
+                ) {
+                    Column {
+                        Text("Shape Family", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            selectedShapeFamily.name.lowercase().replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
             }
 
             HorizontalDivider()
@@ -240,6 +271,61 @@ fun SettingsScreen(onBackClick: () -> Unit) {
             onDismiss = { showAutoDeleteDialog = false }
         )
     }
+
+    val selectedShapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
+    AnimatedVisibility(
+        visible = showShapeFamilyDialog,
+        enter = scaleIn(animationSpec = tween(200)),
+        exit = scaleOut(animationSpec = tween(200))
+    ) {
+        ShapeFamilyChooserDialog(
+            selectedShapeFamily = selectedShapeFamily,
+            onShapeFamilySelected = { shapeFamily ->
+                scope.launch {
+                    settingsRepository.saveShapeFamily(shapeFamily)
+                    showShapeFamilyDialog = false
+                }
+            },
+            onDismiss = { showShapeFamilyDialog = false }
+        )
+    }
+}
+
+@Composable
+private fun ShapeFamilyChooserDialog(
+    selectedShapeFamily: ShapeFamily,
+    onShapeFamilySelected: (ShapeFamily) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose Shape Family") },
+        text = {
+            Column {
+                ShapeFamily.values().forEach { shapeFamily ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onShapeFamilySelected(shapeFamily) }
+                            .padding(vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (shapeFamily == selectedShapeFamily),
+                            onClick = null
+                        )
+                        Spacer(modifier = Modifier.width(16.dp))
+                        Text(shapeFamily.name.lowercase().replaceFirstChar { it.uppercase() })
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 @Composable
