@@ -58,6 +58,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -573,8 +574,15 @@ private fun MoreOptionsItem(
 ) {
     Column(
         modifier = modifier
+            .shadow(
+                elevation = 8.dp,
+                shape = MaterialTheme.shapes.medium,
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            )
             .clip(MaterialTheme.shapes.medium)
             .clickable(onClick = onClick)
+            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.8f))
             .padding(vertical = 12.dp, horizontal = 8.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
