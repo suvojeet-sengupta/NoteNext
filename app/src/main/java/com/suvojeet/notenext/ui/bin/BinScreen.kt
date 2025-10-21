@@ -48,11 +48,13 @@ import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.components.NoteItem
 
+import androidx.compose.material.icons.filled.Menu
+
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun BinScreen(
     viewModel: BinViewModel,
-    onNavigateBack: () -> Unit
+    onMenuClick: () -> Unit
 ) {
     val state by viewModel.state.collectAsState()
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
@@ -71,8 +73,8 @@ fun BinScreen(
                     TopAppBar(
                         title = { Text(stringResource(id = R.string.bin_title)) },
                         navigationIcon = {
-                            IconButton(onClick = onNavigateBack) {
-                                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                            IconButton(onClick = onMenuClick) {
+                                Icon(Icons.Default.Menu, contentDescription = "Menu")
                             }
                         }
                     )

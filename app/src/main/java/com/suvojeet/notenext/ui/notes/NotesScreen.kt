@@ -103,7 +103,8 @@ fun NotesScreen(
     onEditLabelsClick: () -> Unit,
     onBinClick: () -> Unit,
     themeMode: ThemeMode,
-    settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    onMenuClick: () -> Unit
 ) {
     val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -114,8 +115,6 @@ fun NotesScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-    val drawerState = rememberDrawerState(DrawerValue.Closed)
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -137,9 +136,8 @@ fun NotesScreen(
         }
     }
 
-    BackHandler(enabled = isSearchActive || isSelectionModeActive || drawerState.isOpen || state.expandedNoteId != null) {
+    BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
         when {
-            drawerState.isOpen -> scope.launch { drawerState.close() }
             isSelectionModeActive -> viewModel.onEvent(NotesEvent.ClearSelection)
             isSearchActive -> {
                 isSearchActive = false
@@ -150,305 +148,198 @@ fun NotesScreen(
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        ModalNavigationDrawer(
-            drawerState = drawerState,
-            drawerContent = {
-                ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
-                    Text(
-                        text = "NoteNext",
-                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
-                        modifier = Modifier.padding(16.dp)
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    NavigationDrawerItem(
-                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
-                        label = { Text("Notes") },
-                        selected = state.filteredLabel == null,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            viewModel.onEvent(NotesEvent.FilterByLabel(null))
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-                    NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
-                        label = { Text("Archive") },
-                        selected = false,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            onArchiveClick()
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-                    NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
-                        label = { Text("Bin") },
-                        selected = false,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            onBinClick()
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-                    NavigationDrawerItem(
-                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-                        label = { Text("Settings") },
-                        selected = false,
-                        onClick = {
-                            scope.launch { drawerState.close() }
-                            onSettingsClick()
-                        },
-                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                    )
-
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-                    if (state.labels.isEmpty()) {
-                        NavigationDrawerItem(
-                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Create new label") },
-                            label = { Text("Create new label") },
-                            selected = false,
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                onEditLabelsClick()
-                            },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        Scaffold(
+            topBar = {
+                AnimatedContent(
+                    targetState = isSelectionModeActive,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(220, delayMillis = 90)).togetherWith(fadeOut(animationSpec = tween(90)))
+                    },
+                    label = "TopAppBar Animation"
+                ) { targetState ->
+                    if (targetState) {
+                        ContextualTopAppBar(
+                            selectedItemCount = state.selectedNoteIds.size,
+                            onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
+                            onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
+                            onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                            onColorClick = { /* TODO */ },
+                            onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
+                            onDeleteClick = { showDeleteDialog = true },
+                            onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
+                            onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                            onLabelClick = { showLabelDialog = true }
                         )
                     } else {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Text(
-                                text = "LABELS",
-                                style = MaterialTheme.typography.labelSmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            IconButton(onClick = {
-                                scope.launch { drawerState.close() }
-                                onEditLabelsClick()
-                            }) {
-                                Icon(
-                                    imageVector = Icons.Default.Edit,
-                                    contentDescription = "Edit Labels",
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-
-                        state.labels.forEach { label ->
-                            NavigationDrawerItem(
-                                icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
-                                label = { Text(label) },
-                                selected = state.filteredLabel == label,
-                                onClick = {
-                                    scope.launch { drawerState.close() }
-                                    viewModel.onEvent(NotesEvent.FilterByLabel(label))
-                                },
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-                            )
-                        }
-                    }
-                }
-            }
-        ) {
-            Scaffold(
-                topBar = {
-                    AnimatedContent(
-                        targetState = isSelectionModeActive,
-                        transitionSpec = {
-                            fadeIn(animationSpec = tween(220, delayMillis = 90)).togetherWith(fadeOut(animationSpec = tween(90)))
-                        },
-                        label = "TopAppBar Animation"
-                    ) { targetState ->
-                        if (targetState) {
-                            ContextualTopAppBar(
-                                selectedItemCount = state.selectedNoteIds.size,
-                                onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
-                                onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                                onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
-                                onColorClick = { /* TODO */ },
-                                onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
-                                onDeleteClick = { showDeleteDialog = true },
-                                onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                                onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                                onLabelClick = { showLabelDialog = true }
-                            )
-                        } else {
-                            TopAppBar(
-                                title = {
-                                    Row(modifier = Modifier.fillMaxWidth()) {
-                                        SearchBar(
-                                            searchQuery = searchQuery,
-                                            isSearchActive = isSearchActive,
-                                            onSearchQueryChange = { searchQuery = it },
-                                            onSearchActiveChange = { isSearchActive = it },
-                                            onLayoutToggleClick = { /*TODO*/ },
-                                            onSortClick = { /*TODO*/ }
-                                        )
-                                    }
-                                },
-                                navigationIcon = {
-                                    IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                        Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                    }
-                                },
-                                colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                                    containerColor = Color.Transparent
-                                )
-                            )
-                        }
-                    }
-                },
-                floatingActionButton = {
-                    FloatingActionButton(
-                        onClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
-                        content = {
-                            Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-                        }
-                    )
-                }
-            ) { padding ->
-                val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
-                if (showDeleteDialog) {
-                    AlertDialog(
-                        onDismissRequest = { showDeleteDialog = false },
-                        title = { Text("Move notes to bin?") },
-                        text = { Text("Selected notes will be moved to the bin and permanently deleted after ${autoDeleteDays} days.") },
-                        confirmButton = {
-                            TextButton(
-                                onClick = {
-                                    viewModel.onEvent(NotesEvent.DeleteSelectedNotes)
-                                    showDeleteDialog = false
+                        TopAppBar(
+                            title = {
+                                Row(modifier = Modifier.fillMaxWidth()) {
+                                    SearchBar(
+                                        searchQuery = searchQuery,
+                                        isSearchActive = isSearchActive,
+                                        onSearchQueryChange = { searchQuery = it },
+                                        onSearchActiveChange = { isSearchActive = it },
+                                        onLayoutToggleClick = { /*TODO*/ },
+                                        onSortClick = { /*TODO*/ }
+                                    )
                                 }
-                            ) {
-                                Text("Move to bin")
-                            }
-                        },
-                        dismissButton = {
-                            TextButton(onClick = { showDeleteDialog = false }) {
-                                Text("Cancel")
-                            }
-                        }
-                    )
-                }
-                if (showLabelDialog) {
-                    LabelDialog(
-                        labels = state.labels,
-                        onDismiss = { showLabelDialog = false },
-                        onConfirm = { label ->
-                            viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
-                            showLabelDialog = false
-                        }
-                    )
-                }
-                Column(modifier = Modifier.padding(padding)) {
-                    Spacer(modifier = Modifier.height(8.dp))
-                    val notesToDisplay = if (state.filteredLabel == null) {
-                        state.notes
-                    } else {
-                        state.notes.filter { it.label == state.filteredLabel }
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = onMenuClick) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                            },
+                            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent
+                            )
+                        )
                     }
-
-                    if (notesToDisplay.isEmpty()) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize(),
-                            contentAlignment = Alignment.Center
+                }
+            },
+            floatingActionButton = {
+                FloatingActionButton(
+                    onClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
+                    content = {
+                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
+                    }
+                )
+            }
+        ) { padding ->
+            val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
+            if (showDeleteDialog) {
+                AlertDialog(
+                    onDismissRequest = { showDeleteDialog = false },
+                    title = { Text("Move notes to bin?") },
+                    text = { Text("Selected notes will be moved to the bin and permanently deleted after ${autoDeleteDays} days.") },
+                    confirmButton = {
+                        TextButton(
+                            onClick = {
+                                viewModel.onEvent(NotesEvent.DeleteSelectedNotes)
+                                showDeleteDialog = false
+                            }
                         ) {
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(
-                                    imageVector = Icons.Default.Info,
-                                    contentDescription = null,
-                                    modifier = Modifier.size(96.dp),
-                                    tint = MaterialTheme.colorScheme.onBackground
-                                )
-                                Spacer(modifier = Modifier.height(16.dp))
+                            Text("Move to bin")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showDeleteDialog = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
+            }
+            if (showLabelDialog) {
+                LabelDialog(
+                    labels = state.labels,
+                    onDismiss = { showLabelDialog = false },
+                    onConfirm = { label ->
+                        viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
+                        showLabelDialog = false
+                    }
+                )
+            }
+            Column(modifier = Modifier.padding(padding)) {
+                Spacer(modifier = Modifier.height(8.dp))
+                val notesToDisplay = if (state.filteredLabel == null) {
+                    state.notes
+                } else {
+                    state.notes.filter { it.label == state.filteredLabel }
+                }
+
+                if (notesToDisplay.isEmpty()) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            Icon(
+                                imageVector = Icons.Default.Info,
+                                contentDescription = null,
+                                modifier = Modifier.size(96.dp),
+                                tint = MaterialTheme.colorScheme.onBackground
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            Text(
+                                text = "No notes yet. Tap the '+' button to add one.",
+                                textAlign = TextAlign.Center,
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onBackground,
+                                modifier = Modifier.padding(horizontal = 32.dp)
+                            )
+                        }
+                    }
+                } else {
+                    val filteredNotes = notesToDisplay.filter { note ->
+                        !note.isArchived && (note.title.contains(searchQuery, ignoreCase = true) || note.content.contains(searchQuery, ignoreCase = true))
+                    }
+                    val pinnedNotes = filteredNotes.filter { it.isPinned }
+                    val otherNotes = filteredNotes.filter { !it.isPinned }
+
+                    LazyVerticalStaggeredGrid(
+                        columns = StaggeredGridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalItemSpacing = 8.dp
+                    ) {
+                        if (pinnedNotes.isNotEmpty()) {
+                            item(span = StaggeredGridItemSpan.FullLine) {
                                 Text(
-                                    text = "No notes yet. Tap the '+' button to add one.",
-                                    textAlign = TextAlign.Center,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    color = MaterialTheme.colorScheme.onBackground,
-                                    modifier = Modifier.padding(horizontal = 32.dp)
+                                    text = "PINNED",
+                                    modifier = Modifier.padding(8.dp),
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            StaggeredGridItems(pinnedNotes, key = { it.id }) { note ->
+                                val isExpanded = state.expandedNoteId == note.id
+                                NoteItem(
+                                    modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                    note = note,
+                                    isSelected = state.selectedNoteIds.contains(note.id),
+                                    onNoteClick = {
+                                        if (isSelectionModeActive) {
+                                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                        } else {
+                                            viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                        }
+                                    },
+                                    onNoteLongClick = {
+                                        viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                    }
                                 )
                             }
                         }
-                    } else {
-                        val filteredNotes = notesToDisplay.filter { note ->
-                            !note.isArchived && (note.title.contains(searchQuery, ignoreCase = true) || note.content.contains(searchQuery, ignoreCase = true))
-                        }
-                        val pinnedNotes = filteredNotes.filter { it.isPinned }
-                        val otherNotes = filteredNotes.filter { !it.isPinned }
 
-                        LazyVerticalStaggeredGrid(
-                            columns = StaggeredGridCells.Fixed(2),
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(8.dp),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                            verticalItemSpacing = 8.dp
-                        ) {
+                        if (otherNotes.isNotEmpty()) {
                             if (pinnedNotes.isNotEmpty()) {
                                 item(span = StaggeredGridItemSpan.FullLine) {
                                     Text(
-                                        text = "PINNED",
+                                        text = "OTHERS",
                                         modifier = Modifier.padding(8.dp),
                                         style = MaterialTheme.typography.labelSmall,
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
-                                StaggeredGridItems(pinnedNotes, key = { it.id }) { note ->
-                                    val isExpanded = state.expandedNoteId == note.id
-                                    NoteItem(
-                                        modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
-                                        note = note,
-                                        isSelected = state.selectedNoteIds.contains(note.id),
-                                        onNoteClick = {
-                                            if (isSelectionModeActive) {
-                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                            } else {
-                                                viewModel.onEvent(NotesEvent.ExpandNote(note.id))
-                                            }
-                                        },
-                                        onNoteLongClick = {
-                                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                        }
-                                    )
-                                }
                             }
-
-                            if (otherNotes.isNotEmpty()) {
-                                if (pinnedNotes.isNotEmpty()) {
-                                    item(span = StaggeredGridItemSpan.FullLine) {
-                                        Text(
-                                            text = "OTHERS",
-                                            modifier = Modifier.padding(8.dp),
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                                StaggeredGridItems(otherNotes, key = { it.id }) { note ->
-                                    val isExpanded = state.expandedNoteId == note.id
-                                    NoteItem(
-                                        modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
-                                        note = note,
-                                        isSelected = state.selectedNoteIds.contains(note.id),
-                                        onNoteClick = {
-                                            if (isSelectionModeActive) {
-                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
-                                            } else {
-                                                viewModel.onEvent(NotesEvent.ExpandNote(note.id))
-                                            }
-                                        },
-                                        onNoteLongClick = {
+                            StaggeredGridItems(otherNotes, key = { it.id }) { note ->
+                                val isExpanded = state.expandedNoteId == note.id
+                                NoteItem(
+                                    modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                    note = note,
+                                    isSelected = state.selectedNoteIds.contains(note.id),
+                                    onNoteClick = {
+                                        if (isSelectionModeActive) {
                                             viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                        } else {
+                                            viewModel.onEvent(NotesEvent.ExpandNote(note.id))
                                         }
-                                    )
-                                }
+                                    },
+                                    onNoteLongClick = {
+                                        viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                    }
+                                )
                             }
                         }
                     }

@@ -23,11 +23,13 @@ import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.components.NoteItem
 import com.suvojeet.notenext.ui.archive.ArchiveEvent
 
+import androidx.compose.material.icons.filled.Menu
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchiveScreen(
     factory: ViewModelFactory,
-    onBackPressed: () -> Unit
+    onMenuClick: () -> Unit
 ) {
     val viewModel: ArchiveViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
@@ -39,8 +41,8 @@ fun ArchiveScreen(
             TopAppBar(
                 title = { Text("Archive") },
                 navigationIcon = {
-                    IconButton(onClick = onBackPressed) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    IconButton(onClick = onMenuClick) {
+                        Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
                 }
             )
