@@ -99,7 +99,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun NotesScreen(
-    factory: ViewModelFactory,
+    viewModel: NotesViewModel,
     onSettingsClick: () -> Unit,
     onArchiveClick: () -> Unit,
     onEditLabelsClick: () -> Unit,
@@ -108,7 +108,6 @@ fun NotesScreen(
     settingsRepository: SettingsRepository,
     onMenuClick: () -> Unit
 ) {
-    val viewModel: NotesViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }

@@ -406,23 +406,14 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
             ) {
 
                 NotesScreen(
-
-                    factory = ViewModelFactory(factory.noteDao, factory.labelDao, linkPreviewRepository),
-
+                    viewModel = notesViewModel,
                     onSettingsClick = { navController.navigate("settings") },
-
                     onArchiveClick = { navController.navigate("archive") },
-
                     onEditLabelsClick = { navController.navigate("edit_labels") },
-
                     onBinClick = { navController.navigate("bin") },
-
                     themeMode = themeMode,
-
                     settingsRepository = settingsRepository,
-
                     onMenuClick = { scope.launch { drawerState.open() } }
-
                 )
 
             }
