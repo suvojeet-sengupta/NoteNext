@@ -39,6 +39,7 @@ import coil.request.ImageRequest
 import com.suvojeet.notenext.R
 
 import com.suvojeet.notenext.ui.notes.LayoutType
+import com.suvojeet.notenext.ui.notes.SortType
 import androidx.compose.material.icons.filled.ViewList
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -51,7 +52,10 @@ fun SearchBar(
     onSearchActiveChange: (Boolean) -> Unit,
     onLayoutToggleClick: () -> Unit,
     onSortClick: () -> Unit,
-    layoutType: LayoutType
+    layoutType: LayoutType,
+    sortMenuExpanded: Boolean,
+    onSortMenuDismissRequest: () -> Unit,
+    onSortOptionClick: (SortType) -> Unit
 ) {
 
     Card(
@@ -108,6 +112,32 @@ fun SearchBar(
                         imageVector = Icons.Default.Sort,
                         contentDescription = "Sort",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                DropdownMenu(
+                    expanded = sortMenuExpanded,
+                    onDismissRequest = onSortMenuDismissRequest
+                ) {
+                    DropdownMenuItem(
+                        text = { Text("Sort by date created") },
+                        onClick = {
+                            onSortOptionClick(SortType.DATE_CREATED)
+                            onSortMenuDismissRequest()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Sort by date modified") },
+                        onClick = {
+                            onSortOptionClick(SortType.DATE_MODIFIED)
+                            onSortMenuDismissRequest()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text("Sort by title") },
+                        onClick = {
+                            onSortOptionClick(SortType.TITLE)
+                            onSortMenuDismissRequest()
+                        }
                     )
                 }
 

@@ -185,34 +185,13 @@ fun NotesScreen(
                                         onSearchActiveChange = { isSearchActive = it },
                                         onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
                                         onSortClick = { showSortMenu = true },
-                                        layoutType = state.layoutType
+                                        layoutType = state.layoutType,
+                                        sortMenuExpanded = showSortMenu,
+                                        onSortMenuDismissRequest = { showSortMenu = false },
+                                        onSortOptionClick = {
+                                            sortType -> viewModel.onEvent(NotesEvent.SortNotes(sortType))
+                                        }
                                     )
-                                    DropdownMenu(
-                                        expanded = showSortMenu,
-                                        onDismissRequest = { showSortMenu = false }
-                                    ) {
-                                        DropdownMenuItem(
-                                            text = { Text("Sort by date created") },
-                                            onClick = { 
-                                                viewModel.onEvent(NotesEvent.SortNotes(SortType.DATE_CREATED))
-                                                showSortMenu = false
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Sort by date modified") },
-                                            onClick = { 
-                                                viewModel.onEvent(NotesEvent.SortNotes(SortType.DATE_MODIFIED))
-                                                showSortMenu = false
-                                            }
-                                        )
-                                        DropdownMenuItem(
-                                            text = { Text("Sort by title") },
-                                            onClick = { 
-                                                viewModel.onEvent(NotesEvent.SortNotes(SortType.TITLE))
-                                                showSortMenu = false
-                                            }
-                                        )
-                                    }
                                 }
                             },
                             navigationIcon = {
