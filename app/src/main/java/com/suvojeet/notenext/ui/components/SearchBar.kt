@@ -44,6 +44,10 @@ import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
 import androidx.compose.material.icons.filled.ViewList
 
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.runtime.LaunchedEffect
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
@@ -59,6 +63,7 @@ fun SearchBar(
     onSortMenuDismissRequest: () -> Unit,
     onSortOptionClick: (SortType) -> Unit
 ) {
+    val focusRequester = remember { FocusRequester() }
 
     Card(
         modifier = modifier
@@ -72,7 +77,7 @@ fun SearchBar(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .clickable { onSearchActiveChange(true) },
+                .then(if (!isSearchActive) Modifier.clickable { onSearchActiveChange(true) } else Modifier),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -83,7 +88,8 @@ fun SearchBar(
                     placeholder = { Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 16.dp),
+                        .padding(start = 16.dp)
+                        .focusRequester(focusRequester),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -93,6 +99,9 @@ fun SearchBar(
                     ),
                     singleLine = true
                 )
+                LaunchedEffect(Unit) {
+                    focusRequester.requestFocus()
+                }
             } else {
                 Spacer(modifier = Modifier.width(16.dp))
                 Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
