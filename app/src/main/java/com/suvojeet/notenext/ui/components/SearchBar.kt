@@ -18,6 +18,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -151,13 +153,17 @@ fun SearchBar(
 fun SearchBarPreview() {
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
     SearchBar(
         searchQuery = searchQuery,
         isSearchActive = isSearchActive,
         onSearchQueryChange = { searchQuery = it },
         onSearchActiveChange = { isSearchActive = it },
         onLayoutToggleClick = {},
-        onSortClick = {},
-        layoutType = LayoutType.GRID
+        onSortClick = { showSortMenu = true },
+        layoutType = LayoutType.GRID,
+        sortMenuExpanded = showSortMenu,
+        onSortMenuDismissRequest = { showSortMenu = false },
+        onSortOptionClick = {}
     )
 }
