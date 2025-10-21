@@ -43,4 +43,6 @@ sealed class NotesEvent {
     data class OnLinkDetected(val url: String) : NotesEvent()
     data class OnLinkPreviewFetched(val url: String, val title: String?, val description: String?, val imageUrl: String?) : NotesEvent()
     data class OnRemoveLinkPreview(val url: String) : NotesEvent()
+    object ToggleLayout : NotesEvent()
+    data class SortNotes(val sortType: SortType) : NotesEvent()
 }

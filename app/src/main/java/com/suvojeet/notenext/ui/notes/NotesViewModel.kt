@@ -17,6 +17,8 @@ import com.suvojeet.notenext.data.NoteDao
 import com.suvojeet.notenext.ui.notes.HtmlConverter
 import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.LinkPreviewRepository
+import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.ui.notes.LayoutType
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -42,9 +44,14 @@ class NotesViewModel(
     private var recentlyDeletedNote: Note? = null
 
     init {
-        combine(noteDao.getNotes(), labelDao.getLabels()) { notes, labels ->
-            _state.value = state.value.copy(
-                notes = notes,
+        combine(noteDao.getNotes(), labelDao.getLabels(), _state) { notes, labels, state ->
+            val sortedNotes = when (state.sortType) {
+                SortType.DATE_CREATED -> notes.sortedByDescending { it.createdAt }
+                SortType.DATE_MODIFIED -> notes.sortedByDescending { it.lastEdited }
+                SortType.TITLE -> notes.sortedBy { it.title }
+            }
+            _state.value = state.copy(
+                notes = sortedNotes,
                 labels = labels.map { it.name }
             )
         }.launchIn(viewModelScope)
@@ -505,6 +512,13 @@ class NotesViewModel(
         }
         is NotesEvent.FilterByLabel -> {
             _state.value = state.value.copy(filteredLabel = event.label)
+        }
+        is NotesEvent.ToggleLayout -> {
+            val newLayout = if (state.value.layoutType == LayoutType.GRID) LayoutType.LIST else LayoutType.GRID
+            _state.value = state.value.copy(layoutType = newLayout)
+        }
+        is NotesEvent.SortNotes -> {
+            _state.value = state.value.copy(sortType = event.sortType)
         }
         is NotesEvent.OnRemoveLinkPreview -> {
             val updatedLinkPreviews = state.value.linkPreviews.filter { it.url != event.url }

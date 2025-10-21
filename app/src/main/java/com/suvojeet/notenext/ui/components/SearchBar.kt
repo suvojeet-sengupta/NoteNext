@@ -38,6 +38,9 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.suvojeet.notenext.R
 
+import com.suvojeet.notenext.ui.notes.LayoutType
+import androidx.compose.material.icons.filled.ViewList
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
@@ -47,7 +50,8 @@ fun SearchBar(
     onSearchQueryChange: (String) -> Unit,
     onSearchActiveChange: (Boolean) -> Unit,
     onLayoutToggleClick: () -> Unit,
-    onSortClick: () -> Unit
+    onSortClick: () -> Unit,
+    layoutType: LayoutType
 ) {
 
     Card(
@@ -94,7 +98,7 @@ fun SearchBar(
             ) {
                 IconButton(onClick = onLayoutToggleClick) {
                     Icon(
-                        imageVector = Icons.Default.ViewModule,
+                        imageVector = if (layoutType == LayoutType.GRID) Icons.Default.ViewList else Icons.Default.ViewModule,
                         contentDescription = "Layout Toggle",
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -123,6 +127,7 @@ fun SearchBarPreview() {
         onSearchQueryChange = { searchQuery = it },
         onSearchActiveChange = { isSearchActive = it },
         onLayoutToggleClick = {},
-        onSortClick = {}
+        onSortClick = {},
+        layoutType = LayoutType.GRID
     )
 }

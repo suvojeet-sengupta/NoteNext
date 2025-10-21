@@ -6,8 +6,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.LinkPreview
 
+import com.suvojeet.notenext.ui.notes.LayoutType
+import com.suvojeet.notenext.ui.notes.SortType
+
 data class NotesState(
     val notes: List<Note> = emptyList(),
+    val layoutType: LayoutType = LayoutType.GRID,
+    val sortType: SortType = SortType.DATE_MODIFIED,
     val selectedNoteIds: List<Int> = emptyList(),
     val labels: List<String> = emptyList(),
     val filteredLabel: String? = null,
