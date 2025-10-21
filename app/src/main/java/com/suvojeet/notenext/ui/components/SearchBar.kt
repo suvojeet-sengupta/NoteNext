@@ -14,8 +14,6 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.DropdownMenu
@@ -44,17 +42,10 @@ import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
 import androidx.compose.material.icons.filled.ViewList
 
-import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.focus.focusRequester
-import androidx.compose.runtime.LaunchedEffect
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
     modifier: Modifier = Modifier,
-    searchQuery: String,
-    isSearchActive: Boolean,
-    onSearchQueryChange: (String) -> Unit,
     onSearchActiveChange: (Boolean) -> Unit,
     onLayoutToggleClick: () -> Unit,
     onSortClick: () -> Unit,
@@ -63,13 +54,12 @@ fun SearchBar(
     onSortMenuDismissRequest: () -> Unit,
     onSortOptionClick: (SortType) -> Unit
 ) {
-    val focusRequester = remember { FocusRequester() }
-
     Card(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .padding(horizontal = 18.dp, vertical = 8.dp),
+            .padding(horizontal = 18.dp, vertical = 8.dp)
+            .clickable { onSearchActiveChange(true) }, // Make the whole card clickable
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
@@ -77,36 +67,12 @@ fun SearchBar(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (!isSearchActive) Modifier.clickable { onSearchActiveChange(true) } else Modifier)
-                .padding(horizontal = 16.dp), // Add horizontal padding here
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (isSearchActive) {
-                OutlinedTextField(
-                    value = searchQuery,
-                    onValueChange = onSearchQueryChange,
-                    placeholder = { Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant) },
-                    modifier = Modifier
-                        .weight(1f)
-                        // .padding(start = 16.dp) // Remove this padding
-                        .focusRequester(focusRequester),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent,
-                        unfocusedBorderColor = Color.Transparent,
-                        focusedBorderColor = Color.Transparent,
-                        cursorColor = MaterialTheme.colorScheme.onSurface
-                    ),
-                    singleLine = true
-                )
-                LaunchedEffect(Unit) {
-                    focusRequester.requestFocus()
-                }
-            } else {
-                Spacer(modifier = Modifier.width(16.dp))
-                Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-            }
+            Spacer(modifier = Modifier.width(16.dp))
+            Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -161,14 +127,9 @@ fun SearchBar(
 @Preview
 @Composable
 fun SearchBarPreview() {
-    var searchQuery by remember { mutableStateOf("") }
-    var isSearchActive by remember { mutableStateOf(false) }
     var showSortMenu by remember { mutableStateOf(false) }
     SearchBar(
-        searchQuery = searchQuery,
-        isSearchActive = isSearchActive,
-        onSearchQueryChange = { searchQuery = it },
-        onSearchActiveChange = { isSearchActive = it },
+        onSearchActiveChange = { /* Do nothing for preview */ },
         onLayoutToggleClick = {},
         onSortClick = { showSortMenu = true },
         layoutType = LayoutType.GRID,

@@ -94,6 +94,7 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.ui.components.SearchTopAppBar
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
@@ -174,34 +175,47 @@ fun NotesScreen(
                             onLabelClick = { showLabelDialog = true }
                         )
                     } else {
-                        TopAppBar(
-                            title = {
-                                Row(modifier = Modifier.fillMaxWidth()) {
-                                    SearchBar(
-                                        searchQuery = searchQuery,
-                                        isSearchActive = isSearchActive,
-                                        onSearchQueryChange = { searchQuery = it },
-                                        onSearchActiveChange = { isSearchActive = it },
-                                        onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
-                                        onSortClick = { showSortMenu = true },
-                                        layoutType = state.layoutType,
-                                        sortMenuExpanded = showSortMenu,
-                                        onSortMenuDismissRequest = { showSortMenu = false },
-                                        onSortOptionClick = {
-                                            sortType -> viewModel.onEvent(NotesEvent.SortNotes(sortType))
+                        AnimatedContent(
+                            targetState = isSearchActive,
+                            transitionSpec = {
+                                fadeIn(animationSpec = tween(220, delayMillis = 90)).togetherWith(fadeOut(animationSpec = tween(90)))
+                            },
+                            label = "SearchAppBar Animation"
+                        ) { searchActive ->
+                            if (searchActive) {
+                                SearchTopAppBar(
+                                    searchQuery = searchQuery,
+                                    onSearchQueryChange = { searchQuery = it },
+                                    onBackClick = { isSearchActive = false; searchQuery = "" }
+                                )
+                            } else {
+                                TopAppBar(
+                                    title = {
+                                        Row(modifier = Modifier.fillMaxWidth()) {
+                                            SearchBar(
+                                                onSearchActiveChange = { isSearchActive = it },
+                                                onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
+                                                onSortClick = { showSortMenu = true },
+                                                layoutType = state.layoutType,
+                                                sortMenuExpanded = showSortMenu,
+                                                onSortMenuDismissRequest = { showSortMenu = false },
+                                                onSortOptionClick = {
+                                                    sortType -> viewModel.onEvent(NotesEvent.SortNotes(sortType))
+                                                }
+                                            )
                                         }
+                                    },
+                                    navigationIcon = {
+                                        IconButton(onClick = onMenuClick) {
+                                            Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                        }
+                                    },
+                                    colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                                        containerColor = Color.Transparent
                                     )
-                                }
-                            },
-                            navigationIcon = {
-                                IconButton(onClick = onMenuClick) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                }
-                            },
-                            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                                containerColor = Color.Transparent
-                            )
-                        )
+                                )
+                            }
+                        }
                     }
                 }
             },
