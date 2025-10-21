@@ -87,6 +87,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 
@@ -158,105 +159,111 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                NavigationDrawerItem(
+                                    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-                    icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
+                                    val currentRoute = navBackStackEntry?.destination?.route
 
-                    label = { Text("Notes") },
+                
 
-                    selected = notesState.filteredLabel == null,
+                                    NavigationDrawerItem(
 
-                    onClick = {
+                                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
 
-                        scope.launch { drawerState.close() }
+                                        label = { Text("Notes") },
 
-                        notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
+                                        selected = currentRoute == "notes" && notesState.filteredLabel == null,
 
-                        navController.navigate("notes") {
+                                        onClick = {
 
-                            popUpTo(navController.graph.startDestinationId)
+                                            scope.launch { drawerState.close() }
 
-                            launchSingleTop = true
+                                            notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
 
-                        }
+                                            navController.navigate("notes") {
 
-                    },
+                                                popUpTo(navController.graph.startDestinationId)
 
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                                launchSingleTop = true
 
-                )
+                                            }
 
-                NavigationDrawerItem(
+                                        },
 
-                    icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
-                    label = { Text("Archive") },
+                                    )
 
-                    selected = false,
+                                    NavigationDrawerItem(
 
-                    onClick = {
+                                        icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
 
-                        scope.launch { drawerState.close() }
+                                        label = { Text("Archive") },
 
-                        navController.navigate("archive") {
+                                        selected = currentRoute == "archive",
 
-                            popUpTo(navController.graph.startDestinationId)
+                                        onClick = {
 
-                            launchSingleTop = true
+                                            scope.launch { drawerState.close() }
 
-                        }
+                                            navController.navigate("archive") {
 
-                    },
+                                                popUpTo(navController.graph.startDestinationId)
 
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                                launchSingleTop = true
 
-                )
+                                            }
 
-                NavigationDrawerItem(
+                                        },
 
-                    icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
-                    label = { Text("Bin") },
+                                    )
 
-                    selected = false,
+                                    NavigationDrawerItem(
 
-                    onClick = {
+                                        icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
 
-                        scope.launch { drawerState.close() }
+                                        label = { Text("Bin") },
 
-                        navController.navigate("bin") {
+                                        selected = currentRoute == "bin",
 
-                            popUpTo(navController.graph.startDestinationId)
+                                        onClick = {
 
-                            launchSingleTop = true
+                                            scope.launch { drawerState.close() }
 
-                        }
+                                            navController.navigate("bin") {
 
-                    },
+                                                popUpTo(navController.graph.startDestinationId)
 
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                                launchSingleTop = true
 
-                )
+                                            }
 
-                NavigationDrawerItem(
+                                        },
 
-                    icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
-                    label = { Text("Settings") },
+                                    )
 
-                    selected = false,
+                                    NavigationDrawerItem(
 
-                    onClick = {
+                                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
 
-                        scope.launch { drawerState.close() }
+                                        label = { Text("Settings") },
 
-                        navController.navigate("settings")
+                                        selected = currentRoute == "settings",
 
-                    },
+                                        onClick = {
 
-                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                            scope.launch { drawerState.close() }
 
-                )
+                                            navController.navigate("settings")
+
+                                        },
+
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                    )
 
 
 
