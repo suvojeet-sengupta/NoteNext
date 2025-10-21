@@ -77,7 +77,8 @@ fun SearchBar(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .then(if (!isSearchActive) Modifier.clickable { onSearchActiveChange(true) } else Modifier),
+                .then(if (!isSearchActive) Modifier.clickable { onSearchActiveChange(true) } else Modifier)
+                .padding(horizontal = 16.dp), // Add horizontal padding here
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -88,7 +89,7 @@ fun SearchBar(
                     placeholder = { Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant) },
                     modifier = Modifier
                         .weight(1f)
-                        .padding(start = 16.dp)
+                        // .padding(start = 16.dp) // Remove this padding
                         .focusRequester(focusRequester),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
