@@ -72,7 +72,7 @@ fun SearchBar(
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Spacer(modifier = Modifier.width(16.dp))
-            Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text("Search Notes", color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.weight(1f))
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
