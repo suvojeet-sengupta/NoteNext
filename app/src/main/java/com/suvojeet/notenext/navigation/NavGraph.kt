@@ -139,11 +139,19 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode) {
 
 
 
-    ModalNavigationDrawer(
+        ModalNavigationDrawer(
 
-        drawerState = drawerState,
 
-        drawerContent = {
+
+            drawerState = drawerState,
+
+
+
+            gesturesEnabled = notesState.expandedNoteId == null,
+
+
+
+            drawerContent = {
 
             ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
 
