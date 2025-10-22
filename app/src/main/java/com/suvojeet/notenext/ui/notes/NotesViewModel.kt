@@ -211,7 +211,7 @@ class NotesViewModel(
             val selection = currentContent.selection
             val newText = currentContent.text.replaceRange(selection.min, selection.max, event.text)
             val newSelection = selection.min + event.text.length
-            val newTextFieldValue = currentContent.copy(
+            val newTextFieldValue = TextFieldValue(
                 annotatedString = AnnotatedString(newText),
                 selection = currentContent.selection.copy(start = newSelection, end = newSelection)
             )
@@ -227,7 +227,7 @@ class NotesViewModel(
             val selection = currentContent.selection
             val newText = currentContent.text.replaceRange(selection.min, selection.max, "")
             val newSelection = selection.min
-            val newTextFieldValue = currentContent.copy(
+            val newTextFieldValue = TextFieldValue(
                 annotatedString = AnnotatedString(newText),
                 selection = currentContent.selection.copy(start = newSelection, end = newSelection)
             )

@@ -34,9 +34,10 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import android.view.View
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.platform.LocalTextToolbar
-import androidx.compose.ui.platform.CompositionLocalProvider
+import androidx.compose.runtime.CompositionLocalProvider
 import com.suvojeet.notenext.ui.add_edit_note.components.AddEditNoteBottomAppBar
 import com.suvojeet.notenext.ui.add_edit_note.components.AddEditNoteTopAppBar
 import com.suvojeet.notenext.ui.add_edit_note.components.ColorPicker
