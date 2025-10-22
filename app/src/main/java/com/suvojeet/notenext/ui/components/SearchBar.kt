@@ -85,38 +85,40 @@ fun SearchBar(
                         tint = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                IconButton(onClick = onSortClick) {
-                    Icon(
-                        imageVector = Icons.Default.Sort,
-                        contentDescription = "Sort",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                DropdownMenu(
-                    expanded = sortMenuExpanded,
-                    onDismissRequest = onSortMenuDismissRequest
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Sort by date created") },
-                        onClick = {
-                            onSortOptionClick(SortType.DATE_CREATED)
-                            onSortMenuDismissRequest()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Sort by date modified") },
-                        onClick = {
-                            onSortOptionClick(SortType.DATE_MODIFIED)
-                            onSortMenuDismissRequest()
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Sort by title") },
-                        onClick = {
-                            onSortOptionClick(SortType.TITLE)
-                            onSortMenuDismissRequest()
-                        }
-                    )
+                Box {
+                    IconButton(onClick = onSortClick) {
+                        Icon(
+                            imageVector = Icons.Default.Sort,
+                            contentDescription = "Sort",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = sortMenuExpanded,
+                        onDismissRequest = onSortMenuDismissRequest
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Sort by date created") },
+                            onClick = {
+                                onSortOptionClick(SortType.DATE_CREATED)
+                                onSortMenuDismissRequest()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Sort by date modified") },
+                            onClick = {
+                                onSortOptionClick(SortType.DATE_MODIFIED)
+                                onSortMenuDismissRequest()
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Sort by title") },
+                            onClick = {
+                                onSortOptionClick(SortType.TITLE)
+                                onSortMenuDismissRequest()
+                            }
+                        )
+                    }
                 }
 
             }
