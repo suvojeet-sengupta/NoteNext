@@ -24,6 +24,9 @@ sealed class NotesEvent {
     object CollapseNote : NotesEvent()
 
     // Events from AddEditNoteEvent
+    data class OnCopyText(val text: String) : NotesEvent()
+    data class OnPasteText(val text: String) : NotesEvent()
+    object OnCutText : NotesEvent()
     data class OnTitleChange(val title: String) : NotesEvent()
     data class OnContentChange(val content: TextFieldValue) : NotesEvent()
     data class ApplyStyleToContent(val style: SpanStyle) : NotesEvent()

@@ -33,9 +33,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import android.view.View
+import androidx.compose.ui.platform.LocalView
+import androidx.compose.ui.platform.LocalTextToolbar
+import androidx.compose.ui.platform.CompositionLocalProvider
 import com.suvojeet.notenext.ui.add_edit_note.components.AddEditNoteBottomAppBar
 import com.suvojeet.notenext.ui.add_edit_note.components.AddEditNoteTopAppBar
 import com.suvojeet.notenext.ui.add_edit_note.components.ColorPicker
+import com.suvojeet.notenext.ui.add_edit_note.components.CustomTextToolbar
 import com.suvojeet.notenext.ui.add_edit_note.components.FormatToolbar
 import com.suvojeet.notenext.ui.add_edit_note.components.LabelDialog
 import com.suvojeet.notenext.ui.add_edit_note.components.LinkPreviewCard
@@ -114,126 +119,250 @@ fun AddEditNoteScreen(
         else -> lightNoteColors
     }
 
-    Scaffold(
-        modifier = Modifier.imePadding(),
-        topBar = {
-            AddEditNoteTopAppBar(
-                state = state,
-                onEvent = onEvent,
-                onDismiss = onDismiss,
-                showDeleteDialog = { showDeleteDialog = it }
-            )
-        },
-        bottomBar = {
-            AddEditNoteBottomAppBar(
-                state = state,
-                onEvent = onEvent,
-                showColorPicker = { showColorPicker = !showColorPicker },
-                showFormatBar = { showFormatBar = !showFormatBar },
-                showMoreOptions = { showMoreOptions = it }
-            )
-        }
-    ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(Color(state.editingColor))
-                    .verticalScroll(scrollState)
-            ) {
-                NoteEditor(state = state, onEvent = onEvent)
+        val view = LocalView.current
 
-                if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    state.linkPreviews.forEach { linkPreview ->
-                        LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
+        val clipboardManager = LocalClipboardManager.current
+    val customTextToolbar = remember(view, state.editingContent, clipboardManager) { CustomTextToolbar(view, { Toast.makeText(context, "More options clicked!", Toast.LENGTH_SHORT).show() }, onEvent, state.editingContent, clipboardManager) }
+
+    
+
+        CompositionLocalProvider(LocalTextToolbar provides customTextToolbar) {
+
+            Scaffold(
+
+                modifier = Modifier.imePadding(),
+
+                topBar = {
+
+                    AddEditNoteTopAppBar(
+
+                        state = state,
+
+                        onEvent = onEvent,
+
+                        onDismiss = onDismiss,
+
+                        showDeleteDialog = { showDeleteDialog = it }
+
+                    )
+
+                },
+
+                bottomBar = {
+
+                    AddEditNoteBottomAppBar(
+
+                        state = state,
+
+                        onEvent = onEvent,
+
+                        showColorPicker = { showColorPicker = !showColorPicker },
+
+                        showFormatBar = { showFormatBar = !showFormatBar },
+
+                        showMoreOptions = { showMoreOptions = it }
+
+                    )
+
                 }
-            }
 
-            AnimatedVisibility(
-                visible = showFormatBar,
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-            ) {
-                FormatToolbar(state = state, onEvent = onEvent)
-            }
+            ) { padding ->
 
-            AnimatedVisibility(
-                visible = showColorPicker,
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-            ) {
-                ColorPicker(
-                    colors = colors,
-                    editingColor = state.editingColor,
-                    onEvent = onEvent
-                )
-            }
-        }
-    }
+                Column(
 
-    if (showMoreOptions) {
-        MoreOptionsSheet(
-            state = state,
-            onEvent = onEvent,
-            onDismiss = { showMoreOptions = false },
-            showDeleteDialog = { showDeleteDialog = it },
-            showSaveAsDialog = { showSaveAsDialog = it }
-        )
-    }
+                    modifier = Modifier
 
-    if (showDeleteDialog) {
-        val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
-        AlertDialog(
-            onDismissRequest = { showDeleteDialog = false },
-            title = { Text("Move note to bin?") },
-            text = { Text("This note will be moved to the bin and will be permanently deleted after $autoDeleteDays days.") },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onEvent(NotesEvent.OnDeleteNoteClick)
-                        showDeleteDialog = false
-                    }
+                        .fillMaxSize()
+
+                        .padding(padding)
+
                 ) {
-                    Text("Move to bin")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
-            }
-        )
-    }
 
-    if (showSaveAsDialog) {
-        SaveAsDialog(
-            onDismiss = { showSaveAsDialog = false },
-            onSaveAsPdf = {
-                saveAsPdf(context, state.editingTitle, state.editingContent.text)
-                Toast.makeText(context, "Note saved to Documents as PDF", Toast.LENGTH_SHORT).show()
-            },
-            onSaveAsTxt = {
-                saveAsTxt(context, state.editingTitle, state.editingContent.text)
-                Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
-            }
-        )
-    }
+                    Column(
 
-    if (state.showLabelDialog) {
-        LabelDialog(
-            labels = state.labels,
-            onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
-            onConfirm = { label ->
-                onEvent(NotesEvent.OnLabelChange(label))
-                onEvent(NotesEvent.DismissLabelDialog)
+                        modifier = Modifier
+
+                            .weight(1f)
+
+                            .background(Color(state.editingColor))
+
+                            .verticalScroll(scrollState)
+
+                    ) {
+
+                        NoteEditor(state = state, onEvent = onEvent)
+
+    
+
+                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+
+                            Spacer(modifier = Modifier.height(16.dp))
+
+                            state.linkPreviews.forEach { linkPreview ->
+
+                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                            }
+
+                        }
+
+                    }
+
+    
+
+                    AnimatedVisibility(
+
+                        visible = showFormatBar,
+
+                        enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+
+                        exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+
+                    ) {
+
+                        FormatToolbar(state = state, onEvent = onEvent)
+
+                    }
+
+    
+
+                    AnimatedVisibility(
+
+                        visible = showColorPicker,
+
+                        enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+
+                        exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+
+                    ) {
+
+                        ColorPicker(colors = colors, editingColor = state.editingColor, onEvent = onEvent)
+
+                    }
+
+                }
+
             }
-        )
-    }
+
+    
+
+            if (showMoreOptions) {
+
+                MoreOptionsSheet(
+
+                    state = state,
+
+                    onEvent = onEvent,
+
+                    onDismiss = { showMoreOptions = false },
+
+                    showDeleteDialog = { showDeleteDialog = it },
+
+                    showSaveAsDialog = { showSaveAsDialog = it }
+
+                )
+
+            }
+
+    
+
+            if (showDeleteDialog) {
+
+                val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
+
+                AlertDialog(
+
+                    onDismissRequest = { showDeleteDialog = false },
+
+                    title = { Text("Move note to bin?") },
+
+                    text = { Text("This note will be moved to the bin and will be permanently deleted after $autoDeleteDays days.") },
+
+                    confirmButton = {
+
+                        TextButton(
+
+                            onClick = {
+
+                                onEvent(NotesEvent.OnDeleteNoteClick)
+
+                                showDeleteDialog = false
+
+                            }
+
+                        ) {
+
+                            Text("Move to bin")
+
+                        }
+
+                    },
+
+                    dismissButton = {
+
+                        TextButton(onClick = { showDeleteDialog = false }) {
+
+                            Text("Cancel")
+
+                        }
+
+                    }
+
+                )
+
+            }
+
+    
+
+            if (showSaveAsDialog) {
+
+                SaveAsDialog(
+
+                    onDismiss = { showSaveAsDialog = false },
+
+                    onSaveAsPdf = {
+
+                        saveAsPdf(context, state.editingTitle, state.editingContent.text)
+
+                        Toast.makeText(context, "Note saved to Documents as PDF", Toast.LENGTH_SHORT).show()
+
+                    },
+
+                    onSaveAsTxt = {
+
+                        saveAsTxt(context, state.editingTitle, state.editingContent.text)
+
+                        Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
+
+                    }
+
+                )
+
+            }
+
+    
+
+            if (state.showLabelDialog) {
+
+                LabelDialog(
+
+                    labels = state.labels,
+
+                    onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
+
+                    onConfirm = { label ->
+
+                        onEvent(NotesEvent.OnLabelChange(label))
+
+                        onEvent(NotesEvent.DismissLabelDialog)
+
+                    }
+
+                )
+
+            }
+
+        }
 }

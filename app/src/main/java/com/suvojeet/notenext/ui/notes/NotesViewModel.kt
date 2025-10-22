@@ -201,13 +201,45 @@ class NotesViewModel(
         is NotesEvent.CollapseNote -> {
             onEvent(NotesEvent.OnSaveNoteClick)
         }
-        is NotesEvent.OnTitleChange -> {
-            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
+        is NotesEvent.OnCopyText -> {
+            viewModelScope.launch {
+                _events.emit(NotesUiEvent.ShowToast("Copied to clipboard"))
+            }
+        }
+        is NotesEvent.OnPasteText -> {
+            val currentContent = state.value.editingContent
+            val selection = currentContent.selection
+            val newText = currentContent.text.replaceRange(selection.min, selection.max, event.text)
+            val newSelection = selection.min + event.text.length
+            val newTextFieldValue = currentContent.copy(
+                annotatedString = AnnotatedString(newText),
+                selection = currentContent.selection.copy(start = newSelection, end = newSelection)
+            )
+            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newTextFieldValue)
             _state.value = state.value.copy(
-                editingTitle = event.title,
+                editingContent = newTextFieldValue,
                 editingHistory = newHistory,
                 editingHistoryIndex = newHistory.lastIndex
             )
+        }
+        is NotesEvent.OnCutText -> {
+            val currentContent = state.value.editingContent
+            val selection = currentContent.selection
+            val newText = currentContent.text.replaceRange(selection.min, selection.max, "")
+            val newSelection = selection.min
+            val newTextFieldValue = currentContent.copy(
+                annotatedString = AnnotatedString(newText),
+                selection = currentContent.selection.copy(start = newSelection, end = newSelection)
+            )
+            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newTextFieldValue)
+            _state.value = state.value.copy(
+                editingContent = newTextFieldValue,
+                editingHistory = newHistory,
+                editingHistoryIndex = newHistory.lastIndex
+            )
+            viewModelScope.launch {
+                _events.emit(NotesUiEvent.ShowToast("Cut to clipboard"))
+            }
         }
         is NotesEvent.OnContentChange -> {
             val newContent = event.content
