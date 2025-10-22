@@ -244,126 +244,122 @@ fun AddEditNoteScreen(
                     }
 
                 }
+                if (showMoreOptions) {
 
-            }
+                    MoreOptionsSheet(
 
-    
+                        state = state,
 
-            if (showMoreOptions) {
+                        onEvent = onEvent,
 
-                MoreOptionsSheet(
+                        onDismiss = { showMoreOptions = false },
 
-                    state = state,
+                        showDeleteDialog = { showDeleteDialog = it },
 
-                    onEvent = onEvent,
+                        showSaveAsDialog = { showSaveAsDialog = it }
 
-                    onDismiss = { showMoreOptions = false },
+                    )
 
-                    showDeleteDialog = { showDeleteDialog = it },
+                }
 
-                    showSaveAsDialog = { showSaveAsDialog = it }
 
-                )
 
-            }
+                if (showDeleteDialog) {
 
-    
+                    val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
 
-            if (showDeleteDialog) {
+                    AlertDialog(
 
-                val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
+                        onDismissRequest = { showDeleteDialog = false },
 
-                AlertDialog(
+                        title = { Text("Move note to bin?") },
 
-                    onDismissRequest = { showDeleteDialog = false },
+                        text = { Text("This note will be moved to the bin and will be permanently deleted after $autoDeleteDays days.") },
 
-                    title = { Text("Move note to bin?") },
+                        confirmButton = {
 
-                    text = { Text("This note will be moved to the bin and will be permanently deleted after $autoDeleteDays days.") },
+                            TextButton(
 
-                    confirmButton = {
+                                onClick = {
 
-                        TextButton(
+                                    onEvent(NotesEvent.OnDeleteNoteClick)
 
-                            onClick = {
+                                    showDeleteDialog = false
 
-                                onEvent(NotesEvent.OnDeleteNoteClick)
+                                }
 
-                                showDeleteDialog = false
+                            ) {
+
+                                Text("Move to bin")
 
                             }
 
-                        ) {
+                        },
 
-                            Text("Move to bin")
+                        dismissButton = {
 
-                        }
+                            TextButton(onClick = { showDeleteDialog = false }) {
 
-                    },
+                                Text("Cancel")
 
-                    dismissButton = {
-
-                        TextButton(onClick = { showDeleteDialog = false }) {
-
-                            Text("Cancel")
+                            }
 
                         }
 
-                    }
+                    )
 
-                )
+                }
+
+
+
+                if (showSaveAsDialog) {
+
+                    SaveAsDialog(
+
+                        onDismiss = { showSaveAsDialog = false },
+
+                        onSaveAsPdf = {
+
+                            saveAsPdf(context, state.editingTitle, state.editingContent.text)
+
+                            Toast.makeText(context, "Note saved to Documents as PDF", Toast.LENGTH_SHORT).show()
+
+                        },
+
+                        onSaveAsTxt = {
+
+                            saveAsTxt(context, state.editingTitle, state.editingContent.text)
+
+                            Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
+
+                        }
+
+                    )
+
+                }
+
+
+
+                if (state.showLabelDialog) {
+
+                    LabelDialog(
+
+                        labels = state.labels,
+
+                        onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
+
+                        onConfirm = { label ->
+
+                            onEvent(NotesEvent.OnLabelChange(label))
+
+                            onEvent(NotesEvent.DismissLabelDialog)
+
+                        }
+
+                    )
+
+                }
 
             }
-
-    
-
-            if (showSaveAsDialog) {
-
-                SaveAsDialog(
-
-                    onDismiss = { showSaveAsDialog = false },
-
-                    onSaveAsPdf = {
-
-                        saveAsPdf(context, state.editingTitle, state.editingContent.text)
-
-                        Toast.makeText(context, "Note saved to Documents as PDF", Toast.LENGTH_SHORT).show()
-
-                    },
-
-                    onSaveAsTxt = {
-
-                        saveAsTxt(context, state.editingTitle, state.editingContent.text)
-
-                        Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
-
-                    }
-
-                )
-
-            }
-
-    
-
-            if (state.showLabelDialog) {
-
-                LabelDialog(
-
-                    labels = state.labels,
-
-                    onDismiss = { onEvent(NotesEvent.DismissLabelDialog) },
-
-                    onConfirm = { label ->
-
-                        onEvent(NotesEvent.OnLabelChange(label))
-
-                        onEvent(NotesEvent.DismissLabelDialog)
-
-                    }
-
-                )
-
-            }
-
         }
 }
