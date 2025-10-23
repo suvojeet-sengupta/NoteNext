@@ -153,7 +153,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                 drawerContent = {
 
-                    PermanentDrawerSheet(modifier = Modifier.fillMaxWidth(0.2f)) {
+                    PermanentDrawerSheet(modifier = Modifier.fillMaxWidth(0.15f)) {
 
                         Text(
 
@@ -621,7 +621,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
-                    ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.8f)) {
+                    ModalDrawerSheet(modifier = Modifier.fillMaxWidth(0.7f)) {
 
     
 
