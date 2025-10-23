@@ -45,4 +45,5 @@ sealed class NotesEvent {
     data class OnRemoveLinkPreview(val url: String) : NotesEvent()
     object ToggleLayout : NotesEvent()
     data class SortNotes(val sortType: SortType) : NotesEvent()
+    data class OnInsertLink(val url: String) : NotesEvent()
 }

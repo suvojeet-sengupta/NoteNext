@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -50,7 +51,8 @@ fun MoreOptionsSheet(
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
     showDeleteDialog: (Boolean) -> Unit,
-    showSaveAsDialog: (Boolean) -> Unit
+    showSaveAsDialog: (Boolean) -> Unit,
+    showInsertLinkDialog: (Boolean) -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
     val context = LocalContext.current
@@ -77,7 +79,8 @@ fun MoreOptionsSheet(
                 "Make a copy" to Icons.Default.ContentCopy,
                 "Share" to Icons.Default.Share,
                 "Labels" to Icons.AutoMirrored.Filled.Label,
-                "Save as" to Icons.Default.Check
+                "Save as" to Icons.Default.Check,
+                "Insert link" to Icons.Default.AddLink
             )
 
             LazyVerticalGrid(
@@ -108,6 +111,7 @@ fun MoreOptionsSheet(
                                 }
                                 "Labels" -> onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
                                 "Save as" -> showSaveAsDialog(true)
+                                "Insert link" -> showInsertLinkDialog(true)
                             }
                         }
                     )

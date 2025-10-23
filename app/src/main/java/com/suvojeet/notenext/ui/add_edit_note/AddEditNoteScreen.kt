@@ -42,6 +42,7 @@ import com.suvojeet.notenext.ui.add_edit_note.components.LinkPreviewCard
 import com.suvojeet.notenext.ui.add_edit_note.components.MoreOptionsSheet
 import com.suvojeet.notenext.ui.add_edit_note.components.NoteEditor
 import com.suvojeet.notenext.ui.add_edit_note.components.SaveAsDialog
+import com.suvojeet.notenext.ui.add_edit_note.components.InsertLinkDialog
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import com.suvojeet.notenext.ui.settings.SettingsRepository
@@ -63,6 +64,7 @@ fun AddEditNoteScreen(
     var showFormatBar by remember { mutableStateOf(false) }
     var showMoreOptions by remember { mutableStateOf(false) }
     var showSaveAsDialog by remember { mutableStateOf(false) }
+    var showInsertLinkDialog by remember { mutableStateOf(false) }
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
@@ -184,7 +186,18 @@ fun AddEditNoteScreen(
             onEvent = onEvent,
             onDismiss = { showMoreOptions = false },
             showDeleteDialog = { showDeleteDialog = it },
-            showSaveAsDialog = { showSaveAsDialog = it }
+            showSaveAsDialog = { showSaveAsDialog = it },
+            showInsertLinkDialog = { showInsertLinkDialog = it }
+        )
+    }
+
+    if (showInsertLinkDialog) {
+        InsertLinkDialog(
+            onDismiss = { showInsertLinkDialog = false },
+            onConfirm = { url ->
+                onEvent(NotesEvent.OnInsertLink(url))
+                showInsertLinkDialog = false
+            }
         )
     }
 

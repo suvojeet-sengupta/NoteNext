@@ -524,6 +524,24 @@ class NotesViewModel(
             val updatedLinkPreviews = state.value.linkPreviews.filter { it.url != event.url }
             _state.value = state.value.copy(linkPreviews = updatedLinkPreviews)
         }
+        is NotesEvent.OnInsertLink -> {
+            val content = state.value.editingContent
+            val selection = content.selection
+            if (!selection.collapsed) {
+                val selectedText = content.text.substring(selection.start, selection.end)
+                val newAnnotatedString = buildAnnotatedString {
+                    append(content.annotatedString.subSequence(0, selection.start))
+                    pushStringAnnotation(tag = "URL", annotation = event.url)
+                    withStyle(style = SpanStyle(color = androidx.compose.ui.graphics.Color.Blue, textDecoration = TextDecoration.Underline)) {
+                        append(selectedText)
+                    }
+                    pop()
+                    append(content.annotatedString.subSequence(selection.end, content.text.length))
+                }
+                val newTextFieldValue = content.copy(annotatedString = newAnnotatedString)
+                _state.value = state.value.copy(editingContent = newTextFieldValue)
+            }
+        }
         else -> {}
     }
 }
