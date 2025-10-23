@@ -84,7 +84,7 @@ fun MoreOptionsSheet(
             )
 
             LazyVerticalGrid(
-                columns = GridCells.Adaptive(minSize = 100.dp),
+                columns = GridCells.Adaptive(minSize = 120.dp),
                 contentPadding = PaddingValues(16.dp),
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
