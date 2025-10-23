@@ -43,59 +43,21 @@ fun AddEditNoteTopAppBar(
         ),
         actions = {
             if (!state.editingIsNewNote) {
-                Box(
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = MaterialTheme.shapes.medium
-                        )
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable { onEvent(NotesEvent.OnTogglePinClick) }
-                        .background(Color.Transparent)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                IconButton(onClick = { onEvent(NotesEvent.OnTogglePinClick) }) {
                     Icon(
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = if (state.isPinned) "Unpin note" else "Pin note",
                         tint = if (state.isPinned) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor))
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = MaterialTheme.shapes.medium
-                        )
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable { onEvent(NotesEvent.OnToggleArchiveClick) }
-                        .background(Color.Transparent)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                IconButton(onClick = { onEvent(NotesEvent.OnToggleArchiveClick) }) {
                     Icon(
                         imageVector = Icons.Filled.Archive,
                         contentDescription = if (state.isArchived) "Unarchive note" else "Archive note",
                         tint = if (state.isArchived) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor))
                     )
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                Box(
-                    modifier = Modifier
-                        .border(
-                            width = 1.dp,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                            shape = MaterialTheme.shapes.medium
-                        )
-                        .clip(MaterialTheme.shapes.medium)
-                        .clickable { showDeleteDialog(true) }
-                        .background(Color.Transparent)
-                        .padding(8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
+                IconButton(onClick = { showDeleteDialog(true) }) {
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = "Delete note",
