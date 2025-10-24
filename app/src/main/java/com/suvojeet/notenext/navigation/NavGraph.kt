@@ -109,6 +109,7 @@ import com.suvojeet.notenext.ui.notes.NotesScreen
 
 import com.suvojeet.notenext.ui.notes.NotesViewModel
 
+import com.suvojeet.notenext.ui.lock.PinSetupScreen
 import com.suvojeet.notenext.ui.settings.SettingsScreen
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
@@ -451,7 +452,8 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
-                            onBackClick = { navController.popBackStack() }
+                            onBackClick = { navController.popBackStack() },
+                            onNavigate = { route -> navController.navigate(route) }
 
     
 
@@ -583,6 +585,16 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
+                    }
+
+                    composable(
+                        route = "pin_setup",
+                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                    ) {
+                        PinSetupScreen(
+                            onPinSet = { navController.popBackStack() }
+                        )
                     }
 
     
@@ -774,7 +786,6 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                     scope.launch { drawerState.close() }
 
                                     navController.navigate("edit_labels")
-
                                 },
 
                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -945,7 +956,8 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
-                            onBackClick = { navController.popBackStack() }
+                            onBackClick = { navController.popBackStack() },
+                            onNavigate = { route -> navController.navigate(route) }
 
     
 
@@ -1077,6 +1089,16 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
+                    }
+
+                    composable(
+                        route = "pin_setup",
+                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                    ) {
+                        PinSetupScreen(
+                            onPinSet = { navController.popBackStack() }
+                        )
                     }
 
     

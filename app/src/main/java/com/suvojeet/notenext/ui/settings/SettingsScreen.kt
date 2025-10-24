@@ -65,6 +65,8 @@ object PreferencesKeys {
     val AUTO_DELETE_DAYS = intPreferencesKey("auto_delete_days")
     val ENABLE_RICH_LINK_PREVIEW = booleanPreferencesKey("enable_rich_link_preview")
     val SHAPE_FAMILY = stringPreferencesKey("shape_family")
+    val ENABLE_APP_LOCK = booleanPreferencesKey("enable_app_lock")
+    val APP_LOCK_PIN = stringPreferencesKey("app_lock_pin")
 }
 
 class SettingsRepository(private val context: Context) {
@@ -118,11 +120,33 @@ class SettingsRepository(private val context: Context) {
             preferences[PreferencesKeys.SHAPE_FAMILY] = shapeFamily.name
         }
     }
+
+    val enableAppLock: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.ENABLE_APP_LOCK] ?: false
+        }
+
+    suspend fun saveEnableAppLock(enable: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ENABLE_APP_LOCK] = enable
+        }
+    }
+
+    val appLockPin: Flow<String?> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.APP_LOCK_PIN]
+        }
+
+    suspend fun saveAppLockPin(pin: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.APP_LOCK_PIN] = pin
+        }
+    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreen(onBackClick: () -> Unit) {
+fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     val context = LocalContext.current
     val settingsRepository = remember { SettingsRepository(context) }
     val scope = rememberCoroutineScope()
@@ -130,6 +154,7 @@ fun SettingsScreen(onBackClick: () -> Unit) {
     val selectedThemeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
     val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
+    val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = false)
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
@@ -233,6 +258,41 @@ fun SettingsScreen(onBackClick: () -> Unit) {
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
+                }
+            }
+
+            HorizontalDivider()
+
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Security", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.padding(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Column {
+                        Text("App Lock", style = MaterialTheme.typography.titleMedium)
+                        Text(
+                            "Secure the app with a PIN or biometric lock",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(
+                        checked = enableAppLock,
+                        onCheckedChange = {
+                            if (it) {
+                                onNavigate("pin_setup")
+                            } else {
+                                scope.launch {
+                                    settingsRepository.saveEnableAppLock(false)
+                                }
+                            }
+                        }
+                    )
                 }
             }
         }

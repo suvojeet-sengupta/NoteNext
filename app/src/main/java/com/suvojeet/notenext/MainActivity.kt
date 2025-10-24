@@ -16,6 +16,11 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.theme.NoteNextTheme
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.ui.theme.ShapeFamily
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.suvojeet.notenext.ui.lock.LockScreen
+import androidx.fragment.app.FragmentActivity
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -30,8 +35,18 @@ class MainActivity : ComponentActivity() {
             val windowSizeClass = calculateWindowSizeClass(this)
             val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             val shapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
+            val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = null)
+            var unlocked by remember { mutableStateOf(false) }
+
             NoteNextTheme(themeMode = themeMode, shapeFamily = shapeFamily) {
-                NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass)
+                val appLock = enableAppLock
+                if (appLock == null) {
+                    // You can show a loading indicator here
+                } else if (appLock && !unlocked) {
+                    LockScreen(onUnlock = { unlocked = true })
+                } else {
+                    NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass)
+                }
             }
         }
     }
