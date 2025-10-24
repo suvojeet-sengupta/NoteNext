@@ -141,7 +141,7 @@ class NotesViewModel(
                 val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
                 if (selectedNotes.isNotEmpty()) {
                     val title = if (selectedNotes.size == 1) selectedNotes.first().title else "Multiple Notes"
-                    val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.title}\n\n${it.content}" }
+                    val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.title}\n\n${HtmlConverter.htmlToPlainText(it.content)}" }
                     _events.emit(NotesUiEvent.SendNotes(title, content))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())

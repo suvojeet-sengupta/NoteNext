@@ -39,6 +39,10 @@ object HtmlConverter {
         return spannable
     }
 
+    fun htmlToPlainText(html: String): String {
+        return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+    }
+
     fun htmlToAnnotatedString(html: String): AnnotatedString {
         val spanned = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
         return buildAnnotatedString {

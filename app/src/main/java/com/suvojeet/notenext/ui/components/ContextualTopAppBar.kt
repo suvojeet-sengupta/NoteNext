@@ -86,13 +86,15 @@ fun ContextualTopAppBar(
                             showMenu = false
                         }
                     )
-                    DropdownMenuItem(
-                        text = { Text("Share") },
-                        onClick = {
-                            onSendClick()
-                            showMenu = false
-                        }
-                    )
+                    if (selectedItemCount == 1) {
+                        DropdownMenuItem(
+                            text = { Text("Share") },
+                            onClick = {
+                                onSendClick()
+                                showMenu = false
+                            }
+                        )
+                    }
                 }
             }
         }
