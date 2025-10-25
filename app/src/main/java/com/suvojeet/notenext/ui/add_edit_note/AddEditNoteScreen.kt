@@ -1,5 +1,8 @@
 package com.suvojeet.notenext.ui.add_edit_note
 
+import androidx.compose.foundation.text.selection.TextSelectionColors
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import android.widget.Toast
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -177,6 +180,33 @@ fun AddEditNoteScreen(
                         .weight(1f)
                         .background(Color(state.editingColor))
                 ) {
+                    item {
+                        val titleTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
+                        TextField(
+                            value = state.editingTitle,
+                            onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
+                            placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent,
+                                disabledContainerColor = Color.Transparent,
+                                focusedIndicatorColor = Color.Transparent,
+                                unfocusedIndicatorColor = Color.Transparent,
+                                cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                selectionColors = TextSelectionColors(
+                                    handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                    backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                                )
+                            ),
+                            textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
+                            singleLine = true,
+                            maxLines = 1
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                    }
                     items(state.editingChecklist) { item ->
                         Row(
                             modifier = Modifier
