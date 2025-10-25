@@ -178,10 +178,10 @@ class NotesViewModel(
                             try {
                                 Gson().fromJson(note.content, object : TypeToken<List<ChecklistItem>>() {}.type)
                             } catch (e: Exception) {
-                                emptyList()
+                                emptyList<ChecklistItem>()
                             }
                         } else {
-                            emptyList()
+                            emptyList<ChecklistItem>()
                         }
                         _state.value = state.value.copy(
                             expandedNoteId = event.noteId,
