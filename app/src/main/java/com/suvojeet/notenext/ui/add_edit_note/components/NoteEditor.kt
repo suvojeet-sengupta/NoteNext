@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
+import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun NoteEditor(
@@ -42,7 +43,9 @@ fun NoteEditor(
                     backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
                 )
             ),
-            textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor)
+            textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
+            singleLine = true,
+            maxLines = 1
         )
         Spacer(modifier = Modifier.height(8.dp))
         val contentTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
