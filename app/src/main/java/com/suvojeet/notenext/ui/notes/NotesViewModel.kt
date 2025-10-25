@@ -10,6 +10,9 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.Label
 import com.suvojeet.notenext.data.LabelDao
 import com.suvojeet.notenext.data.Note
@@ -166,7 +169,20 @@ class NotesViewModel(
             viewModelScope.launch {
                 if (event.noteId != -1) {
                     noteDao.getNoteById(event.noteId)?.let { note ->
-                        val content = HtmlConverter.htmlToAnnotatedString(note.content)
+                        val content = if (note.noteType == "TEXT") {
+                            HtmlConverter.htmlToAnnotatedString(note.content)
+                        } else {
+                            AnnotatedString("")
+                        }
+                        val checklist = if (note.noteType == "CHECKLIST") {
+                            try {
+                                Gson().fromJson(note.content, object : TypeToken<List<ChecklistItem>>() {}.type)
+                            } catch (e: Exception) {
+                                emptyList()
+                            }
+                        } else {
+                            emptyList()
+                        }
                         _state.value = state.value.copy(
                             expandedNoteId = event.noteId,
                             editingTitle = note.title,
@@ -179,7 +195,9 @@ class NotesViewModel(
                             editingLabel = note.label,
                             editingHistory = listOf(note.title to TextFieldValue(content)),
                             editingHistoryIndex = 0,
-                            linkPreviews = note.linkPreviews
+                            linkPreviews = note.linkPreviews,
+                            editingNoteType = note.noteType,
+                            editingChecklist = checklist
                         )
                     }
                 } else {
@@ -193,13 +211,35 @@ class NotesViewModel(
                         editingHistory = listOf("" to TextFieldValue()),
                         editingHistoryIndex = 0,
                         editingLabel = null,
-                        linkPreviews = emptyList()
+                        linkPreviews = emptyList(),
+                        editingNoteType = event.noteType,
+                        editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList()
                     )
                 }
             }
         }
         is NotesEvent.CollapseNote -> {
             onEvent(NotesEvent.OnSaveNoteClick)
+        }
+        is NotesEvent.AddChecklistItem -> {
+            val updatedChecklist = state.value.editingChecklist + ChecklistItem(text = "", isChecked = false)
+            _state.value = state.value.copy(editingChecklist = updatedChecklist)
+        }
+        is NotesEvent.DeleteChecklistItem -> {
+            val updatedChecklist = state.value.editingChecklist.filterNot { it.id == event.itemId }
+            _state.value = state.value.copy(editingChecklist = updatedChecklist)
+        }
+        is NotesEvent.OnChecklistItemCheckedChange -> {
+            val updatedChecklist = state.value.editingChecklist.map {
+                if (it.id == event.itemId) it.copy(isChecked = event.isChecked) else it
+            }
+            _state.value = state.value.copy(editingChecklist = updatedChecklist)
+        }
+        is NotesEvent.OnChecklistItemTextChange -> {
+            val updatedChecklist = state.value.editingChecklist.map {
+                if (it.id == event.itemId) it.copy(text = event.text) else it
+            }
+            _state.value = state.value.copy(editingChecklist = updatedChecklist)
         }
         is NotesEvent.OnTitleChange -> {
             val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
@@ -210,84 +250,86 @@ class NotesViewModel(
             )
         }
         is NotesEvent.OnContentChange -> {
-            val newContent = event.content
-            val oldContent = state.value.editingContent
+            if (state.value.editingNoteType == "TEXT") {
+                val newContent = event.content
+                val oldContent = state.value.editingContent
 
-            val finalContent = if (newContent.text != oldContent.text) {
-                val oldText = oldContent.text
-                val newText = newContent.text
+                val finalContent = if (newContent.text != oldContent.text) {
+                    val oldText = oldContent.text
+                    val newText = newContent.text
 
-                // 1. Find common prefix
-                val prefixLength = commonPrefixWith(oldText, newText).length
+                    // 1. Find common prefix
+                    val prefixLength = commonPrefixWith(oldText, newText).length
 
-                // 2. Find common suffix of the remainder of the strings
-                val oldRemainder = oldText.substring(prefixLength)
-                val newRemainder = newText.substring(prefixLength)
-                val suffixLength = commonSuffixWith(oldRemainder, newRemainder).length
+                    // 2. Find common suffix of the remainder of the strings
+                    val oldRemainder = oldText.substring(prefixLength)
+                    val newRemainder = newText.substring(prefixLength)
+                    val suffixLength = commonSuffixWith(oldRemainder, newRemainder).length
 
-                // 3. Determine the middle (changed) part of the new text
-                val newChangedPart = newRemainder.substring(0, newRemainder.length - suffixLength)
+                    // 3. Determine the middle (changed) part of the new text
+                    val newChangedPart = newRemainder.substring(0, newRemainder.length - suffixLength)
 
-                val newAnnotatedString = buildAnnotatedString {
-                    // Append the styled prefix from the original string
-                    append(oldContent.annotatedString.subSequence(0, prefixLength))
+                    val newAnnotatedString = buildAnnotatedString {
+                        // Append the styled prefix from the original string
+                        append(oldContent.annotatedString.subSequence(0, prefixLength))
 
-                    // Append the newly typed text with the active styles
-                    val styleToApply = state.value.activeStyles.reduceOrNull { a, b -> a.merge(b) } ?: SpanStyle()
-                    withStyle(styleToApply) {
-                        append(newChangedPart)
+                        // Append the newly typed text with the active styles
+                        val styleToApply = state.value.activeStyles.reduceOrNull { a, b -> a.merge(b) } ?: SpanStyle()
+                        withStyle(styleToApply) {
+                            append(newChangedPart)
+                        }
+
+                        // Append the styled suffix from the original string
+                        append(oldContent.annotatedString.subSequence(oldText.length - suffixLength, oldText.length))
                     }
-
-                    // Append the styled suffix from the original string
-                    append(oldContent.annotatedString.subSequence(oldText.length - suffixLength, oldText.length))
+                    newContent.copy(annotatedString = newAnnotatedString)
+                } else {
+                    // When only the selection changes, trust the old AnnotatedString from our state
+                    // and just update the selection from the new value. This prevents the TextField
+                    // from stripping styles on selection/deselection.
+                    oldContent.copy(selection = newContent.selection)
                 }
-                newContent.copy(annotatedString = newAnnotatedString)
-            } else {
-                // When only the selection changes, trust the old AnnotatedString from our state
-                // and just update the selection from the new value. This prevents the TextField
-                // from stripping styles on selection/deselection.
-                oldContent.copy(selection = newContent.selection)
-            }
 
-            val selection = finalContent.selection
-            val styles = if (selection.collapsed) {
-                if (selection.start > 0) {
-                    finalContent.annotatedString.spanStyles.filter {
-                        it.start <= selection.start - 1 && it.end >= selection.start
+                val selection = finalContent.selection
+                val styles = if (selection.collapsed) {
+                    if (selection.start > 0) {
+                        finalContent.annotatedString.spanStyles.filter {
+                            it.start <= selection.start - 1 && it.end >= selection.start
+                        }
+                    } else {
+                        emptyList()
                     }
                 } else {
-                    emptyList()
+                    finalContent.annotatedString.spanStyles.filter {
+                        maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+                    }
                 }
-            } else {
-                finalContent.annotatedString.spanStyles.filter {
-                    maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+                val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
+                _state.value = state.value.copy(
+                    editingContent = finalContent,
+                    editingHistory = newHistory,
+                    editingHistoryIndex = newHistory.lastIndex,
+                    isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
+                    isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
+                    isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
+                )
+
+                // Link detection
+                val urlRegex = "(https?://[\\w.-]+\\.[a-zA-Z]{2,}(?:/[^\\s]*)?)".toRegex()
+                val detectedUrls = urlRegex.findAll(finalContent.text).map { it.value }.toSet() // Use Set for efficient lookup
+
+                val existingLinkPreviews = state.value.linkPreviews.filter { detectedUrls.contains(it.url) }
+                val newUrlsToFetch = detectedUrls.filter { url -> existingLinkPreviews.none { it.url == url } }
+
+                viewModelScope.launch {
+                    val fetchedNewLinkPreviews = newUrlsToFetch.map { url ->
+                        async { linkPreviewRepository.getLinkPreview(url) }
+                    }.awaitAll()
+
+                    val combinedLinkPreviews = (existingLinkPreviews + fetchedNewLinkPreviews).distinctBy { it.url }
+
+                    _state.value = _state.value.copy(linkPreviews = combinedLinkPreviews)
                 }
-            }
-            val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
-            _state.value = state.value.copy(
-                editingContent = finalContent,
-                editingHistory = newHistory,
-                editingHistoryIndex = newHistory.lastIndex,
-                isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
-                isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
-                isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
-            )
-
-            // Link detection
-            val urlRegex = "(https?://[\\w.-]+\\.[a-zA-Z]{2,}(?:/[^\\s]*)?)".toRegex()
-            val detectedUrls = urlRegex.findAll(finalContent.text).map { it.value }.toSet() // Use Set for efficient lookup
-
-            val existingLinkPreviews = state.value.linkPreviews.filter { detectedUrls.contains(it.url) }
-            val newUrlsToFetch = detectedUrls.filter { url -> existingLinkPreviews.none { it.url == url } }
-
-            viewModelScope.launch {
-                val fetchedNewLinkPreviews = newUrlsToFetch.map { url ->
-                    async { linkPreviewRepository.getLinkPreview(url) }
-                }.awaitAll()
-
-                val combinedLinkPreviews = (existingLinkPreviews + fetchedNewLinkPreviews).distinctBy { it.url }
-
-                _state.value = _state.value.copy(linkPreviews = combinedLinkPreviews)
             }
         }
         is NotesEvent.ApplyStyleToContent -> {
@@ -421,9 +463,13 @@ class NotesViewModel(
                 if (noteId == null) return@launch
 
                 val title = state.value.editingTitle
-                val content = HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
+                val content = if (state.value.editingNoteType == "TEXT") {
+                    HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
+                } else {
+                    Gson().toJson(state.value.editingChecklist)
+                }
 
-                if (title.isBlank() && content.isBlank()) {
+                if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
                     if (noteId != -1) { // It's an existing note, so delete it
                         noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
                     }
@@ -439,7 +485,8 @@ class NotesViewModel(
                             isPinned = state.value.isPinned,
                             isArchived = state.value.isArchived,
                             label = state.value.editingLabel,
-                            linkPreviews = state.value.linkPreviews
+                            linkPreviews = state.value.linkPreviews,
+                            noteType = state.value.editingNoteType
                         )
                     } else { // Existing note
                         noteDao.getNoteById(noteId)?.let { existingNote ->
@@ -451,7 +498,8 @@ class NotesViewModel(
                                 isPinned = state.value.isPinned,
                                 isArchived = state.value.isArchived,
                                 label = state.value.editingLabel,
-                                linkPreviews = state.value.linkPreviews
+                                linkPreviews = state.value.linkPreviews,
+                                noteType = state.value.editingNoteType
                             )
                         }
                     }
@@ -477,7 +525,8 @@ class NotesViewModel(
                     isItalicActive = false,
                     isUnderlineActive = false,
                     activeStyles = emptySet(),
-                    linkPreviews = emptyList()
+                    linkPreviews = emptyList(),
+                    editingChecklist = emptyList()
                 )
             }
         }

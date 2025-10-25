@@ -4,6 +4,7 @@ package com.suvojeet.notenext.ui.notes
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.Note
+import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.LinkPreview
 
 import com.suvojeet.notenext.ui.notes.LayoutType
@@ -34,5 +35,7 @@ data class NotesState(
     val isItalicActive: Boolean = false,
     val isUnderlineActive: Boolean = false,
     val activeStyles: Set<SpanStyle> = emptySet(),
-    val linkPreviews: List<LinkPreview> = emptyList()
+    val linkPreviews: List<LinkPreview> = emptyList(),
+    val editingNoteType: String = "TEXT",
+    val editingChecklist: List<ChecklistItem> = emptyList()
 )

@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.add_edit_note.components.AddEditNoteBottomAppBar
 import com.suvojeet.notenext.ui.add_edit_note.components.AddEditNoteTopAppBar
+import com.suvojeet.notenext.ui.add_edit_note.components.ChecklistEditor
 import com.suvojeet.notenext.ui.add_edit_note.components.ColorPicker
 import com.suvojeet.notenext.ui.add_edit_note.components.FormatToolbar
 import com.suvojeet.notenext.ui.add_edit_note.components.LabelDialog
@@ -147,7 +148,11 @@ fun AddEditNoteScreen(
                     .background(Color(state.editingColor))
                     .verticalScroll(scrollState)
             ) {
-                NoteEditor(state = state, onEvent = onEvent)
+                if (state.editingNoteType == "TEXT") {
+                    NoteEditor(state = state, onEvent = onEvent)
+                } else {
+                    ChecklistEditor(state = state, onEvent = onEvent)
+                }
 
                 if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
                     Spacer(modifier = Modifier.height(16.dp))
@@ -159,7 +164,7 @@ fun AddEditNoteScreen(
             }
 
             AnimatedVisibility(
-                visible = showFormatBar,
+                visible = showFormatBar && state.editingNoteType == "TEXT",
                 enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
                 exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
             ) {

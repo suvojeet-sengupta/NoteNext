@@ -89,6 +89,7 @@ import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 import com.suvojeet.notenext.ui.components.ContextualTopAppBar
 import com.suvojeet.notenext.ui.components.LabelDialog
 import com.suvojeet.notenext.ui.components.NoteItem
+import com.suvojeet.notenext.ui.components.MultiActionFab
 import com.suvojeet.notenext.ui.components.SearchBar
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.settings.SettingsRepository
@@ -187,7 +188,7 @@ fun NotesScreen(
                                     searchQuery = searchQuery,
                                     onSearchQueryChange = { searchQuery = it },
                                     onBackClick = { isSearchActive = false; searchQuery = "" }
-                                )
+                                 )
                             } else {
                                 TopAppBar(
                                     title = {
@@ -220,11 +221,9 @@ fun NotesScreen(
                 }
             },
             floatingActionButton = {
-                FloatingActionButton(
-                    onClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
-                    content = {
-                        Icon(imageVector = Icons.Default.Add, contentDescription = "Add note")
-                    }
+                MultiActionFab(
+                    onNoteClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
+                    onChecklistClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1, "CHECKLIST")) }
                 )
             }
         ) { padding ->

@@ -20,8 +20,14 @@ sealed class NotesEvent {
     data class SetReminderForSelectedNotes(val reminder: Long?) : NotesEvent()
     object ToggleImportantForSelectedNotes : NotesEvent()
     data class SetLabelForSelectedNotes(val label: String) : NotesEvent()
-    data class ExpandNote(val noteId: Int) : NotesEvent()
+    data class ExpandNote(val noteId: Int, val noteType: String = "TEXT") : NotesEvent()
     object CollapseNote : NotesEvent()
+
+    // Checklist Events
+    data class OnChecklistItemCheckedChange(val itemId: String, val isChecked: Boolean) : NotesEvent()
+    data class OnChecklistItemTextChange(val itemId: String, val text: String) : NotesEvent()
+    object AddChecklistItem : NotesEvent()
+    data class DeleteChecklistItem(val itemId: String) : NotesEvent()
 
     // Events from AddEditNoteEvent
     data class OnTitleChange(val title: String) : NotesEvent()

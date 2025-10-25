@@ -20,6 +20,11 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.ui.notes.HtmlConverter
 
@@ -79,13 +84,17 @@ fun NoteItem(
             // Content
             if (note.content.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    text = HtmlConverter.htmlToAnnotatedString(note.content),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (note.noteType == "TEXT") {
+                    Text(
+                        text = HtmlConverter.htmlToAnnotatedString(note.content),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 10,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                } else {
+                    ChecklistPreview(note.content)
+                }
             }
 
             if (!note.label.isNullOrEmpty()) {
@@ -102,6 +111,43 @@ fun NoteItem(
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ChecklistPreview(content: String) {
+    val checklistItems = try {
+        Gson().fromJson<List<ChecklistItem>>(content, object : TypeToken<List<ChecklistItem>>() {}.type)
+    } catch (e: Exception) {
+        emptyList<ChecklistItem>()
+    }
+
+    Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        checklistItems.take(5).forEach { item ->
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (item.isChecked) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = item.text,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        if (checklistItems.size > 5) {
+            Text(
+                text = "...",
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
