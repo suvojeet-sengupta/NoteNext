@@ -1,5 +1,6 @@
 package com.suvojeet.notenext.ui.add_edit_note
 
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -154,126 +155,128 @@ fun AddEditNoteScreen(
             )
         }
     ) { padding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        ) {
-            if (state.editingNoteType == "TEXT") {
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(Color(state.editingColor))
-                        .verticalScroll(scrollState)
-                ) {
-                    NoteEditor(state = state, onEvent = onEvent)
+        SelectionContainer {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(padding)
+            ) {
+                if (state.editingNoteType == "TEXT") {
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color(state.editingColor))
+                            .verticalScroll(scrollState)
+                    ) {
+                        NoteEditor(state = state, onEvent = onEvent)
 
-                    if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                        Spacer(modifier = Modifier.height(16.dp))
-                        state.linkPreviews.forEach { linkPreview ->
-                            LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier
-                        .weight(1f)
-                        .background(Color(state.editingColor))
-                ) {
-                    item {
-                        val titleTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
-                        TextField(
-                            value = state.editingTitle,
-                            onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
-                            placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = Color.Transparent,
-                                unfocusedContainerColor = Color.Transparent,
-                                disabledContainerColor = Color.Transparent,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                selectionColors = TextSelectionColors(
-                                    handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                    backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
-                                )
-                            ),
-                            textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
-                            singleLine = true,
-                            maxLines = 1
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                    }
-                    items(state.editingChecklist) { item ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Checkbox(
-                                checked = item.isChecked,
-                                onCheckedChange = { isChecked ->
-                                    onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
-                                }
-                            )
-                            OutlinedTextField(
-                                value = item.text,
-                                onValueChange = { text ->
-                                    onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
-                                },
-                                modifier = Modifier.weight(1f),
-                                placeholder = { Text("List item") }
-                            )
-                            IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
-                                Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            state.linkPreviews.forEach { linkPreview ->
+                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     }
-                    item {
-                        TextButton(
-                            modifier = Modifier.padding(horizontal = 16.dp),
-                            onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
-                            Icon(Icons.Default.Add, contentDescription = "Add item")
-                            Text("Add item")
-                        }
-                    }
-
-                    if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                } else {
+                    LazyColumn(
+                        modifier = Modifier
+                            .weight(1f)
+                            .background(Color(state.editingColor))
+                    ) {
                         item {
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-                        items(state.linkPreviews) { linkPreview ->
-                            LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                            val titleTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
+                            TextField(
+                                value = state.editingTitle,
+                                onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
+                                placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = Color.Transparent,
+                                    unfocusedContainerColor = Color.Transparent,
+                                    disabledContainerColor = Color.Transparent,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                    selectionColors = TextSelectionColors(
+                                        handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                        backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                                    )
+                                ),
+                                textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
+                                singleLine = true,
+                                maxLines = 1
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
+                        }
+                        items(state.editingChecklist) { item ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 16.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Checkbox(
+                                    checked = item.isChecked,
+                                    onCheckedChange = { isChecked ->
+                                        onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
+                                    }
+                                )
+                                OutlinedTextField(
+                                    value = item.text,
+                                    onValueChange = { text ->
+                                        onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
+                                    },
+                                    modifier = Modifier.weight(1f),
+                                    placeholder = { Text("List item") }
+                                )
+                                IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
+                                    Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                                }
+                            }
+                        }
+                        item {
+                            TextButton(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
+                                Icon(Icons.Default.Add, contentDescription = "Add item")
+                                Text("Add item")
+                            }
+                        }
+
+                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                            item {
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                            items(state.linkPreviews) { linkPreview ->
+                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                Spacer(modifier = Modifier.height(8.dp))
+                            }
                         }
                     }
                 }
-            }
 
-            AnimatedVisibility(
-                visible = showFormatBar && state.editingNoteType == "TEXT",
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-            ) {
-                FormatToolbar(state = state, onEvent = onEvent)
-            }
+                AnimatedVisibility(
+                    visible = showFormatBar && state.editingNoteType == "TEXT",
+                    enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                    exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+                ) {
+                    FormatToolbar(state = state, onEvent = onEvent)
+                }
 
-            AnimatedVisibility(
-                visible = showColorPicker,
-                enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-            ) {
-                ColorPicker(
-                    colors = colors,
-                    editingColor = state.editingColor,
-                    onEvent = onEvent
-                )
+                AnimatedVisibility(
+                    visible = showColorPicker,
+                    enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                    exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+                ) {
+                    ColorPicker(
+                        colors = colors,
+                        editingColor = state.editingColor,
+                        onEvent = onEvent
+                    )
+                }
             }
         }
     }
