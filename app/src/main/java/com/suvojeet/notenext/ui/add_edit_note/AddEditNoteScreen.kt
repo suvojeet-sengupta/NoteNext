@@ -1,6 +1,18 @@
 package com.suvojeet.notenext.ui.add_edit_note
 
 import android.widget.Toast
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.ui.Alignment
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
@@ -142,23 +154,72 @@ fun AddEditNoteScreen(
                 .fillMaxSize()
                 .padding(padding)
         ) {
-            Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .background(Color(state.editingColor))
-                    .verticalScroll(scrollState)
-            ) {
-                if (state.editingNoteType == "TEXT") {
+            if (state.editingNoteType == "TEXT") {
+                Column(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Color(state.editingColor))
+                        .verticalScroll(scrollState)
+                ) {
                     NoteEditor(state = state, onEvent = onEvent)
-                } else {
-                    ChecklistEditor(state = state, onEvent = onEvent)
-                }
 
-                if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    state.linkPreviews.forEach { linkPreview ->
-                        LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                        Spacer(modifier = Modifier.height(8.dp))
+                    if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        state.linkPreviews.forEach { linkPreview ->
+                            LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier
+                        .weight(1f)
+                        .background(Color(state.editingColor))
+                ) {
+                    items(state.editingChecklist) { item ->
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = item.isChecked,
+                                onCheckedChange = { isChecked ->
+                                    onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
+                                }
+                            )
+                            OutlinedTextField(
+                                value = item.text,
+                                onValueChange = { text ->
+                                    onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
+                                },
+                                modifier = Modifier.weight(1f),
+                                placeholder = { Text("List item") }
+                            )
+                            IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
+                                Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                            }
+                        }
+                    }
+                    item {
+                        TextButton(
+                            modifier = Modifier.padding(horizontal = 16.dp),
+                            onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
+                            Icon(Icons.Default.Add, contentDescription = "Add item")
+                            Text("Add item")
+                        }
+                    }
+
+                    if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                        item {
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+                        items(state.linkPreviews) { linkPreview ->
+                            LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                            Spacer(modifier = Modifier.height(8.dp))
+                        }
                     }
                 }
             }
