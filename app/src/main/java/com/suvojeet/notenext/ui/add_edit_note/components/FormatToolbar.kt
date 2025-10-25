@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
+import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -28,7 +29,8 @@ import com.suvojeet.notenext.ui.notes.NotesState
 @Composable
 fun FormatToolbar(
     state: NotesState,
-    onEvent: (NotesEvent) -> Unit
+    onEvent: (NotesEvent) -> Unit,
+    onInsertLinkClick: () -> Unit
 ) {
     LazyRow(
         modifier = Modifier
@@ -66,6 +68,11 @@ fun FormatToolbar(
                 )
             ) {
                 Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
+            }
+        }
+        item {
+            IconButton(onClick = onInsertLinkClick) {
+                Icon(Icons.Default.AddLink, contentDescription = "Insert link")
             }
         }
     }

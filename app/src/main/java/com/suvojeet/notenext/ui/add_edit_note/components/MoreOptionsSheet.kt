@@ -51,8 +51,7 @@ fun MoreOptionsSheet(
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
     showDeleteDialog: (Boolean) -> Unit,
-    showSaveAsDialog: (Boolean) -> Unit,
-    showInsertLinkDialog: (Boolean) -> Unit
+    showSaveAsDialog: (Boolean) -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
     val context = LocalContext.current
@@ -79,8 +78,7 @@ fun MoreOptionsSheet(
                 "Make a copy" to Icons.Default.ContentCopy,
                 "Share" to Icons.Default.Share,
                 "Labels" to Icons.AutoMirrored.Filled.Label,
-                "Save as" to Icons.Default.Check,
-                "Insert link" to Icons.Default.AddLink
+                "Save as" to Icons.Default.Check
             )
 
             LazyVerticalGrid(
@@ -111,7 +109,6 @@ fun MoreOptionsSheet(
                                 }
                                 "Labels" -> onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
                                 "Save as" -> showSaveAsDialog(true)
-                                "Insert link" -> showInsertLinkDialog(true)
                             }
                         }
                     )
