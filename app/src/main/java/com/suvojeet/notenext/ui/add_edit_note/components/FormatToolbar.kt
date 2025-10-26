@@ -26,6 +26,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
+import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.theme.button_color
 import com.suvojeet.notenext.ui.theme.dark_button_color
 
@@ -33,10 +34,17 @@ import com.suvojeet.notenext.ui.theme.dark_button_color
 fun FormatToolbar(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
-    onInsertLinkClick: () -> Unit
+    onInsertLinkClick: () -> Unit,
+    themeMode: ThemeMode
 ) {
-    val buttonColor = if (isSystemInDarkTheme()) dark_button_color else button_color
-    val iconColor = if (isSystemInDarkTheme()) Color.White else MaterialTheme.colorScheme.onSurface
+    val systemInDarkTheme = isSystemInDarkTheme()
+    val useDarkTheme = when (themeMode) {
+        ThemeMode.DARK -> true
+        ThemeMode.LIGHT -> false
+        ThemeMode.SYSTEM -> systemInDarkTheme
+    }
+    val buttonColor = if (useDarkTheme) dark_button_color else button_color
+    val iconColor = if (useDarkTheme) Color.White else MaterialTheme.colorScheme.onSurface
 
     LazyRow(
         modifier = Modifier

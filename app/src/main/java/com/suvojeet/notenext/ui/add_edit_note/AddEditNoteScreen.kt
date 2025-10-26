@@ -263,7 +263,7 @@ fun AddEditNoteScreen(
                     enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
                     exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
                 ) {
-                    FormatToolbar(state = state, onEvent = onEvent, onInsertLinkClick = { showInsertLinkDialog = true })
+                    FormatToolbar(state = state, onEvent = onEvent, onInsertLinkClick = { showInsertLinkDialog = true }, themeMode = themeMode)
                 }
 
                 AnimatedVisibility(
