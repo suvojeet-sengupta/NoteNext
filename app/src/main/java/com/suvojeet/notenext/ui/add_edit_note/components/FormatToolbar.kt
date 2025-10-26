@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
+import com.suvojeet.notenext.ui.theme.button_color
 
 @Composable
 fun FormatToolbar(
@@ -44,7 +45,7 @@ fun FormatToolbar(
             IconButton(
                 onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                    containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else button_color
                 )
             ) {
                 Icon(Icons.Default.FormatBold, contentDescription = "Bold")
@@ -54,7 +55,7 @@ fun FormatToolbar(
             IconButton(
                 onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                    containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else button_color
                 )
             ) {
                 Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
@@ -64,14 +65,19 @@ fun FormatToolbar(
             IconButton(
                 onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+                    containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else button_color
                 )
             ) {
                 Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
             }
         }
         item {
-            IconButton(onClick = onInsertLinkClick) {
+            IconButton(
+                onClick = onInsertLinkClick,
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = button_color
+                )
+            ) {
                 Icon(Icons.Default.AddLink, contentDescription = "Insert link")
             }
         }
