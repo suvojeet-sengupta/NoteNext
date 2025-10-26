@@ -112,7 +112,7 @@ class SettingsRepository(private val context: Context) {
 
     val shapeFamily: Flow<ShapeFamily> = context.dataStore.data
         .map { preferences ->
-            ShapeFamily.valueOf(preferences[PreferencesKeys.SHAPE_FAMILY] ?: ShapeFamily.EXPRESSIVE.name)
+            ShapeFamily.valueOf(preferences[PreferencesKeys.SHAPE_FAMILY] ?: ShapeFamily.ROUNDED.name)
         }
 
     suspend fun saveShapeFamily(shapeFamily: ShapeFamily) {
@@ -229,7 +229,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                         .padding(vertical = 16.dp)
                 ) {
                     Column {
-                        Text("Shape Family", style = MaterialTheme.typography.titleMedium)
+                        Text("Shape Family (experimental)", style = MaterialTheme.typography.titleMedium)
                         Text(
                             selectedShapeFamily.name.lowercase().replaceFirstChar { it.uppercase() },
                             style = MaterialTheme.typography.bodyMedium,
