@@ -137,6 +137,8 @@ class NotesViewModel(
                     noteDao.insertNote(note.copy(id = 0, title = "${note.title} (Copy)"))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
+                val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
+                _events.emit(NotesUiEvent.ShowToast(message))
             }
         }
         is NotesEvent.SendSelectedNotes -> {
@@ -549,6 +551,7 @@ class NotesViewModel(
                     noteDao.getNoteById(it)?.let { note ->
                         val copiedNote = note.copy(id = 0, title = "${note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
                         noteDao.insertNote(copiedNote)
+                        _events.emit(NotesUiEvent.ShowToast("Note copied"))
                     }
                 }
             }
