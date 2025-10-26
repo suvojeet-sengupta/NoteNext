@@ -74,7 +74,7 @@ class SettingsRepository(private val context: Context) {
     val themeMode: Flow<ThemeMode> = context.dataStore.data
         .map {
             preferences ->
-            ThemeMode.valueOf(preferences[PreferencesKeys.THEME_MODE] ?: ThemeMode.SYSTEM.name)
+            ThemeMode.valueOf(preferences[PreferencesKeys.THEME_MODE] ?: ThemeMode.DARK.name)
         }
 
     suspend fun saveThemeMode(themeMode: ThemeMode) {
