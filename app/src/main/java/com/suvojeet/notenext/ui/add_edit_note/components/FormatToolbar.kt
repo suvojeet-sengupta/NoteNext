@@ -1,6 +1,7 @@
 package com.suvojeet.notenext.ui.add_edit_note.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -26,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import com.suvojeet.notenext.ui.theme.button_color
+import com.suvojeet.notenext.ui.theme.dark_button_color
 
 @Composable
 fun FormatToolbar(
@@ -33,6 +35,9 @@ fun FormatToolbar(
     onEvent: (NotesEvent) -> Unit,
     onInsertLinkClick: () -> Unit
 ) {
+    val buttonColor = if (isSystemInDarkTheme()) dark_button_color else button_color
+    val iconColor = if (isSystemInDarkTheme()) Color.White else MaterialTheme.colorScheme.onSurface
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -45,7 +50,8 @@ fun FormatToolbar(
             IconButton(
                 onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else button_color
+                    containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else buttonColor,
+                    contentColor = iconColor
                 )
             ) {
                 Icon(Icons.Default.FormatBold, contentDescription = "Bold")
@@ -55,7 +61,8 @@ fun FormatToolbar(
             IconButton(
                 onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else button_color
+                    containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else buttonColor,
+                    contentColor = iconColor
                 )
             ) {
                 Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
@@ -65,7 +72,8 @@ fun FormatToolbar(
             IconButton(
                 onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else button_color
+                    containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else buttonColor,
+                    contentColor = iconColor
                 )
             ) {
                 Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
@@ -75,7 +83,8 @@ fun FormatToolbar(
             IconButton(
                 onClick = onInsertLinkClick,
                 colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = button_color
+                    containerColor = buttonColor,
+                    contentColor = iconColor
                 )
             ) {
                 Icon(Icons.Default.AddLink, contentDescription = "Insert link")
