@@ -1,5 +1,8 @@
 package com.suvojeet.notenext.ui.add_edit_note.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -16,8 +19,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
@@ -30,27 +37,42 @@ fun ChecklistEditor(
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        items(state.editingChecklist) { item ->
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+        items(state.editingChecklist, key = { it.id }) { item ->
+            val focusRequester = remember { FocusRequester() }
+            AnimatedVisibility(
+                visible = true,
+                enter = expandVertically(),
+                exit = shrinkVertically()
             ) {
-                Checkbox(
-                    checked = item.isChecked,
-                    onCheckedChange = { isChecked ->
-                        onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = item.isChecked,
+                        onCheckedChange = { isChecked ->
+                            onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
+                        }
+                    )
+                    OutlinedTextField(
+                        value = item.text,
+                        onValueChange = { text ->
+                            onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        placeholder = { Text("List item") }
+                    )
+                    IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete item")
                     }
-                )
-                OutlinedTextField(
-                    value = item.text,
-                    onValueChange = { text ->
-                        onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
-                    },
-                    modifier = Modifier.weight(1f),
-                    placeholder = { Text("List item") }
-                )
-                IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
-                    Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                }
+            }
+            LaunchedEffect(state.newlyAddedChecklistItemId) {
+                if (item.id == state.newlyAddedChecklistItemId) {
+                    focusRequester.requestFocus()
+                    onEvent(NotesEvent.ClearNewlyAddedChecklistItemId)
                 }
             }
         }

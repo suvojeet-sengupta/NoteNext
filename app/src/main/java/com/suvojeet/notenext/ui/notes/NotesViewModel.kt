@@ -224,8 +224,12 @@ class NotesViewModel(
             onEvent(NotesEvent.OnSaveNoteClick)
         }
         is NotesEvent.AddChecklistItem -> {
-            val updatedChecklist = state.value.editingChecklist + ChecklistItem(text = "", isChecked = false)
-            _state.value = state.value.copy(editingChecklist = updatedChecklist)
+            val newItem = ChecklistItem(text = "", isChecked = false)
+            val updatedChecklist = state.value.editingChecklist + newItem
+            _state.value = state.value.copy(
+                editingChecklist = updatedChecklist,
+                newlyAddedChecklistItemId = newItem.id
+            )
         }
         is NotesEvent.DeleteChecklistItem -> {
             val updatedChecklist = state.value.editingChecklist.filterNot { it.id == event.itemId }
@@ -593,6 +597,9 @@ class NotesViewModel(
                 val newTextFieldValue = content.copy(annotatedString = newAnnotatedString)
                 _state.value = state.value.copy(editingContent = newTextFieldValue)
             }
+        }
+        is NotesEvent.ClearNewlyAddedChecklistItemId -> {
+            _state.value = state.value.copy(newlyAddedChecklistItemId = null)
         }
         else -> {}
     }

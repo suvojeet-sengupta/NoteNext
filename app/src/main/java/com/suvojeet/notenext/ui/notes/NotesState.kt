@@ -37,5 +37,6 @@ data class NotesState(
     val activeStyles: Set<SpanStyle> = emptySet(),
     val linkPreviews: List<LinkPreview> = emptyList(),
     val editingNoteType: String = "TEXT",
-    val editingChecklist: List<ChecklistItem> = emptyList()
+    val editingChecklist: List<ChecklistItem> = emptyList(),
+    val newlyAddedChecklistItemId: String? = null
 )
