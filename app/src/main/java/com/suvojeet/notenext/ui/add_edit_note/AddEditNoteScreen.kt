@@ -11,6 +11,9 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.foundation.clickable
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
@@ -65,6 +68,8 @@ fun AddEditNoteScreen(
     var showMoreOptions by remember { mutableStateOf(false) }
     var showSaveAsDialog by remember { mutableStateOf(false) }
     var showInsertLinkDialog by remember { mutableStateOf(false) }
+    var showImageViewer by remember { mutableStateOf(false) }
+    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
@@ -213,7 +218,11 @@ fun AddEditNoteScreen(
                                                 modifier = Modifier
                                                     .fillMaxWidth()
                                                     .height(200.dp)
-                                                    .padding(8.dp),
+                                                    .padding(8.dp)
+                                                    .clickable {
+                                                        selectedImageUri = Uri.parse(attachment.uri)
+                                                        showImageViewer = true
+                                                    },
                                                 contentScale = ContentScale.Fit
                                             )
                                         }
@@ -405,6 +414,19 @@ fun AddEditNoteScreen(
                 onEvent(NotesEvent.DismissLabelDialog)
             }
         )
+    }
+
+    AnimatedVisibility(
+        visible = showImageViewer && selectedImageUri != null,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        selectedImageUri?.let { uri ->
+            ImageViewerScreen(
+                imageUri = uri,
+                onDismiss = { showImageViewer = false }
+            )
+        }
     }
 }
 
