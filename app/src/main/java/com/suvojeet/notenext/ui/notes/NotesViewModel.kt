@@ -579,6 +579,9 @@ class NotesViewModel(
         is NotesEvent.OnRemoveLinkPreview -> {
             val updatedLinkPreviews = state.value.linkPreviews.filter { it.url != event.url }
             _state.value = state.value.copy(linkPreviews = updatedLinkPreviews)
+            viewModelScope.launch {
+                _events.emit(NotesUiEvent.LinkPreviewRemoved)
+            }
         }
         is NotesEvent.OnInsertLink -> {
             val content = state.value.editingContent

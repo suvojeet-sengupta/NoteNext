@@ -69,6 +69,9 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.util.saveAsPdf
 import com.suvojeet.notenext.util.saveAsTxt
 
+import com.suvojeet.notenext.ui.notes.NotesUiEvent
+import kotlinx.coroutines.flow.SharedFlow
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
@@ -76,7 +79,8 @@ fun AddEditNoteScreen(
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
     themeMode: ThemeMode,
-    settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    events: SharedFlow<NotesUiEvent>
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -90,6 +94,18 @@ fun AddEditNoteScreen(
 
     BackHandler {
         onDismiss()
+    }
+
+    LaunchedEffect(Unit) {
+        events.collect {
+            event ->
+            when (event) {
+                is NotesUiEvent.LinkPreviewRemoved -> {
+                    Toast.makeText(context, "Link preview removed", Toast.LENGTH_SHORT).show()
+                }
+                else -> {}
+            }
+        }
     }
 
     LaunchedEffect(state.editingContent) {

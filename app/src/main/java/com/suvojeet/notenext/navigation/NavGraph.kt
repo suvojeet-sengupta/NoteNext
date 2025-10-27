@@ -150,281 +150,283 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
         if (isExpandedScreen) {
 
-            PermanentNavigationDrawer(
+                        PermanentNavigationDrawer(
 
-                drawerContent = {
+                            drawerContent = {
 
-                    PermanentDrawerSheet(modifier = Modifier.fillMaxWidth(0.15f)) {
+                                PermanentDrawerSheet(modifier = Modifier.fillMaxWidth(0.15f)) {
 
-                        Text(
+                                    Text(
 
-                            text = "NoteNext",
+                                        text = "NoteNext",
 
-                            style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
+                                        style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
 
-                            modifier = Modifier.padding(16.dp)
-
-                        )
-
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-                        val currentRoute = navBackStackEntry?.destination?.route
-
-    
-
-                        NavigationDrawerItem(
-
-                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
-
-                            label = { Text("Notes") },
-
-                            selected = currentRoute == "notes" && notesState.filteredLabel == null,
-
-                            onClick = {
-
-                                notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
-
-                                navController.navigate("notes") {
-
-                                    popUpTo(navController.graph.startDestinationId)
-
-                                    launchSingleTop = true
-
-                                }
-
-                            },
-
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-
-                        )
-
-                        NavigationDrawerItem(
-
-                            icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
-
-                            label = { Text("Archive") },
-
-                            selected = currentRoute == "archive",
-
-                            onClick = {
-
-                                navController.navigate("archive") {
-
-                                    popUpTo(navController.graph.startDestinationId)
-
-                                    launchSingleTop = true
-
-                                }
-
-                            },
-
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-
-                        )
-
-                        NavigationDrawerItem(
-
-                            icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
-
-                            label = { Text("Bin") },
-
-                            selected = currentRoute == "bin",
-
-                            onClick = {
-
-                                navController.navigate("bin") {
-
-                                    popUpTo(navController.graph.startDestinationId)
-
-                                    launchSingleTop = true
-
-                                }
-
-                            },
-
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-
-                        )
-
-                        NavigationDrawerItem(
-
-                            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
-
-                            label = { Text("Settings") },
-
-                            selected = currentRoute == "settings",
-
-                            onClick = {
-
-                                navController.navigate("settings")
-
-                            },
-
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-
-                        )
-
-    
-
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-
-    
-
-                        if (notesState.labels.isEmpty()) {
-
-                            NavigationDrawerItem(
-
-                                icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Create new label") },
-
-                                label = { Text("Create new label") },
-
-                                selected = false,
-
-                                onClick = {
-
-                                    navController.navigate("edit_labels")
-
-                                },
-
-                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
-
-                            )
-
-                        } else {
-
-                            Row(
-
-                                modifier = Modifier
-
-                                    .fillMaxWidth()
-
-                                    .padding(horizontal = 16.dp),
-
-                                verticalAlignment = Alignment.CenterVertically,
-
-                                horizontalArrangement = Arrangement.SpaceBetween
-
-                            ) {
-
-                                Text(
-
-                                    text = "LABELS",
-
-                                    style = MaterialTheme.typography.labelSmall,
-
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-
-                                )
-
-                                IconButton(onClick = {
-
-                                    navController.navigate("edit_labels")
-
-                                }) {
-
-                                    Icon(
-
-                                        imageVector = Icons.Default.Edit,
-
-                                        contentDescription = "Edit Labels",
-
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                                        modifier = Modifier.padding(16.dp)
 
                                     )
 
+                                    Spacer(modifier = Modifier.height(16.dp))
+
+                                    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+                                    val currentRoute = navBackStackEntry?.destination?.route
+
+            
+
+                                    NavigationDrawerItem(
+
+                                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
+
+                                        label = { Text("Notes") },
+
+                                        selected = currentRoute == "notes" && notesState.filteredLabel == null,
+
+                                        onClick = {
+
+                                            notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
+
+                                            navController.navigate("notes") {
+
+                                                popUpTo(navController.graph.startDestinationId)
+
+                                                launchSingleTop = true
+
+                                            }
+
+                                        },
+
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                    )
+
+                                    NavigationDrawerItem(
+
+                                        icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
+
+                                        label = { Text("Archive") },
+
+                                        selected = currentRoute == "archive",
+
+                                        onClick = {
+
+                                            navController.navigate("archive") {
+
+                                                popUpTo(navController.graph.startDestinationId)
+
+                                                launchSingleTop = true
+
+                                            }
+
+                                        },
+
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                    )
+
+                                    NavigationDrawerItem(
+
+                                        icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
+
+                                        label = { Text("Bin") },
+
+                                        selected = currentRoute == "bin",
+
+                                        onClick = {
+
+                                            navController.navigate("bin") {
+
+                                                popUpTo(navController.graph.startDestinationId)
+
+                                                launchSingleTop = true
+
+                                            }
+
+                                        },
+
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                    )
+
+                                    NavigationDrawerItem(
+
+                                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+
+                                        label = { Text("Settings") },
+
+                                        selected = currentRoute == "settings",
+
+                                        onClick = {
+
+                                            navController.navigate("settings")
+
+                                        },
+
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                    )
+
+            
+
+                                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+            
+
+                                    if (notesState.labels.isEmpty()) {
+
+                                        NavigationDrawerItem(
+
+                                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Create new label") },
+
+                                            label = { Text("Create new label") },
+
+                                            selected = false,
+
+                                            onClick = {
+
+                                                navController.navigate("edit_labels")
+
+                                            },
+
+                                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                        )
+
+                                    } else {
+
+                                        Row(
+
+                                            modifier = Modifier
+
+                                                .fillMaxWidth()
+
+                                                .padding(horizontal = 16.dp),
+
+                                            verticalAlignment = Alignment.CenterVertically,
+
+                                            horizontalArrangement = Arrangement.SpaceBetween
+
+                                        ) {
+
+                                            Text(
+
+                                                text = "LABELS",
+
+                                                style = MaterialTheme.typography.labelSmall,
+
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                                            )
+
+                                            IconButton(onClick = {
+
+                                                navController.navigate("edit_labels")
+
+                                            }) {
+
+                                                Icon(
+
+                                                    imageVector = Icons.Default.Edit,
+
+                                                    contentDescription = "Edit Labels",
+
+                                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+
+                                                )
+
+                                            }
+
+                                        }
+
+            
+
+                                        notesState.labels.forEach { label ->
+
+                                            NavigationDrawerItem(
+
+                                                icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
+
+                                                label = { Text(label) },
+
+                                                selected = notesState.filteredLabel == label,
+
+                                                onClick = {
+
+                                                    notesViewModel.onEvent(NotesEvent.FilterByLabel(label))
+
+                                                    navController.navigate("notes") {
+
+                                                        popUpTo(navController.graph.startDestinationId)
+
+                                                        launchSingleTop = true
+
+                                                    }
+
+                                                },
+
+                                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                            )
+
+                                        }
+
+                                    }
+
                                 }
 
                             }
 
-    
+                        ) {
 
-                            notesState.labels.forEach { label ->
+                            NavHost(navController = navController, startDestination = "notes") {
 
-                                NavigationDrawerItem(
+            
 
-                                    icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
+                                composable(
 
-                                    label = { Text(label) },
+            
 
-                                    selected = notesState.filteredLabel == label,
+                                    route = "notes",
 
-                                    onClick = {
+            
 
-                                        notesViewModel.onEvent(NotesEvent.FilterByLabel(label))
+                                    enterTransition = { fadeIn(animationSpec = tween(300)) },
 
-                                        navController.navigate("notes") {
+            
 
-                                            popUpTo(navController.graph.startDestinationId)
+                                    exitTransition = { fadeOut(animationSpec = tween(300)) }
 
-                                            launchSingleTop = true
+            
 
-                                        }
+                                ) {
 
-                                    },
+            
 
-                                    modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                    NotesScreen(
 
-                                )
+                                        viewModel = notesViewModel,
 
-                            }
+                                        onSettingsClick = { navController.navigate("settings") },
 
-                        }
+                                        onArchiveClick = { navController.navigate("archive") },
 
-                    }
+                                        onEditLabelsClick = { navController.navigate("edit_labels") },
 
-                }
+                                        onBinClick = { navController.navigate("bin") },
 
-            ) {
+                                        themeMode = themeMode,
 
-                NavHost(navController = navController, startDestination = "notes") {
+                                        settingsRepository = settingsRepository,
 
-    
+                                        onMenuClick = { scope.launch { drawerState.open() } },
 
-                    composable(
+                                        events = notesViewModel.events
 
-    
+                                    )
 
-                        route = "notes",
+            
 
-    
-
-                        enterTransition = { fadeIn(animationSpec = tween(300)) },
-
-    
-
-                        exitTransition = { fadeOut(animationSpec = tween(300)) }
-
-    
-
-                    ) {
-
-    
-
-                        NotesScreen(
-
-                            viewModel = notesViewModel,
-
-                            onSettingsClick = { navController.navigate("settings") },
-
-                            onArchiveClick = { navController.navigate("archive") },
-
-                            onEditLabelsClick = { navController.navigate("edit_labels") },
-
-                            onBinClick = { navController.navigate("bin") },
-
-                            themeMode = themeMode,
-
-                            settingsRepository = settingsRepository,
-
-                            onMenuClick = { scope.launch { drawerState.open() } }
-
-                        )
-
-    
-
-                    }
+                                }
 
     
 
@@ -922,7 +924,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                             settingsRepository = settingsRepository,
 
-                            onMenuClick = { scope.launch { drawerState.open() } }
+                            onMenuClick = { scope.launch { drawerState.open() } },
+
+                            events = notesViewModel.events
 
                         )
 

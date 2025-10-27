@@ -108,7 +108,8 @@ fun NotesScreen(
     onBinClick: () -> Unit,
     themeMode: ThemeMode,
     settingsRepository: SettingsRepository,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    events: kotlinx.coroutines.flow.SharedFlow<com.suvojeet.notenext.ui.notes.NotesUiEvent>
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
@@ -134,6 +135,9 @@ fun NotesScreen(
 
                 is NotesUiEvent.ShowToast -> {
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+                is NotesUiEvent.LinkPreviewRemoved -> {
+                    Toast.makeText(context, "Link preview removed", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -450,7 +454,8 @@ fun NotesScreen(
                 onEvent = viewModel::onEvent,
                 onDismiss = { viewModel.onEvent(NotesEvent.CollapseNote) },
                 themeMode = themeMode,
-                settingsRepository = settingsRepository
+                settingsRepository = settingsRepository,
+                events = viewModel.events
             )
         }
     }

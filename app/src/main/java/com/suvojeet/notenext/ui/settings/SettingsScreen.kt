@@ -100,7 +100,7 @@ class SettingsRepository(private val context: Context) {
     val enableRichLinkPreview: Flow<Boolean> = context.dataStore.data
         .map {
             preferences ->
-            preferences[PreferencesKeys.ENABLE_RICH_LINK_PREVIEW] ?: false
+            preferences[PreferencesKeys.ENABLE_RICH_LINK_PREVIEW] ?: true
         }
 
     suspend fun saveEnableRichLinkPreview(enable: Boolean) {
