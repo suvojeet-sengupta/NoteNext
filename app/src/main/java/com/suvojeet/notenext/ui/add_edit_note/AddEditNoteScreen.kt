@@ -75,11 +75,11 @@ fun AddEditNoteScreen(
     val context = LocalContext.current
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
 
-    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        uri?.let {
-            val mimeType = context.contentResolver.getType(it)
-            context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            onEvent(NotesEvent.AddAttachment(it.toString(), mimeType ?: ""))
+    val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+        uris.forEach { uri ->
+            val mimeType = context.contentResolver.getType(uri)
+            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            onEvent(NotesEvent.AddAttachment(uri.toString(), mimeType ?: ""))
         }
     }
 
