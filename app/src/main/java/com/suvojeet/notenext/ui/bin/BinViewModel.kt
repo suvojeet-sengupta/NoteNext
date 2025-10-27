@@ -17,8 +17,8 @@ class BinViewModel(private val noteDao: NoteDao, private val savedStateHandle: a
 
     init {
         noteDao.getBinnedNotes()
-            .onEach { notes ->
-                _state.value = state.value.copy(notes = notes)
+            .onEach { list ->
+                _state.value = state.value.copy(notes = list.map { it.note })
             }
             .launchIn(viewModelScope)
     }

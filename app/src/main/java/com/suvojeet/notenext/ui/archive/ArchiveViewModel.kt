@@ -12,6 +12,7 @@ import kotlinx.coroutines.launch
 class ArchiveViewModel(private val noteDao: NoteDao) : ViewModel() {
 
     val state: StateFlow<ArchiveState> = noteDao.getArchivedNotes()
+        .map { list -> list.map { it.note } }
         .map { ArchiveState(notes = it) }
         .stateIn(
             scope = viewModelScope,

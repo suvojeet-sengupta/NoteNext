@@ -25,6 +25,8 @@ import com.suvojeet.notenext.ui.archive.ArchiveEvent
 
 import androidx.compose.material.icons.filled.Menu
 
+import com.suvojeet.notenext.data.NoteWithAttachments
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchiveScreen(
@@ -82,7 +84,7 @@ fun ArchiveScreen(
             ) {
                 items(state.notes) { note ->
                     NoteItem(
-                        note = note,
+                        note = NoteWithAttachments(note, emptyList()),
                         isSelected = false, // Not selectable in archive
                         onNoteClick = {
                             noteToRestore = note

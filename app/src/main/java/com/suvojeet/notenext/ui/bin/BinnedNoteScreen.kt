@@ -9,21 +9,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
-import com.suvojeet.notenext.ui.notes.HtmlConverter
+import androidx.compose.foundation.lazy.items
+import com.suvojeet.notenext.data.NoteWithAttachments
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,11 +18,12 @@ fun BinnedNoteScreen(
     state: BinState,
     onDismiss: () -> Unit
 ) {
-    val note = state.notes.find { it.id == state.expandedNoteId }
+    val noteWithAttachments = state.notes.find { it.id == state.expandedNoteId }?.let { NoteWithAttachments(it, emptyList()) }
 
     BackHandler { onDismiss() }
 
-    if (note != null) {
+    if (noteWithAttachments != null) {
+        val note = noteWithAttachments.note
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -70,6 +58,13 @@ fun BinnedNoteScreen(
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurface
                         )
+
+                        if (noteWithAttachments.attachments.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            noteWithAttachments.attachments.forEach { attachment ->
+                                Text(text = attachment.uri)
+                            }
+                        }
                     }
                 }
             }

@@ -6,6 +6,9 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.Attachment
 import com.suvojeet.notenext.data.NoteWithAttachments
 
+import com.suvojeet.notenext.data.ChecklistItem
+import com.suvojeet.notenext.data.LinkPreview
+
 data class NotesState(
     val notes: List<NoteWithAttachments> = emptyList(),
     val layoutType: LayoutType = LayoutType.GRID,

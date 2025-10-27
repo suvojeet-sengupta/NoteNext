@@ -122,7 +122,7 @@ fun BinScreen(
                             key = { note -> note.id }
                         ) { note ->
                             NoteItem(
-                                note = note,
+                                note = NoteWithAttachments(note, emptyList()),
                                 onNoteClick = {
                                     if (isSelectionModeActive) {
                                         viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id))

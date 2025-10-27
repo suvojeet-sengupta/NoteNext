@@ -6,6 +6,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.LinkPreview
 
+import com.suvojeet.notenext.data.NoteWithAttachments
+
 sealed class NotesEvent {
     data class DeleteNote(val note: NoteWithAttachments) : NotesEvent()
     object RestoreNote : NotesEvent()
