@@ -47,6 +47,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.content.Intent
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -71,6 +72,7 @@ fun AddEditNoteScreen(
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let {
             val mimeType = context.contentResolver.getType(it)
+            context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             onEvent(NotesEvent.AddAttachment(it.toString(), mimeType ?: ""))
         }
     }
@@ -80,6 +82,7 @@ fun AddEditNoteScreen(
         if (success) {
             photoUri?.let {
                 val mimeType = context.contentResolver.getType(it)
+                context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 onEvent(NotesEvent.AddAttachment(it.toString(), mimeType ?: "image/jpeg"))
             }
         }
