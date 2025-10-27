@@ -17,10 +17,17 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.BottomAppBar
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -35,8 +42,11 @@ fun AddEditNoteBottomAppBar(
     showColorPicker: (Boolean) -> Unit,
     showFormatBar: (Boolean) -> Unit,
     showMoreOptions: (Boolean) -> Unit,
-    onAttachmentClick: () -> Unit
+    onImageClick: () -> Unit,
+    onTakePhotoClick: () -> Unit,
+    onAudioClick: () -> Unit
 ) {
+    var showAttachmentMenu by remember { mutableStateOf(false) }
     BottomAppBar(
         containerColor = Color(state.editingColor),
         windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
@@ -49,14 +59,42 @@ fun AddEditNoteBottomAppBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FloatingActionButton(
-                    onClick = { onAttachmentClick() },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.size(40.dp),
-                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                ) {
-                    Icon(Icons.Default.Add, contentDescription = "Add attachment")
+                Box {
+                    FloatingActionButton(
+                        onClick = { showAttachmentMenu = true },
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.size(40.dp),
+                        containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                        contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    ) {
+                        Icon(Icons.Default.Add, contentDescription = "Add attachment")
+                    }
+                    DropdownMenu(
+                        expanded = showAttachmentMenu,
+                        onDismissRequest = { showAttachmentMenu = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text("Add image") },
+                            onClick = {
+                                onImageClick()
+                                showAttachmentMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Take photo") },
+                            onClick = {
+                                onTakePhotoClick()
+                                showAttachmentMenu = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Audio Recording") },
+                            onClick = {
+                                onAudioClick()
+                                showAttachmentMenu = false
+                            }
+                        )
+                    }
                 }
                 FloatingActionButton(
                     onClick = { showColorPicker(true) },

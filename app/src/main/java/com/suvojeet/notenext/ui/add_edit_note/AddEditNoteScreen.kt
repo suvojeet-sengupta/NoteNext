@@ -1,5 +1,8 @@
 package com.suvojeet.notenext.ui.add_edit_note
 
+import android.content.Context
+import android.net.Uri
+import android.os.Environment
 import android.widget.Toast
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -28,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.core.content.FileProvider
 import com.suvojeet.notenext.ui.add_edit_note.components.*
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
@@ -37,6 +41,10 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.util.saveAsPdf
 import com.suvojeet.notenext.util.saveAsTxt
 import kotlinx.coroutines.flow.SharedFlow
+import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -62,6 +70,16 @@ fun AddEditNoteScreen(
         uri?.let {
             val mimeType = context.contentResolver.getType(it)
             onEvent(NotesEvent.AddAttachment(it.toString(), mimeType ?: ""))
+        }
+    }
+
+    var photoUri by remember { mutableStateOf<Uri?>(null) }
+    val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
+        if (success) {
+            photoUri?.let {
+                val mimeType = context.contentResolver.getType(it)
+                onEvent(NotesEvent.AddAttachment(it.toString(), mimeType ?: "image/jpeg"))
+            }
         }
     }
 
@@ -141,8 +159,16 @@ fun AddEditNoteScreen(
                 showColorPicker = { showColorPicker = !showColorPicker },
                 showFormatBar = { showFormatBar = !showFormatBar },
                 showMoreOptions = { showMoreOptions = it },
-                onAttachmentClick = {
-                    getContent.launch("*/*")
+                onImageClick = {
+                    getContent.launch("image/*")
+                },
+                onTakePhotoClick = {
+                    val uri = createImageFile(context)
+                    photoUri = uri
+                    takePictureLauncher.launch(uri)
+                },
+                onAudioClick = {
+                    Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
                 }
             )
         }
@@ -212,7 +238,8 @@ fun AddEditNoteScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
-                        items(state.editingChecklist) { item ->
+                        items(state.editingChecklist) {
+                            item ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -359,4 +386,19 @@ fun AddEditNoteScreen(
             }
         )
     }
+}
+
+private fun createImageFile(context: Context): Uri {
+    val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+    val storageDir: File? = context.getExternalFilesDir(Environment.DIRECTORY_PICTURES)
+    val file = File.createTempFile(
+        "JPEG_${timeStamp}_",
+        ".jpg",
+        storageDir
+    )
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        file
+    )
 }
