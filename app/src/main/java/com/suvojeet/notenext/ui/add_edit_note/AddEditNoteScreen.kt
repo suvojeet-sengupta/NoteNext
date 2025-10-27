@@ -32,6 +32,8 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.content.FileProvider
+import coil.compose.AsyncImage
+import androidx.compose.ui.layout.ContentScale
 import com.suvojeet.notenext.ui.add_edit_note.components.*
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
@@ -200,7 +202,22 @@ fun AddEditNoteScreen(
                             Spacer(modifier = Modifier.height(16.dp))
                             LazyColumn(modifier = Modifier.height(200.dp)) {
                                 items(state.editingAttachments) { attachment ->
-                                    Text(text = attachment.uri)
+                                    when (attachment.type) {
+                                        "IMAGE" -> {
+                                            AsyncImage(
+                                                model = attachment.uri,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(200.dp)
+                                                    .padding(8.dp),
+                                                contentScale = ContentScale.Crop
+                                            )
+                                        }
+                                        else -> {
+                                            Text(text = attachment.uri)
+                                        }
+                                    }
                                 }
                             }
                         }
