@@ -196,6 +196,51 @@ fun AddEditNoteScreen(
                             .background(Color(state.editingColor))
                             .verticalScroll(scrollState)
                     ) {
+                        val imageAttachments = state.editingAttachments.filter { it.type == "IMAGE" }
+                        if (imageAttachments.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(16.dp))
+                            val imageCount = imageAttachments.size
+                            if (imageCount == 1) {
+                                // Single image: full width
+                                AsyncImage(
+                                    model = imageAttachments.first().uri,
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 400.dp) // Larger max height for single image
+                                        .clickable {
+                                            selectedImageUri = Uri.parse(imageAttachments.first().uri)
+                                            showImageViewer = true
+                                        },
+                                    contentScale = ContentScale.Fit
+                                )
+                            } else {
+                                // Multiple images: up to 3 per row in a horizontal scrollable row
+                                LazyRow(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                    contentPadding = PaddingValues(horizontal = 8.dp)
+                                ) {
+                                    items(imageAttachments, key = { it.uri }) { attachment ->
+                                        AsyncImage(
+                                            model = attachment.uri,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .width(120.dp) // Fixed width for a 3-per-row look
+                                                .height(120.dp)
+                                                .aspectRatio(1f)
+                                                .clickable {
+                                                    selectedImageUri = Uri.parse(attachment.uri)
+                                                    showImageViewer = true
+                                                },
+                                            contentScale = ContentScale.Crop
+                                        )
+                                    }
+                                }
+                            }
+                            Spacer(modifier = Modifier.height(16.dp))
+                        }
+
                         NoteEditor(state = state, onEvent = onEvent)
 
                         if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
@@ -206,33 +251,7 @@ fun AddEditNoteScreen(
                             }
                         }
 
-                        if (state.editingAttachments.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            LazyColumn(modifier = Modifier.height(200.dp)) {
-                                items(state.editingAttachments) { attachment ->
-                                    when (attachment.type) {
-                                        "IMAGE" -> {
-                                            AsyncImage(
-                                                model = attachment.uri,
-                                                contentDescription = null,
-                                                modifier = Modifier
-                                                    .fillMaxWidth()
-                                                    .height(200.dp)
-                                                    .padding(8.dp)
-                                                    .clickable {
-                                                        selectedImageUri = Uri.parse(attachment.uri)
-                                                        showImageViewer = true
-                                                    },
-                                                contentScale = ContentScale.Fit
-                                            )
-                                        }
-                                        else -> {
-                                            Text(text = attachment.uri)
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        
                     }
                 } else {
                     LazyColumn(
