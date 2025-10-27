@@ -269,7 +269,7 @@ fun NotesScreen(
                 val notesToDisplay = if (state.filteredLabel == null) {
                     state.notes
                 } else {
-                    state.notes.filter { it.label == state.filteredLabel }
+                    state.notes.filter { it.note.label == state.filteredLabel }
                 }
 
                 if (notesToDisplay.isEmpty()) {
@@ -297,10 +297,10 @@ fun NotesScreen(
                     }
                 } else {
                     val filteredNotes = notesToDisplay.filter { note ->
-                        !note.isArchived && (note.title.contains(searchQuery, ignoreCase = true) || note.content.contains(searchQuery, ignoreCase = true))
+                        !note.note.isArchived && (note.note.title.contains(searchQuery, ignoreCase = true) || note.note.content.contains(searchQuery, ignoreCase = true))
                     }
-                    val pinnedNotes = filteredNotes.filter { it.isPinned }
-                    val otherNotes = filteredNotes.filter { !it.isPinned }
+                    val pinnedNotes = filteredNotes.filter { it.note.isPinned }
+                    val otherNotes = filteredNotes.filter { !it.note.isPinned }
 
                     when (state.layoutType) {
                         LayoutType.GRID -> {
@@ -320,21 +320,21 @@ fun NotesScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
-                                    StaggeredGridItems(pinnedNotes, key = { it.id }) { note ->
-                                        val isExpanded = state.expandedNoteId == note.id
+                                    StaggeredGridItems(pinnedNotes, key = { it.note.id }) { note ->
+                                        val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
-                                            isSelected = state.selectedNoteIds.contains(note.id),
+                                            isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
                                                 if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                                 } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
                                                 }
                                             },
                                             onNoteLongClick = {
-                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
                                         )
                                     }
@@ -351,21 +351,21 @@ fun NotesScreen(
                                             )
                                         }
                                     }
-                                    StaggeredGridItems(otherNotes, key = { it.id }) { note ->
-                                        val isExpanded = state.expandedNoteId == note.id
+                                    StaggeredGridItems(otherNotes, key = { it.note.id }) { note ->
+                                        val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
-                                            isSelected = state.selectedNoteIds.contains(note.id),
+                                            isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
                                                 if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                                 } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
                                                 }
                                             },
                                             onNoteLongClick = {
-                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
                                         )
                                     }
@@ -387,21 +387,21 @@ fun NotesScreen(
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
                                         )
                                     }
-                                    items(pinnedNotes, key = { it.id }) { note ->
-                                        val isExpanded = state.expandedNoteId == note.id
+                                    items(pinnedNotes, key = { it.note.id }) { note ->
+                                        val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
-                                            isSelected = state.selectedNoteIds.contains(note.id),
+                                            isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
                                                 if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                                 } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
                                                 }
                                             },
                                             onNoteLongClick = {
-                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
                                         )
                                     }
@@ -418,21 +418,21 @@ fun NotesScreen(
                                             )
                                         }
                                     }
-                                    items(otherNotes, key = { it.id }) { note ->
-                                        val isExpanded = state.expandedNoteId == note.id
+                                    items(otherNotes, key = { it.note.id }) { note ->
+                                        val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
-                                            isSelected = state.selectedNoteIds.contains(note.id),
+                                            isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
                                                 if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                                 } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.id))
+                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
                                                 }
                                             },
                                             onNoteLongClick = {
-                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.id))
+                                                viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
                                         )
                                     }

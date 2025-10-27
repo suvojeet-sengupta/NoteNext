@@ -3,15 +3,11 @@ package com.suvojeet.notenext.ui.notes
 
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
-import com.suvojeet.notenext.data.Note
-import com.suvojeet.notenext.data.ChecklistItem
-import com.suvojeet.notenext.data.LinkPreview
-
-import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.data.Attachment
+import com.suvojeet.notenext.data.NoteWithAttachments
 
 data class NotesState(
-    val notes: List<Note> = emptyList(),
+    val notes: List<NoteWithAttachments> = emptyList(),
     val layoutType: LayoutType = LayoutType.GRID,
     val sortType: SortType = SortType.DATE_MODIFIED,
     val selectedNoteIds: List<Int> = emptyList(),
@@ -38,5 +34,6 @@ data class NotesState(
     val linkPreviews: List<LinkPreview> = emptyList(),
     val editingNoteType: String = "TEXT",
     val editingChecklist: List<ChecklistItem> = emptyList(),
-    val newlyAddedChecklistItemId: String? = null
+    val newlyAddedChecklistItemId: String? = null,
+    val editingAttachments: List<Attachment> = emptyList()
 )

@@ -6,20 +6,27 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface NoteDao {
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 ORDER BY isPinned DESC, lastEdited DESC")
-    fun getNotes(): Flow<List<Note>>
+    fun getNotes(): Flow<List<NoteWithAttachments>>
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE isArchived = 1 ORDER BY lastEdited DESC")
-    fun getArchivedNotes(): Flow<List<Note>>
+    fun getArchivedNotes(): Flow<List<NoteWithAttachments>>
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE isBinned = 1 ORDER BY lastEdited DESC")
-    fun getBinnedNotes(): Flow<List<Note>>
+    fun getBinnedNotes(): Flow<List<NoteWithAttachments>>
 
+    @Transaction
     @Query("SELECT * FROM notes WHERE id = :id")
-    suspend fun getNoteById(id: Int): Note?
+    suspend fun getNoteById(id: Int): NoteWithAttachments?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertNote(note: Note)
+    suspend fun insertNote(note: Note): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAttachment(attachment: Attachment)
 
     @Update
     suspend fun updateNote(note: Note)

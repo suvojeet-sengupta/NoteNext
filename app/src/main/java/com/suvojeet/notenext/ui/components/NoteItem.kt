@@ -28,11 +28,14 @@ import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.ui.notes.HtmlConverter
 
+import com.suvojeet.notenext.data.NoteWithAttachments
+import androidx.compose.material.icons.filled.Attachment
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
     modifier: Modifier = Modifier,
-    note: Note,
+    note: NoteWithAttachments,
     isSelected: Boolean,
     onNoteClick: () -> Unit,
     onNoteLongClick: () -> Unit,
@@ -60,7 +63,7 @@ fun NoteItem(
         Column(
             modifier = Modifier.padding(16.dp)
         ) {
-            if (note.isPinned) {
+            if (note.note.isPinned) {
                 Icon(
                     imageVector = Icons.Outlined.PushPin,
                     contentDescription = "Pinned note",
@@ -70,9 +73,9 @@ fun NoteItem(
                 Spacer(modifier = Modifier.height(8.dp))
             }
             // Title
-            if (note.title.isNotEmpty()) {
+            if (note.note.title.isNotEmpty()) {
                 Text(
-                    text = note.title,
+                    text = note.note.title,
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
@@ -82,29 +85,39 @@ fun NoteItem(
             }
 
             // Content
-            if (note.content.isNotEmpty()) {
+            if (note.note.content.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
-                if (note.noteType == "TEXT") {
+                if (note.note.noteType == "TEXT") {
                     Text(
-                        text = HtmlConverter.htmlToAnnotatedString(note.content),
+                        text = HtmlConverter.htmlToAnnotatedString(note.note.content),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 10,
                         overflow = TextOverflow.Ellipsis
                     )
                 } else {
-                    ChecklistPreview(note.content)
+                    ChecklistPreview(note.note.content)
                 }
             }
 
-            if (!note.label.isNullOrEmpty()) {
+            if (note.attachments.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(8.dp))
+                Icon(
+                    imageVector = Icons.Default.Attachment,
+                    contentDescription = "Attachment",
+                    modifier = Modifier.size(16.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+
+            if (!note.note.label.isNullOrEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Surface(
                     shape = RoundedCornerShape(4.dp),
                     color = MaterialTheme.colorScheme.tertiaryContainer
                 ) {
                     Text(
-                        text = note.label,
+                        text = note.note.label,
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)

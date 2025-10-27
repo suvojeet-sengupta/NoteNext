@@ -32,6 +32,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 
+import com.suvojeet.notenext.data.Attachment
+import com.suvojeet.notenext.data.NoteWithAttachments
+
 class NotesViewModel(
     private val noteDao: NoteDao,
     private val labelDao: LabelDao,
@@ -49,9 +52,9 @@ class NotesViewModel(
     init {
         combine(noteDao.getNotes(), labelDao.getLabels(), _state) { notes, labels, state ->
             val sortedNotes = when (state.sortType) {
-                SortType.DATE_CREATED -> notes.sortedByDescending { it.createdAt }
-                SortType.DATE_MODIFIED -> notes.sortedByDescending { it.lastEdited }
-                SortType.TITLE -> notes.sortedBy { it.title }
+                SortType.DATE_CREATED -> notes.sortedByDescending { it.note.createdAt }
+                SortType.DATE_MODIFIED -> notes.sortedByDescending { it.note.lastEdited }
+                SortType.TITLE -> notes.sortedBy { it.note.title }
             }
             _state.value = state.copy(
                 notes = sortedNotes,
@@ -60,13 +63,13 @@ class NotesViewModel(
         }.launchIn(viewModelScope)
     }
 
-    fun onEvent(event: NotesEvent) {
+fun onEvent(event: NotesEvent) {
     when (event) {
         is NotesEvent.DeleteNote -> {
             viewModelScope.launch {
-                val noteToBin = event.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
+                val noteToBin = event.note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
                 noteDao.updateNote(noteToBin)
-                recentlyDeletedNote = event.note
+                recentlyDeletedNote = event.note.note
                 _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
             }
         }
@@ -92,18 +95,18 @@ class NotesViewModel(
         }
         is NotesEvent.TogglePinForSelectedNotes -> {
             viewModelScope.launch {
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 for (note in selectedNotes) {
-                    noteDao.insertNote(note.copy(isPinned = !note.isPinned))
+                    noteDao.insertNote(note.note.copy(isPinned = !note.note.isPinned))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
         }
         is NotesEvent.DeleteSelectedNotes -> {
             viewModelScope.launch {
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 for (note in selectedNotes) {
-                    noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
+                    noteDao.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
                 _events.emit(NotesUiEvent.ShowToast("${selectedNotes.size} notes moved to Bin"))
@@ -111,18 +114,18 @@ class NotesViewModel(
         }
         is NotesEvent.ArchiveSelectedNotes -> {
             viewModelScope.launch {
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 for (note in selectedNotes) {
-                    noteDao.insertNote(note.copy(isArchived = !note.isArchived))
+                    noteDao.insertNote(note.note.copy(isArchived = !note.note.isArchived))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
         }
         is NotesEvent.ToggleImportantForSelectedNotes -> {
             viewModelScope.launch {
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 for (note in selectedNotes) {
-                    noteDao.insertNote(note.copy(isImportant = !note.isImportant))
+                    noteDao.insertNote(note.note.copy(isImportant = !note.note.isImportant))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
@@ -132,9 +135,9 @@ class NotesViewModel(
         }
         is NotesEvent.CopySelectedNotes -> {
             viewModelScope.launch {
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 for (note in selectedNotes) {
-                    noteDao.insertNote(note.copy(id = 0, title = "${note.title} (Copy)"))
+                    noteDao.insertNote(note.note.copy(id = 0, title = "${note.note.title} (Copy)"))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
                 val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
@@ -143,10 +146,10 @@ class NotesViewModel(
         }
         is NotesEvent.SendSelectedNotes -> {
             viewModelScope.launch {
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 if (selectedNotes.isNotEmpty()) {
-                    val title = if (selectedNotes.size == 1) selectedNotes.first().title else "Multiple Notes"
-                    val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.title}\n\n${HtmlConverter.htmlToPlainText(it.content)}" }
+                    val title = if (selectedNotes.size == 1) selectedNotes.first().note.title else "Multiple Notes"
+                    val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.note.title}\n\n${HtmlConverter.htmlToPlainText(it.note.content)}" }
                     _events.emit(NotesUiEvent.SendNotes(title, content))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
@@ -160,9 +163,9 @@ class NotesViewModel(
                 if (event.label.isNotBlank()) {
                     labelDao.insertLabel(Label(event.label))
                 }
-                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.id) }
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                 for (note in selectedNotes) {
-                    noteDao.insertNote(note.copy(label = event.label))
+                    noteDao.insertNote(note.note.copy(label = event.label))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
@@ -170,7 +173,8 @@ class NotesViewModel(
         is NotesEvent.ExpandNote -> {
             viewModelScope.launch {
                 if (event.noteId != -1) {
-                    noteDao.getNoteById(event.noteId)?.let { note ->
+                    noteDao.getNoteById(event.noteId)?.let { noteWithAttachments ->
+                        val note = noteWithAttachments.note
                         val content = if (note.noteType == "TEXT") {
                             HtmlConverter.htmlToAnnotatedString(note.content)
                         } else {
@@ -199,7 +203,8 @@ class NotesViewModel(
                             editingHistoryIndex = 0,
                             linkPreviews = note.linkPreviews,
                             editingNoteType = note.noteType,
-                            editingChecklist = checklist
+                            editingChecklist = checklist,
+                            editingAttachments = noteWithAttachments.attachments
                         )
                     }
                 } else {
@@ -215,7 +220,8 @@ class NotesViewModel(
                         editingLabel = null,
                         linkPreviews = emptyList(),
                         editingNoteType = event.noteType,
-                        editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList()
+                        editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList(),
+                        editingAttachments = emptyList()
                     )
                 }
             }
@@ -415,9 +421,9 @@ class NotesViewModel(
             viewModelScope.launch {
                 state.value.expandedNoteId?.let { noteId ->
                     noteDao.getNoteById(noteId)?.let { note ->
-                        val updatedNote = note.copy(isPinned = !note.isPinned)
+                        val updatedNote = note.note.copy(isPinned = !note.note.isPinned)
                         noteDao.insertNote(updatedNote)
-                        val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
+                        val updatedNotesList = state.value.notes.map { if (it.note.id == updatedNote.id) it.copy(note = updatedNote) else it }
                         _state.value = state.value.copy(
                             isPinned = updatedNote.isPinned,
                             notes = updatedNotesList
@@ -430,9 +436,9 @@ class NotesViewModel(
             viewModelScope.launch {
                 state.value.expandedNoteId?.let { noteId ->
                     noteDao.getNoteById(noteId)?.let { note ->
-                        val updatedNote = note.copy(isArchived = !note.isArchived)
+                        val updatedNote = note.note.copy(isArchived = !note.note.isArchived)
                         noteDao.insertNote(updatedNote)
-                        val updatedNotesList = state.value.notes.map { if (it.id == updatedNote.id) updatedNote else it }
+                        val updatedNotesList = state.value.notes.map { if (it.note.id == updatedNote.id) it.copy(note = updatedNote) else it }
                         _state.value = state.value.copy(
                             isArchived = updatedNote.isArchived,
                             notes = updatedNotesList
@@ -477,7 +483,7 @@ class NotesViewModel(
 
                 if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
                     if (noteId != -1) { // It's an existing note, so delete it
-                        noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
+                        noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
                     }
                 } else {
                     val currentTime = System.currentTimeMillis()
@@ -496,7 +502,7 @@ class NotesViewModel(
                         )
                     } else { // Existing note
                         noteDao.getNoteById(noteId)?.let { existingNote ->
-                            existingNote.copy(
+                            existingNote.note.copy(
                                 title = title,
                                 content = content,
                                 lastEdited = currentTime,
@@ -510,7 +516,10 @@ class NotesViewModel(
                         }
                     }
                     if (note != null) {
-                        noteDao.insertNote(note)
+                        val insertedId = noteDao.insertNote(note)
+                        state.value.editingAttachments.forEach { attachment ->
+                            noteDao.insertAttachment(attachment.copy(noteId = insertedId.toInt()))
+                        }
                     }
                 }
 
@@ -532,7 +541,8 @@ class NotesViewModel(
                     isUnderlineActive = false,
                     activeStyles = emptySet(),
                     linkPreviews = emptyList(),
-                    editingChecklist = emptyList()
+                    editingChecklist = emptyList(),
+                    editingAttachments = emptyList()
                 )
             }
         }
@@ -541,7 +551,7 @@ class NotesViewModel(
                 state.value.expandedNoteId?.let {
                     if (it != -1) {
                         noteDao.getNoteById(it)?.let { note ->
-                            noteDao.updateNote(note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
+                            noteDao.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                             _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
                         }
                     }
@@ -553,7 +563,7 @@ class NotesViewModel(
             viewModelScope.launch {
                 state.value.expandedNoteId?.let {
                     noteDao.getNoteById(it)?.let { note ->
-                        val copiedNote = note.copy(id = 0, title = "${note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
+                        val copiedNote = note.note.copy(id = 0, title = "${note.note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
                         noteDao.insertNote(copiedNote)
                         _events.emit(NotesUiEvent.ShowToast("Note copied"))
                     }
@@ -604,7 +614,21 @@ class NotesViewModel(
         is NotesEvent.ClearNewlyAddedChecklistItemId -> {
             _state.value = state.value.copy(newlyAddedChecklistItemId = null)
         }
-        else -> {}
+        is NotesEvent.AddAttachment -> {
+            val type = when {
+                event.mimeType.startsWith("image") -> "IMAGE"
+                event.mimeType.startsWith("video") -> "VIDEO"
+                event.mimeType.startsWith("audio") -> "AUDIO"
+                else -> "FILE"
+            }
+            val attachment = Attachment(
+                noteId = state.value.expandedNoteId ?: -1,
+                uri = event.uri,
+                type = type,
+                mimeType = event.mimeType
+            )
+            _state.value = state.value.copy(editingAttachments = state.value.editingAttachments + attachment)
+        }
     }
 }
 

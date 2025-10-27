@@ -7,7 +7,7 @@ import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.LinkPreview
 
 sealed class NotesEvent {
-    data class DeleteNote(val note: Note) : NotesEvent()
+    data class DeleteNote(val note: NoteWithAttachments) : NotesEvent()
     object RestoreNote : NotesEvent()
     data class ToggleNoteSelection(val noteId: Int) : NotesEvent()
     object ClearSelection : NotesEvent()
@@ -53,4 +53,5 @@ sealed class NotesEvent {
     data class SortNotes(val sortType: SortType) : NotesEvent()
     data class OnInsertLink(val url: String) : NotesEvent()
     object ClearNewlyAddedChecklistItemId : NotesEvent()
+    data class AddAttachment(val uri: String, val mimeType: String) : NotesEvent()
 }

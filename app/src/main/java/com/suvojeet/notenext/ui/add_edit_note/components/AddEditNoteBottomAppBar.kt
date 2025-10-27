@@ -9,8 +9,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.automirrored.rounded.Redo
 import androidx.compose.material.icons.automirrored.rounded.Undo
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TextFields
@@ -32,7 +34,8 @@ fun AddEditNoteBottomAppBar(
     onEvent: (NotesEvent) -> Unit,
     showColorPicker: (Boolean) -> Unit,
     showFormatBar: (Boolean) -> Unit,
-    showMoreOptions: (Boolean) -> Unit
+    showMoreOptions: (Boolean) -> Unit,
+    onAttachmentClick: () -> Unit
 ) {
     BottomAppBar(
         containerColor = Color(state.editingColor),
@@ -46,6 +49,15 @@ fun AddEditNoteBottomAppBar(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                FloatingActionButton(
+                    onClick = { onAttachmentClick() },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.size(40.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Icon(Icons.Default.Add, contentDescription = "Add attachment")
+                }
                 FloatingActionButton(
                     onClick = { showColorPicker(true) },
                     shape = CircleShape,
