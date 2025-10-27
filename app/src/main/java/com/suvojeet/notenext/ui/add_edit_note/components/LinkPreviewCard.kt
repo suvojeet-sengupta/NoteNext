@@ -101,7 +101,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                     .clickable { linkPreview.url.let { uriHandler.openUri(it) } },
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Column(modifier = Modifier.padding(12.dp)) {
+                Column(modifier = Modifier.padding(8.dp)) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
@@ -148,10 +148,10 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                             contentDescription = "Link preview image",
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(150.dp)
+                                .height(120.dp)
                                 .clip(MaterialTheme.shapes.medium)
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(6.dp))
                     }
                     linkPreview.description?.let { description ->
                         Text(
@@ -159,7 +159,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
-                        Spacer(modifier = Modifier.height(4.dp))
+                        Spacer(modifier = Modifier.height(2.dp))
                     }
                     ClickableText(
                         text = buildAnnotatedString {
