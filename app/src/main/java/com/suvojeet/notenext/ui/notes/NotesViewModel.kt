@@ -629,6 +629,8 @@ fun onEvent(event: NotesEvent) {
             )
             _state.value = state.value.copy(editingAttachments = state.value.editingAttachments + attachment)
         }
+        is NotesEvent.OnLinkDetected -> { /* TODO: Handle link detection */ }
+        is NotesEvent.OnLinkPreviewFetched -> { /* TODO: Handle link preview fetched */ }
     }
 }
 

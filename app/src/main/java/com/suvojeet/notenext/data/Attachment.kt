@@ -13,7 +13,8 @@ import androidx.room.PrimaryKey
             childColumns = ["noteId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [androidx.room.Index(value = ["noteId"])]
 )
 data class Attachment(
     @PrimaryKey(autoGenerate = true)

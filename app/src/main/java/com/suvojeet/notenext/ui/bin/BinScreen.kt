@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.components.NoteItem
+import com.suvojeet.notenext.data.NoteWithAttachments
 
 import androidx.compose.material.icons.filled.Menu
 
