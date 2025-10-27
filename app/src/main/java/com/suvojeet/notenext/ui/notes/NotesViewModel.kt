@@ -516,9 +516,38 @@ fun onEvent(event: NotesEvent) {
                         }
                     }
                     if (note != null) {
-                        val insertedId = noteDao.insertNote(note)
-                        state.value.editingAttachments.forEach { attachment ->
-                            noteDao.insertAttachment(attachment.copy(noteId = insertedId.toInt()))
+                        val currentNoteId = if (noteId == -1) { // New note
+                            noteDao.insertNote(note)
+                        } else { // Existing note
+                            noteDao.updateNote(note)
+                            noteId.toLong() // Convert Int to Long for consistency
+                        }
+
+                        // Handle attachments
+                        val existingAttachmentsInDb = if (noteId != -1) {
+                            noteDao.getNoteById(noteId)?.attachments ?: emptyList()
+                        } else {
+                            emptyList()
+                        }
+
+                        val attachmentsToAdd = state.value.editingAttachments.filter { uiAttachment ->
+                            existingAttachmentsInDb.none { dbAttachment ->
+                                dbAttachment.uri == uiAttachment.uri && dbAttachment.type == uiAttachment.type
+                            }
+                        }
+
+                        val attachmentsToRemove = existingAttachmentsInDb.filter { dbAttachment ->
+                            state.value.editingAttachments.none { uiAttachment ->
+                                uiAttachment.uri == dbAttachment.uri && uiAttachment.type == uiAttachment.type
+                            }
+                        }
+
+                        attachmentsToRemove.forEach { attachment ->
+                            noteDao.deleteAttachment(attachment)
+                        }
+
+                        attachmentsToAdd.forEach { attachment ->
+                            noteDao.insertAttachment(attachment.copy(noteId = currentNoteId.toInt()))
                         }
                     }
                 }

@@ -42,4 +42,10 @@ interface NoteDao {
 
     @Query("DELETE FROM notes WHERE isBinned = 1")
     suspend fun emptyBin()
+
+    @Query("DELETE FROM attachments WHERE noteId = :noteId")
+    suspend fun deleteAttachmentsForNote(noteId: Int)
+
+    @Delete
+    suspend fun deleteAttachment(attachment: Attachment)
 }
