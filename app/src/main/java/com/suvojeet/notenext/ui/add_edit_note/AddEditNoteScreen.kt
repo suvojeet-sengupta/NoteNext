@@ -211,7 +211,7 @@ fun AddEditNoteScreen(
                                                     .fillMaxWidth()
                                                     .height(200.dp)
                                                     .padding(8.dp),
-                                                contentScale = ContentScale.Crop
+                                                contentScale = ContentScale.Fit
                                             )
                                         }
                                         else -> {
