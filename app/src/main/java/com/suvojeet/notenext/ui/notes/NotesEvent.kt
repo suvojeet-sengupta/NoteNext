@@ -56,4 +56,5 @@ sealed class NotesEvent {
     data class OnInsertLink(val url: String) : NotesEvent()
     object ClearNewlyAddedChecklistItemId : NotesEvent()
     data class AddAttachment(val uri: String, val mimeType: String) : NotesEvent()
+    data class RemoveAttachment(val attachmentId: Int) : NotesEvent()
 }

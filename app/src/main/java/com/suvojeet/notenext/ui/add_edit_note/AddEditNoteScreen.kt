@@ -53,6 +53,8 @@ import java.util.Date
 import java.util.Locale
 import android.content.Intent
 
+data class ImageViewerData(val uri: Uri, val attachmentId: Int)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEditNoteScreen(
@@ -70,7 +72,7 @@ fun AddEditNoteScreen(
     var showSaveAsDialog by remember { mutableStateOf(false) }
     var showInsertLinkDialog by remember { mutableStateOf(false) }
     var showImageViewer by remember { mutableStateOf(false) }
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
+    var selectedImageData by remember { mutableStateOf<ImageViewerData?>(null) }
     val scrollState = rememberScrollState()
     val context = LocalContext.current
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
@@ -207,18 +209,25 @@ fun AddEditNoteScreen(
                             val imageCount = imageAttachments.size
                             if (imageCount == 1) {
                                 // Single image: full width
-                                AsyncImage(
-                                    model = imageAttachments.first().uri,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(max = 400.dp) // Larger max height for single image
-                                        .clickable {
-                                            selectedImageUri = Uri.parse(imageAttachments.first().uri)
-                                            showImageViewer = true
-                                        },
-                                    contentScale = ContentScale.Fit
-                                )
+                                Box(modifier = Modifier.fillMaxWidth()) {
+                                    AsyncImage(
+                                        model = imageAttachments.first().uri,
+                                        contentDescription = null,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .heightIn(max = 400.dp) // Larger max height for single image
+                                                                                    .clickable {
+                                                                                        selectedImageData = ImageViewerData(uri = Uri.parse(imageAttachments.first().uri), attachmentId = imageAttachments.first().id)
+                                                                                        showImageViewer = true
+                                                                                    },                                        contentScale = ContentScale.Fit
+                                    )
+                                    IconButton(
+                                        onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().id)) },
+                                        modifier = Modifier.align(Alignment.TopEnd)
+                                    ) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
+                                    }
+                                }
                             } else {
                                 // Multiple images: up to 3 per row in a horizontal scrollable row
                                 LazyRow(
@@ -227,19 +236,27 @@ fun AddEditNoteScreen(
                                     contentPadding = PaddingValues(horizontal = 8.dp)
                                 ) {
                                     items(imageAttachments, key = { it.uri }) { attachment ->
-                                        AsyncImage(
-                                            model = attachment.uri,
-                                            contentDescription = null,
-                                            modifier = Modifier
-                                                .width(120.dp) // Fixed width for a 3-per-row look
-                                                .height(120.dp)
-                                                .aspectRatio(1f)
-                                                .clickable {
-                                                    selectedImageUri = Uri.parse(attachment.uri)
-                                                    showImageViewer = true
-                                                },
-                                            contentScale = ContentScale.Crop
-                                        )
+                                        Box {
+                                            AsyncImage(
+                                                model = attachment.uri,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .width(120.dp) // Fixed width for a 3-per-row look
+                                                    .height(120.dp)
+                                                    .aspectRatio(1f)
+                                                    .clickable {
+                                                        selectedImageData = ImageViewerData(uri = Uri.parse(attachment.uri), attachmentId = attachment.id)
+                                                        showImageViewer = true
+                                                    },
+                                                contentScale = ContentScale.Crop
+                                            )
+                                            IconButton(
+                                                onClick = { onEvent(NotesEvent.RemoveAttachment(attachment.id)) },
+                                                modifier = Modifier.align(Alignment.TopEnd)
+                                            ) {
+                                                Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -441,14 +458,16 @@ fun AddEditNoteScreen(
     }
 
     AnimatedVisibility(
-        visible = showImageViewer && selectedImageUri != null,
+        visible = showImageViewer && selectedImageData != null,
         enter = fadeIn(),
         exit = fadeOut()
     ) {
-        selectedImageUri?.let { uri ->
+        selectedImageData?.let { data ->
             ImageViewerScreen(
-                imageUri = uri,
-                onDismiss = { showImageViewer = false }
+                imageUri = data.uri,
+                attachmentId = data.attachmentId,
+                onDismiss = { showImageViewer = false },
+                onEvent = onEvent
             )
         }
     }

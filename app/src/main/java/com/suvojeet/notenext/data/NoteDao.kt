@@ -48,4 +48,7 @@ interface NoteDao {
 
     @Delete
     suspend fun deleteAttachment(attachment: Attachment)
+
+    @Query("DELETE FROM attachments WHERE id = :attachmentId")
+    suspend fun deleteAttachmentById(attachmentId: Int)
 }

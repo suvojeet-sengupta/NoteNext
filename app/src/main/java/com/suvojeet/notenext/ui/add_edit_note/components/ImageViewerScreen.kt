@@ -28,11 +28,16 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Offset
 import coil.compose.AsyncImage
 
+import androidx.compose.material.icons.filled.Delete
+import com.suvojeet.notenext.ui.notes.NotesEvent
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageViewerScreen(
     imageUri: Uri,
-    onDismiss: () -> Unit
+    attachmentId: Int,
+    onDismiss: () -> Unit,
+    onEvent: (NotesEvent) -> Unit
 ) {
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
@@ -88,6 +93,14 @@ fun ImageViewerScreen(
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = {
+                        onEvent(NotesEvent.RemoveAttachment(attachmentId))
+                        onDismiss()
+                    }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete image", tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

@@ -660,6 +660,13 @@ fun onEvent(event: NotesEvent) {
         }
         is NotesEvent.OnLinkDetected -> { /* TODO: Handle link detection */ }
         is NotesEvent.OnLinkPreviewFetched -> { /* TODO: Handle link preview fetched */ }
+        is NotesEvent.RemoveAttachment -> {
+            viewModelScope.launch {
+                noteDao.deleteAttachmentById(event.attachmentId)
+                val updatedAttachments = _state.value.editingAttachments.filter { it.id != event.attachmentId }
+                _state.value = _state.value.copy(editingAttachments = updatedAttachments)
+            }
+        }
     }
 }
 
