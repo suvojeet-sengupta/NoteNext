@@ -1,7 +1,9 @@
 package com.suvojeet.notenext.ui.add_edit_note.components
 
 import android.net.Uri
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,11 +37,19 @@ fun ImageViewerScreen(
     var scale by remember { mutableStateOf(1f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     var rotation by remember { mutableStateOf(0f) }
+    var showTopAppBar by remember { mutableStateOf(true) }
 
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            .pointerInput(Unit) {
+                detectTapGestures(
+                    onTap = {
+                        showTopAppBar = !showTopAppBar
+                    }
+                )
+            }
     ) {
         AsyncImage(
             model = imageUri,
@@ -72,18 +82,20 @@ fun ImageViewerScreen(
                 ),
             contentScale = ContentScale.Fit
         )
-        TopAppBar(
-            title = { Text("Image Viewer") },
-            navigationIcon = {
-                IconButton(onClick = onDismiss) {
-                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
-                }
-            },
-            colors = TopAppBarDefaults.topAppBarColors(
-                containerColor = Color.Black.copy(alpha = 0.5f),
-                titleContentColor = Color.White,
-                navigationIconContentColor = Color.White
+        AnimatedVisibility(visible = showTopAppBar) {
+            TopAppBar(
+                title = { Text("Image Viewer") },
+                navigationIcon = {
+                    IconButton(onClick = onDismiss) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = Color.Black.copy(alpha = 0.5f),
+                    titleContentColor = Color.White,
+                    navigationIconContentColor = Color.White
+                )
             )
-        )
+        }
     }
 }
