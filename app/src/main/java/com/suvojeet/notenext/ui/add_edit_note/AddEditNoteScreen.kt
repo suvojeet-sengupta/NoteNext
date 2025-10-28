@@ -53,7 +53,7 @@ import java.util.Date
 import java.util.Locale
 import android.content.Intent
 
-data class ImageViewerData(val uri: Uri, val attachmentId: Int)
+data class ImageViewerData(val uri: Uri, val tempId: String)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -222,7 +222,7 @@ fun AddEditNoteScreen(
                                                                                     },                                        contentScale = ContentScale.Fit
                                     )
                                     IconButton(
-                                        onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().id)) },
+                                        onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().tempId)) },
                                         modifier = Modifier.align(Alignment.TopEnd)
                                     ) {
                                         Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
@@ -251,7 +251,7 @@ fun AddEditNoteScreen(
                                                 contentScale = ContentScale.Crop
                                             )
                                             IconButton(
-                                                onClick = { onEvent(NotesEvent.RemoveAttachment(attachment.id)) },
+                                                onClick = { onEvent(NotesEvent.RemoveAttachment(attachment.tempId)) },
                                                 modifier = Modifier.align(Alignment.TopEnd)
                                             ) {
                                                 Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
@@ -465,7 +465,7 @@ fun AddEditNoteScreen(
         selectedImageData?.let { data ->
             ImageViewerScreen(
                 imageUri = data.uri,
-                attachmentId = data.attachmentId,
+                attachmentTempId = data.tempId,
                 onDismiss = { showImageViewer = false },
                 onEvent = onEvent
             )

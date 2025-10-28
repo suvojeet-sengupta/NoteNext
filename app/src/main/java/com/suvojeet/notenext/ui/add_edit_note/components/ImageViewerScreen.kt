@@ -35,7 +35,7 @@ import com.suvojeet.notenext.ui.notes.NotesEvent
 @Composable
 fun ImageViewerScreen(
     imageUri: Uri,
-    attachmentId: Int,
+    attachmentTempId: String,
     onDismiss: () -> Unit,
     onEvent: (NotesEvent) -> Unit
 ) {
@@ -97,7 +97,7 @@ fun ImageViewerScreen(
                 },
                 actions = {
                     IconButton(onClick = {
-                        onEvent(NotesEvent.RemoveAttachment(attachmentId))
+                        onEvent(NotesEvent.RemoveAttachment(attachmentTempId))
                         onDismiss()
                     }) {
                         Icon(Icons.Default.Delete, contentDescription = "Delete image", tint = Color.White)

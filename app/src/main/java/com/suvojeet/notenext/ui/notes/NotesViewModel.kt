@@ -204,7 +204,7 @@ fun onEvent(event: NotesEvent) {
                             linkPreviews = note.linkPreviews,
                             editingNoteType = note.noteType,
                             editingChecklist = checklist,
-                            editingAttachments = noteWithAttachments.attachments
+                            editingAttachments = noteWithAttachments.attachments.map { it.copy(tempId = java.util.UUID.randomUUID().toString()) }
                         )
                     }
                 } else {
@@ -654,7 +654,8 @@ fun onEvent(event: NotesEvent) {
                 noteId = state.value.expandedNoteId ?: -1,
                 uri = event.uri,
                 type = type,
-                mimeType = event.mimeType
+                mimeType = event.mimeType,
+                tempId = java.util.UUID.randomUUID().toString()
             )
             _state.value = state.value.copy(editingAttachments = state.value.editingAttachments + attachment)
         }
@@ -662,9 +663,14 @@ fun onEvent(event: NotesEvent) {
         is NotesEvent.OnLinkPreviewFetched -> { /* TODO: Handle link preview fetched */ }
         is NotesEvent.RemoveAttachment -> {
             viewModelScope.launch {
-                noteDao.deleteAttachmentById(event.attachmentId)
-                val updatedAttachments = _state.value.editingAttachments.filter { it.id != event.attachmentId }
-                _state.value = _state.value.copy(editingAttachments = updatedAttachments)
+                val attachmentToRemove = _state.value.editingAttachments.firstOrNull { it.tempId == event.tempId }
+                attachmentToRemove?.let {
+                    if (it.id != 0) { // Only delete from DB if it has a real ID
+                        noteDao.deleteAttachmentById(it.id)
+                    }
+                    val updatedAttachments = _state.value.editingAttachments.filter { attachment -> attachment.tempId != event.tempId }
+                    _state.value = _state.value.copy(editingAttachments = updatedAttachments)
+                }
             }
         }
     }
