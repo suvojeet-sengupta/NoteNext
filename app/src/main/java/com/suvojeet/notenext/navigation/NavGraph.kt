@@ -76,6 +76,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 
 import androidx.compose.ui.Modifier
+import androidx.compose.foundation.background
 
 import androidx.compose.ui.platform.LocalContext
 
@@ -378,7 +379,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         ) {
 
-                            NavHost(navController = navController, startDestination = "notes") {
+                            NavHost(navController = navController, startDestination = "notes", modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
 
             
 
@@ -884,7 +885,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
             ) {
 
-                NavHost(navController = navController, startDestination = "notes") {
+                NavHost(navController = navController, startDestination = "notes", modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
 
     
 
