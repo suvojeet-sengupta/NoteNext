@@ -95,7 +95,11 @@ fun AddEditNoteScreen(
     }
 
     BackHandler {
-        onDismiss()
+        if (showImageViewer) {
+            showImageViewer = false
+        } else {
+            onDismiss()
+        }
     }
 
     LaunchedEffect(Unit) {
