@@ -216,10 +216,10 @@ fun AddEditNoteScreen(
                                         modifier = Modifier
                                             .fillMaxWidth()
                                             .heightIn(max = 400.dp) // Larger max height for single image
-                                                                                    .clickable {
-                                                                                        selectedImageData = ImageViewerData(uri = Uri.parse(imageAttachments.first().uri), attachmentId = imageAttachments.first().id)
-                                                                                        showImageViewer = true
-                                                                                    },                                        contentScale = ContentScale.Fit
+                                                                                                                            .clickable {
+                                                                                                                                selectedImageData = ImageViewerData(uri = Uri.parse(imageAttachments.first().uri), tempId = imageAttachments.first().tempId)
+                                                                                                                                showImageViewer = true
+                                                                                                                            },                                        contentScale = ContentScale.Fit
                                     )
                                     IconButton(
                                         onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().tempId)) },
@@ -245,7 +245,7 @@ fun AddEditNoteScreen(
                                                     .height(120.dp)
                                                     .aspectRatio(1f)
                                                     .clickable {
-                                                        selectedImageData = ImageViewerData(uri = Uri.parse(attachment.uri), attachmentId = attachment.id)
+                                                        selectedImageData = ImageViewerData(uri = Uri.parse(attachment.uri), tempId = attachment.tempId)
                                                         showImageViewer = true
                                                     },
                                                 contentScale = ContentScale.Crop
