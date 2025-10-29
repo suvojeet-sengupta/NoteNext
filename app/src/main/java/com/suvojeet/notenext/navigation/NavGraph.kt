@@ -1152,6 +1152,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                                 exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
                                             ) {
                                                                         ReminderScreen(
+                                                                            factory = factory,
                                                                             onBackClick = { navController.popBackStack() },
                                                                             onAddReminderClick = { navController.navigate("add_edit_reminder") }
                                                                         )

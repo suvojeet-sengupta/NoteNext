@@ -11,6 +11,7 @@ import com.suvojeet.notenext.ui.archive.ArchiveViewModel
 import com.suvojeet.notenext.ui.bin.BinViewModel
 import com.suvojeet.notenext.ui.labels.EditLabelsViewModel
 import com.suvojeet.notenext.ui.notes.NotesViewModel
+import com.suvojeet.notenext.ui.reminder.ReminderViewModel
 
 import android.content.Context
 import com.suvojeet.notenext.util.AlarmSchedulerImpl
@@ -40,6 +41,10 @@ class ViewModelFactory(
         if (modelClass.isAssignableFrom(BinViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return BinViewModel(noteDao, savedStateHandle) as T
+        }
+        if (modelClass.isAssignableFrom(ReminderViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ReminderViewModel(noteDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

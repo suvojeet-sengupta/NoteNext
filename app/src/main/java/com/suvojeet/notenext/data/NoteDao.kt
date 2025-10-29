@@ -51,4 +51,7 @@ interface NoteDao {
 
     @Query("DELETE FROM attachments WHERE id = :attachmentId")
     suspend fun deleteAttachmentById(attachmentId: Int)
+
+    @Query("SELECT * FROM notes WHERE reminderTime IS NOT NULL AND reminderTime > :currentTime ORDER BY reminderTime ASC")
+    fun getNotesWithReminders(currentTime: Long): Flow<List<Note>>
 }
