@@ -96,6 +96,8 @@ import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
 import com.suvojeet.notenext.ui.components.SearchTopAppBar
+import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
+import com.suvojeet.notenext.ui.reminder.RepeatOption
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
@@ -117,6 +119,7 @@ fun NotesScreen(
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
     var showLabelDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showReminderSetDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -171,7 +174,7 @@ fun NotesScreen(
                             selectedItemCount = state.selectedNoteIds.size,
                             onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
                             onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
-                            onReminderClick = { viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(null)) }, // Placeholder
+                            onReminderClick = { showReminderSetDialog = true },
                             onColorClick = { /* TODO */ },
                             onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
                             onDeleteClick = { showDeleteDialog = true },
@@ -261,6 +264,15 @@ fun NotesScreen(
                     onConfirm = { label ->
                         viewModel.onEvent(NotesEvent.SetLabelForSelectedNotes(label))
                         showLabelDialog = false
+                    }
+                )
+            }
+            if (showReminderSetDialog) {
+                ReminderSetDialog(
+                    onDismissRequest = { showReminderSetDialog = false },
+                    onConfirm = { date, time, repeatOption ->
+                        viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(date, time, repeatOption))
+                        showReminderSetDialog = false
                     }
                 )
             }

@@ -22,6 +22,10 @@ import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.ui.notes.SortType
 import com.suvojeet.notenext.ui.notes.LayoutType
+import com.suvojeet.notenext.util.AlarmScheduler
+import java.time.LocalDateTime
+import java.time.ZoneId
+import com.suvojeet.notenext.ui.reminder.RepeatOption
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -38,7 +42,8 @@ import com.suvojeet.notenext.data.NoteWithAttachments
 class NotesViewModel(
     private val noteDao: NoteDao,
     private val labelDao: LabelDao,
-    private val linkPreviewRepository: LinkPreviewRepository
+    private val linkPreviewRepository: LinkPreviewRepository,
+    private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
@@ -156,7 +161,22 @@ fun onEvent(event: NotesEvent) {
             }
         }
         is NotesEvent.SetReminderForSelectedNotes -> {
-            // TODO: Implement reminder
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
+                val reminderDateTime = LocalDateTime.of(event.date, event.time)
+                val reminderMillis = reminderDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+
+                for (noteWithAttachments in selectedNotes) {
+                    val updatedNote = noteWithAttachments.note.copy(
+                        reminderTime = reminderMillis,
+                        repeatOption = event.repeatOption.name // Store enum name as string
+                    )
+                    noteDao.updateNote(updatedNote)
+                    alarmScheduler.schedule(updatedNote)
+                }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
+                _events.emit(NotesUiEvent.ShowToast("Reminder set for ${selectedNotes.size} notes"))
+            }
         }
         is NotesEvent.SetLabelForSelectedNotes -> {
             viewModelScope.launch {

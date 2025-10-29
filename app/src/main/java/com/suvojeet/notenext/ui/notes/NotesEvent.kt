@@ -8,6 +8,10 @@ import com.suvojeet.notenext.data.LinkPreview
 
 import com.suvojeet.notenext.data.NoteWithAttachments
 
+import com.suvojeet.notenext.ui.reminder.RepeatOption
+import java.time.LocalDate
+import java.time.LocalTime
+
 sealed class NotesEvent {
     data class DeleteNote(val note: NoteWithAttachments) : NotesEvent()
     object RestoreNote : NotesEvent()
@@ -19,7 +23,7 @@ sealed class NotesEvent {
     data class ChangeColorForSelectedNotes(val color: Int) : NotesEvent()
     object CopySelectedNotes : NotesEvent()
     object SendSelectedNotes : NotesEvent()
-    data class SetReminderForSelectedNotes(val reminder: Long?) : NotesEvent()
+    data class SetReminderForSelectedNotes(val date: LocalDate, val time: LocalTime, val repeatOption: RepeatOption) : NotesEvent()
     object ToggleImportantForSelectedNotes : NotesEvent()
     data class SetLabelForSelectedNotes(val label: String) : NotesEvent()
     data class ExpandNote(val noteId: Int, val noteType: String = "TEXT") : NotesEvent()

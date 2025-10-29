@@ -12,17 +12,22 @@ import com.suvojeet.notenext.ui.bin.BinViewModel
 import com.suvojeet.notenext.ui.labels.EditLabelsViewModel
 import com.suvojeet.notenext.ui.notes.NotesViewModel
 
+import android.content.Context
+import com.suvojeet.notenext.util.AlarmSchedulerImpl
+
 class ViewModelFactory(
     val noteDao: NoteDao,
     val labelDao: LabelDao,
-    private val linkPreviewRepository: LinkPreviewRepository
+    private val linkPreviewRepository: LinkPreviewRepository,
+    private val context: Context
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val savedStateHandle = extras.createSavedStateHandle()
+        val alarmScheduler = AlarmSchedulerImpl(context)
         if (modelClass.isAssignableFrom(NotesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return NotesViewModel(noteDao, labelDao, linkPreviewRepository) as T
+            return NotesViewModel(noteDao, labelDao, linkPreviewRepository, alarmScheduler) as T
         }
         if (modelClass.isAssignableFrom(ArchiveViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
