@@ -12,6 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.suvojeet.notenext.MainActivity
 import com.suvojeet.notenext.R
+import com.suvojeet.notenext.ui.notes.HtmlConverter
 
 class ReminderBroadcastReceiver : BroadcastReceiver() {
 
@@ -52,7 +53,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, "reminder_channel_id")
             .setSmallIcon(android.R.drawable.ic_dialog_alert) // Replaced with generic alert icon
             .setContentTitle(title)
-            .setContentText(content)
+            .setContentText(HtmlConverter.htmlToPlainText(content))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
