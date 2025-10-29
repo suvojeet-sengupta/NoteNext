@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 
 import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Notifications
 
 import androidx.compose.material.icons.automirrored.filled.Label
 
@@ -112,6 +113,8 @@ import com.suvojeet.notenext.ui.notes.NotesViewModel
 
 import com.suvojeet.notenext.ui.lock.PinSetupScreen
 import com.suvojeet.notenext.ui.settings.SettingsScreen
+import com.suvojeet.notenext.ui.reminder.ReminderScreen
+import com.suvojeet.notenext.ui.reminder.AddEditReminderScreen
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
 
@@ -260,6 +263,24 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                         onClick = {
 
                                             navController.navigate("settings")
+
+                                        },
+
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                                    )
+
+                                    NavigationDrawerItem(
+
+                                        icon = { Icon(Icons.Default.Notifications, contentDescription = "Reminders") },
+
+                                        label = { Text("Reminders") },
+
+                                        selected = currentRoute == "reminder",
+
+                                        onClick = {
+
+                                            navController.navigate("reminder")
 
                                         },
 
@@ -768,6 +789,26 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         )
 
+                        NavigationDrawerItem(
+
+                            icon = { Icon(Icons.Default.Notifications, contentDescription = "Reminders") },
+
+                            label = { Text("Reminders") },
+
+                            selected = currentRoute == "reminder",
+
+                            onClick = {
+
+                                scope.launch { drawerState.close() }
+
+                                navController.navigate("reminder")
+
+                            },
+
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+
+                        )
+
     
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -1101,17 +1142,32 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                         enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
                         exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
                     ) {
-                        PinSetupScreen(
-                            onPinSet = { navController.popBackStack() }
-                        )
-                    }
-
-    
-
-                }
-
-            }
-
-        }
-
-}
+                                                PinSetupScreen(
+                                                    onPinSet = { navController.popBackStack() }
+                                                )
+                                            }
+                                            composable(
+                                                route = "reminder",
+                                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                                            ) {
+                                                                        ReminderScreen(
+                                                                            onBackClick = { navController.popBackStack() },
+                                                                            onAddReminderClick = { navController.navigate("add_edit_reminder") }
+                                                                        )
+                                                                    }
+                                                                    composable(
+                                                                        route = "add_edit_reminder",
+                                                                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                                                                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                                                                    ) {
+                                                                        AddEditReminderScreen(
+                                                                            onBackClick = { navController.popBackStack() }
+                                                                        )
+                                                                    }                        
+                            
+                        
+                                        }
+                                    }
+                                }
+                        }
