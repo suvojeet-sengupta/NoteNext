@@ -128,7 +128,7 @@ import kotlinx.coroutines.launch
 
 @Composable
 
-fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: WindowSizeClass) {
+fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId: Int = -1) {
 
     val navController = rememberNavController()
 
@@ -144,11 +144,15 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     val notesViewModel: NotesViewModel = viewModel(factory = factory)
 
-        val notesState by notesViewModel.state.collectAsState()
+    val notesState by notesViewModel.state.collectAsState()
 
-    
+    LaunchedEffect(startNoteId) {
+        if (startNoteId != -1) {
+            notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+        }
+    }
 
-        val isExpandedScreen = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
+    val isExpandedScreen = windowSizeClass.widthSizeClass == WindowWidthSizeClass.Expanded
 
     
 

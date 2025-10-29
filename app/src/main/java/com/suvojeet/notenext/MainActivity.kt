@@ -35,27 +35,51 @@ class MainActivity : FragmentActivity() {
         val factory = ViewModelFactory(database.noteDao(), database.labelDao(), linkPreviewRepository, applicationContext)
         val settingsRepository = SettingsRepository(this)
 
-        requestExactAlarmPermission()
+                requestExactAlarmPermission()
 
-        setContent {
-            val windowSizeClass = calculateWindowSizeClass(this)
-            val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
-            val shapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
-            val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = null)
-            var unlocked by remember { mutableStateOf(false) }
+        
 
-            NoteNextTheme(themeMode = themeMode, shapeFamily = shapeFamily) {
-                val appLock = enableAppLock
-                if (appLock == null) {
-                    // You can show a loading indicator here
-                } else if (appLock && !unlocked) {
-                    LockScreen(onUnlock = { unlocked = true })
-                } else {
-                    NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass)
+                val startNoteId = intent.getIntExtra("NOTE_ID", -1)
+
+        
+
+                setContent {
+
+                    val windowSizeClass = calculateWindowSizeClass(this)
+
+                    val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+
+                    val shapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
+
+                    val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = null)
+
+                    var unlocked by remember { mutableStateOf(false) }
+
+        
+
+                    NoteNextTheme(themeMode = themeMode, shapeFamily = shapeFamily) {
+
+                        val appLock = enableAppLock
+
+                        if (appLock == null) {
+
+                            // You can show a loading indicator here
+
+                        } else if (appLock && !unlocked) {
+
+                            LockScreen(onUnlock = { unlocked = true })
+
+                        } else {
+
+                            NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId)
+
+                        }
+
+                    }
+
                 }
+
             }
-        }
-    }
 
     private fun requestExactAlarmPermission() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12 (API 31) and above

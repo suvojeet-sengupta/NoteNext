@@ -22,8 +22,15 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
             val noteTitle = intent?.getStringExtra("NOTE_TITLE") ?: "Reminder"
             val noteContent = intent?.getStringExtra("NOTE_CONTENT") ?: ""
 
+            val plainTextContent = HtmlConverter.htmlToPlainText(noteContent)
+            val truncatedContent = if (plainTextContent.length > 150) {
+                plainTextContent.substring(0, 150) + "..."
+            } else {
+                plainTextContent
+            }
+
             createNotificationChannel(context)
-            showNotification(context, noteId, noteTitle, noteContent)
+            showNotification(context, noteId, noteTitle, truncatedContent)
             playAlarmSound(context)
         }
     }
