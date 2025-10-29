@@ -2,6 +2,10 @@
 package com.suvojeet.notenext
 
 import android.os.Bundle
+import android.content.Intent
+import android.provider.Settings
+import android.app.AlarmManager
+import android.os.Build
 
 import androidx.activity.compose.setContent
 import androidx.compose.runtime.collectAsState
@@ -31,6 +35,8 @@ class MainActivity : FragmentActivity() {
         val factory = ViewModelFactory(database.noteDao(), database.labelDao(), linkPreviewRepository, applicationContext)
         val settingsRepository = SettingsRepository(this)
 
+        requestExactAlarmPermission()
+
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
@@ -46,6 +52,17 @@ class MainActivity : FragmentActivity() {
                     LockScreen(onUnlock = { unlocked = true })
                 } else {
                     NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass)
+                }
+            }
+        }
+    }
+
+    private fun requestExactAlarmPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) { // Android 12 (API 31) and above
+            val alarmManager = getSystemService(ALARM_SERVICE) as AlarmManager
+            if (!alarmManager.canScheduleExactAlarms()) {
+                Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).also {
+                    startActivity(it)
                 }
             }
         }
