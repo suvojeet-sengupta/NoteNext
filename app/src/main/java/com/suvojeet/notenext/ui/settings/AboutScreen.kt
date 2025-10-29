@@ -31,11 +31,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
+import coil.compose.AsyncImage
+import androidx.compose.ui.platform.LocalContext
+import com.suvojeet.notenext.util.NetworkUtils
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AboutScreen(onBackClick: () -> Unit) {
     val uriHandler = LocalUriHandler.current
+    val context = LocalContext.current
+    val isInternetAvailable = NetworkUtils.isInternetAvailable(context)
 
     Scaffold(
         topBar = {
@@ -85,12 +90,20 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Default.Person,
-                        contentDescription = "Core Developer",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(40.dp)
-                    )
+                    if (isInternetAvailable) {
+                        AsyncImage(
+                            model = "https://avatars.githubusercontent.com/u/107928380?s=400&u=6e6351e1a09a6c473133a46e28f4b005a2345a57&v=4",
+                            contentDescription = "Suvojeet Sengupta Profile Pic",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "Core Developer",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
                     Column {
                         Text(
                             text = "Suvojeet Sengupta",
