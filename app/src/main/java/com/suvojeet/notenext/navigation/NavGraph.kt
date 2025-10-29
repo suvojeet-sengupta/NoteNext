@@ -142,7 +142,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     val scope = rememberCoroutineScope()
 
-    val notesViewModel: NotesViewModel = viewModel(factory = ViewModelFactory(factory.noteDao, factory.labelDao, linkPreviewRepository))
+    val notesViewModel: NotesViewModel = viewModel(factory = factory)
 
         val notesState by notesViewModel.state.collectAsState()
 

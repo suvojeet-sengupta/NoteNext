@@ -50,7 +50,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         )
 
         val builder = NotificationCompat.Builder(context, "reminder_channel_id")
-            .setSmallIcon(R.drawable.ic_notifications_black_24dp) // TODO: Replace with actual notification icon
+            .setSmallIcon(android.R.drawable.ic_dialog_alert) // Replaced with generic alert icon
             .setContentTitle(title)
             .setContentText(content)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
