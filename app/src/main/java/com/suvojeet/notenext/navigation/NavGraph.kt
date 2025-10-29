@@ -117,6 +117,7 @@ import com.suvojeet.notenext.ui.lock.PinSetupScreen
 import com.suvojeet.notenext.ui.settings.SettingsScreen
 import com.suvojeet.notenext.ui.reminder.ReminderScreen
 import com.suvojeet.notenext.ui.reminder.AddEditReminderScreen
+import com.suvojeet.notenext.ui.settings.AboutScreen
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
 
@@ -1171,7 +1172,16 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                                                         AddEditReminderScreen(
                                                                             onBackClick = { navController.popBackStack() }
                                                                         )
-                                                                    }                        
+                                                                    }
+                    composable(
+                        route = "about",
+                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                    ) {
+                        AboutScreen(
+                            onBackClick = { navController.popBackStack() }
+                        )
+                    }                        
                             
                         
                                         }
