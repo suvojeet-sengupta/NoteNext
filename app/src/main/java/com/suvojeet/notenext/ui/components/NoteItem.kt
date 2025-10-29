@@ -30,6 +30,10 @@ import com.suvojeet.notenext.ui.notes.HtmlConverter
 
 import com.suvojeet.notenext.data.NoteWithAttachments
 import androidx.compose.material.icons.filled.Attachment
+import androidx.compose.material.icons.filled.Alarm
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -121,6 +125,27 @@ fun NoteItem(
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.onTertiaryContainer,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                    )
+                }
+            }
+
+            note.note.reminderTime?.let { reminderTime ->
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Alarm,
+                        contentDescription = "Reminder",
+                        modifier = Modifier.size(16.dp),
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+                    Text(
+                        text = sdf.format(Date(reminderTime)),
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
