@@ -17,6 +17,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,9 +35,9 @@ fun ReminderScreen(onBackClick: () -> Unit, onAddReminderClick: () -> Unit) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         },

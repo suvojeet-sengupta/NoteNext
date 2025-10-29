@@ -32,6 +32,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.graphics.Color
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -99,10 +100,10 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    navigationIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                    actionIconContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                    containerColor = Color.Transparent,
+                    titleContentColor = MaterialTheme.colorScheme.onBackground,
+                    navigationIconContentColor = MaterialTheme.colorScheme.onBackground,
+                    actionIconContentColor = MaterialTheme.colorScheme.onBackground
                 )
             )
         }
