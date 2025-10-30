@@ -8,6 +8,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
@@ -318,7 +319,16 @@ fun onEvent(event: NotesEvent) {
                         append(oldContent.annotatedString.subSequence(0, prefixLength))
 
                         // Append the newly typed text with the active styles
-                        val styleToApply = state.value.activeStyles.reduceOrNull { a, b -> a.merge(b) } ?: SpanStyle()
+                        val headingSpanStyle = when (state.value.activeHeadingStyle) {
+                            1 -> SpanStyle(fontSize = 24.sp)
+                            2 -> SpanStyle(fontSize = 20.sp)
+                            3 -> SpanStyle(fontSize = 18.sp)
+                            4 -> SpanStyle(fontSize = 16.sp)
+                            5 -> SpanStyle(fontSize = 14.sp)
+                            6 -> SpanStyle(fontSize = 12.sp)
+                            else -> SpanStyle()
+                        }
+                        val styleToApply = (state.value.activeStyles + headingSpanStyle).reduceOrNull { a, b -> a.merge(b) } ?: SpanStyle()
                         withStyle(styleToApply) {
                             append(newChangedPart)
                         }
@@ -441,13 +451,48 @@ fun onEvent(event: NotesEvent) {
             }
         }
         is NotesEvent.ApplyHeadingStyle -> {
-            _state.value = state.value.copy(
-                activeHeadingStyle = event.level,
-                isBoldActive = false,
-                isItalicActive = false,
-                isUnderlineActive = false,
-                activeStyles = emptySet()
-            )
+            val selection = state.value.editingContent.selection
+            val currentContent = state.value.editingContent
+
+            val headingStyle = when (event.level) {
+                1 -> SpanStyle(fontSize = 24.sp)
+                2 -> SpanStyle(fontSize = 20.sp)
+                3 -> SpanStyle(fontSize = 18.sp)
+                4 -> SpanStyle(fontSize = 16.sp)
+                5 -> SpanStyle(fontSize = 14.sp)
+                6 -> SpanStyle(fontSize = 12.sp)
+                else -> SpanStyle() // Normal text
+            }
+
+            if (selection.collapsed) {
+                // Apply style for future typing
+                val newActiveStyles = mutableSetOf<SpanStyle>()
+                if (event.level != 0) {
+                    newActiveStyles.add(headingStyle)
+                }
+                _state.value = state.value.copy(
+                    activeHeadingStyle = event.level,
+                    activeStyles = newActiveStyles,
+                    isBoldActive = false, // Clear other styles
+                    isItalicActive = false,
+                    isUnderlineActive = false
+                )
+            } else {
+                // Apply style to selected text
+                val newAnnotatedString = AnnotatedString.Builder(currentContent.annotatedString).apply {
+                    addStyle(headingStyle, selection.start, selection.end)
+                }.toAnnotatedString()
+
+                val newTextFieldValue = currentContent.copy(annotatedString = newAnnotatedString)
+                val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newTextFieldValue)
+
+                _state.value = state.value.copy(
+                    editingContent = newTextFieldValue,
+                    editingHistory = newHistory,
+                    editingHistoryIndex = newHistory.lastIndex,
+                    activeHeadingStyle = event.level // Update active heading style for the selection
+                )
+            }
         }
         is NotesEvent.OnColorChange -> {
             _state.value = state.value.copy(editingColor = event.color)
