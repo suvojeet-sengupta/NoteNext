@@ -4,6 +4,7 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -28,8 +29,8 @@ import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
+ @OptIn(ExperimentalMaterial3Api::class)
+ @Composable
 fun SearchBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -49,36 +50,78 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .padding(horizontal = 18.dp, vertical = 8.dp),
+            .padding(horizontal = 16.dp, vertical = 8.dp),
         shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(
-            defaultElevation = if (isSearchFocused) 8.dp else 4.dp
+            defaultElevation = if (isSearchFocused) 6.dp else 2.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         )
     ) {
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 16.dp),
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            MaterialTheme.colorScheme.surfaceContainerHigh,
+                            MaterialTheme.colorScheme.surfaceContainer
+                        )
+                    )
+                )
+                .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            AnimatedContent(targetState = isSearchActive) {
-                if (it) {
-                    IconButton(onClick = { onSearchActiveChange(false) }) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+            // Search/Back Icon with smooth animation
+            AnimatedContent(
+                targetState = isSearchActive,
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(200)) + 
+                    scaleIn(initialScale = 0.8f) togetherWith
+                    fadeOut(animationSpec = tween(200)) + 
+                    scaleOut(targetScale = 0.8f)
+                },
+                label = "searchIconTransition"
+            ) { active ->
+                if (active) {
+                    IconButton(
+                        onClick = { 
+                            onSearchActiveChange(false)
+                            onSearchQueryChange("")
+                        },
+                        modifier = Modifier.size(40.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                            contentDescription = "Back",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.size(20.dp)
+                        )
                     }
                 } else {
+                    val iconScale by animateFloatAsState(
+                        targetValue = if (isSearchFocused) 1.15f else 1f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessLow
+                        ),
+                        label = "searchIconScale"
+                    )
+                    
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.primary
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .size(24.dp)
+                            .scale(iconScale)
                     )
                 }
             }
 
+            // Search TextField
             TextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
@@ -86,15 +129,15 @@ fun SearchBar(
                     Text(
                         "Search notes",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                     )
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .onFocusChanged { 
-                        isSearchFocused = it.isFocused
-                        if (it.isFocused) onSearchActiveChange(true)
-                     },
+                    .onFocusChanged { focusState ->
+                        isSearchFocused = focusState.isFocused
+                        if (focusState.isFocused) onSearchActiveChange(true)
+                    },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -104,37 +147,62 @@ fun SearchBar(
                 ),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
             )
 
+            // Clear button with animation
             AnimatedVisibility(
                 visible = isSearchActive && searchQuery.isNotEmpty(),
-                enter = scaleIn() + fadeIn(),
+                enter = scaleIn(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy)
+                ) + fadeIn(),
                 exit = scaleOut() + fadeOut()
             ) {
                 IconButton(
                     onClick = { onSearchQueryChange("") },
-                    modifier = Modifier.size(32.dp)
+                    modifier = Modifier.size(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
                         contentDescription = "Clear",
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
                     )
                 }
             }
 
-            AnimatedVisibility(visible = !isSearchActive) {
+            // Controls with slide animation
+            AnimatedVisibility(
+                visible = !isSearchActive,
+                enter = slideInHorizontally(
+                    initialOffsetX = { it / 2 },
+                    animationSpec = tween(300, easing = FastOutSlowInEasing)
+                ) + fadeIn(),
+                exit = slideOutHorizontally(
+                    targetOffsetX = { it / 2 },
+                    animationSpec = tween(200)
+                ) + fadeOut()
+            ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
+                    // Animated divider
                     Box(
                         modifier = Modifier
                             .width(1.dp)
                             .height(24.dp)
-                            .background(MaterialTheme.colorScheme.outlineVariant)
+                            .background(
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.Transparent,
+                                        MaterialTheme.colorScheme.outlineVariant,
+                                        Color.Transparent
+                                    )
+                                )
+                            )
                     )
 
                     CompactViewModeToggle(
@@ -144,26 +212,31 @@ fun SearchBar(
 
                     Box {
                         CompactSortButton(onClick = onSortClick)
+                        
                         DropdownMenu(
                             expanded = sortMenuExpanded,
-                            onDismissRequest = onSortMenuDismissRequest
+                            onDismissRequest = onSortMenuDismissRequest,
+                            modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         ) {
-                            DropdownMenuItem(
-                                text = { Text("Sort by date created") },
+                            SortMenuItem(
+                                text = "Date Created",
+                                icon = Icons.Default.CalendarToday,
                                 onClick = {
                                     onSortOptionClick(SortType.DATE_CREATED)
                                     onSortMenuDismissRequest()
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Sort by date modified") },
+                            SortMenuItem(
+                                text = "Date Modified",
+                                icon = Icons.Default.Update,
                                 onClick = {
                                     onSortOptionClick(SortType.DATE_MODIFIED)
                                     onSortMenuDismissRequest()
                                 }
                             )
-                            DropdownMenuItem(
-                                text = { Text("Sort by title") },
+                            SortMenuItem(
+                                text = "Title",
+                                icon = Icons.Default.SortByAlpha,
                                 onClick = {
                                     onSortOptionClick(SortType.TITLE)
                                     onSortMenuDismissRequest()
@@ -177,17 +250,45 @@ fun SearchBar(
     }
 }
 
-@Composable
+ @Composable
+fun SortMenuItem(
+    text: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    DropdownMenuItem(
+        text = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = text,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+            }
+        },
+        onClick = onClick
+    )
+}
+
+ @Composable
 fun CompactViewModeToggle(
     currentMode: LayoutType,
     onModeChange: () -> Unit
 ) {
     Row(
         modifier = Modifier
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceContainerHighest)
-            .padding(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(4.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f))
+            .padding(3.dp),
+        horizontalArrangement = Arrangement.spacedBy(3.dp)
     ) {
         CompactViewModeButton(
             icon = Icons.Default.ViewList,
@@ -203,7 +304,7 @@ fun CompactViewModeToggle(
     }
 }
 
-@Composable
+ @Composable
 fun CompactViewModeButton(
     icon: ImageVector,
     isSelected: Boolean,
@@ -214,7 +315,7 @@ fun CompactViewModeButton(
             MaterialTheme.colorScheme.primaryContainer
         else
             Color.Transparent,
-        animationSpec = tween(300),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
         label = "buttonBackground"
     )
 
@@ -226,30 +327,45 @@ fun CompactViewModeButton(
         animationSpec = tween(300),
         label = "buttonContent"
     )
+    
+    val scale by animateFloatAsState(
+        targetValue = if (isSelected) 1.05f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
+        label = "buttonScale"
+    )
 
     Box(
         modifier = Modifier
-            .size(32.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .size(34.dp)
+            .scale(scale)
+            .clip(RoundedCornerShape(11.dp))
             .background(backgroundColor)
-            .clickable(onClick = onClick),
+            .clickable(
+                onClick = onClick,
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            ),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = null,
+            tint = contentColor,
             modifier = Modifier.size(18.dp)
         )
     }
 }
 
-@Composable
+ @Composable
 fun CompactSortButton(onClick: () -> Unit) {
     var isPressed by remember { mutableStateOf(false) }
 
     val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.95f else 1f,
-        animationSpec = spring(dampingRatio = 0.6f),
+        targetValue = if (isPressed) 0.92f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessHigh
+        ),
         label = "sortButtonScale"
     )
 
@@ -258,9 +374,11 @@ fun CompactSortButton(onClick: () -> Unit) {
             isPressed = true
             onClick()
         },
-        modifier = Modifier.scale(scale),
-        shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
+        modifier = Modifier
+            .scale(scale)
+            .height(34.dp),
+        shape = RoundedCornerShape(14.dp),
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = 0.dp),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -269,13 +387,13 @@ fun CompactSortButton(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Sort,
             contentDescription = "Sort",
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = "Sort",
-            style = MaterialTheme.typography.labelMedium,
-            fontWeight = FontWeight.Bold
+            style = MaterialTheme.typography.labelSmall,
+            fontWeight = FontWeight.SemiBold
         )
     }
 
@@ -287,26 +405,40 @@ fun CompactSortButton(onClick: () -> Unit) {
     }
 }
 
-@Preview(showBackground = true)
-@Composable
+ @Preview(showBackground = true)
+ @Composable
 fun SearchBarPreview() {
-    var searchQuery by remember { mutableStateOf("") }
-    var layoutType by remember { mutableStateOf(LayoutType.GRID) }
-    var showSortMenu by remember { mutableStateOf(false) }
-    var isSearchActive by remember { mutableStateOf(false) }
+    MaterialTheme {
+        var searchQuery by remember { mutableStateOf("") }
+        var layoutType by remember { mutableStateOf(LayoutType.GRID) }
+        var showSortMenu by remember { mutableStateOf(false) }
+        var isSearchActive by remember { mutableStateOf(false) }
 
-    SearchBar(
-        searchQuery = searchQuery,
-        onSearchQueryChange = { searchQuery = it },
-        layoutType = layoutType,
-        onLayoutToggleClick = {
-            layoutType = if (layoutType == LayoutType.GRID) LayoutType.LIST else LayoutType.GRID
-        },
-        onSortClick = { showSortMenu = !showSortMenu },
-        sortMenuExpanded = showSortMenu,
-        onSortMenuDismissRequest = { showSortMenu = false },
-        onSortOptionClick = {},
-        isSearchActive = isSearchActive,
-        onSearchActiveChange = { isSearchActive = it }
-    )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            SearchBar(
+                searchQuery = searchQuery,
+                onSearchQueryChange = { searchQuery = it },
+                layoutType = layoutType,
+                onLayoutToggleClick = {
+                    layoutType = if (layoutType == LayoutType.GRID) LayoutType.LIST else LayoutType.GRID
+                },
+                onSortClick = { showSortMenu = !showSortMenu },
+                sortMenuExpanded = showSortMenu,
+                onSortMenuDismissRequest = { showSortMenu = false },
+                onSortOptionClick = {},
+                isSearchActive = isSearchActive,
+                onSearchActiveChange = { isSearchActive = it }
+            )
+            
+            // Preview state
+            if (isSearchActive) {
+                Text(
+                    "Search Active: ${searchQuery.ifEmpty { "Empty" }}",
+                    modifier = Modifier.padding(16.dp),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 }
