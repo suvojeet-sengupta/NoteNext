@@ -45,27 +45,20 @@ fun SearchBar(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 8.dp),
-        shape = RoundedCornerShape(24.dp),
+            .height(56.dp)
+            .padding(horizontal = 18.dp, vertical = 8.dp),
+        shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isSearchFocused) 8.dp else 4.dp
         ),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
         )
     ) {
         Row(
             modifier = Modifier
-                .background(
-                    Brush.horizontalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.surfaceContainer,
-                            MaterialTheme.colorScheme.surfaceContainerHigh
-                        )
-                    )
-                )
-                .padding(16.dp)
-                .fillMaxWidth(),
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -80,7 +73,7 @@ fun SearchBar(
                 contentDescription = "Search",
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .size(28.dp)
+                    .size(24.dp)
                     .scale(scale)
             )
 
@@ -90,7 +83,7 @@ fun SearchBar(
                 placeholder = {
                     Text(
                         "Search notes",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 },
@@ -105,7 +98,7 @@ fun SearchBar(
                     cursorColor = MaterialTheme.colorScheme.primary
                 ),
                 singleLine = true,
-                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                textStyle = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium
                 )
             )
@@ -117,7 +110,7 @@ fun SearchBar(
             ) {
                 IconButton(
                     onClick = { onSearchQueryChange("") },
-                    modifier = Modifier.size(40.dp)
+                    modifier = Modifier.size(32.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
@@ -130,7 +123,7 @@ fun SearchBar(
             Box(
                 modifier = Modifier
                     .width(1.dp)
-                    .height(32.dp)
+                    .height(24.dp)
                     .background(MaterialTheme.colorScheme.outlineVariant)
             )
 
@@ -224,7 +217,7 @@ fun CompactViewModeButton(
 
     Box(
         modifier = Modifier
-            .size(40.dp)
+            .size(32.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(backgroundColor)
             .clickable(onClick = onClick),
@@ -233,8 +226,7 @@ fun CompactViewModeButton(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = contentColor,
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(18.dp)
         )
     }
 }
@@ -256,7 +248,7 @@ fun CompactSortButton(onClick: () -> Unit) {
         },
         modifier = Modifier.scale(scale),
         shape = RoundedCornerShape(16.dp),
-        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
+        contentPadding = PaddingValues(horizontal = 12.dp, vertical = 8.dp),
         colors = ButtonDefaults.filledTonalButtonColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -265,12 +257,12 @@ fun CompactSortButton(onClick: () -> Unit) {
         Icon(
             imageVector = Icons.Default.Sort,
             contentDescription = "Sort",
-            modifier = Modifier.size(20.dp)
+            modifier = Modifier.size(18.dp)
         )
-        Spacer(modifier = Modifier.width(8.dp))
+        Spacer(modifier = Modifier.width(4.dp))
         Text(
             text = "Sort",
-            style = MaterialTheme.typography.labelLarge,
+            style = MaterialTheme.typography.labelMedium,
             fontWeight = FontWeight.Bold
         )
     }
