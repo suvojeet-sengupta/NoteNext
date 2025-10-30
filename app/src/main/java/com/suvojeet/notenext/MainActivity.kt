@@ -36,6 +36,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import com.suvojeet.notenext.ui.setup.SetupScreen
 
+import androidx.compose.ui.Modifier
+
 class MainActivity : FragmentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +69,7 @@ class MainActivity : FragmentActivity() {
                 if (enableAppLockLoaded == null || isSetupCompleteLoaded == null) {
                     // Show a blank screen or splash screen while settings are loading
                     Surface(modifier = Modifier.fillMaxSize()) {}
-                } else if (!isSetupCompleteLoaded) {
+                } else if (isSetupCompleteLoaded == false) {
                     SetupScreen(factory = factory) { /* Setup is complete, UI will recompose based on isSetupComplete */ }
                 } else if (enableAppLockLoaded!! && !unlocked) {
                     LockScreen(onUnlock = { unlocked = true })
