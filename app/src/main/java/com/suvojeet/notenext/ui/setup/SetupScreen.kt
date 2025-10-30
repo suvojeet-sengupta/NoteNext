@@ -58,15 +58,6 @@ fun SetupScreen(
             )
 
             // Runtime Permissions
-            val readExternalStoragePermissionState = rememberPermissionState(Manifest.permission.READ_EXTERNAL_STORAGE)
-            PermissionItem(
-                title = "Storage Permission",
-                description = "Allow NoteNext to access your device storage to save and load notes, attachments, and other data.",
-                isGranted = readExternalStoragePermissionState.status.isGranted,
-                onRequestClick = { readExternalStoragePermissionState.launchPermissionRequest() }
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-
             val postNotificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
             } else {
@@ -102,8 +93,7 @@ fun SetupScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            val canContinue = readExternalStoragePermissionState.status.isGranted && 
-                              (postNotificationsPermissionState?.status?.isGranted ?: true) && 
+            val canContinue = (postNotificationsPermissionState?.status?.isGranted ?: true) && 
                               exactAlarmGranted
 
             Button(
