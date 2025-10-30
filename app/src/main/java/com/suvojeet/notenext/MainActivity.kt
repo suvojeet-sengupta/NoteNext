@@ -32,7 +32,7 @@ class MainActivity : FragmentActivity() {
         super.onCreate(savedInstanceState)
         val database = NoteDatabase.getDatabase(this)
         val linkPreviewRepository = LinkPreviewRepository()
-        val factory = ViewModelFactory(database.noteDao(), database.labelDao(), linkPreviewRepository, applicationContext)
+        val factory = ViewModelFactory(database.noteDao(), database.labelDao(), database.projectDao(), linkPreviewRepository, applicationContext)
         val settingsRepository = SettingsRepository(this)
 
                 requestExactAlarmPermission()

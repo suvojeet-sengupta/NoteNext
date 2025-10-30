@@ -22,5 +22,6 @@ data class Note(
     val isBinned: Boolean = false,
     val binnedOn: Long? = null,
     val linkPreviews: List<LinkPreview> = emptyList(),
-    val noteType: String = "TEXT"
+    val noteType: String = "TEXT",
+    val projectId: Int? = null
 )

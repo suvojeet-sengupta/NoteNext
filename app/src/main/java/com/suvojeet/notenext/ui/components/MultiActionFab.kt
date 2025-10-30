@@ -35,10 +35,13 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
+import androidx.compose.material.icons.filled.CreateNewFolder
+
 @Composable
 fun MultiActionFab(
     onNoteClick: () -> Unit,
-    onChecklistClick: () -> Unit
+    onChecklistClick: () -> Unit,
+    onProjectClick: () -> Unit
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
@@ -50,6 +53,21 @@ fun MultiActionFab(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        AnimatedVisibility(
+            visible = isExpanded,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
+        ) {
+            FabItem(
+                icon = Icons.Default.CreateNewFolder,
+                label = "Project",
+                onClick = {
+                    onProjectClick()
+                    isExpanded = false
+                }
+            )
+        }
+
         AnimatedVisibility(
             visible = isExpanded,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),

@@ -120,6 +120,7 @@ fun NotesScreen(
     var showLabelDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showReminderSetDialog by remember { mutableStateOf(false) }
+    var showCreateProjectDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -141,6 +142,9 @@ fun NotesScreen(
                 }
                 is NotesUiEvent.LinkPreviewRemoved -> {
                     Toast.makeText(context, "Link preview removed", Toast.LENGTH_SHORT).show()
+                }
+                is NotesUiEvent.ProjectCreated -> {
+                    Toast.makeText(context, "Project '${event.projectName}' created", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -230,7 +234,8 @@ fun NotesScreen(
             floatingActionButton = {
                 MultiActionFab(
                     onNoteClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
-                    onChecklistClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1, "CHECKLIST")) }
+                    onChecklistClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1, "CHECKLIST")) },
+                    onProjectClick = { showCreateProjectDialog = true }
                 )
             }
         ) { padding ->
@@ -276,6 +281,17 @@ fun NotesScreen(
                     }
                 )
             }
+
+            if (showCreateProjectDialog) {
+                CreateProjectDialog(
+                    onDismiss = { showCreateProjectDialog = false },
+                    onConfirm = { projectName ->
+                        viewModel.onEvent(NotesEvent.CreateProject(projectName))
+                        showCreateProjectDialog = false
+                    }
+                )
+            }
+
             Column(modifier = Modifier.padding(padding)) {
                 Spacer(modifier = Modifier.height(8.dp))
                 val notesToDisplay = if (state.filteredLabel == null) {
@@ -471,6 +487,41 @@ fun NotesScreen(
             )
         }
     }
+}
+
+@Composable
+private fun CreateProjectDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var projectName by remember { mutableStateOf("") }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Create New Project") },
+        text = {
+            OutlinedTextField(
+                value = projectName,
+                onValueChange = { projectName = it },
+                label = { Text("Project Name") },
+                singleLine = true,
+                modifier = Modifier.fillMaxWidth()
+            )
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(projectName) },
+                enabled = projectName.isNotBlank()
+            ) {
+                Text("Create")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 

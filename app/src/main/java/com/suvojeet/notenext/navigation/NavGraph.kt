@@ -34,6 +34,8 @@ import androidx.compose.material.icons.filled.Edit
 
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.CreateNewFolder
+import androidx.compose.material.icons.filled.CreateNewFolder
 
 import androidx.compose.material.icons.automirrored.filled.Label
 
@@ -118,6 +120,8 @@ import com.suvojeet.notenext.ui.settings.SettingsScreen
 import com.suvojeet.notenext.ui.reminder.ReminderScreen
 import com.suvojeet.notenext.ui.reminder.AddEditReminderScreen
 import com.suvojeet.notenext.ui.settings.AboutScreen
+import com.suvojeet.notenext.ui.project.ProjectScreen
+import com.suvojeet.notenext.ui.project.ProjectViewModel
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
 
@@ -293,6 +297,16 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
+                                    )
+
+                                    NavigationDrawerItem(
+                                        icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
+                                        label = { Text("Projects") },
+                                        selected = currentRoute == "projects",
+                                        onClick = {
+                                            navController.navigate("projects")
+                                        },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                                     )
 
             
@@ -816,6 +830,17 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         )
 
+                        NavigationDrawerItem(
+                            icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
+                            label = { Text("Projects") },
+                            selected = currentRoute == "projects",
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate("projects")
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+
     
 
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
@@ -1173,6 +1198,19 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                                                             onBackClick = { navController.popBackStack() }
                                                                         )
                                                                     }
+                    composable(
+                        route = "projects",
+                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                    ) {
+                        ProjectScreen(
+                            factory = factory,
+                            onMenuClick = { scope.launch { drawerState.open() } },
+                            onProjectClick = { projectId ->
+                                // TODO: Implement navigation to notes filtered by project
+                            }
+                        )
+                    }
                     composable(
                         route = "about",
                         enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },

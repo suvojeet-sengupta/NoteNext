@@ -7,10 +7,12 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.suvojeet.notenext.data.LabelDao
 import com.suvojeet.notenext.data.NoteDao
 import com.suvojeet.notenext.data.LinkPreviewRepository
+import com.suvojeet.notenext.data.ProjectDao
 import com.suvojeet.notenext.ui.archive.ArchiveViewModel
 import com.suvojeet.notenext.ui.bin.BinViewModel
 import com.suvojeet.notenext.ui.labels.EditLabelsViewModel
 import com.suvojeet.notenext.ui.notes.NotesViewModel
+import com.suvojeet.notenext.ui.project.ProjectViewModel
 import com.suvojeet.notenext.ui.reminder.ReminderViewModel
 
 import android.content.Context
@@ -19,6 +21,7 @@ import com.suvojeet.notenext.util.AlarmSchedulerImpl
 class ViewModelFactory(
     val noteDao: NoteDao,
     val labelDao: LabelDao,
+    val projectDao: ProjectDao,
     private val linkPreviewRepository: LinkPreviewRepository,
     private val context: Context
 ) : ViewModelProvider.Factory {
@@ -28,7 +31,7 @@ class ViewModelFactory(
         val alarmScheduler = AlarmSchedulerImpl(context)
         if (modelClass.isAssignableFrom(NotesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return NotesViewModel(noteDao, labelDao, linkPreviewRepository, alarmScheduler) as T
+            return NotesViewModel(noteDao, labelDao, projectDao, linkPreviewRepository, alarmScheduler) as T
         }
         if (modelClass.isAssignableFrom(ArchiveViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
@@ -45,6 +48,10 @@ class ViewModelFactory(
         if (modelClass.isAssignableFrom(ReminderViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return ReminderViewModel(noteDao) as T
+        }
+        if (modelClass.isAssignableFrom(ProjectViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return ProjectViewModel(projectDao) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }

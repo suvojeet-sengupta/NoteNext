@@ -8,6 +8,7 @@ import com.suvojeet.notenext.data.NoteWithAttachments
 
 import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.LinkPreview
+import com.suvojeet.notenext.data.Project
 
 data class NotesState(
     val notes: List<NoteWithAttachments> = emptyList(),
@@ -38,5 +39,6 @@ data class NotesState(
     val editingNoteType: String = "TEXT",
     val editingChecklist: List<ChecklistItem> = emptyList(),
     val newlyAddedChecklistItemId: String? = null,
-    val editingAttachments: List<Attachment> = emptyList()
+    val editingAttachments: List<Attachment> = emptyList(),
+    val projects: List<Project> = emptyList()
 )

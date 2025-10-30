@@ -20,6 +20,8 @@ import com.suvojeet.notenext.data.NoteDao
 import com.suvojeet.notenext.ui.notes.HtmlConverter
 import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.LinkPreviewRepository
+import com.suvojeet.notenext.data.Project
+import com.suvojeet.notenext.data.ProjectDao
 import com.suvojeet.notenext.ui.notes.SortType
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.util.AlarmScheduler
@@ -42,6 +44,7 @@ import com.suvojeet.notenext.data.NoteWithAttachments
 class NotesViewModel(
     private val noteDao: NoteDao,
     private val labelDao: LabelDao,
+    private val projectDao: ProjectDao,
     private val linkPreviewRepository: LinkPreviewRepository,
     private val alarmScheduler: AlarmScheduler
 ) : ViewModel() {
@@ -55,7 +58,7 @@ class NotesViewModel(
     private var recentlyDeletedNote: Note? = null
 
     init {
-        combine(noteDao.getNotes(), labelDao.getLabels(), _state) { notes, labels, state ->
+        combine(noteDao.getNotes(), labelDao.getLabels(), projectDao.getProjects(), _state) { notes, labels, projects, state ->
             val sortedNotes = when (state.sortType) {
                 SortType.DATE_CREATED -> notes.sortedByDescending { it.note.createdAt }
                 SortType.DATE_MODIFIED -> notes.sortedByDescending { it.note.lastEdited }
@@ -63,7 +66,8 @@ class NotesViewModel(
             }
             _state.value = state.copy(
                 notes = sortedNotes,
-                labels = labels.map { it.name }
+                labels = labels.map { it.name },
+                projects = projects
             )
         }.launchIn(viewModelScope)
     }
@@ -700,6 +704,13 @@ fun onEvent(event: NotesEvent) {
                     val updatedAttachments = _state.value.editingAttachments.filter { attachment -> attachment.tempId != event.tempId }
                     _state.value = _state.value.copy(editingAttachments = updatedAttachments)
                 }
+            }
+        }
+        is NotesEvent.CreateProject -> {
+            viewModelScope.launch {
+                val newProject = Project(name = event.name)
+                projectDao.insertProject(newProject)
+                _events.emit(NotesUiEvent.ProjectCreated(event.name))
             }
         }
     }
