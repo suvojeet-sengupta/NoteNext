@@ -31,7 +31,6 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
 
             createNotificationChannel(context)
             showNotification(context, noteId, noteTitle, truncatedContent)
-            playAlarmSound(context)
         }
     }
 
@@ -70,13 +69,5 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         }
     }
 
-    private fun playAlarmSound(context: Context) {
-        try {
-            val alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-            val r = RingtoneManager.getRingtone(context, alarmSound)
-            r.play()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
+
 }
