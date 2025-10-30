@@ -122,6 +122,7 @@ import com.suvojeet.notenext.ui.reminder.AddEditReminderScreen
 import com.suvojeet.notenext.ui.settings.AboutScreen
 import com.suvojeet.notenext.ui.project.ProjectScreen
 import com.suvojeet.notenext.ui.project.ProjectViewModel
+import com.suvojeet.notenext.ui.project.ProjectNotesScreen
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
 

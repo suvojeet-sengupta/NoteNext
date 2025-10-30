@@ -13,6 +13,7 @@ import com.suvojeet.notenext.ui.bin.BinViewModel
 import com.suvojeet.notenext.ui.labels.EditLabelsViewModel
 import com.suvojeet.notenext.ui.notes.NotesViewModel
 import com.suvojeet.notenext.ui.project.ProjectViewModel
+import com.suvojeet.notenext.ui.project.ProjectNotesViewModel
 import com.suvojeet.notenext.ui.reminder.ReminderViewModel
 
 import android.content.Context
@@ -53,9 +54,9 @@ class ViewModelFactory(
             @Suppress("UNCHECKED_CAST")
             return ProjectViewModel(projectDao) as T
         }
-        if (modelClass.isAssignableFrom(com.suvojeet.notenext.ui.project.ProjectNotesViewModel::class.java)) {
+        if (modelClass.isAssignableFrom(ProjectNotesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
-            return com.suvojeet.notenext.ui.project.ProjectNotesViewModel(noteDao, projectDao, labelDao, linkPreviewRepository, alarmScheduler, savedStateHandle) as T
+            return ProjectNotesViewModel(noteDao, projectDao, labelDao, linkPreviewRepository, alarmScheduler, savedStateHandle) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
