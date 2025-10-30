@@ -25,6 +25,7 @@ import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -38,6 +39,8 @@ fun SearchBar(
     sortMenuExpanded: Boolean,
     onSortMenuDismissRequest: () -> Unit,
     onSortOptionClick: (SortType) -> Unit,
+    isSearchActive: Boolean,
+    onSearchActiveChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
     var isSearchFocused by remember { mutableStateOf(false) }
@@ -62,20 +65,19 @@ fun SearchBar(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            val scale by animateFloatAsState(
-                targetValue = if (isSearchFocused) 1.1f else 1f,
-                animationSpec = spring(dampingRatio = 0.5f),
-                label = "searchIconScale"
-            )
-
-            Icon(
-                imageVector = Icons.Default.Search,
-                contentDescription = "Search",
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier
-                    .size(24.dp)
-                    .scale(scale)
-            )
+            AnimatedContent(targetState = isSearchActive) {
+                if (it) {
+                    IconButton(onClick = { onSearchActiveChange(false) }) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                    }
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Search,
+                        contentDescription = "Search",
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
 
             TextField(
                 value = searchQuery,
@@ -89,7 +91,10 @@ fun SearchBar(
                 },
                 modifier = Modifier
                     .weight(1f)
-                    .onFocusChanged { isSearchFocused = it.isFocused },
+                    .onFocusChanged { 
+                        isSearchFocused = it.isFocused
+                        if (it.isFocused) onSearchActiveChange(true)
+                     },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,
                     unfocusedContainerColor = Color.Transparent,
@@ -104,7 +109,7 @@ fun SearchBar(
             )
 
             AnimatedVisibility(
-                visible = searchQuery.isNotEmpty(),
+                visible = isSearchActive && searchQuery.isNotEmpty(),
                 enter = scaleIn() + fadeIn(),
                 exit = scaleOut() + fadeOut()
             ) {
@@ -120,45 +125,52 @@ fun SearchBar(
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .width(1.dp)
-                    .height(24.dp)
-                    .background(MaterialTheme.colorScheme.outlineVariant)
-            )
-
-            CompactViewModeToggle(
-                currentMode = layoutType,
-                onModeChange = onLayoutToggleClick
-            )
-
-            Box {
-                CompactSortButton(onClick = onSortClick)
-                DropdownMenu(
-                    expanded = sortMenuExpanded,
-                    onDismissRequest = onSortMenuDismissRequest
+            AnimatedVisibility(visible = !isSearchActive) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("Sort by date created") },
-                        onClick = {
-                            onSortOptionClick(SortType.DATE_CREATED)
-                            onSortMenuDismissRequest()
-                        }
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(24.dp)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
                     )
-                    DropdownMenuItem(
-                        text = { Text("Sort by date modified") },
-                        onClick = {
-                            onSortOptionClick(SortType.DATE_MODIFIED)
-                            onSortMenuDismissRequest()
-                        }
+
+                    CompactViewModeToggle(
+                        currentMode = layoutType,
+                        onModeChange = onLayoutToggleClick
                     )
-                    DropdownMenuItem(
-                        text = { Text("Sort by title") },
-                        onClick = {
-                            onSortOptionClick(SortType.TITLE)
-                            onSortMenuDismissRequest()
+
+                    Box {
+                        CompactSortButton(onClick = onSortClick)
+                        DropdownMenu(
+                            expanded = sortMenuExpanded,
+                            onDismissRequest = onSortMenuDismissRequest
+                        ) {
+                            DropdownMenuItem(
+                                text = { Text("Sort by date created") },
+                                onClick = {
+                                    onSortOptionClick(SortType.DATE_CREATED)
+                                    onSortMenuDismissRequest()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Sort by date modified") },
+                                onClick = {
+                                    onSortOptionClick(SortType.DATE_MODIFIED)
+                                    onSortMenuDismissRequest()
+                                }
+                            )
+                            DropdownMenuItem(
+                                text = { Text("Sort by title") },
+                                onClick = {
+                                    onSortOptionClick(SortType.TITLE)
+                                    onSortMenuDismissRequest()
+                                }
+                            )
                         }
-                    )
+                    }
                 }
             }
         }
@@ -281,6 +293,7 @@ fun SearchBarPreview() {
     var searchQuery by remember { mutableStateOf("") }
     var layoutType by remember { mutableStateOf(LayoutType.GRID) }
     var showSortMenu by remember { mutableStateOf(false) }
+    var isSearchActive by remember { mutableStateOf(false) }
 
     SearchBar(
         searchQuery = searchQuery,
@@ -292,6 +305,8 @@ fun SearchBarPreview() {
         onSortClick = { showSortMenu = !showSortMenu },
         sortMenuExpanded = showSortMenu,
         onSortMenuDismissRequest = { showSortMenu = false },
-        onSortOptionClick = {}
+        onSortOptionClick = {},
+        isSearchActive = isSearchActive,
+        onSearchActiveChange = { isSearchActive = it }
     )
 }

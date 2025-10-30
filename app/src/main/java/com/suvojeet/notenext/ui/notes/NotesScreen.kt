@@ -116,6 +116,7 @@ fun NotesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    var isSearchActive by remember { mutableStateOf(false) }
 
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
     var showLabelDialog by remember { mutableStateOf(false) }
@@ -154,8 +155,9 @@ fun NotesScreen(
 
     var showSortMenu by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = isSelectionModeActive || state.expandedNoteId != null) {
+    BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
         when {
+            isSearchActive -> isSearchActive = false
             isSelectionModeActive -> viewModel.onEvent(NotesEvent.ClearSelection)
             state.expandedNoteId != null -> viewModel.onEvent(NotesEvent.CollapseNote)
         }
@@ -191,6 +193,8 @@ fun NotesScreen(
                                 SearchBar(
                                     searchQuery = searchQuery,
                                     onSearchQueryChange = { searchQuery = it },
+                                    isSearchActive = isSearchActive,
+                                    onSearchActiveChange = { isSearchActive = it },
                                     onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
                                     onSortClick = { showSortMenu = true },
                                     layoutType = state.layoutType,
