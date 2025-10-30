@@ -199,17 +199,13 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                         selected = currentRoute == "notes" && notesState.filteredLabel == null,
 
                                         onClick = {
-
-                                            notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
-
-                                            navController.navigate("notes") {
-
-                                                popUpTo(navController.graph.startDestinationId)
-
-                                                launchSingleTop = true
-
+                                            if (currentRoute != "notes" || notesState.filteredLabel != null) {
+                                                notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
+                                                navController.navigate("notes") {
+                                                    popUpTo("notes") { inclusive = true }
+                                                    launchSingleTop = true
+                                                }
                                             }
-
                                         },
 
                                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -397,15 +393,12 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                                 onClick = {
 
                                                     notesViewModel.onEvent(NotesEvent.FilterByLabel(label))
-
-                                                    navController.navigate("notes") {
-
-                                                        popUpTo(navController.graph.startDestinationId)
-
-                                                        launchSingleTop = true
-
+                                                    if (currentRoute != "notes" || notesState.filteredLabel != label) {
+                                                        navController.navigate("notes") {
+                                                            popUpTo("notes") { inclusive = true }
+                                                            launchSingleTop = true
+                                                        }
                                                     }
-
                                                 },
 
                                                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -720,19 +713,14 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                             selected = currentRoute == "notes" && notesState.filteredLabel == null,
 
                             onClick = {
-
                                 scope.launch { drawerState.close() }
-
-                                notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
-
-                                navController.navigate("notes") {
-
-                                    popUpTo(navController.graph.startDestinationId)
-
-                                    launchSingleTop = true
-
+                                if (currentRoute != "notes" || notesState.filteredLabel != null) {
+                                    notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
+                                    navController.navigate("notes") {
+                                        popUpTo("notes") { inclusive = true }
+                                        launchSingleTop = true
+                                    }
                                 }
-
                             },
 
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
@@ -929,22 +917,18 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                     selected = notesState.filteredLabel == label,
 
-                                    onClick = {
-
-                                        scope.launch { drawerState.close() }
-
-                                        notesViewModel.onEvent(NotesEvent.FilterByLabel(label))
-
-                                        navController.navigate("notes") {
-
-                                            popUpTo(navController.graph.startDestinationId)
-
-                                            launchSingleTop = true
-
-                                        }
-
-                                    },
-
+                                                                            onClick = {
+                                    
+                                                                                scope.launch { drawerState.close() }
+                                    
+                                                                                notesViewModel.onEvent(NotesEvent.FilterByLabel(label))
+                                                                                if (currentRoute != "notes" || notesState.filteredLabel != label) {
+                                                                                    navController.navigate("notes") {
+                                                                                        popUpTo("notes") { inclusive = true }
+                                                                                        launchSingleTop = true
+                                                                                    }
+                                                                                }
+                                                                            },
                                     modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
                                 )
