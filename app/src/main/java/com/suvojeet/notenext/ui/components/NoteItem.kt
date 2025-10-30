@@ -83,8 +83,7 @@ fun NoteItem(
                     fontSize = 16.sp,
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 10,
-                    overflow = TextOverflow.Ellipsis
+ 
                 )
             }
 
@@ -96,8 +95,7 @@ fun NoteItem(
                         text = HtmlConverter.htmlToAnnotatedString(note.note.content),
                         fontSize = 14.sp,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 10,
-                        overflow = TextOverflow.Ellipsis
+ 
                     )
                 } else {
                     ChecklistPreview(note.note.content)
