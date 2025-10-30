@@ -33,7 +33,8 @@ fun ContextualTopAppBar(
     onDeleteClick: () -> Unit,
     onCopyClick: () -> Unit,
     onSendClick: () -> Unit,
-    onLabelClick: () -> Unit
+    onLabelClick: () -> Unit,
+    onMoveToProjectClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -87,14 +88,20 @@ fun ContextualTopAppBar(
                         }
                     )
                     if (selectedItemCount == 1) {
-                        DropdownMenuItem(
-                            text = { Text("Share") },
-                            onClick = {
-                                onSendClick()
-                                showMenu = false
-                            }
-                        )
-                    }
+                                            DropdownMenuItem(
+                                                text = { Text("Share") },
+                                                onClick = {
+                                                    onSendClick()
+                                                    showMenu = false
+                                                }
+                                            )
+                                            DropdownMenuItem(
+                                                text = { Text("Move to project") },
+                                                onClick = {
+                                                    onMoveToProjectClick()
+                                                    showMenu = false
+                                                }
+                                            )                    }
                 }
             }
         }

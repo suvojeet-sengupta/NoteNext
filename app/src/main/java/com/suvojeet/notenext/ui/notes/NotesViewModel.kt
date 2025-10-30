@@ -58,13 +58,14 @@ class NotesViewModel(
     private var recentlyDeletedNote: Note? = null
 
     init {
-        combine(noteDao.getNotes(), labelDao.getLabels(), projectDao.getProjects(), _state) { notes, labels, projects, state ->
-            val sortedNotes = when (state.sortType) {
-                SortType.DATE_CREATED -> notes.sortedByDescending { it.note.createdAt }
-                SortType.DATE_MODIFIED -> notes.sortedByDescending { it.note.lastEdited }
-                SortType.TITLE -> notes.sortedBy { it.note.title }
+        combine(noteDao.getNotes(), labelDao.getLabels(), projectDao.getProjects()) { notes, labels, projects ->
+            val filteredNotes = notes.filter { it.note.projectId == null }
+            val sortedNotes = when (_state.value.sortType) {
+                SortType.DATE_CREATED -> filteredNotes.sortedByDescending { it.note.createdAt }
+                SortType.DATE_MODIFIED -> filteredNotes.sortedByDescending { it.note.lastEdited }
+                SortType.TITLE -> filteredNotes.sortedBy { it.note.title }
             }
-            _state.value = state.copy(
+            _state.value = _state.value.copy(
                 notes = sortedNotes,
                 labels = labels.map { it.name },
                 projects = projects
@@ -711,6 +712,16 @@ fun onEvent(event: NotesEvent) {
                 val newProject = Project(name = event.name)
                 projectDao.insertProject(newProject)
                 _events.emit(NotesUiEvent.ProjectCreated(event.name))
+            }
+        }
+        is NotesEvent.MoveSelectedNotesToProject -> {
+            viewModelScope.launch {
+                val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
+                for (note in selectedNotes) {
+                    noteDao.insertNote(note.note.copy(projectId = event.projectId))
+                }
+                _state.value = state.value.copy(selectedNoteIds = emptyList())
+                _events.emit(NotesUiEvent.ShowToast("${selectedNotes.size} notes moved to project"))
             }
         }
     }

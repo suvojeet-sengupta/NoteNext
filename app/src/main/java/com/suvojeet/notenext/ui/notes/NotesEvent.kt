@@ -62,4 +62,5 @@ sealed class NotesEvent {
     data class AddAttachment(val uri: String, val mimeType: String) : NotesEvent()
     data class RemoveAttachment(val tempId: String) : NotesEvent()
     data class CreateProject(val name: String) : NotesEvent()
+    data class MoveSelectedNotesToProject(val projectId: Int?) : NotesEvent()
 }

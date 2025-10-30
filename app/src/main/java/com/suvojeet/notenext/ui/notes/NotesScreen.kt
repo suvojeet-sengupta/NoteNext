@@ -121,6 +121,7 @@ fun NotesScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showReminderSetDialog by remember { mutableStateOf(false) }
     var showCreateProjectDialog by remember { mutableStateOf(false) }
+    var showMoveToProjectDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -184,7 +185,8 @@ fun NotesScreen(
                             onDeleteClick = { showDeleteDialog = true },
                             onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
                             onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
-                            onLabelClick = { showLabelDialog = true }
+                            onLabelClick = { showLabelDialog = true },
+                            onMoveToProjectClick = { showMoveToProjectDialog = true }
                         )
                     } else {
                         AnimatedContent(
@@ -288,6 +290,17 @@ fun NotesScreen(
                     onConfirm = { projectName ->
                         viewModel.onEvent(NotesEvent.CreateProject(projectName))
                         showCreateProjectDialog = false
+                    }
+                )
+            }
+
+            if (showMoveToProjectDialog) {
+                MoveToProjectDialog(
+                    projects = state.projects,
+                    onDismiss = { showMoveToProjectDialog = false },
+                    onConfirm = { projectId ->
+                        viewModel.onEvent(NotesEvent.MoveSelectedNotesToProject(projectId))
+                        showMoveToProjectDialog = false
                     }
                 )
             }
@@ -514,6 +527,64 @@ private fun CreateProjectDialog(
                 enabled = projectName.isNotBlank()
             ) {
                 Text("Create")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+@Composable
+private fun MoveToProjectDialog(
+    projects: List<com.suvojeet.notenext.data.Project>,
+    onDismiss: () -> Unit,
+    onConfirm: (Int?) -> Unit
+) {
+    var selectedProject by remember { mutableStateOf<com.suvojeet.notenext.data.Project?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Move to Project") },
+        text = {
+            Column {
+                projects.forEach { project ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { selectedProject = project }
+                            .padding(8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(
+                            selected = (selectedProject == project),
+                            onClick = { selectedProject = project }
+                        )
+                        Text(text = project.name, modifier = Modifier.padding(start = 8.dp))
+                    }
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { selectedProject = null }
+                        .padding(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = (selectedProject == null),
+                        onClick = { selectedProject = null }
+                    )
+                    Text(text = "None (Remove from project)", modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = { onConfirm(selectedProject?.id) }
+            ) {
+                Text("Move")
             }
         },
         dismissButton = {
