@@ -1206,10 +1206,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                         ProjectScreen(
                             factory = factory,
                             onMenuClick = { scope.launch { drawerState.open() } },
-                            onProjectClick = { projectId ->
-                                // TODO: Implement navigation to notes filtered by project
-                            }
-                        )
+                                                    onProjectClick = { projectId ->
+                                                        navController.navigate("project_notes/$projectId")
+                                                    }                        )
                     }
                     composable(
                         route = "about",
@@ -1218,6 +1217,18 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                     ) {
                         AboutScreen(
                             onBackClick = { navController.popBackStack() }
+                        )
+                    }
+                    composable(
+                        route = "project_notes/{projectId}",
+                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                    ) {
+                        ProjectNotesScreen(
+                            factory = factory,
+                            onBackClick = { navController.popBackStack() },
+                            themeMode = themeMode,
+                            settingsRepository = settingsRepository
                         )
                     }                        
                             

@@ -53,6 +53,10 @@ class ViewModelFactory(
             @Suppress("UNCHECKED_CAST")
             return ProjectViewModel(projectDao) as T
         }
+        if (modelClass.isAssignableFrom(com.suvojeet.notenext.ui.project.ProjectNotesViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return com.suvojeet.notenext.ui.project.ProjectNotesViewModel(noteDao, projectDao, labelDao, linkPreviewRepository, alarmScheduler, savedStateHandle) as T
+        }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
 }
