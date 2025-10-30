@@ -68,6 +68,13 @@ import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.flowOf
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.CoroutineScope
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.flow.SharingStarted
 
 import com.suvojeet.notenext.ui.notes.NotesEvent
 
@@ -386,7 +393,7 @@ fun ProjectNotesScreen(
                 onDismiss = { viewModel.onEvent(ProjectNotesEvent.CollapseNote) },
                 themeMode = themeMode,
                 settingsRepository = settingsRepository,
-                events = viewModel.events
+                events = viewModel.events.map { it.toNotesUiEvent() }.shareIn(rememberCoroutineScope(), SharingStarted.WhileSubscribed())
             )
         }
     }

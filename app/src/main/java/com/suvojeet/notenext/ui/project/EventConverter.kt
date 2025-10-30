@@ -1,6 +1,7 @@
 package com.suvojeet.notenext.ui.project
 
 import com.suvojeet.notenext.ui.notes.NotesEvent
+import com.suvojeet.notenext.ui.notes.NotesUiEvent
 
 fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
     return when (this) {
@@ -48,5 +49,13 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.RemoveAttachment -> ProjectNotesEvent.RemoveAttachment(this.tempId)
         is NotesEvent.CreateProject -> throw IllegalArgumentException("CreateProject event cannot be converted")
         is NotesEvent.FilterByLabel -> throw IllegalArgumentException("FilterByLabel event cannot be converted")
+    }
+}
+
+fun ProjectNotesUiEvent.toNotesUiEvent(): NotesUiEvent {
+    return when (this) {
+        is ProjectNotesUiEvent.SendNotes -> NotesUiEvent.SendNotes(this.title, this.content)
+        is ProjectNotesUiEvent.ShowToast -> NotesUiEvent.ShowToast(this.message)
+        is ProjectNotesUiEvent.LinkPreviewRemoved -> NotesUiEvent.LinkPreviewRemoved
     }
 }
