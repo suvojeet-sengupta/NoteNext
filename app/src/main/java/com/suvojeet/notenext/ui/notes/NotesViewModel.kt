@@ -101,10 +101,17 @@ fun onEvent(event: NotesEvent) {
         is NotesEvent.TogglePinForSelectedNotes -> {
             viewModelScope.launch {
                 val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
+                val areNotesBeingPinned = selectedNotes.firstOrNull()?.note?.isPinned == false
                 for (note in selectedNotes) {
-                    noteDao.insertNote(note.note.copy(isPinned = !note.note.isPinned))
+                    noteDao.insertNote(note.note.copy(isPinned = areNotesBeingPinned))
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
+                val message = if (areNotesBeingPinned) {
+                    if (selectedNotes.size > 1) "${selectedNotes.size} notes pinned" else "Note pinned"
+                } else {
+                    if (selectedNotes.size > 1) "${selectedNotes.size} notes unpinned" else "Note unpinned"
+                }
+                _events.emit(NotesUiEvent.ShowToast(message))
             }
         }
         is NotesEvent.DeleteSelectedNotes -> {
@@ -448,6 +455,8 @@ fun onEvent(event: NotesEvent) {
                             isPinned = updatedNote.isPinned,
                             notes = updatedNotesList
                         )
+                        val message = if (updatedNote.isPinned) "Note pinned" else "Note unpinned"
+                        _events.emit(NotesUiEvent.ShowToast(message))
                     }
                 }
             }
