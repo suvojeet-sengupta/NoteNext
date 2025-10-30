@@ -31,7 +31,7 @@ class ViewModelFactory(
 
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
         val savedStateHandle = extras.createSavedStateHandle()
-        val alarmScheduler = AlarmSchedulerImpl(context)
+        val alarmScheduler = AlarmSchedulerImpl(application)
         if (modelClass.isAssignableFrom(NotesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return NotesViewModel(noteDao, labelDao, projectDao, linkPreviewRepository, alarmScheduler) as T
