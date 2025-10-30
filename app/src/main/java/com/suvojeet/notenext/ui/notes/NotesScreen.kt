@@ -96,7 +96,7 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
-import com.suvojeet.notenext.ui.components.SearchTopAppBar
+
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 import com.suvojeet.notenext.ui.reminder.RepeatOption
 import kotlinx.coroutines.launch
@@ -116,7 +116,7 @@ fun NotesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
-    var isSearchActive by remember { mutableStateOf(false) }
+
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
     var showLabelDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -154,13 +154,9 @@ fun NotesScreen(
 
     var showSortMenu by remember { mutableStateOf(false) }
 
-    BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
+    BackHandler(enabled = isSelectionModeActive || state.expandedNoteId != null) {
         when {
             isSelectionModeActive -> viewModel.onEvent(NotesEvent.ClearSelection)
-            isSearchActive -> {
-                isSearchActive = false
-                searchQuery = ""
-            }
             state.expandedNoteId != null -> viewModel.onEvent(NotesEvent.CollapseNote)
         }
     }
@@ -190,47 +186,30 @@ fun NotesScreen(
                             onMoveToProjectClick = { showMoveToProjectDialog = true }
                         )
                     } else {
-                        AnimatedContent(
-                            targetState = isSearchActive,
-                            transitionSpec = {
-                                fadeIn(animationSpec = tween(220, delayMillis = 90)).togetherWith(fadeOut(animationSpec = tween(90)))
-                            },
-                            label = "SearchAppBar Animation"
-                        ) { searchActive ->
-                            if (searchActive) {
-                                SearchTopAppBar(
+                        TopAppBar(
+                            title = {
+                                SearchBar(
                                     searchQuery = searchQuery,
                                     onSearchQueryChange = { searchQuery = it },
-                                    onBackClick = { isSearchActive = false; searchQuery = "" }
-                                 )
-                            } else {
-                                TopAppBar(
-                                    title = {
-                                        Row(modifier = Modifier.fillMaxWidth()) {
-                                            SearchBar(
-                                                onSearchActiveChange = { isSearchActive = it },
-                                                onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
-                                                onSortClick = { showSortMenu = true },
-                                                layoutType = state.layoutType,
-                                                sortMenuExpanded = showSortMenu,
-                                                onSortMenuDismissRequest = { showSortMenu = false },
-                                                onSortOptionClick = {
-                                                    sortType -> viewModel.onEvent(NotesEvent.SortNotes(sortType))
-                                                }
-                                            )
-                                        }
-                                    },
-                                    navigationIcon = {
-                                        IconButton(onClick = onMenuClick) {
-                                            Icon(Icons.Default.Menu, contentDescription = "Menu")
-                                        }
-                                    },
-                                    colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
-                                        containerColor = Color.Transparent
-                                    )
+                                    onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
+                                    onSortClick = { showSortMenu = true },
+                                    layoutType = state.layoutType,
+                                    sortMenuExpanded = showSortMenu,
+                                    onSortMenuDismissRequest = { showSortMenu = false },
+                                    onSortOptionClick = { sortType ->
+                                        viewModel.onEvent(NotesEvent.SortNotes(sortType))
+                                    }
                                 )
-                            }
-                        }
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = onMenuClick) {
+                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                }
+                            },
+                            colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent
+                            )
+                        )
                     }
                 }
             },
