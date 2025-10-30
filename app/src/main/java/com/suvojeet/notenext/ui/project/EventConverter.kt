@@ -49,6 +49,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.RemoveAttachment -> ProjectNotesEvent.RemoveAttachment(this.tempId)
         is NotesEvent.CreateProject -> throw IllegalArgumentException("CreateProject event cannot be converted")
         is NotesEvent.FilterByLabel -> throw IllegalArgumentException("FilterByLabel event cannot be converted")
+        is NotesEvent.MoveSelectedNotesToProject -> throw IllegalArgumentException("MoveSelectedNotesToProject event cannot be converted")
     }
 }
 

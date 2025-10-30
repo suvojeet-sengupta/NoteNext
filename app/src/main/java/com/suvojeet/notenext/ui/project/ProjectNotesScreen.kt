@@ -127,7 +127,8 @@ fun ProjectNotesScreen(
                             onDeleteClick = { showDeleteDialog = true },
                             onCopyClick = { viewModel.onEvent(ProjectNotesEvent.CopySelectedNotes) },
                             onSendClick = { viewModel.onEvent(ProjectNotesEvent.SendSelectedNotes) },
-                            onLabelClick = { showLabelDialog = true }
+                            onLabelClick = { showLabelDialog = true },
+                            onMoveToProjectClick = { /* Not applicable for project notes */ }
                         )
                     } else {
                         AnimatedContent(
