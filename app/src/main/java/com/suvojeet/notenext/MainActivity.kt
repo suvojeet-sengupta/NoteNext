@@ -26,8 +26,14 @@ import androidx.compose.runtime.setValue
 import com.suvojeet.notenext.ui.lock.LockScreen
 import androidx.fragment.app.FragmentActivity
 
-import com.suvojeet.notenext.ui.setup.SetupScreen
-
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import com.suvojeet.notenext.ui.setup.SetupScreen
 
 class MainActivity : FragmentActivity() {
@@ -44,19 +50,26 @@ class MainActivity : FragmentActivity() {
             val windowSizeClass = calculateWindowSizeClass(this)
             val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
             val shapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
-            val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = null)
-            val isSetupComplete by settingsRepository.isSetupComplete.collectAsState(initial = false)
+
+            var enableAppLockLoaded by remember { mutableStateOf<Boolean?>(null) }
+            var isSetupCompleteLoaded by remember { mutableStateOf<Boolean?>(null) }
+
+            LaunchedEffect(Unit) {
+                settingsRepository.enableAppLock.collect { enableAppLockLoaded = it }
+            }
+            LaunchedEffect(Unit) {
+                settingsRepository.isSetupComplete.collect { isSetupCompleteLoaded = it }
+            }
 
             var unlocked by remember { mutableStateOf(false) }
 
             NoteNextTheme(themeMode = themeMode, shapeFamily = shapeFamily) {
-                val appLock = enableAppLock
-
-                if (!isSetupComplete) {
+                if (enableAppLockLoaded == null || isSetupCompleteLoaded == null) {
+                    // Show a blank screen or splash screen while settings are loading
+                    Surface(modifier = Modifier.fillMaxSize()) {}
+                } else if (!isSetupCompleteLoaded) {
                     SetupScreen(factory = factory) { /* Setup is complete, UI will recompose based on isSetupComplete */ }
-                } else if (appLock == null) {
-                    // You can show a loading indicator here
-                } else if (appLock && !unlocked) {
+                } else if (enableAppLockLoaded!! && !unlocked) {
                     LockScreen(onUnlock = { unlocked = true })
                 } else {
                     NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId)
