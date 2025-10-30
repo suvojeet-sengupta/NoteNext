@@ -3,6 +3,7 @@ package com.suvojeet.notenext.ui.add_edit_note.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyRow
@@ -12,6 +13,7 @@ import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -34,6 +36,8 @@ import com.suvojeet.notenext.ui.notes.NotesState
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.theme.button_color
 import com.suvojeet.notenext.ui.theme.dark_button_color
+
+import androidx.compose.ui.unit.DpOffset
 
 @Composable
 fun FormatToolbar(
@@ -95,20 +99,27 @@ fun FormatToolbar(
             }
         }
         item {
-            IconButton(
-                onClick = { showHeadingPicker = true },
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = if (state.activeHeadingStyle != 0) MaterialTheme.colorScheme.primaryContainer else buttonColor,
-                    contentColor = iconColor
-                )
-            ) {
-                Icon(Icons.Default.FormatSize, contentDescription = "Heading Style")
+            Box {
+                IconButton(
+                    onClick = { showHeadingPicker = true },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = if (state.activeHeadingStyle != 0) MaterialTheme.colorScheme.primaryContainer else buttonColor,
+                        contentColor = iconColor
+                    )
+                ) {
+                    Icon(Icons.Default.FormatSize, contentDescription = "Heading Style")
+                }
+                DropdownMenu(
+                    expanded = showHeadingPicker,
+                    onDismissRequest = { showHeadingPicker = false },
+                    offset = DpOffset(x = 16.dp, y = 0.dp) // Adjust offset as needed
+                ) {
+                    HeadingStylePickerContent(
+                        onDismissRequest = { showHeadingPicker = false },
+                        onEvent = onEvent
+                    )
+                }
             }
-            HeadingStylePicker(
-                expanded = showHeadingPicker,
-                onDismissRequest = { showHeadingPicker = false },
-                onEvent = onEvent
-            )
         }
         item {
             IconButton(
