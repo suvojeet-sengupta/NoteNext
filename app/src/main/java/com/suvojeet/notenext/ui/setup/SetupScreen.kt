@@ -22,7 +22,7 @@ import com.google.accompanist.permissions.isGranted
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.setup.components.PermissionItem
 
-@OptIn(ExperimentalPermissionsApi::class)
+@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
     factory: ViewModelFactory,
