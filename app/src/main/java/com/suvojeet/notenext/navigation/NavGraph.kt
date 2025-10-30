@@ -217,6 +217,16 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                     )
 
                                     NavigationDrawerItem(
+                                        icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
+                                        label = { Text("Projects") },
+                                        selected = currentRoute == "projects",
+                                        onClick = {
+                                            navController.navigate("projects")
+                                        },
+                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                                    )
+
+                                    NavigationDrawerItem(
 
                                         icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
 
@@ -298,16 +308,6 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                         modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
-                                    )
-
-                                    NavigationDrawerItem(
-                                        icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
-                                        label = { Text("Projects") },
-                                        selected = currentRoute == "projects",
-                                        onClick = {
-                                            navController.navigate("projects")
-                                        },
-                                        modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                                     )
 
             
@@ -740,6 +740,17 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                         )
 
                         NavigationDrawerItem(
+                            icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
+                            label = { Text("Projects") },
+                            selected = currentRoute == "projects",
+                            onClick = {
+                                scope.launch { drawerState.close() }
+                                navController.navigate("projects")
+                            },
+                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+                        )
+
+                        NavigationDrawerItem(
 
                             icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
 
@@ -829,17 +840,6 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                             modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
 
-                        )
-
-                        NavigationDrawerItem(
-                            icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
-                            label = { Text("Projects") },
-                            selected = currentRoute == "projects",
-                            onClick = {
-                                scope.launch { drawerState.close() }
-                                navController.navigate("projects")
-                            },
-                            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
                         )
 
     
