@@ -68,6 +68,7 @@ object PreferencesKeys {
     val SHAPE_FAMILY = stringPreferencesKey("shape_family")
     val ENABLE_APP_LOCK = booleanPreferencesKey("enable_app_lock")
     val APP_LOCK_PIN = stringPreferencesKey("app_lock_pin")
+    val IS_SETUP_COMPLETE = booleanPreferencesKey("is_setup_complete")
 }
 
 class SettingsRepository(private val context: Context) {
@@ -141,6 +142,17 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveAppLockPin(pin: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.APP_LOCK_PIN] = pin
+        }
+    }
+
+    val isSetupComplete: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.IS_SETUP_COMPLETE] ?: false
+        }
+
+    suspend fun setSetupComplete(isComplete: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_SETUP_COMPLETE] = isComplete
         }
     }
 }

@@ -16,15 +16,17 @@ import com.suvojeet.notenext.ui.project.ProjectViewModel
 import com.suvojeet.notenext.ui.project.ProjectNotesViewModel
 import com.suvojeet.notenext.ui.reminder.ReminderViewModel
 
-import android.content.Context
+import android.app.Application
 import com.suvojeet.notenext.util.AlarmSchedulerImpl
+import com.suvojeet.notenext.ui.setup.SetupViewModel
+import com.suvojeet.notenext.ui.settings.SettingsRepository
 
 class ViewModelFactory(
     val noteDao: NoteDao,
     val labelDao: LabelDao,
     val projectDao: ProjectDao,
     private val linkPreviewRepository: LinkPreviewRepository,
-    private val context: Context
+    private val application: Application
 ) : ViewModelProvider.Factory {
 
     override fun <T : ViewModel> create(modelClass: Class<T>, extras: CreationExtras): T {
@@ -57,6 +59,10 @@ class ViewModelFactory(
         if (modelClass.isAssignableFrom(ProjectNotesViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return ProjectNotesViewModel(noteDao, projectDao, labelDao, linkPreviewRepository, alarmScheduler, savedStateHandle) as T
+        }
+        if (modelClass.isAssignableFrom(SetupViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return SetupViewModel(application, SettingsRepository(application)) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
