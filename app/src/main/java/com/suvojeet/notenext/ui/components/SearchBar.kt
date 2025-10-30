@@ -54,7 +54,7 @@ fun SearchBar(
         modifier = modifier
             .fillMaxWidth()
             .height(56.dp)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isSearchFocused) 6.dp else 2.dp
@@ -76,7 +76,7 @@ fun SearchBar(
                 )
                 .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Search/Back Icon with smooth animation
             AnimatedContent(
@@ -122,6 +122,7 @@ fun SearchBar(
                         modifier = Modifier
                             .size(24.dp)
                             .scale(iconScale)
+                            .clickable { onSearchActiveChange(true) }
                     )
                 }
             }
@@ -144,7 +145,7 @@ fun SearchBar(
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 decorationBox = { innerTextField ->
                     Box(contentAlignment = Alignment.CenterStart) {
-                        if (searchQuery.isEmpty()) {
+                        if (searchQuery.isEmpty() && isSearchActive) {
                             Text(
                                 "Search notes",
                                 style = MaterialTheme.typography.bodyMedium,
