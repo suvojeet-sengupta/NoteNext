@@ -29,8 +29,8 @@ import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 
- @OptIn(ExperimentalMaterial3Api::class)
- @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun SearchBar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
@@ -143,12 +143,13 @@ fun SearchBar(
                     unfocusedContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface
                 ),
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
-                    fontWeight = FontWeight.Medium,
-                    color = Color.Black
+                    fontWeight = FontWeight.Medium
                 )
             )
 
@@ -250,7 +251,7 @@ fun SearchBar(
     }
 }
 
- @Composable
+@Composable
 fun SortMenuItem(
     text: String,
     icon: ImageVector,
@@ -278,7 +279,7 @@ fun SortMenuItem(
     )
 }
 
- @Composable
+@Composable
 fun CompactViewModeToggle(
     currentMode: LayoutType,
     onModeChange: () -> Unit
@@ -304,7 +305,7 @@ fun CompactViewModeToggle(
     }
 }
 
- @Composable
+@Composable
 fun CompactViewModeButton(
     icon: ImageVector,
     isSelected: Boolean,
@@ -356,7 +357,7 @@ fun CompactViewModeButton(
     }
 }
 
- @Composable
+@Composable
 fun CompactSortButton(onClick: () -> Unit) {
     var isPressed by remember { mutableStateOf(false) }
 
@@ -405,8 +406,8 @@ fun CompactSortButton(onClick: () -> Unit) {
     }
 }
 
- @Preview(showBackground = true)
- @Composable
+@Preview(showBackground = true)
+@Composable
 fun SearchBarPreview() {
     MaterialTheme {
         var searchQuery by remember { mutableStateOf("") }
