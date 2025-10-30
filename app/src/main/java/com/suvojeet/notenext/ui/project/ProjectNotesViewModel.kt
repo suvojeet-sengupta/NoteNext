@@ -1,4 +1,6 @@
 
+package com.suvojeet.notenext.ui.project
+
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString

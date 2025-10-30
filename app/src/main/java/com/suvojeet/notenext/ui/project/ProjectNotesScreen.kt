@@ -71,8 +71,8 @@ import kotlinx.coroutines.flow.SharedFlow
 
 import com.suvojeet.notenext.ui.notes.NotesEvent
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 @Composable
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 fun ProjectNotesScreen(
     factory: ViewModelFactory,
     onBackClick: () -> Unit,
@@ -253,9 +253,10 @@ fun ProjectNotesScreen(
                                     StaggeredGridItems(pinnedNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f : 1f },
+                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
+
                                             onNoteClick = {
                                                 if (isSelectionModeActive) {
                                                     viewModel.onEvent(ProjectNotesEvent.ToggleNoteSelection(note.note.id))
@@ -284,7 +285,7 @@ fun ProjectNotesScreen(
                                     StaggeredGridItems(otherNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f : 1f },
+                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
@@ -320,7 +321,7 @@ fun ProjectNotesScreen(
                                     items(pinnedNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f : 1f },
+                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
@@ -351,7 +352,7 @@ fun ProjectNotesScreen(
                                     items(otherNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f : 1f },
+                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
