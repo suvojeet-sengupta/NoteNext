@@ -148,7 +148,7 @@ fun SearchBar(
                 singleLine = true,
                 textStyle = MaterialTheme.typography.bodyMedium.copy(
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = Color.Black
                 )
             )
 
