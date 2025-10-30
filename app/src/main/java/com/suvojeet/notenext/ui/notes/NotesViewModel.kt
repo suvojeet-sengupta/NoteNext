@@ -440,6 +440,15 @@ fun onEvent(event: NotesEvent) {
                 )
             }
         }
+        is NotesEvent.ApplyHeadingStyle -> {
+            _state.value = state.value.copy(
+                activeHeadingStyle = event.level,
+                isBoldActive = false,
+                isItalicActive = false,
+                isUnderlineActive = false,
+                activeStyles = emptySet()
+            )
+        }
         is NotesEvent.OnColorChange -> {
             _state.value = state.value.copy(editingColor = event.color)
         }

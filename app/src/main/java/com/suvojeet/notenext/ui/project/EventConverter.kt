@@ -27,6 +27,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.OnTitleChange -> ProjectNotesEvent.OnTitleChange(this.title)
         is NotesEvent.OnContentChange -> ProjectNotesEvent.OnContentChange(this.content)
         is NotesEvent.ApplyStyleToContent -> ProjectNotesEvent.ApplyStyleToContent(this.style)
+        is NotesEvent.ApplyHeadingStyle -> ProjectNotesEvent.ApplyHeadingStyle(this.level)
         is NotesEvent.OnColorChange -> ProjectNotesEvent.OnColorChange(this.color)
         is NotesEvent.OnSaveNoteClick -> ProjectNotesEvent.OnSaveNoteClick
         is NotesEvent.OnDeleteNoteClick -> ProjectNotesEvent.OnDeleteNoteClick

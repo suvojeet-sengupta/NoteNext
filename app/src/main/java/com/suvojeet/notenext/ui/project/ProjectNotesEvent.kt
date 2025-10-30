@@ -35,6 +35,7 @@ sealed class ProjectNotesEvent {
     data class OnTitleChange(val title: String) : ProjectNotesEvent()
     data class OnContentChange(val content: TextFieldValue) : ProjectNotesEvent()
     data class ApplyStyleToContent(val style: SpanStyle) : ProjectNotesEvent()
+    data class ApplyHeadingStyle(val level: Int) : ProjectNotesEvent()
     data class OnColorChange(val color: Int) : ProjectNotesEvent()
     object OnSaveNoteClick : ProjectNotesEvent()
     object OnDeleteNoteClick : ProjectNotesEvent()

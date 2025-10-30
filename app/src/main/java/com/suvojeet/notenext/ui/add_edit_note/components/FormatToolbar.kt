@@ -11,11 +11,16 @@ import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatUnderlined
+import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -45,6 +50,8 @@ fun FormatToolbar(
     }
     val buttonColor = if (useDarkTheme) dark_button_color else button_color
     val iconColor = if (useDarkTheme) Color.White else MaterialTheme.colorScheme.onSurface
+
+    var showHeadingPicker by remember { mutableStateOf(false) }
 
     LazyRow(
         modifier = Modifier
@@ -86,6 +93,22 @@ fun FormatToolbar(
             ) {
                 Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
             }
+        }
+        item {
+            IconButton(
+                onClick = { showHeadingPicker = true },
+                colors = IconButtonDefaults.iconButtonColors(
+                    containerColor = if (state.activeHeadingStyle != 0) MaterialTheme.colorScheme.primaryContainer else buttonColor,
+                    contentColor = iconColor
+                )
+            ) {
+                Icon(Icons.Default.FormatSize, contentDescription = "Heading Style")
+            }
+            HeadingStylePicker(
+                expanded = showHeadingPicker,
+                onDismissRequest = { showHeadingPicker = false },
+                onEvent = onEvent
+            )
         }
         item {
             IconButton(

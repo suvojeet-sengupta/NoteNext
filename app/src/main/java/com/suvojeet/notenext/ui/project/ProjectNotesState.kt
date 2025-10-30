@@ -33,6 +33,7 @@ data class ProjectNotesState(
     val isBoldActive: Boolean = false,
     val isItalicActive: Boolean = false,
     val isUnderlineActive: Boolean = false,
+    val activeHeadingStyle: Int = 0,
     val activeStyles: Set<SpanStyle> = emptySet(),
     val linkPreviews: List<LinkPreview> = emptyList(),
     val editingNoteType: String = "TEXT",
