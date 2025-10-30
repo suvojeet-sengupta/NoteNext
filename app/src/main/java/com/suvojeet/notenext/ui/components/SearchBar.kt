@@ -21,6 +21,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -46,6 +47,7 @@ fun SearchBar(
     onSearchActiveChange: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val focusManager = LocalFocusManager.current
     var isSearchFocused by remember { mutableStateOf(false) }
 
     Card(
@@ -92,6 +94,7 @@ fun SearchBar(
                         onClick = { 
                             onSearchActiveChange(false)
                             onSearchQueryChange("")
+                            focusManager.clearFocus()
                         },
                         modifier = Modifier.size(40.dp)
                     ) {
