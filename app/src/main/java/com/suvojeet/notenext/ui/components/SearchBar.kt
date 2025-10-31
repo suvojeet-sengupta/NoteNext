@@ -53,7 +53,7 @@ fun SearchBar(
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .height(56.dp)
+            .height(60.dp)
             .padding(horizontal = 12.dp, vertical = 8.dp),
         shape = RoundedCornerShape(28.dp),
         elevation = CardDefaults.cardElevation(
