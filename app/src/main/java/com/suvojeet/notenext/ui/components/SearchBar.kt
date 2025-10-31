@@ -76,22 +76,21 @@ fun SearchBar(
                 )
                 .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(4.dp)
         ) {
             // Search/Back Icon with smooth animation
             AnimatedContent(
                 targetState = isSearchActive,
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(200)) + 
-                    scaleIn(initialScale = 0.8f) togetherWith
-                    fadeOut(animationSpec = tween(200)) + 
-                    scaleOut(targetScale = 0.8f)
+                    fadeIn(animationSpec = tween(200)) +
+                            scaleIn(initialScale = 0.8f) togetherWith
+                            fadeOut(animationSpec = tween(200)) +
+                            scaleOut(targetScale = 0.8f)
                 },
                 label = "searchIconTransition"
             ) { active ->
                 if (active) {
                     IconButton(
-                        onClick = { 
+                        onClick = {
                             onSearchActiveChange(false)
                             onSearchQueryChange("")
                             focusManager.clearFocus()
@@ -114,7 +113,7 @@ fun SearchBar(
                         ),
                         label = "searchIconScale"
                     )
-                    
+
                     Icon(
                         imageVector = Icons.Default.Search,
                         contentDescription = "Search",
@@ -126,7 +125,6 @@ fun SearchBar(
                     )
                 }
             }
-
             // Search TextField
             BasicTextField(
                 value = searchQuery,
@@ -192,7 +190,7 @@ fun SearchBar(
             ) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
                     // Animated divider
                     Box(
@@ -217,7 +215,7 @@ fun SearchBar(
 
                     Box {
                         CompactSortButton(onClick = onSortClick)
-                        
+
                         DropdownMenu(
                             expanded = sortMenuExpanded,
                             onDismissRequest = onSortMenuDismissRequest,
@@ -293,7 +291,7 @@ fun CompactViewModeToggle(
             .clip(RoundedCornerShape(14.dp))
             .background(MaterialTheme.colorScheme.surfaceContainerHighest.copy(alpha = 0.5f))
             .padding(3.dp),
-        horizontalArrangement = Arrangement.spacedBy(3.dp)
+        horizontalArrangement = Arrangement.spacedBy(1.dp)
     ) {
         CompactViewModeButton(
             icon = Icons.Default.ViewList,
