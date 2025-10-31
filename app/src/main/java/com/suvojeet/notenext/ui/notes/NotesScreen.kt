@@ -207,8 +207,14 @@ fun NotesScreen(
                                     sortMenuExpanded = showSortMenu,
                                     onSortMenuDismissRequest = { showSortMenu = false },
                                     onSortOptionClick = { sortType ->
-                                        viewModel.onEvent(NotesEvent.SortNotes(sortType))
-                                    }
+                                        val newSortType = if (sortType == state.sortType) {
+                                            SortType.DATE_MODIFIED // Revert to default if same option is clicked
+                                        } else {
+                                            sortType
+                                        }
+                                        viewModel.onEvent(NotesEvent.SortNotes(newSortType))
+                                    },
+                                    currentSortType = state.sortType
                                 )
                             },
                             navigationIcon = {

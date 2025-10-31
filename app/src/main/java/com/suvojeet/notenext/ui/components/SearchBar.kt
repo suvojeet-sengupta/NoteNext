@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ fun SearchBar(
     onSortOptionClick: (SortType) -> Unit,
     isSearchActive: Boolean,
     onSearchActiveChange: (Boolean) -> Unit,
+    currentSortType: SortType,
     modifier: Modifier = Modifier
 ) {
     val focusManager = LocalFocusManager.current
@@ -224,6 +226,7 @@ fun SearchBar(
                             SortMenuItem(
                                 text = "Date Created",
                                 icon = Icons.Default.CalendarToday,
+                                isSelected = currentSortType == SortType.DATE_CREATED,
                                 onClick = {
                                     onSortOptionClick(SortType.DATE_CREATED)
                                     onSortMenuDismissRequest()
@@ -232,6 +235,7 @@ fun SearchBar(
                             SortMenuItem(
                                 text = "Date Modified",
                                 icon = Icons.Default.Update,
+                                isSelected = currentSortType == SortType.DATE_MODIFIED,
                                 onClick = {
                                     onSortOptionClick(SortType.DATE_MODIFIED)
                                     onSortMenuDismissRequest()
@@ -240,6 +244,7 @@ fun SearchBar(
                             SortMenuItem(
                                 text = "Title",
                                 icon = Icons.Default.SortByAlpha,
+                                isSelected = currentSortType == SortType.TITLE,
                                 onClick = {
                                     onSortOptionClick(SortType.TITLE)
                                     onSortMenuDismissRequest()
@@ -257,6 +262,7 @@ fun SearchBar(
 fun SortMenuItem(
     text: String,
     icon: ImageVector,
+    isSelected: Boolean,
     onClick: () -> Unit
 ) {
     DropdownMenuItem(
@@ -275,6 +281,15 @@ fun SortMenuItem(
                     text = text,
                     style = MaterialTheme.typography.bodyMedium
                 )
+                if (isSelected) {
+                    Spacer(Modifier.weight(1f))
+                    Icon(
+                        imageVector = Icons.Default.Check,
+                        contentDescription = "Selected",
+                        modifier = Modifier.size(18.dp),
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                }
             }
         },
         onClick = onClick
@@ -430,7 +445,8 @@ fun SearchBarPreview() {
                 onSortMenuDismissRequest = { showSortMenu = false },
                 onSortOptionClick = {},
                 isSearchActive = isSearchActive,
-                onSearchActiveChange = { isSearchActive = it }
+                onSearchActiveChange = { isSearchActive = it },
+                currentSortType = SortType.DATE_MODIFIED
             )
             
             // Preview state
