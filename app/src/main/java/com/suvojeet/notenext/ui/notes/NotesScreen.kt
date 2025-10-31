@@ -80,6 +80,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalFocusManager
 import android.content.Intent
 import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
@@ -154,14 +155,19 @@ fun NotesScreen(
     }
 
     var showSortMenu by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
         when {
-            isSearchActive -> isSearchActive = false
+            isSearchActive -> {
+                isSearchActive = false
+                focusManager.clearFocus()
+            }
             isSelectionModeActive -> viewModel.onEvent(NotesEvent.ClearSelection)
             state.expandedNoteId != null -> viewModel.onEvent(NotesEvent.CollapseNote)
         }
     }
+
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
