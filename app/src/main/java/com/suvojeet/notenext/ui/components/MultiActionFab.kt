@@ -57,15 +57,15 @@ fun MultiActionFab(
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
             showNote = true
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(50)
             showChecklist = true
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(50)
             showProject = true
         } else {
             showProject = false
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(50)
             showChecklist = false
-            kotlinx.coroutines.delay(100)
+            kotlinx.coroutines.delay(50)
             showNote = false
         }
     }
