@@ -275,8 +275,21 @@ fun onEvent(event: NotesEvent) {
             _state.value = state.value.copy(editingChecklist = updatedChecklist)
         }
         is NotesEvent.OnChecklistItemCheckedChange -> {
-            val updatedChecklist = state.value.editingChecklist.map {
-                if (it.id == event.itemId) it.copy(isChecked = event.isChecked) else it
+            val updatedChecklist = state.value.editingChecklist.toMutableList()
+            val index = updatedChecklist.indexOfFirst { it.id == event.itemId }
+            if (index != -1) {
+                val item = updatedChecklist.removeAt(index).copy(isChecked = event.isChecked)
+                if (event.isChecked) {
+                    updatedChecklist.add(item) // Add to the end if checked
+                } else {
+                    // Find the first checked item and insert before it, or at the end if no checked items
+                    val firstCheckedIndex = updatedChecklist.indexOfFirst { it.isChecked }
+                    if (firstCheckedIndex != -1) {
+                        updatedChecklist.add(firstCheckedIndex, item)
+                    } else {
+                        updatedChecklist.add(0, item) // Add to the beginning if no checked items
+                    }
+                }
             }
             _state.value = state.value.copy(editingChecklist = updatedChecklist)
         }
