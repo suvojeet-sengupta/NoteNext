@@ -25,6 +25,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -49,12 +50,32 @@ fun MultiActionFab(
         animationSpec = tween(durationMillis = 300), label = ""
     )
 
+    var showProject by remember { mutableStateOf(false) }
+    var showChecklist by remember { mutableStateOf(false) }
+    var showNote by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isExpanded) {
+        if (isExpanded) {
+            showNote = true
+            kotlinx.coroutines.delay(100)
+            showChecklist = true
+            kotlinx.coroutines.delay(100)
+            showProject = true
+        } else {
+            showProject = false
+            kotlinx.coroutines.delay(100)
+            showChecklist = false
+            kotlinx.coroutines.delay(100)
+            showNote = false
+        }
+    }
+
     Column(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         AnimatedVisibility(
-            visible = isExpanded,
+            visible = showProject,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
         ) {
@@ -69,7 +90,7 @@ fun MultiActionFab(
         }
 
         AnimatedVisibility(
-            visible = isExpanded,
+            visible = showChecklist,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
         ) {
@@ -84,7 +105,7 @@ fun MultiActionFab(
         }
 
         AnimatedVisibility(
-            visible = isExpanded,
+            visible = showNote,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
         ) {
