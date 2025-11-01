@@ -212,11 +212,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
         }
     }
 
-    AnimatedVisibility(
-        visible = showThemeDialog,
-        enter = scaleIn(animationSpec = tween(200)),
-        exit = scaleOut(animationSpec = tween(200))
-    ) {
+    if (showThemeDialog) {
         ThemeChooserDialog(
             selectedThemeMode = selectedThemeMode,
             onThemeSelected = { themeMode ->
@@ -229,11 +225,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
         )
     }
 
-    AnimatedVisibility(
-        visible = showAutoDeleteDialog,
-        enter = scaleIn(animationSpec = tween(200)),
-        exit = scaleOut(animationSpec = tween(200))
-    ) {
+    if (showAutoDeleteDialog) {
         AutoDeleteDialog(
             currentDays = autoDeleteDays,
             onConfirm = { days ->
@@ -247,11 +239,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     }
 
     val selectedShapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
-    AnimatedVisibility(
-        visible = showShapeFamilyDialog,
-        enter = scaleIn(animationSpec = tween(200)),
-        exit = scaleOut(animationSpec = tween(200))
-    ) {
+    if (showShapeFamilyDialog) {
         ShapeFamilyChooserDialog(
             selectedShapeFamily = selectedShapeFamily,
             onShapeFamilySelected = { shapeFamily ->
