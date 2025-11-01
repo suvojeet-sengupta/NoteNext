@@ -11,6 +11,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
@@ -44,7 +46,12 @@ fun ProjectScreen(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
-                    Text("No projects yet. Create one from the main screen FAB.")
+                    Text(
+                        "No projects yet. Create one from the main screen FAB.",
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(horizontal = 16.dp),
+                        overflow = TextOverflow.Visible
+                    )
                 }
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
