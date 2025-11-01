@@ -37,7 +37,10 @@ fun ChecklistEditor(
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        items(state.editingChecklist, key = { it.id }) { item ->
+        val uncheckedItems = state.editingChecklist.filter { !it.isChecked }
+        val checkedItems = state.editingChecklist.filter { it.isChecked }
+
+        items(uncheckedItems, key = { it.id }) { item ->
             val focusRequester = remember { FocusRequester() }
             AnimatedVisibility(
                 visible = true,
@@ -76,10 +79,51 @@ fun ChecklistEditor(
                 }
             }
         }
+
         item {
             TextButton(onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
                 Icon(Icons.Default.Add, contentDescription = "Add item")
                 Text("Add item")
+            }
+        }
+
+        items(checkedItems, key = { it.id }) { item ->
+            val focusRequester = remember { FocusRequester() }
+            AnimatedVisibility(
+                visible = true,
+                enter = expandVertically(),
+                exit = shrinkVertically()
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Checkbox(
+                        checked = item.isChecked,
+                        onCheckedChange = { isChecked ->
+                            onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
+                        }
+                    )
+                    OutlinedTextField(
+                        value = item.text,
+                        onValueChange = { text ->
+                            onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .focusRequester(focusRequester),
+                        placeholder = { Text("List item") }
+                    )
+                    IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
+                        Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                    }
+                }
+            }
+            LaunchedEffect(state.newlyAddedChecklistItemId) {
+                if (item.id == state.newlyAddedChecklistItemId) {
+                    focusRequester.requestFocus()
+                    onEvent(NotesEvent.ClearNewlyAddedChecklistItemId)
+                }
             }
         }
     }
