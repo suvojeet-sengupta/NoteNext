@@ -28,10 +28,13 @@ fun AddEditNoteTopAppBar(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
-    showDeleteDialog: (Boolean) -> Unit
+    showDeleteDialog: (Boolean) -> Unit,
+    editingNoteType: String
 ) {
     TopAppBar(
-        title = { Text(if (state.editingIsNewNote) "Add Note" else "") },
+        title = { Text(if (state.editingIsNewNote) {
+            if (editingNoteType == "CHECKLIST") "Add Checklist" else "Add Note"
+        } else "") },
         navigationIcon = {
             IconButton(onClick = onDismiss) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")

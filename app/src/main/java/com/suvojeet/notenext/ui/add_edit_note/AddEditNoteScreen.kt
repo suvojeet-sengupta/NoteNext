@@ -166,7 +166,8 @@ fun AddEditNoteScreen(
                 state = state,
                 onEvent = onEvent,
                 onDismiss = onDismiss,
-                showDeleteDialog = { showDeleteDialog = it }
+                showDeleteDialog = { showDeleteDialog = it },
+                editingNoteType = state.editingNoteType
             )
         },
         bottomBar = {
