@@ -194,21 +194,6 @@ fun SearchBar(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    // Animated divider
-                    Box(
-                        modifier = Modifier
-                            .width(1.dp)
-                            .height(24.dp)
-                            .background(
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.Transparent,
-                                        MaterialTheme.colorScheme.outlineVariant,
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                    )
 
                     CompactViewModeToggle(
                         currentMode = layoutType,
