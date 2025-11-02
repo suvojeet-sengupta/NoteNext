@@ -67,6 +67,17 @@ fun AboutScreen(onBackClick: () -> Unit) {
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            Spacer(modifier = Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("About the App", style = MaterialTheme.typography.titleMedium)
+            Text(
+                "This app is designed to help you organize your thoughts, ideas, and daily tasks in a simple and intuitive way. " +
+                "You can create notes, checklists, and set reminders to stay on top of your schedule. " +
+                "NoteNext is built with privacy in mind, and all your data is stored locally on your device.",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
             Spacer(modifier = Modifier.height(24.dp))
             Text(
                 "Team",
