@@ -116,15 +116,27 @@ fun SearchBar(
                         label = "searchIconScale"
                     )
 
-                    Icon(
-                        imageVector = Icons.Default.Search,
-                        contentDescription = "Search",
-                        tint = MaterialTheme.colorScheme.primary,
+                    Row(
                         modifier = Modifier
-                            .size(24.dp)
-                            .scale(iconScale)
                             .clickable { onSearchActiveChange(true) }
-                    )
+                            .padding(horizontal = 8.dp, vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Search,
+                            contentDescription = "Search",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier
+                                .size(24.dp)
+                                .scale(iconScale)
+                        )
+                        Text(
+                            text = "Search",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
             // Search TextField
