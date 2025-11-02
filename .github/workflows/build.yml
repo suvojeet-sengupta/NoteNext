@@ -54,6 +54,17 @@ jobs:
     - name: Find APK files
       run: find app/build/outputs/apk/release -name "*.apk"
 
+    - name: Build and Sign Release AAB
+      run: ./gradlew bundleRelease
+      env:
+        KEYSTORE_PATH: "my-release-key.keystore"
+        KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+        KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+
+    - name: Find AAB files
+      run: find app/build/outputs/bundle/release -name "*.aab"
+
     
 
     - name: Extract version name
@@ -77,6 +88,19 @@ jobs:
           exit 1
         fi
 
+    - name: Determine AAB Path
+      id: aab_path
+      run: |
+        AAB_FILE=$(find app/build/outputs/bundle/release -name "*.aab" | head -n 1)
+        if [ -n "$AAB_FILE" ]; then
+          echo "AAB_TO_UPLOAD=$AAB_FILE" >> $GITHUB_ENV
+          AAB_BASENAME=$(basename "$AAB_FILE")
+          echo "AAB_NAME=$AAB_BASENAME" >> $GITHUB_ENV
+        else
+          echo "Error: No AAB found to upload."
+          exit 1
+        fi
+
     - name: List APK files
       # Lists the generated APK files for verification.
       run: ls -l app/build/outputs/apk/release/
@@ -87,6 +111,12 @@ jobs:
       with:
         name: app-apk
         path: ${{ env.APK_TO_UPLOAD }}
+
+    - name: Upload AAB as artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: app-aab
+        path: ${{ env.AAB_TO_UPLOAD }}
 
     - name: Create or Update Release
       # Creates a new GitHub Release or updates an existing one.
@@ -101,5 +131,7 @@ jobs:
           Automated release for version ${{ env.VERSION_NAME }}
         draft: false
         prerelease: false
-        files: ${{ env.APK_TO_UPLOAD }}
+        files: |
+          ${{ env.APK_TO_UPLOAD }}
+          ${{ env.AAB_TO_UPLOAD }}
         overwrite: true
