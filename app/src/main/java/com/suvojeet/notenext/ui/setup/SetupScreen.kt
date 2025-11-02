@@ -59,11 +59,11 @@ fun SetupScreen(
                 contentDescription = "App Logo",
                 modifier = Modifier.size(128.dp)
             )
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "Let's set up NoteNext for the best experience!",
                 style = MaterialTheme.typography.headlineSmall,
-                modifier = Modifier.padding(bottom = 32.dp)
+                modifier = Modifier.padding(bottom = 16.dp)
             )
 
             // Runtime Permissions
