@@ -21,6 +21,9 @@ import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.isGranted
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.setup.components.PermissionItem
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -51,6 +54,12 @@ fun SetupScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                contentDescription = "App Logo",
+                modifier = Modifier.size(128.dp)
+            )
+            Spacer(modifier = Modifier.height(32.dp))
             Text(
                 text = "Let's set up NoteNext for the best experience!",
                 style = MaterialTheme.typography.headlineSmall,
