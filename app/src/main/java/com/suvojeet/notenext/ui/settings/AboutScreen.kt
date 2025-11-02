@@ -135,7 +135,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
                 ) {
                     if (isInternetAvailable) {
                         AsyncImage(
-                            model = "https://raw.githubusercontent.com/jendermine/index.penguin/refs/heads/main/public/icons/photo_2024-01-18_18-25-22.png?token=GHSAT0AAAAAADOEYEK2PJSHKZ7IMB7AAJOY2IHJ4JA",
+                            model = "https://avatars.githubusercontent.com/u/92355621",
                             contentDescription = "Jendermine Profile Pic",
                             modifier = Modifier.size(40.dp)
                         )
