@@ -73,7 +73,7 @@ fun FormatToolbar(
                     contentColor = iconColor
                 )
             ) {
-                Icon(Icons.Default.FormatBold, contentDescription = "Bold")
+                Icon(Icons.Default.FormatBold, contentDescription = "Bold", tint = iconColor)
             }
         }
         item {
@@ -84,7 +84,7 @@ fun FormatToolbar(
                     contentColor = iconColor
                 )
             ) {
-                Icon(Icons.Default.FormatItalic, contentDescription = "Italic")
+                Icon(Icons.Default.FormatItalic, contentDescription = "Italic", tint = iconColor)
             }
         }
         item {
@@ -95,7 +95,7 @@ fun FormatToolbar(
                     contentColor = iconColor
                 )
             ) {
-                Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline")
+                Icon(Icons.Default.FormatUnderlined, contentDescription = "Underline", tint = iconColor)
             }
         }
         item {
@@ -107,7 +107,7 @@ fun FormatToolbar(
                         contentColor = iconColor
                     )
                 ) {
-                    Icon(Icons.Default.FormatSize, contentDescription = "Heading Style")
+                    Icon(Icons.Default.FormatSize, contentDescription = "Heading Style", tint = iconColor)
                 }
                 DropdownMenu(
                     expanded = showHeadingPicker,
@@ -129,7 +129,7 @@ fun FormatToolbar(
                     contentColor = iconColor
                 )
             ) {
-                Icon(Icons.Default.AddLink, contentDescription = "Insert link")
+                Icon(Icons.Default.AddLink, contentDescription = "Insert link", tint = iconColor)
             }
         }
     }
