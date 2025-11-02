@@ -64,6 +64,13 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)
 
+        // For Android 14 (API 34) and above, USE_FULL_SCREEN_INTENT might not be pre-granted.
+        // Check if the app can use full-screen intent before setting it.
+        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE && notificationManager.canUseFullScreenIntent()) {
+            builder.setFullScreenIntent(pendingIntent, true)
+        }
+
         with(NotificationManagerCompat.from(context)) {
             notify(noteId, builder.build()) // Use noteId as notification ID
         }
