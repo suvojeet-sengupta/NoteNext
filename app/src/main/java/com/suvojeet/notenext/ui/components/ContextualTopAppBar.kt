@@ -88,10 +88,7 @@ fun ContextualTopAppBar(
                                 )
                             }
                         }
-                        Text(
-                            text = if (count == 1) "selected" else "selected",
-                            style = MaterialTheme.typography.titleMedium
-                        )
+
                     }
                 }
             },
