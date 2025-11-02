@@ -84,16 +84,10 @@ fun SetupScreen(
             }
 
             // Exact Alarm Permission
-            val exactAlarmGranted = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val alarmManager = context.getSystemService(android.content.Context.ALARM_SERVICE) as android.app.AlarmManager
-                alarmManager.canScheduleExactAlarms()
-            } else {
-                true
-            }
             PermissionItem(
                 title = "Exact Alarm Permission",
                 description = "Allow NoteNext to schedule exact alarms for precise reminders.",
-                isGranted = exactAlarmGranted,
+                isGranted = state.exactAlarmGranted,
                 onRequestClick = {
                     Intent(Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM).also {
                         exactAlarmPermissionLauncher.launch(it)
@@ -102,8 +96,8 @@ fun SetupScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            val canContinue = (postNotificationsPermissionState?.status?.isGranted ?: true) && 
-                              exactAlarmGranted
+            val canContinue = (postNotificationsPermissionState?.status?.isGranted ?: true) &&
+                              state.exactAlarmGranted
 
             Button(
                 onClick = {
