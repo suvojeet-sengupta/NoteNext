@@ -1,5 +1,7 @@
 package com.suvojeet.notenext.ui.settings
 
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -105,14 +107,18 @@ fun AboutScreen(onBackClick: () -> Unit) {
                         AsyncImage(
                             model = "https://avatars.githubusercontent.com/u/107928380?s=400&u=6e6351e1a09a6c473133a46e28f4b005a2345a57&v=4",
                             contentDescription = "Suvojeet Sengupta Profile Pic",
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Core Developer",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
                         )
                     }
                     Column {
@@ -148,14 +154,18 @@ fun AboutScreen(onBackClick: () -> Unit) {
                         AsyncImage(
                             model = "https://avatars.githubusercontent.com/u/92355621",
                             contentDescription = "Jendermine Profile Pic",
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
                         )
                     } else {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "App logo maker",
                             tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(40.dp)
+                            modifier = Modifier
+                                .size(40.dp)
+                                .clip(CircleShape)
                         )
                     }
                     Column {
