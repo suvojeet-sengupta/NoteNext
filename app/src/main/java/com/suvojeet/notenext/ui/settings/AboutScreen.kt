@@ -117,6 +117,49 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        uriHandler.openUri("https://github.com/jendermine")
+                    },
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+            ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ) {
+                    if (isInternetAvailable) {
+                        AsyncImage(
+                            model = "https://raw.githubusercontent.com/jendermine/index.penguin/refs/heads/main/public/icons/photo_2024-01-18_18-25-22.png?token=GHSAT0AAAAAADOEYEK2PJSHKZ7IMB7AAJOY2IHJ4JA",
+                            contentDescription = "Jendermine Profile Pic",
+                            modifier = Modifier.size(40.dp)
+                        )
+                    } else {
+                        Icon(
+                            imageVector = Icons.Default.Person,
+                            contentDescription = "App logo maker",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(40.dp)
+                        )
+                    }
+                    Column {
+                        Text(
+                            text = "Jendermine",
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "App logo maker",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+            }
         }
     }
 }
