@@ -326,7 +326,12 @@ private fun ThemeChooserDialog(
                             onClick = null
                         )
                         Spacer(modifier = Modifier.width(16.dp))
-                        Text(themeMode.name.lowercase().replaceFirstChar { it.uppercase() })
+                                                Text(
+                                                    when (themeMode) {
+                                                        ThemeMode.AMOLED -> "True AMOLED (Optimized For Amoled Display)"
+                                                        else -> themeMode.name.lowercase().replaceFirstChar { it.uppercase() }
+                                                    }
+                                                )
                     }
                 }
             }
