@@ -51,6 +51,7 @@ fun FormatToolbar(
         ThemeMode.DARK -> true
         ThemeMode.LIGHT -> false
         ThemeMode.SYSTEM -> systemInDarkTheme
+        ThemeMode.AMOLED -> true
     }
     val buttonColor = if (useDarkTheme) dark_button_color else button_color
     val iconColor = if (useDarkTheme) Color.White else MaterialTheme.colorScheme.onSurface
