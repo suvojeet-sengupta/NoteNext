@@ -54,6 +54,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -62,8 +63,9 @@ import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 import com.suvojeet.notenext.ui.components.ContextualTopAppBar
 import com.suvojeet.notenext.ui.components.LabelDialog
 import com.suvojeet.notenext.ui.components.NoteItem
-import com.suvojeet.notenext.ui.components.SearchTopAppBar
+import com.suvojeet.notenext.ui.components.SearchBar
 import com.suvojeet.notenext.ui.notes.LayoutType
+import com.suvojeet.notenext.ui.notes.SortType
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.settings.ThemeMode
@@ -75,6 +77,7 @@ import kotlinx.coroutines.flow.shareIn
 import kotlinx.coroutines.CoroutineScope
 import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.flow.SharingStarted
+import androidx.compose.material3.TopAppBarDefaults
 
 import com.suvojeet.notenext.ui.notes.NotesEvent
 
@@ -94,14 +97,16 @@ fun ProjectNotesScreen(
     var showLabelDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showReminderSetDialog by remember { mutableStateOf(false) }
+    var showSortMenu by remember { mutableStateOf(false) }
+    val focusManager = LocalFocusManager.current
 
     BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
         when {
-            isSelectionModeActive -> viewModel.onEvent(ProjectNotesEvent.ClearSelection)
             isSearchActive -> {
                 isSearchActive = false
-                searchQuery = ""
+                focusManager.clearFocus()
             }
+            isSelectionModeActive -> viewModel.onEvent(ProjectNotesEvent.ClearSelection)
             state.expandedNoteId != null -> viewModel.onEvent(ProjectNotesEvent.CollapseNote)
         }
     }
@@ -131,30 +136,38 @@ fun ProjectNotesScreen(
                             onMoveToProjectClick = { /* Not applicable for project notes */ }
                         )
                     } else {
-                        AnimatedContent(
-                            targetState = isSearchActive,
-                            transitionSpec = {
-                                fadeIn(animationSpec = tween(220, delayMillis = 90)).togetherWith(fadeOut(animationSpec = tween(90)))
-                            },
-                            label = "SearchAppBar Animation"
-                        ) { searchActive ->
-                            if (searchActive) {
-                                SearchTopAppBar(
+                        TopAppBar(
+                            title = {
+                                SearchBar(
                                     searchQuery = searchQuery,
                                     onSearchQueryChange = { searchQuery = it },
-                                    onBackClick = { isSearchActive = false; searchQuery = "" }
-                                )
-                            } else {
-                                TopAppBar(
-                                    title = { Text(state.projectName) },
-                                    navigationIcon = {
-                                        IconButton(onClick = onBackClick) {
-                                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    isSearchActive = isSearchActive,
+                                    onSearchActiveChange = { isSearchActive = it },
+                                    onLayoutToggleClick = { viewModel.onEvent(ProjectNotesEvent.ToggleLayout) },
+                                    onSortClick = { showSortMenu = true },
+                                    layoutType = state.layoutType,
+                                    sortMenuExpanded = showSortMenu,
+                                    onSortMenuDismissRequest = { showSortMenu = false },
+                                    onSortOptionClick = { sortType ->
+                                        val newSortType = if (sortType == state.sortType) {
+                                            SortType.DATE_MODIFIED // Revert to default if same option is clicked
+                                        } else {
+                                            sortType
                                         }
-                                    }
+                                        viewModel.onEvent(ProjectNotesEvent.SortNotes(newSortType))
+                                    },
+                                    currentSortType = state.sortType
                                 )
-                            }
-                        }
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = onBackClick) {
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                }
+                            },
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = Color.Transparent
+                            )
+                        )
                     }
                 }
             },
