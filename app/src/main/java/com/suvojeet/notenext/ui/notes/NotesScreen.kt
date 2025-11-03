@@ -15,6 +15,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
@@ -117,6 +118,7 @@ fun NotesScreen(
 ) {
     val state by viewModel.state.collectAsState()
     var searchQuery by remember { mutableStateOf("") }
+    var isFabExpanded by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
 
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
@@ -231,9 +233,20 @@ fun NotesScreen(
             },
             floatingActionButton = {
                 MultiActionFab(
-                    onNoteClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1)) },
-                    onChecklistClick = { viewModel.onEvent(NotesEvent.ExpandNote(-1, "CHECKLIST")) },
-                    onProjectClick = { showCreateProjectDialog = true }
+                    isExpanded = isFabExpanded,
+                    onExpandedChange = { isFabExpanded = it },
+                    onNoteClick = {
+                        viewModel.onEvent(NotesEvent.ExpandNote(-1))
+                        isFabExpanded = false
+                    },
+                    onChecklistClick = {
+                        viewModel.onEvent(NotesEvent.ExpandNote(-1, "CHECKLIST"))
+                        isFabExpanded = false
+                    },
+                    onProjectClick = {
+                        showCreateProjectDialog = true
+                        isFabExpanded = false
+                    }
                 )
             }
         ) { padding ->
@@ -301,7 +314,15 @@ fun NotesScreen(
                 )
             }
 
-            Column(modifier = Modifier.padding(padding)) {
+            Column(modifier = Modifier.padding(padding).clickable(
+                onClick = {
+                    if (isFabExpanded) {
+                        isFabExpanded = false
+                    }
+                },
+                indication = null,
+                interactionSource = remember { MutableInteractionSource() }
+            )) {
                 Spacer(modifier = Modifier.height(8.dp))
                 val notesToDisplay = if (state.filteredLabel == null) {
                     state.notes

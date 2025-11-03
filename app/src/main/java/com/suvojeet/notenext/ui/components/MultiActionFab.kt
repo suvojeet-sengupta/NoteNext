@@ -40,11 +40,12 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 
 @Composable
 fun MultiActionFab(
+    isExpanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     onNoteClick: () -> Unit,
     onChecklistClick: () -> Unit,
     onProjectClick: () -> Unit
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
     val rotation by animateFloatAsState(
         targetValue = if (isExpanded) 45f else 0f,
         animationSpec = tween(durationMillis = 300), label = ""
@@ -84,7 +85,7 @@ fun MultiActionFab(
                 label = "Project",
                 onClick = {
                     onProjectClick()
-                    isExpanded = false
+                    onExpandedChange(false)
                 }
             )
         }
@@ -99,7 +100,7 @@ fun MultiActionFab(
                 label = "Checklist",
                 onClick = {
                     onChecklistClick()
-                    isExpanded = false
+                    onExpandedChange(false)
                 }
             )
         }
@@ -114,13 +115,13 @@ fun MultiActionFab(
                 label = "Note",
                 onClick = {
                     onNoteClick()
-                    isExpanded = false
+                    onExpandedChange(false)
                 }
             )
         }
 
         FloatingActionButton(
-            onClick = { isExpanded = !isExpanded },
+            onClick = { onExpandedChange(!isExpanded) },
             containerColor = MaterialTheme.colorScheme.primary
         ) {
             Icon(
