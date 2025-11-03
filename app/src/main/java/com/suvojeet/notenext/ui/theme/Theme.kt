@@ -1,4 +1,3 @@
-
 package com.suvojeet.notenext.ui.theme
 
 import android.app.Activity
@@ -86,10 +85,11 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
+// True AMOLED Black Theme - All surfaces set to pure black (#000000)
 private val AmoledColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = md_theme_dark_primaryContainer,
+    primaryContainer = Color.Black,
     onPrimaryContainer = md_theme_dark_onPrimaryContainer,
     secondary = md_theme_dark_secondary,
     onSecondary = md_theme_dark_onSecondary,
@@ -97,10 +97,10 @@ private val AmoledColorScheme = darkColorScheme(
     onSecondaryContainer = md_theme_dark_onSecondaryContainer,
     tertiary = md_theme_dark_tertiary,
     onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = md_theme_dark_tertiaryContainer,
+    tertiaryContainer = Color.Black,
     onTertiaryContainer = md_theme_dark_onTertiaryContainer,
     error = md_theme_dark_error,
-    errorContainer = md_theme_dark_errorContainer,
+    errorContainer = Color.Black,
     onError = md_theme_dark_onError,
     onErrorContainer = md_theme_dark_onErrorContainer,
     background = Color.Black,
@@ -113,12 +113,12 @@ private val AmoledColorScheme = darkColorScheme(
     inverseOnSurface = md_theme_dark_inverseOnSurface,
     inverseSurface = Color.Black,
     inversePrimary = md_theme_dark_inversePrimary,
-    surfaceTint = md_theme_dark_surfaceTint,
+    surfaceTint = Color.Black,
     outlineVariant = md_theme_dark_outlineVariant,
-    scrim = md_theme_dark_scrim,
+    scrim = Color.Black,
 )
 
-@Composable
+ @Composable
 fun NoteNextTheme(
     themeMode: ThemeMode,
     shapeFamily: ShapeFamily,
@@ -133,12 +133,15 @@ fun NoteNextTheme(
     }
 
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    val useDynamicColor = dynamicColor
+    
+    // Disable dynamic colors for AMOLED mode to ensure pure black
+    val useDynamicColor = dynamicColor && themeMode != ThemeMode.AMOLED
 
     val colorScheme = when {
         useDynamicColor && useDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
         useDynamicColor && !useDarkTheme -> dynamicLightColorScheme(LocalContext.current)
-        useDarkTheme -> if (themeMode == ThemeMode.AMOLED) AmoledColorScheme else DarkColorScheme
+        themeMode == ThemeMode.AMOLED -> AmoledColorScheme
+        useDarkTheme -> DarkColorScheme
         else -> LightColorScheme
     }
 
