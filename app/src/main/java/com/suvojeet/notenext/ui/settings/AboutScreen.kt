@@ -1,5 +1,6 @@
 package com.suvojeet.notenext.ui.settings
 
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.graphics.Color
