@@ -41,109 +41,114 @@ import com.suvojeet.notenext.util.NetworkUtils
 @Composable
 fun AboutScreen(onBackClick: () -> Unit) {
     val uriHandler = LocalUriHandler.current
-    val context = LocalContext.current
-    val isInternetAvailable = NetworkUtils.isInternetAvailable(context)
-
-    Scaffold(
-        topBar = {
-            TopAppBar(
-                title = { Text("About") },
-                navigationIcon = {
-                    IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+        val context = LocalContext.current
+        val settingsRepository = remember { SettingsRepository(context) }
+        val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
+        val isInternetAvailable = NetworkUtils.isInternetAvailable(context)
+    
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = { Text("About") },
+                    navigationIcon = {
+                        IconButton(onClick = onBackClick) {
+                            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        }
                     }
-                }
-            )
-        }
-    ) {
-        paddingValues ->
-        Column(
-            modifier = Modifier
-                .padding(paddingValues)
-                .fillMaxSize()
-                .padding(16.dp)
+                )
+            }
         ) {
-            Text("NoteNext Goal", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "NoteNext is a minimal and user-friendly notes app that is open source.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            HorizontalDivider()
-            Spacer(modifier = Modifier.height(16.dp))
-            Text("About the App", style = MaterialTheme.typography.titleMedium)
-            Text(
-                "This app is designed to help you organize your thoughts, ideas, and daily tasks in a simple and intuitive way. " +
-                "You can create notes, checklists, and set reminders to stay on top of your schedule. " +
-                "NoteNext is built with privacy in mind, and all your data is stored locally on your device.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-            Text(
-                "Team",
-                style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
-                modifier = Modifier.fillMaxWidth(),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
+            paddingValues ->
+            Column(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        uriHandler.openUri("https://github.com/suvojeet-sengupta")
-                    },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    .padding(paddingValues)
+                    .fillMaxSize()
+                    .padding(16.dp)
             ) {
-                Row(
+                Text("NoteNext Goal", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "NoteNext is a minimal and user-friendly notes app that is open source.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                HorizontalDivider()
+                Spacer(modifier = Modifier.height(16.dp))
+                Text("About the App", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "This app is designed to help you organize your thoughts, ideas, and daily tasks in a simple and intuitive way. " +
+                    "You can create notes, checklists, and set reminders to stay on top of your schedule. " +
+                    "NoteNext is built with privacy in mind, and all your data is stored locally on your device.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                Text(
+                    "Team",
+                    style = MaterialTheme.typography.titleLarge.copy(fontSize = 22.sp),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                        .clickable { 
+                            uriHandler.openUri("https://github.com/suvojeet-sengupta")
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (themeMode == ThemeMode.AMOLED) Color(0xFF424242) else MaterialTheme.colorScheme.surfaceVariant
+                    )
                 ) {
-                    if (isInternetAvailable) {
-                        AsyncImage(
-                            model = "https://avatars.githubusercontent.com/u/107928380?s=400&u=6e6351e1a09a6c473133a46e28f4b005a2345a57&v=4",
-                            contentDescription = "Suvojeet Sengupta Profile Pic",
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                        )
-                    } else {
-                        Icon(
-                            imageVector = Icons.Default.Person,
-                            contentDescription = "Core Developer",
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                        )
-                    }
-                    Column {
-                        Text(
-                            text = "Suvojeet Sengupta",
-                            style = MaterialTheme.typography.titleMedium
-                        )
-                        Text(
-                            text = "Core Developer",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    ) {
+                        if (isInternetAvailable) {
+                            AsyncImage(
+                                model = "https://avatars.githubusercontent.com/u/107928380?s=400&u=6e6351e1a09a6c473133a46e28f4b005a2345a57&v=4",
+                                contentDescription = "Suvojeet Sengupta Profile Pic",
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = Icons.Default.Person,
+                                contentDescription = "Core Developer",
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                            )
+                        }
+                        Column {
+                            Text(
+                                text = "Suvojeet Sengupta",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "Core Developer",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
-            }
-            Spacer(modifier = Modifier.height(16.dp))
-            Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clickable {
-                        uriHandler.openUri("https://github.com/jendermine")
-                    },
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
-            ) {
-                Row(
+                Spacer(modifier = Modifier.height(16.dp))
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { 
+                            uriHandler.openUri("https://github.com/jendermine")
+                        },
+                    colors = CardDefaults.cardColors(
+                        containerColor = if (themeMode == ThemeMode.AMOLED) Color(0xFF424242) else MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {                Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(16.dp),
