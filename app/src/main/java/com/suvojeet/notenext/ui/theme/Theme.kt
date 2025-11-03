@@ -85,22 +85,22 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
-// True AMOLED Black Theme - All surfaces set to pure black (#000000)
+// True AMOLED Black Theme - Only surfaces set to pure black, rest follows Material Design
 private val AmoledColorScheme = darkColorScheme(
     primary = md_theme_dark_primary,
     onPrimary = md_theme_dark_onPrimary,
-    primaryContainer = Color.Black,
+    primaryContainer = md_theme_dark_primaryContainer,
     onPrimaryContainer = md_theme_dark_onPrimaryContainer,
     secondary = md_theme_dark_secondary,
     onSecondary = md_theme_dark_onSecondary,
-    secondaryContainer = Color.Black,
+    secondaryContainer = md_theme_dark_secondaryContainer,
     onSecondaryContainer = md_theme_dark_onSecondaryContainer,
     tertiary = md_theme_dark_tertiary,
     onTertiary = md_theme_dark_onTertiary,
-    tertiaryContainer = Color.Black,
+    tertiaryContainer = md_theme_dark_tertiaryContainer,
     onTertiaryContainer = md_theme_dark_onTertiaryContainer,
     error = md_theme_dark_error,
-    errorContainer = Color.Black,
+    errorContainer = md_theme_dark_errorContainer,
     onError = md_theme_dark_onError,
     onErrorContainer = md_theme_dark_onErrorContainer,
     background = Color.Black,
@@ -111,11 +111,11 @@ private val AmoledColorScheme = darkColorScheme(
     onSurfaceVariant = md_theme_dark_onSurfaceVariant,
     outline = md_theme_dark_outline,
     inverseOnSurface = md_theme_dark_inverseOnSurface,
-    inverseSurface = Color.Black,
+    inverseSurface = md_theme_dark_inverseSurface,
     inversePrimary = md_theme_dark_inversePrimary,
-    surfaceTint = Color.Black,
+    surfaceTint = md_theme_dark_surfaceTint,
     outlineVariant = md_theme_dark_outlineVariant,
-    scrim = Color.Black,
+    scrim = md_theme_dark_scrim,
 )
 
  @Composable
