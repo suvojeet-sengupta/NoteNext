@@ -86,9 +86,36 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
-private val AmoledColorScheme = DarkColorScheme.copy(
+private val AmoledColorScheme = darkColorScheme(
+    primary = md_theme_dark_primary,
+    onPrimary = md_theme_dark_onPrimary,
+    primaryContainer = md_theme_dark_primaryContainer,
+    onPrimaryContainer = md_theme_dark_onPrimaryContainer,
+    secondary = md_theme_dark_secondary,
+    onSecondary = md_theme_dark_onSecondary,
+    secondaryContainer = Color.Black,
+    onSecondaryContainer = md_theme_dark_onSecondaryContainer,
+    tertiary = md_theme_dark_tertiary,
+    onTertiary = md_theme_dark_onTertiary,
+    tertiaryContainer = md_theme_dark_tertiaryContainer,
+    onTertiaryContainer = md_theme_dark_onTertiaryContainer,
+    error = md_theme_dark_error,
+    errorContainer = md_theme_dark_errorContainer,
+    onError = md_theme_dark_onError,
+    onErrorContainer = md_theme_dark_onErrorContainer,
     background = Color.Black,
-    surface = Color.Black
+    onBackground = md_theme_dark_onBackground,
+    surface = Color.Black,
+    onSurface = md_theme_dark_onSurface,
+    surfaceVariant = Color.Black,
+    onSurfaceVariant = md_theme_dark_onSurfaceVariant,
+    outline = md_theme_dark_outline,
+    inverseOnSurface = md_theme_dark_inverseOnSurface,
+    inverseSurface = Color.Black,
+    inversePrimary = md_theme_dark_inversePrimary,
+    surfaceTint = md_theme_dark_surfaceTint,
+    outlineVariant = md_theme_dark_outlineVariant,
+    scrim = md_theme_dark_scrim,
 )
 
 @Composable
