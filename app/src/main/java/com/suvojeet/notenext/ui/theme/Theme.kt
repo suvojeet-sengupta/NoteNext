@@ -86,6 +86,11 @@ private val DarkColorScheme = darkColorScheme(
     scrim = md_theme_dark_scrim,
 )
 
+private val AmoledColorScheme = DarkColorScheme.copy(
+    background = Color.Black,
+    surface = Color.Black
+)
+
 @Composable
 fun NoteNextTheme(
     themeMode: ThemeMode,
@@ -97,6 +102,7 @@ fun NoteNextTheme(
         ThemeMode.SYSTEM -> systemInDarkTheme
         ThemeMode.LIGHT -> false
         ThemeMode.DARK -> true
+        ThemeMode.AMOLED -> true
     }
 
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
@@ -105,7 +111,7 @@ fun NoteNextTheme(
     val colorScheme = when {
         useDynamicColor && useDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
         useDynamicColor && !useDarkTheme -> dynamicLightColorScheme(LocalContext.current)
-        useDarkTheme -> DarkColorScheme
+        useDarkTheme -> if (themeMode == ThemeMode.AMOLED) AmoledColorScheme else DarkColorScheme
         else -> LightColorScheme
     }
 

@@ -15,7 +15,7 @@ import kotlinx.coroutines.flow.map
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
 
 enum class ThemeMode {
-    SYSTEM, LIGHT, DARK
+    SYSTEM, LIGHT, DARK, AMOLED
 }
 
 object PreferencesKeys {
