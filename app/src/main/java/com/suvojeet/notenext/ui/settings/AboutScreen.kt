@@ -170,7 +170,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     } else {
                         Icon(
                             imageVector = Icons.Default.Person,
-                            contentDescription = "App logo maker",
+                            contentDescription = "Developer",
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .size(40.dp)
@@ -183,7 +183,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            text = "App logo maker",
+                            text = "Developer",
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
