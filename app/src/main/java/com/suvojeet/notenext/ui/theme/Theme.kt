@@ -133,15 +133,23 @@ fun NoteNextTheme(
     }
 
     val dynamicColor = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    
-    // Disable dynamic colors for AMOLED mode to ensure pure black
-    val useDynamicColor = dynamicColor && themeMode != ThemeMode.AMOLED
+    val useDynamicColor = dynamicColor
 
     val colorScheme = when {
-        useDynamicColor && useDarkTheme -> dynamicDarkColorScheme(LocalContext.current)
+        useDynamicColor && useDarkTheme -> {
+            val darkColorScheme = dynamicDarkColorScheme(LocalContext.current)
+            if (themeMode == ThemeMode.AMOLED) {
+                darkColorScheme.copy(
+                    background = Color.Black,
+                    surface = Color.Black,
+                    surfaceVariant = Color.Black
+                )
+            } else {
+                darkColorScheme
+            }
+        }
         useDynamicColor && !useDarkTheme -> dynamicLightColorScheme(LocalContext.current)
-        themeMode == ThemeMode.AMOLED -> AmoledColorScheme
-        useDarkTheme -> DarkColorScheme
+        useDarkTheme -> if (themeMode == ThemeMode.AMOLED) AmoledColorScheme else DarkColorScheme
         else -> LightColorScheme
     }
 
