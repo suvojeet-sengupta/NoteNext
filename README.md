@@ -100,6 +100,6 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-Suvojeet Sengupta - [suvojeetsengupta@example.com](mailto:suvojeetsengupta@example.com)
+Suvojeet Sengupta - [suvojeetsengupta@zohomail.in](mailto:suvojeetsengupta@zohomail.in)
 
 Project Link: [https://github.com/suvojeet-sengupta/NoteNext](https://github.com/suvojeet-sengupta/NoteNext)
