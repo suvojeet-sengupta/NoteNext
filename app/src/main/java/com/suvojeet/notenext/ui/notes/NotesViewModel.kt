@@ -69,7 +69,8 @@ class NotesViewModel(
             _state.value = _state.value.copy(
                 notes = sortedNotes,
                 labels = labels.map { it.name },
-                projects = projects
+                projects = projects,
+                isLoading = false
             )
         }.launchIn(viewModelScope)
     }

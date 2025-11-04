@@ -19,6 +19,7 @@ data class NotesState(
     val filteredLabel: String? = null,
     val expandedNoteId: Int? = null,
     val showLabelDialog: Boolean = false,
+    val isLoading: Boolean = true,
 
     // Properties from AddEditNoteState
     val editingTitle: String = "",
