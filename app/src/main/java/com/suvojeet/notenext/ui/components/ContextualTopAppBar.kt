@@ -74,6 +74,7 @@ fun ContextualTopAppBar(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        Spacer(modifier = Modifier.width(8.dp))
                         // Animated counter badge
                         Surface(
                             shape = CircleShape,
