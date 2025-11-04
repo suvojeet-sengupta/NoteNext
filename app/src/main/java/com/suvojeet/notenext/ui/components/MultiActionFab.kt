@@ -2,6 +2,8 @@ package com.suvojeet.notenext.ui.components
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -33,6 +35,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
@@ -70,6 +73,16 @@ fun MultiActionFab(
             showNote = false
         }
     }
+
+    var pressed by remember { mutableStateOf(false) }
+    val pressScale by animateFloatAsState(
+        targetValue = if (pressed) 0.85f else 1f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessHigh
+        ),
+        label = "pressScale"
+    )
 
     Column(
         horizontalAlignment = Alignment.End,
@@ -121,14 +134,25 @@ fun MultiActionFab(
         }
 
         FloatingActionButton(
-            onClick = { onExpandedChange(!isExpanded) },
-            containerColor = MaterialTheme.colorScheme.primary
+            onClick = {
+                pressed = true
+                onExpandedChange(!isExpanded)
+            },
+            containerColor = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.scale(pressScale)
         ) {
             Icon(
                 imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Add,
                 contentDescription = "Add",
                 modifier = Modifier.rotate(rotation)
             )
+        }
+    }
+
+    LaunchedEffect(pressed) {
+        if (pressed) {
+            kotlinx.coroutines.delay(100)
+            pressed = false
         }
     }
 }
