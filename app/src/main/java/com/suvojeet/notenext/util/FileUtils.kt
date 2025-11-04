@@ -31,13 +31,14 @@ fun saveAsTxt(context: Context, title: String, content: String) {
                 outputStream.write((title + "\n\n" + content).toByteArray())
 
             }
+            showSaveSuccessNotification(context, title, "Documents", "TXT")
         } catch (e: IOException) {
             e.printStackTrace()
         }
     }
 }
 
-fun showSaveSuccessNotification(context: Context, title: String, location: String) {
+fun showSaveSuccessNotification(context: Context, title: String, location: String, fileType: String) {
     val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
     val channelId = "note_save_channel"
 
@@ -52,7 +53,7 @@ fun showSaveSuccessNotification(context: Context, title: String, location: Strin
 
     val notification = NotificationCompat.Builder(context, channelId)
         .setContentTitle("Note Saved")
-        .setContentText("'$title' saved as PDF in $location")
+        .setContentText("'$title' saved as $fileType in $location")
         .setSmallIcon(android.R.drawable.ic_dialog_info)
         .setAutoCancel(true)
         .build()
@@ -100,7 +101,7 @@ fun saveAsPdf(context: Context, title: String, content: String) {
             contentResolver.openOutputStream(it)?.use { outputStream ->
                 pdfDocument.writeTo(outputStream)
             }
-            showSaveSuccessNotification(context, title, "Documents")
+            showSaveSuccessNotification(context, title, "Documents", "PDF")
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
