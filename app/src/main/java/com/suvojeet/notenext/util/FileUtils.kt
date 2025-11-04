@@ -1,14 +1,18 @@
 package com.suvojeet.notenext.util
 
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.ContentValues
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.pdf.PdfDocument
+import android.os.Build
 import android.os.Environment
 import android.provider.MediaStore
 import android.text.StaticLayout
 import android.text.TextPaint
+import androidx.core.app.NotificationCompat
 import java.io.IOException
 
 fun saveAsTxt(context: Context, title: String, content: String) {
@@ -31,6 +35,29 @@ fun saveAsTxt(context: Context, title: String, content: String) {
             e.printStackTrace()
         }
     }
+}
+
+fun showSaveSuccessNotification(context: Context, title: String, location: String) {
+    val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+    val channelId = "note_save_channel"
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val channel = NotificationChannel(
+            channelId,
+            "Note Save Notifications",
+            NotificationManager.IMPORTANCE_DEFAULT
+        )
+        notificationManager.createNotificationChannel(channel)
+    }
+
+    val notification = NotificationCompat.Builder(context, channelId)
+        .setContentTitle("Note Saved")
+        .setContentText("'$title' saved as PDF in $location")
+        .setSmallIcon(android.R.drawable.ic_dialog_info)
+        .setAutoCancel(true)
+        .build()
+
+    notificationManager.notify(1, notification)
 }
 
 fun saveAsPdf(context: Context, title: String, content: String) {
@@ -73,6 +100,7 @@ fun saveAsPdf(context: Context, title: String, content: String) {
             contentResolver.openOutputStream(it)?.use { outputStream ->
                 pdfDocument.writeTo(outputStream)
             }
+            showSaveSuccessNotification(context, title, "Documents")
         } catch (e: IOException) {
             e.printStackTrace()
         } finally {
