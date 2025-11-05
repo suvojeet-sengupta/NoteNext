@@ -201,6 +201,29 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             HorizontalDivider()
 
+            Column(modifier = Modifier.padding(16.dp)) {
+                Text("Backup & Restore", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.padding(8.dp))
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* TODO: Implement backup */ }
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text("Backup", style = MaterialTheme.typography.titleMedium)
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { /* TODO: Implement restore */ }
+                        .padding(vertical = 16.dp)
+                ) {
+                    Text("Restore", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+
+            HorizontalDivider()
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
