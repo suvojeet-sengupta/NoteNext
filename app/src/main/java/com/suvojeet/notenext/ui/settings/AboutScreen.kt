@@ -55,6 +55,9 @@ import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalContext
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.util.NetworkUtils
+import androidx.compose.foundation.Image
+import androidx.compose.ui.res.painterResource
+import com.suvojeet.notenext.R
 
  @OptIn(ExperimentalMaterial3Api::class)
  @Composable
@@ -113,11 +116,10 @@ fun AboutScreen(onBackClick: () -> Unit) {
                         color = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(72.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Code,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onPrimary,
-                            modifier = Modifier.padding(16.dp)
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                            contentDescription = "NoteNext Logo",
+                            modifier = Modifier.fillMaxSize().padding(16.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
