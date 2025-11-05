@@ -47,7 +47,8 @@ fun MultiActionFab(
     onExpandedChange: (Boolean) -> Unit,
     onNoteClick: () -> Unit,
     onChecklistClick: () -> Unit,
-    onProjectClick: () -> Unit
+    onProjectClick: () -> Unit,
+    showProjectButton: Boolean = true
 ) {
     val rotation by animateFloatAsState(
         targetValue = if (isExpanded) 45f else 0f,
@@ -89,7 +90,7 @@ fun MultiActionFab(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         AnimatedVisibility(
-            visible = showProject,
+            visible = showProject && showProjectButton,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
             exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
         ) {

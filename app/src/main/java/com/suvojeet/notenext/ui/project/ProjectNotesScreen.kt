@@ -81,6 +81,9 @@ import androidx.compose.material3.TopAppBarDefaults
 
 import com.suvojeet.notenext.ui.notes.NotesEvent
 
+import com.suvojeet.notenext.ui.components.MultiActionFab
+import androidx.compose.runtime.setValue
+
 @Composable
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
 fun ProjectNotesScreen(
@@ -172,9 +175,21 @@ fun ProjectNotesScreen(
                 }
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { viewModel.onEvent(ProjectNotesEvent.ExpandNote(-1)) }) {
-                    Icon(Icons.Default.Add, contentDescription = "Add note")
-                }
+                var isFabExpanded by remember { mutableStateOf(false) }
+                MultiActionFab(
+                    isExpanded = isFabExpanded,
+                    onExpandedChange = { isFabExpanded = it },
+                    onNoteClick = {
+                        viewModel.onEvent(ProjectNotesEvent.ExpandNote(-1))
+                        isFabExpanded = false
+                    },
+                    onChecklistClick = {
+                        viewModel.onEvent(ProjectNotesEvent.ExpandNote(-1, "CHECKLIST"))
+                        isFabExpanded = false
+                    },
+                    onProjectClick = { /* Do nothing */ },
+                    showProjectButton = false
+                )
             }
         ) { padding ->
             val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)

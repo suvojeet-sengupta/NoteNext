@@ -123,6 +123,7 @@ import com.suvojeet.notenext.ui.settings.AboutScreen
 import com.suvojeet.notenext.ui.project.ProjectScreen
 import com.suvojeet.notenext.ui.project.ProjectViewModel
 import com.suvojeet.notenext.ui.project.ProjectNotesScreen
+import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
 
@@ -131,6 +132,9 @@ import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.shareIn
+import kotlinx.coroutines.flow.SharingStarted
 
 
 
@@ -1191,9 +1195,11 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                         ProjectScreen(
                             factory = factory,
                             onMenuClick = { scope.launch { drawerState.open() } },
-                                                    onProjectClick = { projectId ->
-                                                        navController.navigate("project_notes/$projectId")
-                                                    }                        )
+                            onProjectClick = { projectId ->
+                                navController.navigate("project_notes/$projectId")
+                            },
+                            navController = navController
+                        )
                     }
                     composable(
                         route = "about",
@@ -1214,6 +1220,23 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                             onBackClick = { navController.popBackStack() },
                             themeMode = themeMode,
                             settingsRepository = settingsRepository
+                        )
+                    }
+                    composable(
+                        route = "add_edit_note?projectId={projectId}&noteType={noteType}",
+                        arguments = listOf(
+                            androidx.navigation.navArgument("projectId") { type = androidx.navigation.NavType.IntType; defaultValue = -1 },
+                            androidx.navigation.navArgument("noteType") { type = androidx.navigation.NavType.StringType; defaultValue = "TEXT" }
+                        )
+                    ) {
+                        val viewModel: ProjectNotesViewModel = viewModel(factory = factory)
+                        AddEditNoteScreen(
+                            state = viewModel.state.collectAsState().value.toNotesState(),
+                            onEvent = { viewModel.onEvent(it.toProjectNotesEvent()) },
+                            onDismiss = { navController.popBackStack() },
+                            themeMode = themeMode,
+                            settingsRepository = settingsRepository,
+                            events = viewModel.events.map { it.toNotesUiEvent() }.shareIn(rememberCoroutineScope(), SharingStarted.WhileSubscribed())
                         )
                     }                        
                             

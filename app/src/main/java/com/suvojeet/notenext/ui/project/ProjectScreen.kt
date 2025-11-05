@@ -17,15 +17,35 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 
+import com.suvojeet.notenext.ui.components.MultiActionFab
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectScreen(
     factory: ViewModelFactory,
     onMenuClick: () -> Unit,
-    onProjectClick: (Int) -> Unit
+    onProjectClick: (Int) -> Unit,
+    navController: androidx.navigation.NavController
 ) {
     val viewModel: ProjectViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
+    var isFabExpanded by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ProjectScreenEvent.CreateNewNote -> {
+                    navController.navigate("add_edit_note?projectId=${event.projectId}&noteType=TEXT")
+                }
+                is ProjectScreenEvent.CreateNewChecklist -> {
+                    navController.navigate("add_edit_note?projectId=${event.projectId}&noteType=CHECKLIST")
+                }
+            }
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -35,6 +55,23 @@ fun ProjectScreen(
                     IconButton(onClick = onMenuClick) {
                         Icon(Icons.Default.Menu, contentDescription = "Menu")
                     }
+                }
+            )
+        },
+        floatingActionButton = {
+            MultiActionFab(
+                isExpanded = isFabExpanded,
+                onExpandedChange = { isFabExpanded = it },
+                onNoteClick = {
+                    viewModel.onEvent(ProjectScreenEvent.CreateNewNote(-1))
+                    isFabExpanded = false
+                },
+                onChecklistClick = {
+                    viewModel.onEvent(ProjectScreenEvent.CreateNewChecklist(-1))
+                    isFabExpanded = false
+                },
+                onProjectClick = {
+                    // Do nothing
                 }
             )
         }
