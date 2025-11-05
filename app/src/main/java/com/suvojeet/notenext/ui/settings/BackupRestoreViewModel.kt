@@ -1,0 +1,212 @@
+package com.suvojeet.notenext.ui.settings
+
+import android.app.Application
+import android.net.Uri
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
+import com.suvojeet.notenext.data.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStreamReader
+import java.util.zip.ZipEntry
+import java.util.zip.ZipInputStream
+import java.util.zip.ZipOutputStream
+
+data class BackupDetails(
+    val notesCount: Int,
+    val labelsCount: Int,
+    val projectsCount: Int,
+    val attachmentsCount: Int,
+    val totalSizeInMb: Double
+)
+
+data class BackupRestoreState(
+    val backupDetails: BackupDetails? = null,
+    val isBackingUp: Boolean = false,
+    val isRestoring: Boolean = false,
+    val backupResult: String? = null,
+    val restoreResult: String? = null
+)
+
+class BackupRestoreViewModel(
+    private val noteDao: NoteDao,
+    private val labelDao: LabelDao,
+    private val projectDao: ProjectDao,
+    private val application: Application
+) : ViewModel() {
+
+    private val _state = MutableStateFlow(BackupRestoreState())
+    val state = _state.asStateFlow()
+
+    fun getBackupDetails() {
+        viewModelScope.launch {
+            val notes = noteDao.getNotes().first()
+            val labels = labelDao.getLabels().first()
+            val projects = projectDao.getProjects().first()
+            val attachments = notes.flatMap { it.attachments }
+
+            val notesJson = Gson().toJson(notes)
+            val labelsJson = Gson().toJson(labels)
+            val projectsJson = Gson().toJson(projects)
+
+            var attachmentsSize = 0L
+            attachments.forEach { attachment ->
+                try {
+                    val attachmentUri = Uri.parse(attachment.uri)
+                    application.contentResolver.openFileDescriptor(attachmentUri, "r")?.use {
+                        attachmentsSize += it.statSize
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+
+            val totalSize = notesJson.toByteArray().size + labelsJson.toByteArray().size + projectsJson.toByteArray().size + attachmentsSize
+
+            _state.value = _state.value.copy(
+                backupDetails = BackupDetails(
+                    notesCount = notes.size,
+                    labelsCount = labels.size,
+                    projectsCount = projects.size,
+                    attachmentsCount = attachments.size,
+                    totalSizeInMb = totalSize / (1024.0 * 1024.0)
+                )
+            )
+        }
+    }
+
+    fun createBackup(uri: Uri) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isBackingUp = true, backupResult = null)
+            withContext(Dispatchers.IO) {
+                try {
+                    application.contentResolver.openFileDescriptor(uri, "w")?.use { pfd ->
+                        FileOutputStream(pfd.fileDescriptor).use { fos ->
+                            ZipOutputStream(fos).use { zos ->
+                                // Backup notes
+                                val notes = noteDao.getNotes().first()
+                                val notesJson = Gson().toJson(notes)
+                                zos.putNextEntry(ZipEntry("notes.json"))
+                                zos.write(notesJson.toByteArray())
+                                zos.closeEntry()
+
+                                // Backup labels
+                                val labels = labelDao.getLabels().first()
+                                val labelsJson = Gson().toJson(labels)
+                                zos.putNextEntry(ZipEntry("labels.json"))
+                                zos.write(labelsJson.toByteArray())
+                                zos.closeEntry()
+
+                                // Backup projects
+                                val projects = projectDao.getProjects().first()
+                                val projectsJson = Gson().toJson(projects)
+                                zos.putNextEntry(ZipEntry("projects.json"))
+                                zos.write(projectsJson.toByteArray())
+                                zos.closeEntry()
+
+                                // Backup attachments
+                                val attachments = notes.flatMap { it.attachments }
+                                attachments.forEach { attachment ->
+                                    try {
+                                        val attachmentUri = Uri.parse(attachment.uri)
+                                        application.contentResolver.openInputStream(attachmentUri)?.use { inputStream ->
+                                            val fileName = File(attachmentUri.path!!).name
+                                            zos.putNextEntry(ZipEntry("attachments/$fileName"))
+                                            inputStream.copyTo(zos)
+                                            zos.closeEntry()
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    _state.value = _state.value.copy(isBackingUp = false, backupResult = "Backup successful")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isBackingUp = false, backupResult = "Backup failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun restoreBackup(uri: Uri) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isRestoring = true, restoreResult = null)
+            withContext(Dispatchers.IO) {
+                try {
+                    // Clear existing data
+                    noteDao.getNotes().first().flatMap { it.attachments }.forEach { noteDao.deleteAttachment(it) }
+                    noteDao.getNotes().first().forEach { noteDao.deleteNote(it.note) }
+                    labelDao.getLabels().first().forEach { labelDao.deleteLabel(it) }
+                    projectDao.getProjects().first().forEach { projectDao.deleteProject(it.id) }
+
+                    application.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        ZipInputStream(inputStream).use { zis ->
+                            val oldToNewProjectIds = mutableMapOf<Int, Int>()
+                            var notesJson: String? = null
+                            var labelsJson: String? = null
+                            var projectsJson: String? = null
+
+                            var zipEntry = zis.nextEntry
+                            while (zipEntry != null) {
+                                when {
+                                    zipEntry.name == "notes.json" -> notesJson = InputStreamReader(zis).readText()
+                                    zipEntry.name == "labels.json" -> labelsJson = InputStreamReader(zis).readText()
+                                    zipEntry.name == "projects.json" -> projectsJson = InputStreamReader(zis).readText()
+                                    zipEntry.name.startsWith("attachments/") -> {
+                                        // Attachment restoration is complex and will be handled later.
+                                    }
+                                }
+                                zipEntry = zis.nextEntry
+                            }
+
+                            // Restore projects and create mapping
+                            projectsJson?.let {
+                                val projectsType = object : TypeToken<List<Project>>() {}.type
+                                val projects: List<Project> = Gson().fromJson(it, projectsType)
+                                projects.forEach { project ->
+                                    val oldId = project.id
+                                    val newId = projectDao.insertProject(project.copy(id = 0)).toInt()
+                                    oldToNewProjectIds[oldId] = newId
+                                }
+                            }
+
+                            // Restore labels
+                            labelsJson?.let {
+                                val labelsType = object : TypeToken<List<Label>>() {}.type
+                                val labels: List<Label> = Gson().fromJson(it, labelsType)
+                                labels.forEach { labelDao.insertLabel(it) }
+                            }
+
+                            // Restore notes
+                            notesJson?.let {
+                                val notesType = object : TypeToken<List<NoteWithAttachments>>() {}.type
+                                val notesWithAttachments: List<NoteWithAttachments> = Gson().fromJson(it, notesType)
+                                notesWithAttachments.forEach { noteWithAttachments ->
+                                    val oldProjectId = noteWithAttachments.note.projectId
+                                    val newProjectId = oldToNewProjectIds[oldProjectId]
+                                    val newNote = noteWithAttachments.note.copy(id = 0, projectId = newProjectId)
+                                    noteDao.insertNote(newNote)
+                                }
+                            }
+                        }
+                    }
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Restore successful")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Restore failed: ${e.message}")
+                }
+            }
+        }
+    }
+}

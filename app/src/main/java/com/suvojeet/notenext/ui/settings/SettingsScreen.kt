@@ -207,7 +207,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { /* TODO: Implement backup */ }
+                        .clickable { onNavigate("backup") }
                         .padding(vertical = 16.dp)
                 ) {
                     Text("Backup", style = MaterialTheme.typography.titleMedium)
@@ -215,7 +215,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clickable { /* TODO: Implement restore */ }
+                        .clickable { onNavigate("restore") }
                         .padding(vertical = 16.dp)
                 ) {
                     Text("Restore", style = MaterialTheme.typography.titleMedium)

@@ -134,6 +134,8 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.data.LinkPreviewRepository
 
 import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.ui.settings.BackupScreen
+import com.suvojeet.notenext.ui.settings.RestoreScreen
 
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
@@ -495,20 +497,387 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
-                        SettingsScreen(
+                                                                                                                        SettingsScreen(
 
     
 
-                            onBackClick = { navController.popBackStack() },
-                            onNavigate = { route -> navController.navigate(route) }
+                                                                                                    
 
     
 
-                        )
+                                                                                                                            onBackClick = { navController.popBackStack() },
 
     
 
-                    }
+                                                                                                                            onNavigate = { route -> navController.navigate(route) }
+
+    
+
+                                                                                                    
+
+    
+
+                                                                                                                        )
+
+    
+
+                                                                                                    
+
+    
+
+                                                                                                                    }
+
+    
+
+                                                                                                
+
+    
+
+                                                                                                                    composable(
+
+    
+
+                                                                                                                        route = "backup",
+
+    
+
+                                                                                                                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                                                                                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                                                                                                    ) {
+
+    
+
+                                                                                                                        BackupScreen(
+
+    
+
+                                                                                                                            factory = factory,
+
+    
+
+                                                                                                                            onBackClick = { navController.popBackStack() }
+
+    
+
+                                                                                                                        )
+
+    
+
+                                                                                                                    }
+
+    
+
+                                                                                                
+
+    
+
+                                                                                                                    composable(
+
+    
+
+                                                                                                                        route = "restore",
+
+    
+
+                                                                                                                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                                                                                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                                                                                                    ) {
+
+    
+
+                                                                                                                        RestoreScreen(
+
+    
+
+                                                                                                                            factory = factory,
+
+    
+
+                                                                                                                            onBackClick = { navController.popBackStack() }
+
+    
+
+                                                                                                                        )
+
+    
+
+                                                                                                                    }
+
+    
+
+                                                                        
+
+    
+
+                                                                                            composable(
+
+    
+
+                                                                                                route = "backup",
+
+    
+
+                                                                                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                                                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                                                                            ) {
+
+    
+
+                                                                                                BackupScreen(
+
+    
+
+                                                                                                    factory = factory,
+
+    
+
+                                                                                                    onBackClick = { navController.popBackStack() }
+
+    
+
+                                                                                                )
+
+    
+
+                                                                                            }
+
+    
+
+                                                                        
+
+    
+
+                                                                                            composable(
+
+    
+
+                                                                                                route = "restore",
+
+    
+
+                                                                                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                                                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                                                                            ) {
+
+    
+
+                                                                                                RestoreScreen(
+
+    
+
+                                                                                                    factory = factory,
+
+    
+
+                                                                                                    onBackClick = { navController.popBackStack() }
+
+    
+
+                                                                                                )
+
+    
+
+                                                                                            }
+
+    
+
+                                                
+
+    
+
+                                                                    composable(
+
+    
+
+                                                                        route = "backup",
+
+    
+
+                                                                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                                                    ) {
+
+    
+
+                                                                        BackupScreen(
+
+    
+
+                                                                            factory = factory,
+
+    
+
+                                                                            onBackClick = { navController.popBackStack() }
+
+    
+
+                                                                        )
+
+    
+
+                                                                    }
+
+    
+
+                                                
+
+    
+
+                                                                    composable(
+
+    
+
+                                                                        route = "restore",
+
+    
+
+                                                                        enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                                        exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                                                    ) {
+
+    
+
+                                                                        RestoreScreen(
+
+    
+
+                                                                            factory = factory,
+
+    
+
+                                                                            onBackClick = { navController.popBackStack() }
+
+    
+
+                                                                        )
+
+    
+
+                                                                    }
+
+    
+
+                        
+
+    
+
+                                            composable(
+
+    
+
+                                                route = "backup",
+
+    
+
+                                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                            ) {
+
+    
+
+                                                BackupScreen(
+
+    
+
+                                                    factory = factory,
+
+    
+
+                                                    onBackClick = { navController.popBackStack() }
+
+    
+
+                                                )
+
+    
+
+                                            }
+
+    
+
+                        
+
+    
+
+                                            composable(
+
+    
+
+                                                route = "restore",
+
+    
+
+                                                enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+
+    
+
+                                                exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+
+    
+
+                                            ) {
+
+    
+
+                                                RestoreScreen(
+
+    
+
+                                                    factory = factory,
+
+    
+
+                                                    onBackClick = { navController.popBackStack() }
+
+    
+
+                                                )
+
+    
+
+                                            }
 
     
 

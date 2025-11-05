@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 interface ProjectDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertProject(project: Project)
+    suspend fun insertProject(project: Project): Long
 
     @Query("SELECT * FROM projects ORDER BY createdAt DESC")
     fun getProjects(): Flow<List<Project>>

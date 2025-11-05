@@ -19,6 +19,7 @@ import com.suvojeet.notenext.ui.reminder.ReminderViewModel
 import android.app.Application
 import com.suvojeet.notenext.util.AlarmSchedulerImpl
 import com.suvojeet.notenext.ui.setup.SetupViewModel
+import com.suvojeet.notenext.ui.settings.BackupRestoreViewModel
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 
 class ViewModelFactory(
@@ -63,6 +64,10 @@ class ViewModelFactory(
         if (modelClass.isAssignableFrom(SetupViewModel::class.java)) {
             @Suppress("UNCHECKED_CAST")
             return SetupViewModel(application, SettingsRepository(application)) as T
+        }
+        if (modelClass.isAssignableFrom(BackupRestoreViewModel::class.java)) {
+            @Suppress("UNCHECKED_CAST")
+            return BackupRestoreViewModel(noteDao, labelDao, projectDao, application) as T
         }
         throw IllegalArgumentException("Unknown ViewModel class")
     }
