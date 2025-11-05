@@ -123,6 +123,10 @@ import com.suvojeet.notenext.ui.settings.AboutScreen
 import com.suvojeet.notenext.ui.project.ProjectScreen
 import com.suvojeet.notenext.ui.project.ProjectViewModel
 import com.suvojeet.notenext.ui.project.ProjectNotesScreen
+import com.suvojeet.notenext.ui.project.ProjectNotesViewModel
+import com.suvojeet.notenext.ui.project.toNotesState
+import com.suvojeet.notenext.ui.project.toProjectNotesEvent
+import com.suvojeet.notenext.ui.project.toNotesUiEvent
 import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
