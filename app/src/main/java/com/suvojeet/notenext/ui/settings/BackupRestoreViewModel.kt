@@ -48,38 +48,40 @@ class BackupRestoreViewModel(
 
     fun getBackupDetails() {
         viewModelScope.launch {
-            val notes = noteDao.getNotes().first()
-            val labels = labelDao.getLabels().first()
-            val projects = projectDao.getProjects().first()
-            val attachments = notes.flatMap { it.attachments }
+            withContext(Dispatchers.IO) {
+                val notes = noteDao.getNotes().first()
+                val labels = labelDao.getLabels().first()
+                val projects = projectDao.getProjects().first()
+                val attachments = notes.flatMap { it.attachments }
 
-            val notesJson = Gson().toJson(notes)
-            val labelsJson = Gson().toJson(labels)
-            val projectsJson = Gson().toJson(projects)
+                val notesJson = Gson().toJson(notes)
+                val labelsJson = Gson().toJson(labels)
+                val projectsJson = Gson().toJson(projects)
 
-            var attachmentsSize = 0L
-            attachments.forEach { attachment ->
-                try {
-                    val attachmentUri = Uri.parse(attachment.uri)
-                    application.contentResolver.openFileDescriptor(attachmentUri, "r")?.use {
-                        attachmentsSize += it.statSize
+                var attachmentsSize = 0L
+                attachments.forEach { attachment ->
+                    try {
+                        val attachmentUri = Uri.parse(attachment.uri)
+                        application.contentResolver.openFileDescriptor(attachmentUri, "r")?.use {
+                            attachmentsSize += it.statSize
+                        }
+                    } catch (e: Exception) {
+                        e.printStackTrace()
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
                 }
-            }
 
-            val totalSize = notesJson.toByteArray().size + labelsJson.toByteArray().size + projectsJson.toByteArray().size + attachmentsSize
+                val totalSize = notesJson.toByteArray().size + labelsJson.toByteArray().size + projectsJson.toByteArray().size + attachmentsSize
 
-            _state.value = _state.value.copy(
-                backupDetails = BackupDetails(
-                    notesCount = notes.size,
-                    labelsCount = labels.size,
-                    projectsCount = projects.size,
-                    attachmentsCount = attachments.size,
-                    totalSizeInMb = totalSize / (1024.0 * 1024.0)
+                _state.value = _state.value.copy(
+                    backupDetails = BackupDetails(
+                        notesCount = notes.size,
+                        labelsCount = labels.size,
+                        projectsCount = projects.size,
+                        attachmentsCount = attachments.size,
+                        totalSizeInMb = totalSize / (1024.0 * 1024.0)
+                    )
                 )
-            )
+            }
         }
     }
 
