@@ -23,17 +23,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
+import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.ui.settings.ThemeMode
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectScreen(
     factory: ViewModelFactory,
     onMenuClick: () -> Unit,
     onProjectClick: (Int) -> Unit,
-    navController: androidx.navigation.NavController
+    navController: androidx.navigation.NavController,
+    settingsRepository: SettingsRepository
 ) {
     val viewModel: ProjectViewModel = viewModel(factory = factory)
     val state by viewModel.state.collectAsState()
     var isFabExpanded by remember { mutableStateOf(false) }
+    val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -73,7 +78,8 @@ fun ProjectScreen(
                 },
                 onProjectClick = {
                     // Do nothing
-                }
+                },
+                themeMode = themeMode
             )
         }
     ) {

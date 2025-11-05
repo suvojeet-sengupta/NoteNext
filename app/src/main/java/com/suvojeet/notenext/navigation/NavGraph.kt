@@ -1245,7 +1245,8 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                             onProjectClick = { projectId ->
                                 navController.navigate("project_notes/$projectId")
                             },
-                            navController = navController
+                            navController = navController,
+                            settingsRepository = settingsRepository
                         )
                     }
                     composable(

@@ -188,7 +188,8 @@ fun ProjectNotesScreen(
                         isFabExpanded = false
                     },
                     onProjectClick = { /* Do nothing */ },
-                    showProjectButton = false
+                    showProjectButton = false,
+                    themeMode = themeMode
                 )
             }
         ) { padding ->
