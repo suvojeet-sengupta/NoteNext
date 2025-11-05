@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -231,8 +232,11 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 modifier = Modifier
                     .fillMaxWidth()
                     .clickable { onNavigate("about") }
-                    .padding(16.dp)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
+                Icon(Icons.Filled.Info, contentDescription = "About")
+                Spacer(modifier = Modifier.width(16.dp))
                 Text("About", style = MaterialTheme.typography.titleMedium)
             }
         }
