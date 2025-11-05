@@ -247,7 +247,8 @@ fun NotesScreen(
                     onProjectClick = {
                         showCreateProjectDialog = true
                         isFabExpanded = false
-                    }
+                    },
+                    themeMode = themeMode
                 )
             }
         ) { padding ->

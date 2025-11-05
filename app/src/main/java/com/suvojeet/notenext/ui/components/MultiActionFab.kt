@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.dp
 
 import androidx.compose.material.icons.filled.CreateNewFolder
 
+import com.suvojeet.notenext.ui.settings.ThemeMode
+
 @Composable
 fun MultiActionFab(
     isExpanded: Boolean,
@@ -48,7 +50,8 @@ fun MultiActionFab(
     onNoteClick: () -> Unit,
     onChecklistClick: () -> Unit,
     onProjectClick: () -> Unit,
-    showProjectButton: Boolean = true
+    showProjectButton: Boolean = true,
+    themeMode: ThemeMode
 ) {
     val rotation by animateFloatAsState(
         targetValue = if (isExpanded) 45f else 0f,
@@ -100,7 +103,8 @@ fun MultiActionFab(
                 onClick = {
                     onProjectClick()
                     onExpandedChange(false)
-                }
+                },
+                themeMode = themeMode
             )
         }
 
@@ -115,7 +119,8 @@ fun MultiActionFab(
                 onClick = {
                     onChecklistClick()
                     onExpandedChange(false)
-                }
+                },
+                themeMode = themeMode
             )
         }
 
@@ -130,7 +135,8 @@ fun MultiActionFab(
                 onClick = {
                     onNoteClick()
                     onExpandedChange(false)
-                }
+                },
+                themeMode = themeMode
             )
         }
 
@@ -162,12 +168,19 @@ fun MultiActionFab(
 private fun FabItem(
     icon: ImageVector,
     label: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    themeMode: ThemeMode
 ) {
+    val cardColor = if (themeMode == ThemeMode.AMOLED) {
+        MaterialTheme.colorScheme.surface
+    } else {
+        MaterialTheme.colorScheme.surfaceVariant
+    }
+
     Card(
         modifier = Modifier.clickable { onClick() },
         shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+        colors = CardDefaults.cardColors(containerColor = cardColor),
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
