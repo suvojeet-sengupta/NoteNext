@@ -79,6 +79,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             modifier = Modifier
                 .padding(paddingValues)
                 .fillMaxSize()
+                .verticalScroll(rememberScrollState())
         ) {
             Column(modifier = Modifier.padding(16.dp)) {
                 Text("Display", style = MaterialTheme.typography.labelLarge, color = MaterialTheme.colorScheme.primary)
