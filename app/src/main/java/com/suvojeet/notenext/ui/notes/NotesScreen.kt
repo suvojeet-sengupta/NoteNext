@@ -1,5 +1,11 @@
 package com.suvojeet.notenext.ui.notes
 
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.ui.window.DialogProperties
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -21,6 +27,7 @@ import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
 import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridItemSpan
 import androidx.compose.foundation.lazy.staggeredgrid.items as StaggeredGridItems
+import androidx.compose.foundation.lazy.staggeredgrid.animateItemPlacement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -236,6 +243,12 @@ fun NotesScreen(
                 MultiActionFab(
                     isExpanded = isFabExpanded,
                     onExpandedChange = { isFabExpanded = it },
+                    modifier = Modifier
+                        .graphicsLayer {
+                            rotationZ = if (isFabExpanded) 45f else 0f
+                            scaleX = if (isFabExpanded) 1.1f else 1f
+                            scaleY = if (isFabExpanded) 1.1f else 1f
+                        },
                     onNoteClick = {
                         viewModel.onEvent(NotesEvent.ExpandNote(-1))
                         isFabExpanded = false
@@ -390,7 +403,14 @@ fun NotesScreen(
                                     StaggeredGridItems(pinnedNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                            modifier = Modifier
+                                                .animateItemPlacement(
+                                                    animationSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                        stiffness = Spring.StiffnessLow
+                                                    )
+                                                )
+                                                .graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
@@ -421,7 +441,14 @@ fun NotesScreen(
                                     StaggeredGridItems(otherNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                            modifier = Modifier
+                                                .animateItemPlacement(
+                                                    animationSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                        stiffness = Spring.StiffnessLow
+                                                    )
+                                                )
+                                                .graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
@@ -457,7 +484,14 @@ fun NotesScreen(
                                     items(pinnedNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                            modifier = Modifier
+                                                .animateItemPlacement(
+                                                    animationSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                        stiffness = Spring.StiffnessLow
+                                                    )
+                                                )
+                                                .graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
@@ -488,7 +522,14 @@ fun NotesScreen(
                                     items(otherNotes, key = { it.note.id }) { note ->
                                         val isExpanded = state.expandedNoteId == note.note.id
                                         NoteItem(
-                                            modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
+                                            modifier = Modifier
+                                                .animateItemPlacement(
+                                                    animationSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                        stiffness = Spring.StiffnessLow
+                                                    )
+                                                )
+                                                .graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
                                             onNoteClick = {
