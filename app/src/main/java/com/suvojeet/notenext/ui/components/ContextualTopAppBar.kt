@@ -167,10 +167,6 @@ fun ContextualTopAppBar(
                                 }
                             )
                             if (selectedItemCount == 1) {
-                                HorizontalDivider(
-                                    modifier = Modifier.padding(vertical = 4.dp),
-                                    color = MaterialTheme.colorScheme.outlineVariant
-                                )
                                 AnimatedDropdownItem(
                                     text = "Share",
                                     onClick = {
@@ -178,14 +174,14 @@ fun ContextualTopAppBar(
                                         showMenu = false
                                     }
                                 )
-                                AnimatedDropdownItem(
-                                    text = "Move to project",
-                                    onClick = {
-                                        onMoveToProjectClick()
-                                        showMenu = false
-                                    }
-                                )
                             }
+                            AnimatedDropdownItem(
+                                text = "Move to project",
+                                onClick = {
+                                    onMoveToProjectClick()
+                                    showMenu = false
+                                }
+                            )
                         }
                     }
                 }
