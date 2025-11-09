@@ -155,8 +155,12 @@ fun onEvent(event: NotesEvent) {
         is NotesEvent.CopySelectedNotes -> {
             viewModelScope.launch {
                 val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
-                for (note in selectedNotes) {
-                    noteDao.insertNote(note.note.copy(id = 0, title = "${note.note.title} (Copy)"))
+                for (noteWithAttachments in selectedNotes) {
+                    val copiedNote = noteWithAttachments.note.copy(id = 0, title = "${noteWithAttachments.note.title} (Copy)")
+                    val newNoteId = noteDao.insertNote(copiedNote)
+                    noteWithAttachments.attachments.forEach { attachment ->
+                        noteDao.insertAttachment(attachment.copy(id = 0, noteId = newNoteId.toInt()))
+                    }
                 }
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
                 val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
@@ -693,9 +697,12 @@ fun onEvent(event: NotesEvent) {
         is NotesEvent.OnCopyCurrentNoteClick -> {
             viewModelScope.launch {
                 state.value.expandedNoteId?.let {
-                    noteDao.getNoteById(it)?.let { note ->
-                        val copiedNote = note.note.copy(id = 0, title = "${note.note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
-                        noteDao.insertNote(copiedNote)
+                    noteDao.getNoteById(it)?.let { noteWithAttachments ->
+                        val copiedNote = noteWithAttachments.note.copy(id = 0, title = "${noteWithAttachments.note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
+                        val newNoteId = noteDao.insertNote(copiedNote)
+                        noteWithAttachments.attachments.forEach { attachment ->
+                            noteDao.insertAttachment(attachment.copy(id = 0, noteId = newNoteId.toInt()))
+                        }
                         _events.emit(NotesUiEvent.ShowToast("Note copied"))
                     }
                 }
