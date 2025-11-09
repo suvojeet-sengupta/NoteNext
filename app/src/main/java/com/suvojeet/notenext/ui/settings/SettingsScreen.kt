@@ -2,6 +2,7 @@ package com.suvojeet.notenext.ui.settings
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
@@ -344,26 +345,26 @@ private fun SettingsSectionHeader(
     }
 }
 
- @Composable
-private fun SettingsCard(
-    themeMode: ThemeMode,
-    content: @Composable () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = if (themeMode == ThemeMode.AMOLED) 
-                Color(0xFF1C1C1C) 
-            else 
-                MaterialTheme.colorScheme.surfaceVariant
-        ),
-        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
-    ) {
-        content()
-    }
-}
-
+  @Composable
+ private fun SettingsCard(
+     themeMode: ThemeMode,
+     content: @Composable () -> Unit
+ ) {
+     val isDarkTheme = isSystemInDarkTheme()
+     Card(
+         modifier = Modifier.fillMaxWidth(),
+         shape = RoundedCornerShape(16.dp),
+         colors = CardDefaults.cardColors(
+             containerColor = if (themeMode == ThemeMode.AMOLED || (isDarkTheme && (themeMode == ThemeMode.DARK || themeMode == ThemeMode.SYSTEM)))
+                 Color(0xFF1C1C1C)
+             else
+                 MaterialTheme.colorScheme.surfaceVariant
+         ),
+         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+     ) {
+         content()
+     }
+ }
  @Composable
 private fun SettingsItem(
     title: String,
