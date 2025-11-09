@@ -13,9 +13,10 @@ import android.provider.MediaStore
 import android.text.StaticLayout
 import android.text.TextPaint
 import androidx.core.app.NotificationCompat
+import com.suvojeet.notenext.data.ChecklistItem
 import java.io.IOException
 
-fun saveAsTxt(context: Context, title: String, content: String) {
+fun saveAsTxt(context: Context, title: String, content: String, checklist: List<ChecklistItem> = emptyList()) {
     val contentResolver = context.contentResolver
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, "${title.ifBlank { "Untitled" }}.txt")
@@ -28,8 +29,16 @@ fun saveAsTxt(context: Context, title: String, content: String) {
     uri?.let {
         try {
             contentResolver.openOutputStream(it)?.use { outputStream ->
-                outputStream.write((title + "\n\n" + content).toByteArray())
-
+                val fullContent = StringBuilder()
+                fullContent.append(title).append("\n\n")
+                if (checklist.isNotEmpty()) {
+                    checklist.forEach { item ->
+                        fullContent.append("[${if (item.isChecked) "x" else " "}] ${item.text}\n")
+                    }
+                } else {
+                    fullContent.append(content)
+                }
+                outputStream.write(fullContent.toString().toByteArray())
             }
             showSaveSuccessNotification(context, title, "Documents", "TXT")
         } catch (e: IOException) {
@@ -61,29 +70,71 @@ fun showSaveSuccessNotification(context: Context, title: String, location: Strin
     notificationManager.notify(1, notification)
 }
 
-fun saveAsPdf(context: Context, title: String, content: String) {
+fun saveAsPdf(context: Context, title: String, content: String, checklist: List<ChecklistItem> = emptyList()) {
     val pdfDocument = PdfDocument()
     val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
     val page = pdfDocument.startPage(pageInfo)
     val canvas: Canvas = page.canvas
-    val titlePaint = Paint()
-    titlePaint.textSize = 18f
-    titlePaint.isFakeBoldText = true
-    canvas.drawText(title, 40f, 60f, titlePaint)
+    val titlePaint = TextPaint().apply {
+        textSize = 18f
+        isFakeBoldText = true
+    }
+    val textPaint = TextPaint().apply {
+        textSize = 12f
+    }
+    val checkboxPaint = Paint().apply {
+        style = Paint.Style.STROKE
+        strokeWidth = 2f
+    }
 
-    val textPaint = TextPaint()
-    textPaint.textSize = 12f
+    var yPosition = 60f
 
-    val contentToSave = content.ifBlank { " " } // StaticLayout crashes on empty string
-
-    val staticLayout = StaticLayout.Builder.obtain(
-        contentToSave, 0, contentToSave.length, textPaint, canvas.width - 80
+    // Draw title
+    val titleLayout = StaticLayout.Builder.obtain(
+        title, 0, title.length, titlePaint, canvas.width - 80
     ).build()
-
     canvas.save()
-    canvas.translate(40f, 90f)
-    staticLayout.draw(canvas)
+    canvas.translate(40f, yPosition)
+    titleLayout.draw(canvas)
     canvas.restore()
+    yPosition += titleLayout.height + 20f
+
+    // Draw content or checklist
+    if (checklist.isNotEmpty()) {
+        checklist.forEach { item ->
+            val checkboxSize = 20f
+            val textIndent = 40f + checkboxSize + 10f
+
+            // Draw checkbox
+            canvas.drawRect(40f, yPosition, 40f + checkboxSize, yPosition + checkboxSize, checkboxPaint)
+            if (item.isChecked) {
+                canvas.drawLine(45f, yPosition + 10f, 50f, yPosition + 15f, checkboxPaint)
+                canvas.drawLine(50f, yPosition + 15f, 55f, yPosition + 5f, checkboxPaint)
+            }
+
+            // Draw text
+            val itemText = item.text.ifBlank { " " }
+            val textLayout = StaticLayout.Builder.obtain(
+                itemText, 0, itemText.length, textPaint, canvas.width - (textIndent.toInt() + 40)
+            ).build()
+
+            canvas.save()
+            canvas.translate(textIndent, yPosition)
+            textLayout.draw(canvas)
+            canvas.restore()
+
+            yPosition += textLayout.height + 10f // Add some space between items
+        }
+    } else {
+        val contentToSave = content.ifBlank { " " }
+        val contentLayout = StaticLayout.Builder.obtain(
+            contentToSave, 0, contentToSave.length, textPaint, canvas.width - 80
+        ).build()
+        canvas.save()
+        canvas.translate(40f, yPosition)
+        contentLayout.draw(canvas)
+        canvas.restore()
+    }
 
     pdfDocument.finishPage(page)
 

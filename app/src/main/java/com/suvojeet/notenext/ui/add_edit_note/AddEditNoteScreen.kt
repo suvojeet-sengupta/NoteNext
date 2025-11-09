@@ -437,11 +437,11 @@ fun AddEditNoteScreen(
         SaveAsDialog(
             onDismiss = { showSaveAsDialog = false },
             onSaveAsPdf = {
-                saveAsPdf(context, state.editingTitle, state.editingContent.text)
+                saveAsPdf(context, state.editingTitle, state.editingContent.text, state.editingChecklist)
                 Toast.makeText(context, "Note saved to Documents as PDF", Toast.LENGTH_SHORT).show()
             },
             onSaveAsTxt = {
-                saveAsTxt(context, state.editingTitle, state.editingContent.text)
+                saveAsTxt(context, state.editingTitle, state.editingContent.text, state.editingChecklist)
                 Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
             }
         )
