@@ -309,6 +309,70 @@ fun AddEditNoteScreen(
                             )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
+
+                        item {
+                            val imageAttachments = state.editingAttachments.filter { it.type == "IMAGE" }
+                            if (imageAttachments.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                val imageCount = imageAttachments.size
+                                if (imageCount == 1) {
+                                    // Single image: full width
+                                    Box(modifier = Modifier.fillMaxWidth()) {
+                                        AsyncImage(
+                                            model = imageAttachments.first().uri,
+                                            contentDescription = null,
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .heightIn(max = 400.dp)
+                                                .clickable {
+                                                    selectedImageData = ImageViewerData(uri = Uri.parse(imageAttachments.first().uri), tempId = imageAttachments.first().tempId)
+                                                    showImageViewer = true
+                                                },
+                                            contentScale = ContentScale.Fit
+                                        )
+                                        IconButton(
+                                            onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().tempId)) },
+                                            modifier = Modifier.align(Alignment.TopEnd)
+                                        ) {
+                                            Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
+                                        }
+                                    }
+                                } else {
+                                    // Multiple images: up to 3 per row in a horizontal scrollable row
+                                    LazyRow(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                        contentPadding = PaddingValues(horizontal = 8.dp)
+                                    ) {
+                                        items(imageAttachments, key = { it.uri }) { attachment ->
+                                            Box {
+                                                AsyncImage(
+                                                    model = attachment.uri,
+                                                    contentDescription = null,
+                                                    modifier = Modifier
+                                                        .width(120.dp)
+                                                        .height(120.dp)
+                                                        .aspectRatio(1f)
+                                                        .clickable {
+                                                            selectedImageData = ImageViewerData(uri = Uri.parse(attachment.uri), tempId = attachment.tempId)
+                                                            showImageViewer = true
+                                                        },
+                                                    contentScale = ContentScale.Crop
+                                                )
+                                                IconButton(
+                                                    onClick = { onEvent(NotesEvent.RemoveAttachment(attachment.tempId)) },
+                                                    modifier = Modifier.align(Alignment.TopEnd)
+                                                ) {
+                                                    Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                                Spacer(modifier = Modifier.height(16.dp))
+                            }
+                        }
+
                         items(state.editingChecklist) {
                             item ->
                             Row(
@@ -352,15 +416,6 @@ fun AddEditNoteScreen(
                             items(state.linkPreviews) { linkPreview ->
                                 LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
                                 Spacer(modifier = Modifier.height(8.dp))
-                            }
-                        }
-
-                        if (state.editingAttachments.isNotEmpty()) {
-                            item {
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
-                            items(state.editingAttachments) { attachment ->
-                                Text(text = attachment.uri)
                             }
                         }
                     }
