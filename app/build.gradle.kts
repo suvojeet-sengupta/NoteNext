@@ -14,7 +14,7 @@ android {
         applicationId = "com.suvojeet.notenext"
         minSdk = 24
         targetSdk = 36
-        versionCode = 7
+        versionCode = 8
         versionName = "1.2.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
