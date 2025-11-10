@@ -22,6 +22,8 @@ import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.components.NoteItem
 import com.suvojeet.notenext.ui.archive.ArchiveEvent
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 import androidx.compose.material.icons.filled.Menu
 
@@ -41,10 +43,10 @@ fun ArchiveScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Archive") },
+                title = { Text(stringResource(id = R.string.archive)) },
                 navigationIcon = {
                     IconButton(onClick = onMenuClick) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
                     }
                 }
             )
@@ -66,7 +68,7 @@ fun ArchiveScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        text = "No archived notes.",
+                        text = stringResource(id = R.string.no_archived_notes),
                         textAlign = TextAlign.Center,
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onBackground,
@@ -102,8 +104,8 @@ fun ArchiveScreen(
                     showRestoreDialog = false
                     noteToRestore = null
                 },
-                title = { Text("Restore Note") },
-                text = { Text("Are you sure you want to restore this note from the archive?") },
+                title = { Text(stringResource(id = R.string.restore_note_title)) },
+                text = { Text(stringResource(id = R.string.restore_note_confirmation)) },
                 confirmButton = {
                     TextButton(
                         onClick = {
@@ -114,7 +116,7 @@ fun ArchiveScreen(
                             noteToRestore = null
                         }
                     ) {
-                        Text("Restore")
+                        Text(stringResource(id = R.string.restore))
                     }
                 },
                 dismissButton = {
@@ -124,7 +126,7 @@ fun ArchiveScreen(
                             noteToRestore = null
                         }
                     ) {
-                        Text("Cancel")
+                        Text(stringResource(id = R.string.cancel))
                     }
                 }
             )

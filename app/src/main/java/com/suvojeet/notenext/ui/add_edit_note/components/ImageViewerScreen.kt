@@ -27,6 +27,8 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.geometry.Offset
 import coil.compose.AsyncImage
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 import androidx.compose.material.icons.filled.Delete
 import com.suvojeet.notenext.ui.notes.NotesEvent
@@ -89,10 +91,10 @@ fun ImageViewerScreen(
         )
         AnimatedVisibility(visible = showTopAppBar) {
             TopAppBar(
-                title = { Text("Image Viewer") },
+                title = { Text(stringResource(id = R.string.image_viewer)) },
                 navigationIcon = {
                     IconButton(onClick = onDismiss) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 },
                 actions = {
@@ -100,7 +102,7 @@ fun ImageViewerScreen(
                         onEvent(NotesEvent.RemoveAttachment(attachmentTempId))
                         onDismiss()
                     }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete image", tint = Color.White)
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.remove_image), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(

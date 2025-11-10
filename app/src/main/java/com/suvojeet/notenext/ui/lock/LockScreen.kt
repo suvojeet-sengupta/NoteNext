@@ -51,6 +51,7 @@ import com.suvojeet.notenext.util.BiometricAuthManager
 import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,6 +66,8 @@ fun LockScreen(onUnlock: () -> Unit) {
 
     val activity = context.findActivity() as? FragmentActivity
 
+    val biometricAuthFailedString = stringResource(id = R.string.biometric_auth_failed)
+
     val biometricAuthManager = if (activity != null) {
         remember(activity) {
             BiometricAuthManager(
@@ -76,7 +79,7 @@ fun LockScreen(onUnlock: () -> Unit) {
                         error = it
                     }
                 },
-                onAuthFailed = { error = "Biometric authentication failed" }
+                onAuthFailed = { error = biometricAuthFailedString }
             )
         }
     } else {
@@ -111,6 +114,9 @@ fun LockScreen(onUnlock: () -> Unit) {
         }
     }
 
+    // ***FIX 1: Get the string resource here, in the composable context***
+    val incorrectPinString = stringResource(id = R.string.incorrect_pin)
+
     Scaffold { paddingValues ->
         Column(
             modifier = Modifier
@@ -126,12 +132,12 @@ fun LockScreen(onUnlock: () -> Unit) {
             ) {
                 Icon(
                     painter = painterResource(id = R.mipmap.ic_launcher_foreground),
-                    contentDescription = "App Icon",
+                    contentDescription = stringResource(id = R.string.app_name),
                     modifier = Modifier.size(96.dp),
                     tint = MaterialTheme.colorScheme.primary
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                Text("Enter PIN", style = MaterialTheme.typography.titleLarge)
+                Text(stringResource(id = R.string.enter_pin_lock_screen), style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(16.dp))
 
                 Row(
@@ -189,7 +195,7 @@ fun LockScreen(onUnlock: () -> Unit) {
                             ) {
                                 Icon(
                                     Icons.Default.Fingerprint,
-                                    contentDescription = "Use Biometrics",
+                                    contentDescription = stringResource(id = R.string.use_biometrics),
                                     modifier = Modifier.size(32.dp)
                                 )
                             }
@@ -205,7 +211,7 @@ fun LockScreen(onUnlock: () -> Unit) {
                     ) {
                         Icon(
                             Icons.Default.Backspace,
-                            contentDescription = "Backspace",
+                            contentDescription = stringResource(id = R.string.back),
                             modifier = Modifier.size(32.dp)
                         )
                     }
@@ -219,7 +225,8 @@ fun LockScreen(onUnlock: () -> Unit) {
                         if (pin == storedPin) {
                             onUnlock()
                         } else {
-                            error = "Incorrect PIN"
+                            // ***FIX 2: Use the variable here, inside the non-composable lambda***
+                            error = incorrectPinString
                             triggerShake()
                             pin = ""
                         }
@@ -229,7 +236,7 @@ fun LockScreen(onUnlock: () -> Unit) {
                     .fillMaxWidth()
                     .padding(horizontal = 32.dp)
             ) {
-                Text("Unlock")
+                Text(stringResource(id = R.string.unlock))
             }
             Spacer(modifier = Modifier.weight(0.1f))
         }

@@ -1,0 +1,17 @@
+<resources>
+    <string name="bin_title">Bin</string>
+    <string name="empty_bin">Empty Bin</string>
+    <string name="bin_empty_message">Bin is empty</string>
+    <string name="restore_note">Restore Note</string>
+    <string name="delete_permanently">Delete Permanently</string>
+    <string name="binned_note_restored">Note restored</string>
+    <string name="binned_note_deleted_permanently">Note deleted permanently</string>
+    <string name="empty_bin_confirmation">Are you sure you want to empty the bin? This will permanently delete all notes in the bin.</string>
+    <string name="empty_bin_confirmation_title">Empty Bin?</string>
+
+
+    <string name="x_selected">%1$d selected</string>
+    <string name="clear_selection">Clear selection</string>
+
+
+</resources>

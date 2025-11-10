@@ -14,6 +14,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -39,10 +41,10 @@ fun BackupScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Backup") },
+                title = { Text(stringResource(id = R.string.backup_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 }
             )
@@ -58,27 +60,27 @@ fun BackupScreen(
             state.backupDetails?.let { details ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.padding(16.dp)) {
-                        Text("Backup Information", style = MaterialTheme.typography.titleLarge)
+                        Text(stringResource(id = R.string.backup_information), style = MaterialTheme.typography.titleLarge)
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Notes")
+                            Text(stringResource(id = R.string.notes_count))
                             Text(details.notesCount.toString())
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Labels")
+                            Text(stringResource(id = R.string.labels_count))
                             Text(details.labelsCount.toString())
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Projects")
+                            Text(stringResource(id = R.string.projects_count))
                             Text(details.projectsCount.toString())
                         }
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Attachments")
+                            Text(stringResource(id = R.string.attachments_count))
                             Text(details.attachmentsCount.toString())
                         }
                         HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text("Estimated Size", style = MaterialTheme.typography.bodyLarge)
+                            Text(stringResource(id = R.string.estimated_size), style = MaterialTheme.typography.bodyLarge)
                             Text(String.format("%.2f MB", details.totalSizeInMb), style = MaterialTheme.typography.bodyLarge)
                         }
                     }
@@ -94,7 +96,7 @@ fun BackupScreen(
                     if (state.isBackingUp) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     } else {
-                        Text("Create Backup")
+                        Text(stringResource(id = R.string.create_backup))
                     }
                 }
                 state.backupResult?.let {

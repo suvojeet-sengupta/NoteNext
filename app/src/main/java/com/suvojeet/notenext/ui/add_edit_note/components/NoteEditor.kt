@@ -17,6 +17,8 @@ import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 import androidx.compose.ui.text.TextStyle
 
@@ -44,7 +46,7 @@ fun NoteEditor(
 
             onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
 
-            placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+            placeholder = { Text(stringResource(id = R.string.title), color = contentColorFor(backgroundColor = Color(state.editingColor))) },
 
             modifier = Modifier
 
@@ -114,7 +116,7 @@ fun NoteEditor(
 
             onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
 
-            placeholder = { Text("Note", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+            placeholder = { Text(stringResource(id = R.string.content), color = contentColorFor(backgroundColor = Color(state.editingColor))) },
 
             modifier = Modifier
 

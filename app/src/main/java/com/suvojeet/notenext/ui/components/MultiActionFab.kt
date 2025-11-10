@@ -39,6 +39,8 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 import androidx.compose.material.icons.filled.CreateNewFolder
 
@@ -100,7 +102,7 @@ fun MultiActionFab(
         ) {
             FabItem(
                 icon = Icons.Default.CreateNewFolder,
-                label = "Project",
+                label = stringResource(id = R.string.projects),
                 onClick = {
                     onProjectClick()
                     onExpandedChange(false)
@@ -116,7 +118,7 @@ fun MultiActionFab(
         ) {
             FabItem(
                 icon = Icons.Default.CheckBox,
-                label = "Checklist",
+                label = stringResource(id = R.string.checklist),
                 onClick = {
                     onChecklistClick()
                     onExpandedChange(false)
@@ -132,7 +134,7 @@ fun MultiActionFab(
         ) {
             FabItem(
                 icon = Icons.Default.Note,
-                label = "Note",
+                label = stringResource(id = R.string.note),
                 onClick = {
                     onNoteClick()
                     onExpandedChange(false)
@@ -151,7 +153,7 @@ fun MultiActionFab(
         ) {
             Icon(
                 imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Add,
-                contentDescription = "Add",
+                contentDescription = stringResource(id = R.string.add),
                 modifier = Modifier.rotate(rotation)
             )
         }

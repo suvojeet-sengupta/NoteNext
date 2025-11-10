@@ -16,6 +16,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suvojeet.notenext.data.Label
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,17 +31,17 @@ fun EditLabelsScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Edit Labels") },
+                title = { Text(stringResource(id = R.string.edit_labels)) },
                 navigationIcon = {
                     IconButton(onClick = onBackPressed) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 }
             )
         },
         floatingActionButton = {
             FloatingActionButton(onClick = { viewModel.onEvent(EditLabelsEvent.ShowAddLabelDialog) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Label")
+                Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_label))
             }
         }
     ) { padding ->
@@ -91,7 +93,7 @@ fun LabelItem(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(text = label.name, modifier = Modifier.weight(1f))
-        Icon(Icons.Default.Edit, contentDescription = "Edit Label")
+        Icon(Icons.Default.Edit, contentDescription = stringResource(id = R.string.edit_labels))
     }
 }
 
@@ -104,12 +106,12 @@ fun AddLabelDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Add Label") },
+        title = { Text(stringResource(id = R.string.add_label)) },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Label Name") }
+                label = { Text(stringResource(id = R.string.new_label)) }
             )
         },
         confirmButton = {
@@ -120,12 +122,12 @@ fun AddLabelDialog(
                     }
                 }
             ) {
-                Text("Add")
+                Text(stringResource(id = R.string.add))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
@@ -142,12 +144,12 @@ fun EditLabelDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Edit Label") },
+        title = { Text(stringResource(id = R.string.edit_labels)) },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Label Name") }
+                label = { Text(stringResource(id = R.string.new_label)) }
             )
         },
         confirmButton = {
@@ -158,17 +160,17 @@ fun EditLabelDialog(
                     }
                 }
             ) {
-                Text("Save")
+                Text(stringResource(id = R.string.save))
             }
         },
         dismissButton = {
             Row {
                 TextButton(onClick = onDelete) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(id = R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 TextButton(onClick = onDismiss) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         }

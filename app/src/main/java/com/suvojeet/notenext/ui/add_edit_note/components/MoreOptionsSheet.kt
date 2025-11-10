@@ -43,6 +43,8 @@ import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import java.text.SimpleDateFormat
 import java.util.*
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -65,7 +67,7 @@ fun MoreOptionsSheet(
         ) {
             if (!state.editingIsNewNote && state.editingLastEdited != 0L) {
                 Text(
-                    text = "Last edited: ${dateFormat.format(Date(state.editingLastEdited))}",
+                    text = stringResource(id = R.string.last_edited, dateFormat.format(Date(state.editingLastEdited))),
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                     modifier = Modifier.padding(vertical = 16.dp)
@@ -74,11 +76,11 @@ fun MoreOptionsSheet(
             }
 
             val options = listOf(
-                "Delete" to Icons.Default.Delete,
-                "Make a copy" to Icons.Default.ContentCopy,
-                "Share" to Icons.Default.Share,
-                "Labels" to Icons.AutoMirrored.Filled.Label,
-                "Save as" to Icons.Default.Check
+                stringResource(id = R.string.delete) to Icons.Default.Delete,
+                stringResource(id = R.string.make_a_copy) to Icons.Default.ContentCopy,
+                stringResource(id = R.string.share) to Icons.Default.Share,
+                stringResource(id = R.string.labels) to Icons.AutoMirrored.Filled.Label,
+                stringResource(id = R.string.save_as) to Icons.Default.Check
             )
 
             LazyVerticalGrid(
@@ -95,9 +97,9 @@ fun MoreOptionsSheet(
                         onClick = {
                             onDismiss()
                             when (label) {
-                                "Delete" -> showDeleteDialog(true)
-                                "Make a copy" -> onEvent(NotesEvent.OnCopyCurrentNoteClick)
-                                "Share" -> {
+                                context.getString(R.string.delete) -> showDeleteDialog(true)
+                                context.getString(R.string.make_a_copy) -> onEvent(NotesEvent.OnCopyCurrentNoteClick)
+                                context.getString(R.string.share) -> {
                                     val sendIntent: Intent = Intent().apply {
                                         action = Intent.ACTION_SEND
                                         putExtra(Intent.EXTRA_TEXT, state.editingTitle + "\n\n" + state.editingContent.text)
@@ -107,8 +109,8 @@ fun MoreOptionsSheet(
                                     val shareIntent = Intent.createChooser(sendIntent, null)
                                     context.startActivity(shareIntent)
                                 }
-                                "Labels" -> onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
-                                "Save as" -> showSaveAsDialog(true)
+                                context.getString(R.string.labels) -> onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
+                                context.getString(R.string.save_as) -> showSaveAsDialog(true)
                             }
                         }
                     )

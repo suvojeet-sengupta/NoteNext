@@ -21,6 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -33,11 +35,11 @@ fun AddEditNoteTopAppBar(
 ) {
     TopAppBar(
         title = { Text(if (state.editingIsNewNote) {
-            if (editingNoteType == "CHECKLIST") "Add Checklist" else "Add Note"
+            if (editingNoteType == "CHECKLIST") stringResource(id = R.string.add_checklist) else stringResource(id = R.string.add_note)
         } else "") },
         navigationIcon = {
             IconButton(onClick = onDismiss) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -49,21 +51,21 @@ fun AddEditNoteTopAppBar(
                 IconButton(onClick = { onEvent(NotesEvent.OnTogglePinClick) }) {
                     Icon(
                         imageVector = Icons.Filled.PushPin,
-                        contentDescription = if (state.isPinned) "Unpin note" else "Pin note",
+                        contentDescription = if (state.isPinned) stringResource(id = R.string.unpin_note) else stringResource(id = R.string.pin_note),
                         tint = if (state.isPinned) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor))
                     )
                 }
                 IconButton(onClick = { onEvent(NotesEvent.OnToggleArchiveClick) }) {
                     Icon(
                         imageVector = Icons.Filled.Archive,
-                        contentDescription = if (state.isArchived) "Unarchive note" else "Archive note",
+                        contentDescription = if (state.isArchived) stringResource(id = R.string.unarchive_note) else stringResource(id = R.string.archive_note),
                         tint = if (state.isArchived) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor))
                     )
                 }
                 IconButton(onClick = { showDeleteDialog(true) }) {
                     Icon(
                         Icons.Default.Delete,
-                        contentDescription = "Delete note",
+                        contentDescription = stringResource(id = R.string.delete_note),
                         tint = contentColorFor(backgroundColor = Color(state.editingColor))
                     )
                 }

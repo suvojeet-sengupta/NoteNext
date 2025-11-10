@@ -31,6 +31,8 @@ import com.suvojeet.notenext.ui.notes.SortType
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -101,7 +103,7 @@ fun SearchBar(
                     ) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back",
+                            contentDescription = stringResource(id = R.string.back),
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(20.dp)
                         )
@@ -125,14 +127,14 @@ fun SearchBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.Search,
-                            contentDescription = "Search",
+                            contentDescription = stringResource(id = R.string.search),
                             tint = MaterialTheme.colorScheme.primary,
                             modifier = Modifier
                                 .size(24.dp)
                                 .scale(iconScale)
                         )
                         Text(
-                            text = "Search",
+                            text = stringResource(id = R.string.search),
                             style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -159,7 +161,7 @@ fun SearchBar(
                     Box(contentAlignment = Alignment.CenterStart) {
                         if (searchQuery.isEmpty() && isSearchActive) {
                             Text(
-                                "Search notes",
+                                stringResource(id = R.string.search_notes),
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
                             )
@@ -183,7 +185,7 @@ fun SearchBar(
                 ) {
                     Icon(
                         imageVector = Icons.Default.Clear,
-                        contentDescription = "Clear",
+                        contentDescription = stringResource(id = R.string.clear_selection),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(18.dp)
                     )
@@ -221,7 +223,7 @@ fun SearchBar(
                             modifier = Modifier.background(MaterialTheme.colorScheme.surfaceContainerHigh)
                         ) {
                             SortMenuItem(
-                                text = "Date Created",
+                                text = stringResource(id = R.string.date_created),
                                 icon = Icons.Default.CalendarToday,
                                 isSelected = currentSortType == SortType.DATE_CREATED,
                                 onClick = {
@@ -230,7 +232,7 @@ fun SearchBar(
                                 }
                             )
                             SortMenuItem(
-                                text = "Date Modified",
+                                text = stringResource(id = R.string.date_modified),
                                 icon = Icons.Default.Update,
                                 isSelected = currentSortType == SortType.DATE_MODIFIED,
                                 onClick = {
@@ -239,7 +241,7 @@ fun SearchBar(
                                 }
                             )
                             SortMenuItem(
-                                text = "Title",
+                                text = stringResource(id = R.string.sort_by_alpha),
                                 icon = Icons.Default.SortByAlpha,
                                 isSelected = currentSortType == SortType.TITLE,
                                 onClick = {
@@ -282,7 +284,7 @@ fun SortMenuItem(
                     Spacer(Modifier.weight(1f))
                     Icon(
                         imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
+                        contentDescription = stringResource(id = R.string.selected),
                         modifier = Modifier.size(18.dp),
                         tint = MaterialTheme.colorScheme.primary
                     )
@@ -401,12 +403,12 @@ fun CompactSortButton(onClick: () -> Unit) {
     ) {
         Icon(
             imageVector = Icons.Default.Sort,
-            contentDescription = "Sort",
+            contentDescription = stringResource(id = R.string.sort),
             modifier = Modifier.size(16.dp)
         )
         Spacer(modifier = Modifier.width(4.dp))
         Text(
-            text = "Sort",
+            text = stringResource(id = R.string.sort),
             style = MaterialTheme.typography.labelSmall,
             fontWeight = FontWeight.SemiBold
         )

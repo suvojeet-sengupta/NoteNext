@@ -66,6 +66,10 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
+import com.suvojeet.notenext.util.findActivity
+
  @OptIn(ExperimentalMaterial3Api::class)
  @Composable
 fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
@@ -78,17 +82,19 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
     val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = false)
     val selectedShapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
+    val selectedLanguage by settingsRepository.language.collectAsState(initial = "en")
 
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
     var showShapeFamilyDialog by remember { mutableStateOf(false) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { 
                     Text(
-                        "Settings",
+                        stringResource(id = R.string.settings_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
@@ -115,7 +121,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             // Display Section
             SettingsSectionHeader(
                 icon = Icons.Default.Palette,
-                title = "Display"
+                title = stringResource(id = R.string.display_section_title)
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -123,7 +129,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             SettingsCard(themeMode = selectedThemeMode) {
                 Column {
                     SettingsItem(
-                        title = "Theme",
+                        title = stringResource(id = R.string.theme),
                         subtitle = selectedThemeMode.name.lowercase().replaceFirstChar { it.uppercase() },
                         onClick = { showThemeDialog = true }
                     )
@@ -131,8 +137,8 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     
                     SettingsItemWithSwitch(
-                        title = "Rich Link Preview",
-                        subtitle = "Show preview for links in notes",
+                        title = stringResource(id = R.string.rich_link_preview),
+                        subtitle = stringResource(id = R.string.rich_link_preview_subtitle),
                         checked = enableRichLinkPreview,
                         onCheckedChange = {
                             scope.launch {
@@ -144,9 +150,17 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     
                     SettingsItem(
-                        title = "Shape Family (experimental)",
+                        title = stringResource(id = R.string.shape_family),
                         subtitle = selectedShapeFamily.name.lowercase().replaceFirstChar { it.uppercase() },
                         onClick = { showShapeFamilyDialog = true }
+                    )
+
+                    HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+
+                    SettingsItem(
+                        title = stringResource(id = R.string.language),
+                        subtitle = stringResource(id = R.string.language_subtitle),
+                        onClick = { showLanguageDialog = true }
                     )
                 }
             }
@@ -156,15 +170,15 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             // Bin Section
             SettingsSectionHeader(
                 icon = Icons.Default.Delete,
-                title = "Bin"
+                title = stringResource(id = R.string.bin_section_title)
             )
             
             Spacer(modifier = Modifier.height(12.dp))
 
             SettingsCard(themeMode = selectedThemeMode) {
                 SettingsItem(
-                    title = "Auto-delete binned notes",
-                    subtitle = "After $autoDeleteDays days",
+                    title = stringResource(id = R.string.auto_delete_binned_notes),
+                    subtitle = stringResource(id = R.string.auto_delete_subtitle, autoDeleteDays),
                     onClick = { showAutoDeleteDialog = true }
                 )
             }
@@ -174,15 +188,15 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             // Security Section
             SettingsSectionHeader(
                 icon = Icons.Default.Security,
-                title = "Security"
+                title = stringResource(id = R.string.security_section_title)
             )
             
             Spacer(modifier = Modifier.height(12.dp))
 
             SettingsCard(themeMode = selectedThemeMode) {
                 SettingsItemWithSwitch(
-                    title = "App Lock",
-                    subtitle = "Secure the app with a PIN or biometric lock",
+                    title = stringResource(id = R.string.app_lock),
+                    subtitle = stringResource(id = R.string.app_lock_subtitle),
                     checked = enableAppLock,
                     onCheckedChange = {
                         if (it) {
@@ -201,7 +215,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             // Backup & Restore Section
             SettingsSectionHeader(
                 icon = Icons.Default.Backup,
-                title = "Backup & Restore"
+                title = stringResource(id = R.string.backup_restore_section_title)
             )
             
             Spacer(modifier = Modifier.height(12.dp))
@@ -209,7 +223,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             SettingsCard(themeMode = selectedThemeMode) {
                 Column {
                     SettingsItem(
-                        title = "Backup",
+                        title = stringResource(id = R.string.backup),
                         subtitle = null,
                         onClick = { onNavigate("backup") }
                     )
@@ -217,7 +231,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                     HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
                     
                     SettingsItem(
-                        title = "Restore",
+                        title = stringResource(id = R.string.restore),
                         subtitle = null,
                         onClick = { onNavigate("restore") }
                     )
@@ -249,7 +263,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                         )
                     }
                     Text(
-                        "About",
+                        stringResource(id = R.string.about),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.SemiBold
                         )
@@ -309,6 +323,26 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 }
             },
             onDismiss = { showShapeFamilyDialog = false }
+        )
+    }
+
+    AnimatedVisibility(
+        visible = showLanguageDialog,
+        enter = scaleIn(animationSpec = tween(100)),
+        exit = scaleOut(animationSpec = tween(100))
+    ) {
+        LanguageChooserDialog(
+            selectedLanguage = selectedLanguage,
+            onLanguageSelected = { language ->
+                scope.launch {
+                    settingsRepository.saveLanguage(language)
+                    // Restart activity to apply language change
+                    val activity = context.findActivity()
+                    activity?.recreate()
+                    showLanguageDialog = false
+                }
+            },
+            onDismiss = { showLanguageDialog = false }
         )
     }
 }
@@ -432,6 +466,55 @@ private fun SettingsItemWithSwitch(
     }
 }
 
+@Composable
+private fun LanguageChooserDialog(
+    selectedLanguage: String,
+    onLanguageSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(id = R.string.choose_language)) },
+        text = {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onLanguageSelected("en") }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = (selectedLanguage == "en"),
+                        onClick = null
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(stringResource(id = R.string.language_english))
+                }
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable { onLanguageSelected("hi") }
+                        .padding(vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    RadioButton(
+                        selected = (selectedLanguage == "hi"),
+                        onClick = null
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    Text(stringResource(id = R.string.language_hindi))
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(id = R.string.cancel))
+            }
+        }
+    )
+}
+
  @Composable
 private fun ShapeFamilyChooserDialog(
     selectedShapeFamily: ShapeFamily,
@@ -440,7 +523,7 @@ private fun ShapeFamilyChooserDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Choose Shape Family") },
+        title = { Text(stringResource(id = R.string.choose_shape_family)) },
         text = {
             Column {
                 ShapeFamily.values().forEach { shapeFamily ->
@@ -463,7 +546,7 @@ private fun ShapeFamilyChooserDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
@@ -477,7 +560,7 @@ private fun ThemeChooserDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Choose Theme") },
+        title = { Text(stringResource(id = R.string.choose_theme)) },
         text = {
             Column {
                 ThemeMode.values().forEach { themeMode ->
@@ -495,7 +578,7 @@ private fun ThemeChooserDialog(
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
                             when (themeMode) {
-                                ThemeMode.AMOLED -> "True AMOLED (Optimized For Amoled Display)"
+                                ThemeMode.AMOLED -> stringResource(id = R.string.theme_amoled)
                                 else -> themeMode.name.lowercase().replaceFirstChar { it.uppercase() }
                             }
                         )
@@ -505,7 +588,7 @@ private fun ThemeChooserDialog(
         },
         confirmButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
@@ -521,7 +604,7 @@ private fun AutoDeleteDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Auto-delete after") },
+        title = { Text(stringResource(id = R.string.auto_delete_after)) },
         text = {
             Column {
                 Slider(
@@ -530,17 +613,17 @@ private fun AutoDeleteDialog(
                     valueRange = 1f..60f,
                     steps = 58
                 )
-                Text("${sliderPosition.roundToInt()} days", modifier = Modifier.align(Alignment.CenterHorizontally))
+                Text(stringResource(id = R.string.days, sliderPosition.roundToInt()), modifier = Modifier.align(Alignment.CenterHorizontally))
             }
         },
         confirmButton = {
             TextButton(onClick = { onConfirm(sliderPosition.roundToInt()) }) {
-                Text("Save")
+                Text(stringResource(id = R.string.save))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )

@@ -33,6 +33,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,12 +50,12 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
             onDismissRequest = { showDatePicker = false },
             confirmButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("OK")
+                    Text(stringResource(id = R.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showDatePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         ) {
@@ -66,12 +68,12 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
             onDismissRequest = { showTimePicker = false },
             confirmButton = {
                 TextButton(onClick = { showTimePicker = false }) {
-                    Text("OK")
+                    Text(stringResource(id = R.string.ok))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         ) {
@@ -82,12 +84,12 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Add Reminder") },
+                title = { Text(stringResource(id = R.string.add_reminder_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -95,7 +97,7 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
                     IconButton(onClick = { /* TODO: Save reminder */ }) {
                         Icon(
                             imageVector = Icons.Default.Save,
-                            contentDescription = "Save"
+                            contentDescription = stringResource(id = R.string.save)
                         )
                     }
                 },
@@ -117,7 +119,7 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
             OutlinedTextField(
                 value = title,
                 onValueChange = { title = it },
-                label = { Text("Title") },
+                label = { Text(stringResource(id = R.string.title)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -126,10 +128,10 @@ fun AddEditReminderScreen(onBackClick: () -> Unit) {
                 horizontalArrangement = Arrangement.SpaceEvenly
             ) {
                 Button(onClick = { showDatePicker = true }) {
-                    Text(text = "Select Date")
+                    Text(text = stringResource(id = R.string.select_date))
                 }
                 Button(onClick = { showTimePicker = true }) {
-                    Text(text = "Select Time")
+                    Text(text = stringResource(id = R.string.select_time))
                 }
             }
         }

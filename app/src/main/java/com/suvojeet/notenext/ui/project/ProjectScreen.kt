@@ -25,6 +25,8 @@ import androidx.compose.runtime.setValue
 
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.settings.ThemeMode
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -56,10 +58,10 @@ fun ProjectScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Projects") },
+                title = { Text(stringResource(id = R.string.projects)) },
                 navigationIcon = {
                     IconButton(onClick = onMenuClick) {
-                        Icon(Icons.Default.Menu, contentDescription = "Menu")
+                        Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
                     }
                 }
             )
@@ -91,7 +93,7 @@ fun ProjectScreen(
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
                     Text(
-                        "No projects yet. Create one from the main screen FAB.",
+                        stringResource(id = R.string.no_projects_yet),
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(horizontal = 16.dp),
                         overflow = TextOverflow.Visible

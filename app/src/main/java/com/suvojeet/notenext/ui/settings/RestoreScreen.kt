@@ -13,6 +13,8 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import android.net.Uri
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,8 +37,8 @@ fun RestoreScreen(
     if (showConfirmDialog != null) {
         AlertDialog(
             onDismissRequest = { showConfirmDialog = null },
-            title = { Text("Confirm Restore") },
-            text = { Text("Restoring from a backup will delete all your current notes, labels, and projects. This action cannot be undone. Are you sure you want to continue?") },
+            title = { Text(stringResource(id = R.string.confirm_restore)) },
+            text = { Text(stringResource(id = R.string.restore_confirmation_message)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -44,12 +46,12 @@ fun RestoreScreen(
                         showConfirmDialog = null
                     }
                 ) {
-                    Text("Restore")
+                    Text(stringResource(id = R.string.restore_title))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { showConfirmDialog = null }) {
-                    Text("Cancel")
+                    Text(stringResource(id = R.string.cancel))
                 }
             }
         )
@@ -58,10 +60,10 @@ fun RestoreScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Restore") },
+                title = { Text(stringResource(id = R.string.restore_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 }
             )
@@ -82,7 +84,7 @@ fun RestoreScreen(
                 if (state.isRestoring) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
-                    Text("Select Backup File")
+                    Text(stringResource(id = R.string.select_backup_file))
                 }
             }
             state.restoreResult?.let {

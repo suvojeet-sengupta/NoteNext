@@ -49,6 +49,8 @@ import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.ui.notes.NotesEvent
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -90,7 +92,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
             ) {
                 Icon(
                     Icons.Default.Delete,
-                    contentDescription = "Delete Icon",
+                    contentDescription = stringResource(id = R.string.delete),
                     tint = Color.White
                 )
             }
@@ -117,27 +119,27 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                         }
                         Box {
                             IconButton(onClick = { showMenu = true }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                                Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more_options))
                             }
                             DropdownMenu(
                                 expanded = showMenu,
                                 onDismissRequest = { showMenu = false }
                             ) {
                                 DropdownMenuItem(
-                                    text = { Text("Remove preview") },
+                                    text = { Text(stringResource(id = R.string.remove_preview)) },
                                     onClick = {
                                         onEvent(NotesEvent.OnRemoveLinkPreview(linkPreview.url))
                                         showMenu = false
                                     },
-                                    leadingIcon = { Icon(Icons.Default.Delete, contentDescription = "Remove preview") }
+                                    leadingIcon = { Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.remove_preview)) }
                                 )
                                 DropdownMenuItem(
-                                    text = { Text("Copy URL") },
+                                    text = { Text(stringResource(id = R.string.copy_url)) },
                                     onClick = {
                                         clipboardManager.setText(AnnotatedString(linkPreview.url))
                                         showMenu = false
                                     },
-                                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = "Copy URL") }
+                                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = stringResource(id = R.string.copy_url)) }
                                 )
                             }
                         }
@@ -145,7 +147,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                     linkPreview.imageUrl?.let { imageUrl ->
                         AsyncImage(
                             model = imageUrl,
-                            contentDescription = "Link preview image",
+                            contentDescription = stringResource(id = R.string.link_preview_image),
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(120.dp)

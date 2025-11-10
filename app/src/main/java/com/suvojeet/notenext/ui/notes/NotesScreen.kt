@@ -99,6 +99,8 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.ui.notes.SortType
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 import com.suvojeet.notenext.ui.reminder.RepeatOption
@@ -140,7 +142,8 @@ fun NotesScreen(
                         putExtra(Intent.EXTRA_SUBJECT, event.title)
                         putExtra(Intent.EXTRA_TEXT, event.content)
                     }
-                    val chooser = Intent.createChooser(intent, "Send notes via")
+                    // ***FIX 3: Use context.getString() here, inside the non-composable lambda***
+                    val chooser = android.content.Intent.createChooser(intent, context.getString(R.string.send_notes_via))
                     context.startActivity(chooser)
                 }
 
@@ -148,10 +151,12 @@ fun NotesScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
                 is NotesUiEvent.LinkPreviewRemoved -> {
-                    Toast.makeText(context, "Link preview removed", Toast.LENGTH_SHORT).show()
+                    // ***FIX 4: Use context.getString() here***
+                    Toast.makeText(context, context.getString(R.string.link_preview_removed), Toast.LENGTH_SHORT).show()
                 }
                 is NotesUiEvent.ProjectCreated -> {
-                    Toast.makeText(context, "Project '${event.projectName}' created", Toast.LENGTH_SHORT).show()
+                    // ***FIX 5: Use context.getString() here, which can handle formatted strings***
+                    Toast.makeText(context, context.getString(R.string.project_created, event.projectName), Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -222,7 +227,7 @@ fun NotesScreen(
                             },
                             navigationIcon = {
                                 IconButton(onClick = onMenuClick) {
-                                    Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                    Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
                                 }
                             },
                             colors = androidx.compose.material3.TopAppBarDefaults.topAppBarColors(
@@ -256,8 +261,8 @@ fun NotesScreen(
             if (showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },
-                    title = { Text("Move notes to bin?") },
-                    text = { Text("Selected notes will be moved to the bin and permanently deleted after ${autoDeleteDays} days.") },
+                    title = { Text(stringResource(id = R.string.move_to_bin_question)) },
+                    text = { Text(stringResource(id = R.string.move_to_bin_message, autoDeleteDays)) },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -265,12 +270,12 @@ fun NotesScreen(
                                 showDeleteDialog = false
                             }
                         ) {
-                            Text("Move to bin")
+                            Text(stringResource(id = R.string.move_to_bin))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel")
+                            Text(stringResource(id = R.string.cancel))
                         }
                     }
                 )
@@ -354,7 +359,7 @@ fun NotesScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "No notes yet. Tap the '+' button to add one.",
+                                text = stringResource(id = R.string.no_notes_yet),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onBackground,
@@ -381,7 +386,7 @@ fun NotesScreen(
                                 if (pinnedNotes.isNotEmpty()) {
                                     item(span = StaggeredGridItemSpan.FullLine) {
                                         Text(
-                                            text = "PINNED",
+                                            text = stringResource(id = R.string.pinned),
                                             modifier = Modifier.padding(8.dp),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -411,7 +416,7 @@ fun NotesScreen(
                                     if (pinnedNotes.isNotEmpty()) {
                                         item(span = StaggeredGridItemSpan.FullLine) {
                                             Text(
-                                                text = "OTHERS",
+                                                text = stringResource(id = R.string.others),
                                                 modifier = Modifier.padding(8.dp),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -448,7 +453,7 @@ fun NotesScreen(
                                 if (pinnedNotes.isNotEmpty()) {
                                     item {
                                         Text(
-                                            text = "PINNED",
+                                            text = stringResource(id = R.string.pinned),
                                             modifier = Modifier.padding(8.dp),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -478,7 +483,7 @@ fun NotesScreen(
                                     if (pinnedNotes.isNotEmpty()) {
                                         item {
                                             Text(
-                                                text = "OTHERS",
+                                                text = stringResource(id = R.string.others),
                                                 modifier = Modifier.padding(8.dp),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -537,12 +542,12 @@ private fun CreateProjectDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Create New Project") },
+        title = { Text(stringResource(id = R.string.create_new_project)) },
         text = {
             OutlinedTextField(
                 value = projectName,
                 onValueChange = { projectName = it },
-                label = { Text("Project Name") },
+                label = { Text(stringResource(id = R.string.project_name)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth()
             )
@@ -552,12 +557,13 @@ private fun CreateProjectDialog(
                 onClick = { onConfirm(projectName) },
                 enabled = projectName.isNotBlank()
             ) {
-                Text("Create")
+                // This call was already correct, as it's inside a @Composable function
+                Text(stringResource(id = R.string.create))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
@@ -573,7 +579,7 @@ private fun MoveToProjectDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Move to Project") },
+        title = { Text(stringResource(id = R.string.move_to_project)) },
         text = {
             Column {
                 projects.forEach { project ->
@@ -602,7 +608,7 @@ private fun MoveToProjectDialog(
                         selected = (selectedProject == null),
                         onClick = { selectedProject = null }
                     )
-                    Text(text = "None (Remove from project)", modifier = Modifier.padding(start = 8.dp))
+                    Text(text = stringResource(id = R.string.none_remove_from_project), modifier = Modifier.padding(start = 8.dp))
                 }
             }
         },
@@ -610,19 +616,13 @@ private fun MoveToProjectDialog(
             TextButton(
                 onClick = { onConfirm(selectedProject?.id) }
             ) {
-                Text("Move")
+                Text(stringResource(id = R.string.move))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
 }
-
-
-
-
-
-

@@ -6,6 +6,8 @@ import android.content.Intent
 import android.provider.Settings
 import android.app.AlarmManager
 import android.os.Build
+import java.util.Locale
+import android.content.res.Configuration
 
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -39,16 +41,27 @@ import androidx.compose.runtime.getValue
 import com.suvojeet.notenext.ui.setup.SetupScreen
 
 import androidx.compose.ui.Modifier
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 class MainActivity : FragmentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val settingsRepository = SettingsRepository(this)
+        val languageCode = runBlocking { settingsRepository.language.first() }
+        val locale = Locale(languageCode)
+        Locale.setDefault(locale)
+        val config = Configuration(resources.configuration)
+        config.setLocale(locale)
+        resources.updateConfiguration(config, resources.displayMetrics)
+
         enableEdgeToEdge()
         val database = NoteDatabase.getDatabase(this)
         val linkPreviewRepository = LinkPreviewRepository()
         val factory = ViewModelFactory(database.noteDao(), database.labelDao(), database.projectDao(), linkPreviewRepository, application)
-        val settingsRepository = SettingsRepository(this)
+        // val settingsRepository = SettingsRepository(this) // Already initialized above
 
         val startNoteId = intent.getIntExtra("NOTE_ID", -1)
         setContent {

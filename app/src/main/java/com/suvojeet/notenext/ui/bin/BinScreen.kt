@@ -75,7 +75,7 @@ fun BinScreen(
                         title = { Text(stringResource(id = R.string.bin_title)) },
                         navigationIcon = {
                             IconButton(onClick = onMenuClick) {
-                                Icon(Icons.Default.Menu, contentDescription = "Menu")
+                                Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
                             }
                         }
                     )
@@ -163,26 +163,26 @@ private fun BinContextualTopAppBar(
     var showMenu by remember { mutableStateOf(false) }
 
     TopAppBar(
-        title = { Text(text = "$selectedItemCount selected") },
+        title = { Text(text = stringResource(id = R.string.x_selected, selectedItemCount)) },
         navigationIcon = {
             IconButton(onClick = onClearSelection) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Clear selection")
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.clear_selection))
             }
         },
         actions = {
             IconButton(onClick = onRestoreClick) {
-                Icon(Icons.Default.Restore, contentDescription = "Restore")
+                Icon(Icons.Default.Restore, contentDescription = stringResource(id = R.string.restore))
             }
             Box {
                 IconButton(onClick = { showMenu = !showMenu }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "More options")
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more_options))
                 }
                 DropdownMenu(
                     expanded = showMenu,
                     onDismissRequest = { showMenu = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Delete permanently") },
+                        text = { Text(stringResource(id = R.string.delete_permanently)) },
                         onClick = {
                             onDeletePermanentlyClick()
                             showMenu = false

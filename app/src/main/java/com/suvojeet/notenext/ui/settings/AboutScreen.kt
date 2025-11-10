@@ -57,6 +57,7 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.util.NetworkUtils
 import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
  @OptIn(ExperimentalMaterial3Api::class)
@@ -74,7 +75,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
             TopAppBar(
                 title = { 
                     Text(
-                        "About",
+                        stringResource(id = R.string.about_screen_title),
                         style = MaterialTheme.typography.titleLarge.copy(
                             fontWeight = FontWeight.Bold
                         )
@@ -82,7 +83,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
                 },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
-                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -120,13 +121,13 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     ) {
                         Image(
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
-                            contentDescription = "NoteNext Logo",
+                            contentDescription = stringResource(id = R.string.notenext_logo),
                             modifier = Modifier.fillMaxSize().padding(16.dp)
                         )
                     }
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "NoteNext",
+                        stringResource(id = R.string.notenext),
                         style = MaterialTheme.typography.headlineMedium.copy(
                             fontWeight = FontWeight.Bold
                         ),
@@ -135,7 +136,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        "Minimal • Open Source • Privacy-First",
+                        stringResource(id = R.string.about_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
                         textAlign = TextAlign.Center
@@ -147,7 +148,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             // Features Section
             Text(
-                "What Makes Us Different",
+                stringResource(id = R.string.what_makes_us_different),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -156,8 +157,8 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             FeatureCard(
                 icon = Icons.Default.Storage,
-                title = "Local Storage",
-                description = "All your data stays on your device. No cloud, no tracking.",
+                title = stringResource(id = R.string.local_storage_title),
+                description = stringResource(id = R.string.local_storage_description),
                 themeMode = themeMode
             )
 
@@ -165,8 +166,8 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             FeatureCard(
                 icon = Icons.Default.Shield,
-                title = "Privacy First",
-                description = "Built with your privacy in mind. Your notes are truly yours.",
+                title = stringResource(id = R.string.privacy_first_title),
+                description = stringResource(id = R.string.privacy_first_description),
                 themeMode = themeMode
             )
 
@@ -174,8 +175,8 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             FeatureCard(
                 icon = Icons.Default.Code,
-                title = "Open Source",
-                description = "Transparent development. Contribute and customize freely.",
+                title = stringResource(id = R.string.open_source_title),
+                description = stringResource(id = R.string.open_source_description),
                 themeMode = themeMode
             )
 
@@ -183,7 +184,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             // About Section
             Text(
-                "About the App",
+                stringResource(id = R.string.about_the_app_title),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -191,7 +192,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
             )
             
             Text(
-                "NoteNext helps you organize your thoughts, ideas, and daily tasks in a simple and intuitive way. Create notes, checklists, and set reminders to stay on top of your schedule.",
+                stringResource(id = R.string.about_the_app_description),
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 lineHeight = 24.sp
@@ -201,7 +202,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             // Team Section
             Text(
-                "Meet the Team",
+                stringResource(id = R.string.meet_the_team),
                 style = MaterialTheme.typography.titleLarge.copy(
                     fontWeight = FontWeight.Bold
                 ),
@@ -210,7 +211,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             TeamMemberCard(
                 name = "Suvojeet Sengupta",
-                role = "Core Developer",
+                role = stringResource(id = R.string.core_developer),
                 avatarUrl = "https://avatars.githubusercontent.com/u/107928380?s=400&u=6e6351e1a09a6c473133a46e28f4b005a2345a57&v=4",
                 githubUrl = "https://github.com/suvojeet-sengupta",
                 isInternetAvailable = isInternetAvailable,
@@ -222,7 +223,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             TeamMemberCard(
                 name = "Jendermine",
-                role = "Developer",
+                role = stringResource(id = R.string.developer),
                 avatarUrl = "https://avatars.githubusercontent.com/u/92355621",
                 githubUrl = "https://github.com/jendermine",
                 isInternetAvailable = isInternetAvailable,
@@ -234,7 +235,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
 
             // Footer
             Text(
-                "Made with ❤️ for better note-taking",
+                stringResource(id = R.string.made_with_love),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
                 modifier = Modifier.fillMaxWidth(),
@@ -353,7 +354,7 @@ fun TeamMemberCard(
                 ) {
                     AsyncImage(
                         model = avatarUrl,
-                        contentDescription = "$name Profile Picture",
+                        contentDescription = stringResource(id = R.string.profile_picture),
                         modifier = Modifier.fillMaxSize()
                     )
                 }

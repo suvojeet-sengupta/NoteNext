@@ -21,13 +21,15 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @Composable
 fun ChecklistEditor(
@@ -65,10 +67,10 @@ fun ChecklistEditor(
                         modifier = Modifier
                             .weight(1f)
                             .focusRequester(focusRequester),
-                        placeholder = { Text("List item") }
+                        placeholder = { Text(stringResource(id = R.string.list_item)) }
                     )
                     IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_item))
                     }
                 }
             }
@@ -82,8 +84,8 @@ fun ChecklistEditor(
 
         item {
             TextButton(onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
-                Icon(Icons.Default.Add, contentDescription = "Add item")
-                Text("Add item")
+                Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_item))
+                Text(stringResource(id = R.string.add_item))
             }
         }
 
@@ -112,10 +114,10 @@ fun ChecklistEditor(
                         modifier = Modifier
                             .weight(1f)
                             .focusRequester(focusRequester),
-                        placeholder = { Text("List item") }
+                        placeholder = { Text(stringResource(id = R.string.list_item)) }
                     )
                     IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
-                        Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                        Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_item))
                     }
                 }
             }

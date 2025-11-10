@@ -1,0 +1,30 @@
+<resources>
+    <string name="settings_title">Settings</string>
+    <string name="display_section_title">Display</string>
+    <string name="theme">Theme</string>
+    <string name="rich_link_preview">Rich Link Preview</string>
+    <string name="rich_link_preview_subtitle">Show preview for links in notes</string>
+    <string name="shape_family">Shape Family (experimental)</string>
+    <string name="bin_section_title">Bin</string>
+    <string name="auto_delete_binned_notes">Auto-delete binned notes</string>
+    <string name="auto_delete_subtitle">After %1$d days</string>
+    <string name="security_section_title">Security</string>
+    <string name="app_lock">App Lock</string>
+    <string name="app_lock_subtitle">Secure the app with a PIN or biometric lock</string>
+    <string name="backup_restore_section_title">Backup &amp; Restore</string>
+    <string name="backup">Backup</string>
+    <string name="restore">Restore</string>
+    <string name="about">About</string>
+    <string name="choose_theme">Choose Theme</string>
+    <string name="theme_amoled">True AMOLED (Optimized For Amoled Display)</string>
+    <string name="auto_delete_after">Auto-delete after</string>
+    <string name="days">%1$d days</string>
+    <string name="choose_shape_family">Choose Shape Family</string>
+    <string name="language">Language</string>
+    <string name="language_subtitle">Change the application language</string>
+    <string name="choose_language">Choose Language</string>
+    <string name="language_english">English</string>
+    <string name="language_hindi">Hindi</string>
+
+
+</resources>

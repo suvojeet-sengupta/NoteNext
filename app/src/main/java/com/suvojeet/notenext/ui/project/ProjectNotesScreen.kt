@@ -49,6 +49,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -164,7 +167,7 @@ fun ProjectNotesScreen(
                             },
                             navigationIcon = {
                                 IconButton(onClick = onBackClick) {
-                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
+                                    Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                                 }
                             },
                             colors = TopAppBarDefaults.topAppBarColors(
@@ -197,8 +200,8 @@ fun ProjectNotesScreen(
             if (showDeleteDialog) {
                 AlertDialog(
                     onDismissRequest = { showDeleteDialog = false },
-                    title = { Text("Move notes to bin?") },
-                    text = { Text("Selected notes will be moved to the bin and permanently deleted after ${autoDeleteDays} days.") },
+                    title = { Text(stringResource(id = R.string.move_to_bin_question)) },
+                    text = { Text(stringResource(id = R.string.move_to_bin_message, autoDeleteDays)) },
                     confirmButton = {
                         TextButton(
                             onClick = {
@@ -206,12 +209,12 @@ fun ProjectNotesScreen(
                                 showDeleteDialog = false
                             }
                         ) {
-                            Text("Move to bin")
+                            Text(stringResource(id = R.string.move_to_bin))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDeleteDialog = false }) {
-                            Text("Cancel")
+                            Text(stringResource(id = R.string.cancel))
                         }
                     }
                 )
@@ -254,7 +257,7 @@ fun ProjectNotesScreen(
                             )
                             Spacer(modifier = Modifier.height(16.dp))
                             Text(
-                                text = "No notes yet. Tap the '+' button to add one.",
+                                text = stringResource(id = R.string.no_notes_yet),
                                 textAlign = TextAlign.Center,
                                 style = MaterialTheme.typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onBackground,
@@ -279,9 +282,9 @@ fun ProjectNotesScreen(
                                 verticalItemSpacing = 8.dp
                             ) {
                                 if (pinnedNotes.isNotEmpty()) {
-                                    item(span = StaggeredGridItemSpan.FullLine) {
+                                item(span = StaggeredGridItemSpan.FullLine) {
                                         Text(
-                                            text = "PINNED",
+                                            text = stringResource(id = R.string.pinned),
                                             modifier = Modifier.padding(8.dp),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -312,7 +315,7 @@ fun ProjectNotesScreen(
                                     if (pinnedNotes.isNotEmpty()) {
                                         item(span = StaggeredGridItemSpan.FullLine) {
                                             Text(
-                                                text = "OTHERS",
+                                                text = stringResource(id = R.string.others),
                                                 modifier = Modifier.padding(8.dp),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -349,7 +352,7 @@ fun ProjectNotesScreen(
                                 if (pinnedNotes.isNotEmpty()) {
                                     item {
                                         Text(
-                                            text = "PINNED",
+                                            text = stringResource(id = R.string.pinned),
                                             modifier = Modifier.padding(8.dp),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = MaterialTheme.colorScheme.onSurfaceVariant
@@ -379,7 +382,7 @@ fun ProjectNotesScreen(
                                     if (pinnedNotes.isNotEmpty()) {
                                         item {
                                             Text(
-                                                text = "OTHERS",
+                                                text = stringResource(id = R.string.others),
                                                 modifier = Modifier.padding(8.dp),
                                                 style = MaterialTheme.typography.labelSmall,
                                                 color = MaterialTheme.colorScheme.onSurfaceVariant

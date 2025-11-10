@@ -26,6 +26,7 @@ object PreferencesKeys {
     val ENABLE_APP_LOCK = booleanPreferencesKey("enable_app_lock")
     val APP_LOCK_PIN = stringPreferencesKey("app_lock_pin")
     val IS_SETUP_COMPLETE = booleanPreferencesKey("is_setup_complete")
+    val LANGUAGE = stringPreferencesKey("language")
 }
 
 class SettingsRepository(private val context: Context) {
@@ -33,7 +34,7 @@ class SettingsRepository(private val context: Context) {
     val themeMode: Flow<ThemeMode> = context.dataStore.data
         .map {
             preferences ->
-            ThemeMode.valueOf(preferences[PreferencesKeys.THEME_MODE] ?: ThemeMode.DARK.name)
+            ThemeMode.valueOf(preferences[PreferencesKeys.THEME_MODE] ?: ThemeMode.SYSTEM.name)
         }
 
     suspend fun saveThemeMode(themeMode: ThemeMode) {
@@ -110,6 +111,17 @@ class SettingsRepository(private val context: Context) {
     suspend fun setSetupComplete(isComplete: Boolean) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.IS_SETUP_COMPLETE] = isComplete
+        }
+    }
+
+    val language: Flow<String> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.LANGUAGE] ?: "en"
+        }
+
+    suspend fun saveLanguage(language: String) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LANGUAGE] = language
         }
     }
 }

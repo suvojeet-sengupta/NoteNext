@@ -9,6 +9,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @Composable
 fun SaveAsDialog(
@@ -21,24 +23,24 @@ fun SaveAsDialog(
             shape = MaterialTheme.shapes.large
         ) {
             Column(modifier = Modifier.padding(24.dp)) {
-                Text(text = "Save note as", style = MaterialTheme.typography.titleLarge)
+                Text(text = stringResource(id = R.string.save_note_as), style = MaterialTheme.typography.titleLarge)
                 Spacer(modifier = Modifier.height(16.dp))
-                Text("Select format to save the note in Documents folder.")
+                Text(stringResource(id = R.string.select_format_to_save_note))
                 Spacer(modifier = Modifier.height(24.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
                     TextButton(onClick = onDismiss) {
-                        Text("Cancel")
+                        Text(stringResource(id = R.string.cancel))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(onClick = { onSaveAsTxt(); onDismiss() }) {
-                        Text("TXT")
+                        Text(stringResource(id = R.string.txt))
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = { onSaveAsPdf(); onDismiss() }) {
-                        Text("PDF")
+                        Text(stringResource(id = R.string.pdf))
                     }
                 }
             }
@@ -56,13 +58,13 @@ fun LabelDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Add Label") },
+        title = { Text(text = stringResource(id = R.string.add_label)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = newLabel,
                     onValueChange = { newLabel = it },
-                    label = { Text("New Label") }
+                    label = { Text(stringResource(id = R.string.new_label)) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
                 LazyColumn {
@@ -87,12 +89,12 @@ fun LabelDialog(
                     onDismiss()
                 }
             ) {
-                Text("OK")
+                Text(stringResource(id = R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )
@@ -107,13 +109,13 @@ fun InsertLinkDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Insert Link") },
+        title = { Text(text = stringResource(id = R.string.insert_link)) },
         text = {
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text("URL") },
-                placeholder = { Text("https://example.com") }
+                label = { Text(stringResource(id = R.string.url)) },
+                placeholder = { Text(stringResource(id = R.string.example_url)) }
             )
         },
         confirmButton = {
@@ -125,12 +127,12 @@ fun InsertLinkDialog(
                     onDismiss()
                 }
             ) {
-                Text("OK")
+                Text(stringResource(id = R.string.ok))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )

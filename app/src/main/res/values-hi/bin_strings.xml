@@ -1,0 +1,17 @@
+<resources>
+    <string name="bin_title">बिन</string>
+    <string name="empty_bin">बिन खाली करें</string>
+    <string name="bin_empty_message">बिन खाली है</string>
+    <string name="restore_note">नोट रीस्टोर करें</string>
+    <string name="delete_permanently">स्थायी रूप से डिलीट करें</string>
+    <string name="binned_note_restored">नोट रीस्टोर किया गया</string>
+    <string name="binned_note_deleted_permanently">नोट स्थायी रूप से डिलीट किया गया</string>
+    <string name="empty_bin_confirmation">क्या आप वाकई बिन खाली करना चाहते हैं? इससे बिन में मौजूद सभी नोट्स स्थायी रूप से डिलीट हो जाएंगे।</string>
+    <string name="empty_bin_confirmation_title">बिन खाली करें?</string>
+
+
+    <string name="x_selected">%1$d चयनित</string>
+    <string name="clear_selection">चयन साफ़ करें</string>
+
+
+</resources>

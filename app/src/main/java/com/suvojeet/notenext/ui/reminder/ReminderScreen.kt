@@ -34,6 +34,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.text.font.FontWeight
 import com.suvojeet.notenext.dependency_injection.ViewModelFactory
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -49,12 +51,12 @@ fun ReminderScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Reminders") },
+                title = { Text(stringResource(id = R.string.reminders_title)) },
                 navigationIcon = {
                     IconButton(onClick = onBackClick) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = "Back"
+                            contentDescription = stringResource(id = R.string.back)
                         )
                     }
                 },
@@ -67,7 +69,7 @@ fun ReminderScreen(
         },
         floatingActionButton = {
             FloatingActionButton(onClick = onAddReminderClick) {
-                Icon(imageVector = Icons.Default.Add, contentDescription = "Add reminder")
+                Icon(imageVector = Icons.Default.Add, contentDescription = stringResource(id = R.string.add_reminder))
             }
         }
     ) { paddingValues ->
@@ -79,7 +81,7 @@ fun ReminderScreen(
                 horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                 verticalArrangement = androidx.compose.foundation.layout.Arrangement.Center
             ) {
-                Text(text = "No upcoming reminders.", style = MaterialTheme.typography.bodyLarge)
+                Text(text = stringResource(id = R.string.no_upcoming_reminders), style = MaterialTheme.typography.bodyLarge)
             }
         } else {
             LazyColumn(
@@ -109,13 +111,13 @@ fun ReminderScreen(
                             note.reminderTime?.let { time ->
                                 val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
                                 Text(
-                                    text = "Time: ${sdf.format(Date(time))}",
+                                    text = stringResource(id = R.string.time, sdf.format(Date(time))),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }
                             note.repeatOption?.let { repeat ->
                                 Text(
-                                    text = "Repeat: $repeat",
+                                    text = stringResource(id = R.string.repeat, repeat),
                                     style = MaterialTheme.typography.bodyMedium
                                 )
                             }

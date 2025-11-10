@@ -12,6 +12,8 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import kotlinx.coroutines.launch
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,7 +29,7 @@ fun PinSetupScreen(onPinSet: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("Set up PIN") }
+                title = { Text(stringResource(id = R.string.pin_setup_title)) }
             )
         }
     ) { paddingValues ->
@@ -39,13 +41,13 @@ fun PinSetupScreen(onPinSet: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("Create a PIN to secure your notes", style = MaterialTheme.typography.bodyLarge)
+            Text(stringResource(id = R.string.create_pin_message), style = MaterialTheme.typography.bodyLarge)
             Spacer(modifier = Modifier.height(32.dp))
 
             OutlinedTextField(
                 value = pin,
                 onValueChange = { pin = it.take(8) },
-                label = { Text("Enter PIN (4-8 digits)") },
+                label = { Text(stringResource(id = R.string.enter_pin)) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth()
@@ -54,7 +56,7 @@ fun PinSetupScreen(onPinSet: () -> Unit) {
             OutlinedTextField(
                 value = confirmPin,
                 onValueChange = { confirmPin = it.take(8) },
-                label = { Text("Confirm PIN") },
+                label = { Text(stringResource(id = R.string.confirm_pin)) },
                 visualTransformation = PasswordVisualTransformation(),
                 keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.NumberPassword),
                 modifier = Modifier.fillMaxWidth()
@@ -70,11 +72,11 @@ fun PinSetupScreen(onPinSet: () -> Unit) {
             Button(
                 onClick = {
                     if (pin.length < 4) {
-                        error = "PIN must be at least 4 digits"
+                        error = context.getString(R.string.pin_too_short)
                         return@Button
                     }
                     if (pin != confirmPin) {
-                        error = "PINs do not match"
+                        error = context.getString(R.string.pins_do_not_match)
                         return@Button
                     }
                     scope.launch {
@@ -85,7 +87,7 @@ fun PinSetupScreen(onPinSet: () -> Unit) {
                 },
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Save PIN")
+                Text(stringResource(id = R.string.save_pin))
             }
         }
     }

@@ -1,0 +1,30 @@
+<resources>
+    <string name="settings_title">सेटिंग्स</string>
+    <string name="display_section_title">डिस्प्ले</string>
+    <string name="theme">थीम</string>
+    <string name="rich_link_preview">रिच लिंक प्रीव्यू</string>
+    <string name="rich_link_preview_subtitle">नोट्स में लिंक के लिए प्रीव्यू दिखाएं</string>
+    <string name="shape_family">शेप फैमिली (प्रायोगिक)</string>
+    <string name="bin_section_title">बिन</string>
+    <string name="auto_delete_binned_notes">बिन किए गए नोट्स को स्वतः हटाएं</string>
+    <string name="auto_delete_subtitle">%1$d दिनों के बाद</string>
+    <string name="security_section_title">सुरक्षा</string>
+    <string name="app_lock">ऐप लॉक</string>
+    <string name="app_lock_subtitle">पिन या बायोमेट्रिक लॉक से ऐप को सुरक्षित करें</string>
+    <string name="backup_restore_section_title">बैकअप और रीस्टोर</string>
+    <string name="backup">बैकअप</string>
+    <string name="restore">रीस्टोर</string>
+    <string name="about">के बारे में</string>
+    <string name="choose_theme">थीम चुनें</string>
+    <string name="theme_amoled">ट्रू एमोलेड (एमोलेड डिस्प्ले के लिए अनुकूलित)</string>
+    <string name="auto_delete_after">इसके बाद स्वतः हटाएं</string>
+    <string name="days">%1$d दिन</string>
+    <string name="choose_shape_family">शेप फैमिली चुनें</string>
+    <string name="language">भाषा</string>
+    <string name="language_subtitle">एप्लिकेशन की भाषा बदलें</string>
+    <string name="choose_language">भाषा चुनें</string>
+    <string name="language_english">अंग्रेजी</string>
+    <string name="language_hindi">हिंदी</string>
+
+
+</resources>

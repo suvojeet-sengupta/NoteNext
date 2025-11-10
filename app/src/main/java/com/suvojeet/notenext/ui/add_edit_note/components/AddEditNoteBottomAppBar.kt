@@ -34,6 +34,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @Composable
 fun AddEditNoteBottomAppBar(
@@ -67,28 +69,28 @@ fun AddEditNoteBottomAppBar(
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = "Add attachment")
+                        Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_attachment))
                     }
                     DropdownMenu(
                         expanded = showAttachmentMenu,
                         onDismissRequest = { showAttachmentMenu = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Add image") },
+                            text = { Text(stringResource(id = R.string.add_image)) },
                             onClick = {
                                 onImageClick()
                                 showAttachmentMenu = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Take photo") },
+                            text = { Text(stringResource(id = R.string.take_photo)) },
                             onClick = {
                                 onTakePhotoClick()
                                 showAttachmentMenu = false
                             }
                         )
                         DropdownMenuItem(
-                            text = { Text("Audio Recording") },
+                            text = { Text(stringResource(id = R.string.audio_recording)) },
                             onClick = {
                                 onAudioClick()
                                 showAttachmentMenu = false
@@ -103,7 +105,7 @@ fun AddEditNoteBottomAppBar(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Icons.Default.Palette, contentDescription = "Toggle color picker")
+                    Icon(Icons.Default.Palette, contentDescription = stringResource(id = R.string.toggle_color_picker))
                 }
                 FloatingActionButton(
                     onClick = { showFormatBar(true) },
@@ -112,7 +114,7 @@ fun AddEditNoteBottomAppBar(
                     containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Icons.Default.TextFields, contentDescription = "Toggle format bar")
+                    Icon(Icons.Default.TextFields, contentDescription = stringResource(id = R.string.toggle_format_bar))
                 }
             }
             Row(
@@ -135,7 +137,7 @@ fun AddEditNoteBottomAppBar(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.Undo,
-                                contentDescription = "Undo"
+                                contentDescription = stringResource(id = R.string.undo)
                             )
                         }
 
@@ -151,7 +153,7 @@ fun AddEditNoteBottomAppBar(
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.Redo,
-                                contentDescription = "Redo"
+                                contentDescription = stringResource(id = R.string.redo)
                             )
                         }
                     }
@@ -168,7 +170,7 @@ fun AddEditNoteBottomAppBar(
                     ) {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
-                            contentDescription = "More options"
+                            contentDescription = stringResource(id = R.string.more_options)
                         )
                     }
                 }

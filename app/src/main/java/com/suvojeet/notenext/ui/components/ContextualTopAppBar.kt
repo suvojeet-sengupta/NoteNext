@@ -23,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -97,7 +99,7 @@ fun ContextualTopAppBar(
                 AnimatedIconButton(
                     onClick = onClearSelection,
                     icon = Icons.AutoMirrored.Filled.ArrowBack,
-                    contentDescription = "Clear selection"
+                    contentDescription = stringResource(id = R.string.clear_selection)
                 )
             },
             actions = {
@@ -108,32 +110,32 @@ fun ContextualTopAppBar(
                     AnimatedIconButton(
                         onClick = onTogglePinClick,
                         icon = Icons.Outlined.PushPin,
-                        contentDescription = "Pin note",
+                        contentDescription = stringResource(id = R.string.pin_note),
                         delay = 50
                     )
                     AnimatedIconButton(
                         onClick = onReminderClick,
                         icon = Icons.Default.Notifications,
-                        contentDescription = "Set reminder",
+                        contentDescription = stringResource(id = R.string.reminders),
                         delay = 100
                     )
                     AnimatedIconButton(
                         onClick = onColorClick,
                         icon = Icons.Default.Palette,
-                        contentDescription = "Change color",
+                        contentDescription = stringResource(id = R.string.toggle_color_picker),
                         delay = 150
                     )
                     AnimatedIconButton(
                         onClick = onLabelClick,
                         icon = Icons.AutoMirrored.Outlined.Label,
-                        contentDescription = "Add label",
+                        contentDescription = stringResource(id = R.string.add_label),
                         delay = 200
                     )
                     Box {
                         AnimatedIconButton(
                             onClick = { showMenu = !showMenu },
                             icon = Icons.Default.MoreVert,
-                            contentDescription = "More options",
+                            contentDescription = stringResource(id = R.string.more_options),
                             delay = 250
                         )
 
@@ -145,14 +147,14 @@ fun ContextualTopAppBar(
                                 .widthIn(min = 180.dp)
                         ) {
                             AnimatedDropdownItem(
-                                text = "Archive",
+                                text = stringResource(id = R.string.archive),
                                 onClick = {
                                     onArchiveClick()
                                     showMenu = false
                                 }
                             )
                             AnimatedDropdownItem(
-                                text = "Delete",
+                                text = stringResource(id = R.string.delete),
                                 onClick = {
                                     onDeleteClick()
                                     showMenu = false
@@ -160,7 +162,7 @@ fun ContextualTopAppBar(
                                 textColor = MaterialTheme.colorScheme.error
                             )
                             AnimatedDropdownItem(
-                                text = "Make a copy",
+                                text = stringResource(id = R.string.make_a_copy),
                                 onClick = {
                                     onCopyClick()
                                     showMenu = false
@@ -168,7 +170,7 @@ fun ContextualTopAppBar(
                             )
                             if (selectedItemCount == 1) {
                                 AnimatedDropdownItem(
-                                    text = "Share",
+                                    text = stringResource(id = R.string.share),
                                     onClick = {
                                         onSendClick()
                                         showMenu = false
@@ -176,7 +178,7 @@ fun ContextualTopAppBar(
                                 )
                             }
                             AnimatedDropdownItem(
-                                text = "Move to project",
+                                text = stringResource(id = R.string.move_to_project),
                                 onClick = {
                                     onMoveToProjectClick()
                                     showMenu = false
