@@ -83,6 +83,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.background
 
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 
 import androidx.compose.ui.text.font.FontWeight
 
@@ -139,6 +140,7 @@ import com.suvojeet.notenext.ui.settings.RestoreScreen
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
+import com.suvojeet.notenext.R
 import kotlinx.coroutines.flow.SharingStarted
 
 
@@ -182,8 +184,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                 PermanentDrawerSheet(modifier = Modifier.fillMaxWidth(0.15f)) {
 
                                     Text(
-
-                                        text = "NoteNext",
+                                        text = stringResource(id = R.string.app_name),
 
                                         style = MaterialTheme.typography.headlineMedium.copy(fontWeight = FontWeight.Bold),
 
@@ -201,9 +202,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                     NavigationDrawerItem(
 
-                                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
+                                        icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = stringResource(id = R.string.notes)) },
 
-                                        label = { Text("Notes") },
+                                        label = { Text(stringResource(id = R.string.notes)) },
 
                                         selected = currentRoute == "notes" && notesState.filteredLabel == null,
 
@@ -222,8 +223,8 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                                     )
 
                                     NavigationDrawerItem(
-                                        icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
-                                        label = { Text("Projects") },
+                                        icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = stringResource(id = R.string.projects)) },
+                                        label = { Text(stringResource(id = R.string.projects)) },
                                         selected = currentRoute == "projects",
                                         onClick = {
                                             navController.navigate("projects")
@@ -233,9 +234,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                     NavigationDrawerItem(
 
-                                        icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
+                                        icon = { Icon(Icons.Default.Archive, contentDescription = stringResource(id = R.string.archive)) },
 
-                                        label = { Text("Archive") },
+                                        label = { Text(stringResource(id = R.string.archive)) },
 
                                         selected = currentRoute == "archive",
 
@@ -257,9 +258,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                     NavigationDrawerItem(
 
-                                        icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
+                                        icon = { Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.bin)) },
 
-                                        label = { Text("Bin") },
+                                        label = { Text(stringResource(id = R.string.bin)) },
 
                                         selected = currentRoute == "bin",
 
@@ -281,9 +282,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                     NavigationDrawerItem(
 
-                                        icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                                        icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(id = R.string.settings)) },
 
-                                        label = { Text("Settings") },
+                                        label = { Text(stringResource(id = R.string.settings)) },
 
                                         selected = currentRoute == "settings",
 
@@ -299,9 +300,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                     NavigationDrawerItem(
 
-                                        icon = { Icon(Icons.Default.Notifications, contentDescription = "Reminders") },
+                                        icon = { Icon(Icons.Default.Notifications, contentDescription = stringResource(id = R.string.reminders)) },
 
-                                        label = { Text("Reminders") },
+                                        label = { Text(stringResource(id = R.string.reminders)) },
 
                                         selected = currentRoute == "reminder",
 
@@ -325,9 +326,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                         NavigationDrawerItem(
 
-                                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Create new label") },
+                                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = stringResource(id = R.string.create_new_label)) },
 
-                                            label = { Text("Create new label") },
+                                            label = { Text(stringResource(id = R.string.create_new_label)) },
 
                                             selected = false,
 
@@ -359,7 +360,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                             Text(
 
-                                                text = "LABELS",
+                                                text = stringResource(id = R.string.labels_title),
 
                                                 style = MaterialTheme.typography.labelSmall,
 
@@ -377,7 +378,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                                     imageVector = Icons.Default.Edit,
 
-                                                    contentDescription = "Edit Labels",
+                                                    contentDescription = stringResource(id = R.string.edit_labels),
 
                                                     tint = MaterialTheme.colorScheme.onSurfaceVariant
 
@@ -709,7 +710,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
     
 
-                            text = "NoteNext",
+                            text = stringResource(id = R.string.app_name),
 
     
 
@@ -735,9 +736,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         NavigationDrawerItem(
 
-                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Notes") },
+                            icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = stringResource(id = R.string.notes)) },
 
-                            label = { Text("Notes") },
+                            label = { Text(stringResource(id = R.string.notes)) },
 
                             selected = currentRoute == "notes" && notesState.filteredLabel == null,
 
@@ -757,8 +758,8 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
                         )
 
                         NavigationDrawerItem(
-                            icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = "Projects") },
-                            label = { Text("Projects") },
+                            icon = { Icon(Icons.Default.CreateNewFolder, contentDescription = stringResource(id = R.string.projects)) },
+                            label = { Text(stringResource(id = R.string.projects)) },
                             selected = currentRoute == "projects",
                             onClick = {
                                 scope.launch { drawerState.close() }
@@ -769,9 +770,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         NavigationDrawerItem(
 
-                            icon = { Icon(Icons.Default.Archive, contentDescription = "Archive") },
+                            icon = { Icon(Icons.Default.Archive, contentDescription = stringResource(id = R.string.archive)) },
 
-                            label = { Text("Archive") },
+                            label = { Text(stringResource(id = R.string.archive)) },
 
                             selected = currentRoute == "archive",
 
@@ -795,9 +796,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         NavigationDrawerItem(
 
-                            icon = { Icon(Icons.Default.Delete, contentDescription = "Bin") },
+                            icon = { Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.bin)) },
 
-                            label = { Text("Bin") },
+                            label = { Text(stringResource(id = R.string.bin)) },
 
                             selected = currentRoute == "bin",
 
@@ -821,9 +822,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         NavigationDrawerItem(
 
-                            icon = { Icon(Icons.Default.Settings, contentDescription = "Settings") },
+                            icon = { Icon(Icons.Default.Settings, contentDescription = stringResource(id = R.string.settings)) },
 
-                            label = { Text("Settings") },
+                            label = { Text(stringResource(id = R.string.settings)) },
 
                             selected = currentRoute == "settings",
 
@@ -841,9 +842,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                         NavigationDrawerItem(
 
-                            icon = { Icon(Icons.Default.Notifications, contentDescription = "Reminders") },
+                            icon = { Icon(Icons.Default.Notifications, contentDescription = stringResource(id = R.string.reminders)) },
 
-                            label = { Text("Reminders") },
+                            label = { Text(stringResource(id = R.string.reminders)) },
 
                             selected = currentRoute == "reminder",
 
@@ -869,9 +870,9 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                             NavigationDrawerItem(
 
-                                icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = "Create new label") },
+                                icon = { Icon(Icons.AutoMirrored.Filled.Label, contentDescription = stringResource(id = R.string.create_new_label)) },
 
-                                label = { Text("Create new label") },
+                                label = { Text(stringResource(id = R.string.create_new_label)) },
 
                                 selected = false,
 
@@ -904,7 +905,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                 Text(
 
-                                    text = "LABELS",
+                                    text = stringResource(id = R.string.labels_title),
 
                                     style = MaterialTheme.typography.labelSmall,
 
@@ -924,7 +925,7 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
 
                                         imageVector = Icons.Default.Edit,
 
-                                        contentDescription = "Edit Labels",
+                                        contentDescription = stringResource(id = R.string.edit_labels),
 
                                         tint = MaterialTheme.colorScheme.onSurfaceVariant
 

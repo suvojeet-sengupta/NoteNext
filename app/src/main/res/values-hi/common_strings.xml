@@ -177,4 +177,5 @@
     <string name="about_subtitle">न्यूनतम • ओपन सोर्स • गोपनीयता-प्रथम</string>
     <string name="notenext_logo">नोटनेक्स्ट लोगो</string>
     <string name="profile_picture">प्रोफ़ाइल चित्र</string>
+    <string name="labels_title">लेबल</string>
 </resources>

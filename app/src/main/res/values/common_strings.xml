@@ -178,4 +178,5 @@
     <string name="about_subtitle">Minimal • Open Source • Privacy-First</string>
     <string name="notenext_logo">NoteNext Logo</string>
     <string name="profile_picture">Profile Picture</string>
+    <string name="labels_title">LABELS</string>
 </resources>
