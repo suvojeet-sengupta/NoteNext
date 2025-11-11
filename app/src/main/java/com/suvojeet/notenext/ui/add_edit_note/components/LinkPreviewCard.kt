@@ -52,6 +52,13 @@ import com.suvojeet.notenext.ui.notes.NotesEvent
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+/**
+ * Displays a preview card for a given URL, including its title, image, description, and the URL itself.
+ * Supports swiping to dismiss and a dropdown menu for more actions (remove preview, copy URL).
+ *
+ * @param linkPreview The [LinkPreview] data to display.
+ * @param onEvent Lambda to dispatch [NotesEvent]s, specifically for [NotesEvent.OnRemoveLinkPreview].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
@@ -59,29 +66,31 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
     val clipboardManager = LocalClipboardManager.current
     var showMenu by remember { mutableStateOf(false) }
 
+    // State for swipe-to-dismiss functionality.
     val dismissState = rememberSwipeToDismissBoxState(
         confirmValueChange = {
             if (it == SwipeToDismissBoxValue.EndToStart) {
                 onEvent(NotesEvent.OnRemoveLinkPreview(linkPreview.url))
-                true
+                true // Confirm dismissal.
             } else {
-                false
+                false // Do not dismiss for other swipe directions.
             }
         }
     )
 
     SwipeToDismissBox(
         state = dismissState,
-        enableDismissFromEndToStart = true,
+        enableDismissFromEndToStart = true, // Only allow swipe from end to start for dismissal.
         enableDismissFromStartToEnd = false,
         backgroundContent = {
+            // Animated background color for swipe-to-dismiss.
             val color by animateColorAsState(
                 when (dismissState.targetValue) {
                     SwipeToDismissBoxValue.Settled -> Color.Transparent
-                    SwipeToDismissBoxValue.EndToStart -> Color.Red
+                    SwipeToDismissBoxValue.EndToStart -> Color.Red // Red background when swiping to dismiss.
                     SwipeToDismissBoxValue.StartToEnd -> Color.Transparent
                 },
-                label = "background color"
+                label = "DismissBackgroundColor" // Descriptive label for animation.
             )
             Box(
                 modifier = Modifier
@@ -96,11 +105,11 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                     tint = Color.White
                 )
             }
-        }) { 
+        }) {
             Card(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { linkPreview.url.let { uriHandler.openUri(it) } },
+                    .clickable { linkPreview.url.let { uriHandler.openUri(it) } }, // Open URL on card click.
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
             ) {
                 Column(modifier = Modifier.padding(8.dp)) {
@@ -109,6 +118,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Link title.
                         linkPreview.title?.let { title ->
                             Text(
                                 text = title,
@@ -117,6 +127,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                                 modifier = Modifier.weight(1f)
                             )
                         }
+                        // More options dropdown menu.
                         Box {
                             IconButton(onClick = { showMenu = true }) {
                                 Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more_options))
@@ -125,6 +136,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                                 expanded = showMenu,
                                 onDismissRequest = { showMenu = false }
                             ) {
+                                // Option to remove link preview.
                                 DropdownMenuItem(
                                     text = { Text(stringResource(id = R.string.remove_preview)) },
                                     onClick = {
@@ -133,6 +145,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                                     },
                                     leadingIcon = { Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.remove_preview)) }
                                 )
+                                // Option to copy URL to clipboard.
                                 DropdownMenuItem(
                                     text = { Text(stringResource(id = R.string.copy_url)) },
                                     onClick = {
@@ -144,6 +157,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                             }
                         }
                     }
+                    // Link image preview.
                     linkPreview.imageUrl?.let { imageUrl ->
                         AsyncImage(
                             model = imageUrl,
@@ -155,6 +169,7 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(6.dp))
                     }
+                    // Link description.
                     linkPreview.description?.let { description ->
                         Text(
                             text = description,
@@ -163,13 +178,14 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                     }
+                    // Clickable URL text.
                     ClickableText(
                         text = buildAnnotatedString {
                             withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = TextDecoration.Underline)) {
                                 append(linkPreview.url)
                             }
                         },
-                        onClick = { uriHandler.openUri(linkPreview.url) },
+                        onClick = { uriHandler.openUri(linkPreview.url) }, // Open URL on click.
                         style = MaterialTheme.typography.bodySmall
                     )
                 }

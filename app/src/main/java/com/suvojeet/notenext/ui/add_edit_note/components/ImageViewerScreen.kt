@@ -33,6 +33,16 @@ import com.suvojeet.notenext.R
 import androidx.compose.material.icons.filled.Delete
 import com.suvojeet.notenext.ui.notes.NotesEvent
 
+/**
+ * A full-screen image viewer that supports zoom, pan, and rotation gestures.
+ * It also includes a top app bar with options to go back and delete the image,
+ * which can be toggled by tapping the screen.
+ *
+ * @param imageUri The [Uri] of the image to display.
+ * @param attachmentTempId The temporary ID of the attachment, used for deletion.
+ * @param onDismiss Lambda to be invoked when the viewer is dismissed (e.g., back button clicked).
+ * @param onEvent Lambda to dispatch [NotesEvent]s, specifically for [NotesEvent.RemoveAttachment].
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ImageViewerScreen(
@@ -50,6 +60,7 @@ fun ImageViewerScreen(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
+            // Toggle TopAppBar visibility on single tap.
             .pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
@@ -58,16 +69,19 @@ fun ImageViewerScreen(
                 )
             }
     ) {
+        // Display the image with zoom, pan, and rotate gestures.
         AsyncImage(
             model = imageUri,
-            contentDescription = null,
+            contentDescription = stringResource(id = R.string.image_content_description), // Accessibility for the displayed image.
             modifier = Modifier
                 .fillMaxSize()
+                // Handle multi-touch gestures for zoom, pan, and rotate.
                 .pointerInput(Unit) {
                     detectTransformGestures { centroid, pan, zoom, rotate ->
-                        scale = (scale * zoom).coerceIn(1f, 5f) // Limit zoom between 1x and 5x
+                        scale = (scale * zoom).coerceIn(1f, 5f) // Limit zoom between 1x and 5x.
                         rotation += rotate
                         offset = if (scale > 1f) {
+                            // Apply pan only when zoomed in.
                             val newOffset = offset + pan * scale
                             val maxX = (size.width * (scale - 1f)) / 2f
                             val maxY = (size.height * (scale - 1f)) / 2f
@@ -76,10 +90,11 @@ fun ImageViewerScreen(
                                 newOffset.y.coerceIn(-maxY, maxY)
                             )
                         } else {
-                            Offset.Zero
+                            Offset.Zero // Reset offset when not zoomed.
                         }
                     }
                 }
+                // Apply transformations using graphicsLayer for performance.
                 .graphicsLayer(
                     scaleX = scale,
                     scaleY = scale,
@@ -87,26 +102,29 @@ fun ImageViewerScreen(
                     translationY = offset.y,
                     rotationZ = rotation
                 ),
-            contentScale = ContentScale.Fit
+            contentScale = ContentScale.Fit // Fit the image within the bounds.
         )
+        // Animated visibility for the TopAppBar.
         AnimatedVisibility(visible = showTopAppBar) {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.image_viewer)) },
                 navigationIcon = {
+                    // Back button.
                     IconButton(onClick = onDismiss) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
                     }
                 },
                 actions = {
+                    // Delete image action.
                     IconButton(onClick = {
                         onEvent(NotesEvent.RemoveAttachment(attachmentTempId))
-                        onDismiss()
+                        onDismiss() // Dismiss viewer after deletion.
                     }) {
                         Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.remove_image), tint = Color.White)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = Color.Black.copy(alpha = 0.5f),
+                    containerColor = Color.Black.copy(alpha = 0.5f), // Semi-transparent black background.
                     titleContentColor = Color.White,
                     navigationIconContentColor = Color.White
                 )

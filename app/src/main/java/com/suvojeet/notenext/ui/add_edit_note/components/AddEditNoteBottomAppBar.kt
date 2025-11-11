@@ -37,6 +37,19 @@ import com.suvojeet.notenext.ui.notes.NotesState
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+/**
+ * Bottom app bar for the Add/Edit Note screen. Provides quick access to actions
+ * like adding attachments, changing note color, formatting text, undo/redo, and more options.
+ *
+ * @param state The current [NotesState] containing information about the note being edited.
+ * @param onEvent Lambda to dispatch [NotesEvent]s for various actions.
+ * @param showColorPicker Lambda to show/hide the color picker.
+ * @param showFormatBar Lambda to show/hide the format bar.
+ * @param showMoreOptions Lambda to show/hide the more options sheet.
+ * @param onImageClick Lambda to be invoked when "Add Image" is selected from the attachment menu.
+ * @param onTakePhotoClick Lambda to be invoked when "Take Photo" is selected from the attachment menu.
+ * @param onAudioClick Lambda to be invoked when "Audio Recording" is selected from the attachment menu.
+ */
 @Composable
 fun AddEditNoteBottomAppBar(
     state: NotesState,
@@ -49,9 +62,10 @@ fun AddEditNoteBottomAppBar(
     onAudioClick: () -> Unit
 ) {
     var showAttachmentMenu by remember { mutableStateOf(false) }
+
     BottomAppBar(
-        containerColor = Color(state.editingColor),
-        windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp)
+        containerColor = Color(state.editingColor), // Background color matches the note's editing color.
+        windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp) // Remove default window insets for full-bleed.
     ) {
         Row(
             modifier = Modifier
@@ -60,7 +74,9 @@ fun AddEditNoteBottomAppBar(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Left-aligned action buttons: Add Attachment, Color Picker, Format Bar.
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                // Attachment menu FAB.
                 Box {
                     FloatingActionButton(
                         onClick = { showAttachmentMenu = true },
@@ -71,6 +87,7 @@ fun AddEditNoteBottomAppBar(
                     ) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_attachment))
                     }
+                    // Dropdown menu for attachment options.
                     DropdownMenu(
                         expanded = showAttachmentMenu,
                         onDismissRequest = { showAttachmentMenu = false }
@@ -98,6 +115,7 @@ fun AddEditNoteBottomAppBar(
                         )
                     }
                 }
+                // Color picker FAB.
                 FloatingActionButton(
                     onClick = { showColorPicker(true) },
                     shape = CircleShape,
@@ -107,6 +125,7 @@ fun AddEditNoteBottomAppBar(
                 ) {
                     Icon(Icons.Default.Palette, contentDescription = stringResource(id = R.string.toggle_color_picker))
                 }
+                // Format bar FAB.
                 FloatingActionButton(
                     onClick = { showFormatBar(true) },
                     shape = CircleShape,
@@ -117,15 +136,17 @@ fun AddEditNoteBottomAppBar(
                     Icon(Icons.Default.TextFields, contentDescription = stringResource(id = R.string.toggle_format_bar))
                 }
             }
+            // Right-aligned action buttons: Undo, Redo, More Options.
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                // Undo/Redo buttons are only visible if there's editing history.
                 if (state.editingHistory.size > 1) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Undo Button
+                        // Undo Button: enabled if there are previous states to undo to.
                         FloatingActionButton(
                             onClick = { onEvent(NotesEvent.OnUndoClick) },
                             shape = CircleShape,
@@ -133,7 +154,7 @@ fun AddEditNoteBottomAppBar(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                             contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = 0.38f
-                            )
+                            ) // Dimmed if no undo available.
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.Undo,
@@ -141,7 +162,7 @@ fun AddEditNoteBottomAppBar(
                             )
                         }
 
-                        // Redo Button
+                        // Redo Button: enabled if there are future states to redo to.
                         FloatingActionButton(
                             onClick = { onEvent(NotesEvent.OnRedoClick) },
                             shape = CircleShape,
@@ -149,7 +170,7 @@ fun AddEditNoteBottomAppBar(
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                             contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = 0.38f
-                            )
+                            ) // Dimmed if no redo available.
                         ) {
                             Icon(
                                 imageVector = Icons.AutoMirrored.Rounded.Redo,
@@ -159,7 +180,7 @@ fun AddEditNoteBottomAppBar(
                     }
                 }
 
-                // 3-dot button
+                // More options FAB.
                 Box {
                     FloatingActionButton(
                         onClick = { showMoreOptions(true) },

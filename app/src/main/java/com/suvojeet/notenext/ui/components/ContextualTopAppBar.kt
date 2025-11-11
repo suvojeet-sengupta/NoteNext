@@ -1,9 +1,25 @@
 package com.suvojeet.notenext.ui.components
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -12,20 +28,48 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.outlined.PushPin
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.widthIn
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
 
+/**
+ * A contextual top app bar that appears when one or more items are selected.
+ * It provides actions relevant to the selected items, such as pinning, deleting, etc.
+ * The bar and its icons animate in and out with a playful spring animation.
+ *
+ * @param selectedItemCount The number of items currently selected.
+ * @param onClearSelection Lambda to be invoked when the selection is cleared.
+ * @param onTogglePinClick Lambda for the pin/unpin action.
+ * @param onReminderClick Lambda for the reminder action.
+ * @param onColorClick Lambda for the color change action.
+ * @param onArchiveClick Lambda for the archive action.
+ * @param onDeleteClick Lambda for the delete action.
+ * @param onCopyClick Lambda for the copy action.
+ * @param onSendClick Lambda for the send/share action.
+ * @param onLabelClick Lambda for the label action.
+ * @param onMoveToProjectClick Lambda for moving items to a project.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ContextualTopAppBar(
@@ -43,14 +87,14 @@ fun ContextualTopAppBar(
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
-    // Animation for entrance
+    // Animate the entire app bar's appearance with a spring effect.
     val scale by animateFloatAsState(
         targetValue = 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessLow
         ),
-        label = "scale"
+        label = "AppBarScale"
     )
 
     Surface(
@@ -63,6 +107,7 @@ fun ContextualTopAppBar(
     ) {
         TopAppBar(
             title = {
+                // Animate the counter change.
                 AnimatedContent(
                     targetState = selectedItemCount,
                     transitionSpec = {
@@ -70,14 +115,14 @@ fun ContextualTopAppBar(
                             slideOutVertically { it } + fadeOut()
                         )
                     },
-                    label = "count"
+                    label = "SelectedItemCount"
                 ) { count ->
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
                         Spacer(modifier = Modifier.width(8.dp))
-                        // Animated counter badge
+                        // A circular badge to display the number of selected items.
                         Surface(
                             shape = CircleShape,
                             color = MaterialTheme.colorScheme.primaryContainer,
@@ -91,7 +136,6 @@ fun ContextualTopAppBar(
                                 )
                             }
                         }
-
                     }
                 }
             },
@@ -107,6 +151,7 @@ fun ContextualTopAppBar(
                     horizontalArrangement = Arrangement.spacedBy(4.dp),
                     modifier = Modifier.padding(end = 4.dp)
                 ) {
+                    // Action icons appear with a slight stagger.
                     AnimatedIconButton(
                         onClick = onTogglePinClick,
                         icon = Icons.Outlined.PushPin,
@@ -168,6 +213,7 @@ fun ContextualTopAppBar(
                                     showMenu = false
                                 }
                             )
+                            // "Share" is only shown for a single selection.
                             if (selectedItemCount == 1) {
                                 AnimatedDropdownItem(
                                     text = stringResource(id = R.string.share),
@@ -195,6 +241,14 @@ fun ContextualTopAppBar(
     }
 }
 
+/**
+ * An icon button that animates its appearance and provides a press effect.
+ *
+ * @param onClick The lambda to be invoked on click.
+ * @param icon The vector graphic to be displayed.
+ * @param contentDescription The accessibility description.
+ * @param delay The delay in milliseconds before the button starts its entrance animation.
+ */
 @Composable
 private fun AnimatedIconButton(
     onClick: () -> Unit,
@@ -203,37 +257,40 @@ private fun AnimatedIconButton(
     delay: Int = 0
 ) {
     var isVisible by remember { mutableStateOf(false) }
+    var isPressed by remember { mutableStateOf(false) }
 
+    // Trigger the entrance animation after the specified delay.
     LaunchedEffect(Unit) {
         kotlinx.coroutines.delay(delay.toLong())
         isVisible = true
     }
 
-    val scale by animateFloatAsState(
+    // Animate the scale for the entrance.
+    val entranceScale by animateFloatAsState(
         targetValue = if (isVisible) 1f else 0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "iconScale"
+        label = "IconEntranceScale"
     )
 
-    var pressed by remember { mutableStateOf(false) }
+    // Animate the scale for the press effect.
     val pressScale by animateFloatAsState(
-        targetValue = if (pressed) 0.85f else 1f,
+        targetValue = if (isPressed) 0.85f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessHigh
         ),
-        label = "pressScale"
+        label = "IconPressScale"
     )
 
     IconButton(
         onClick = {
-            pressed = true
+            isPressed = true
             onClick()
         },
-        modifier = Modifier.scale(scale * pressScale)
+        modifier = Modifier.scale(entranceScale * pressScale)
     ) {
         Icon(
             imageVector = icon,
@@ -242,22 +299,24 @@ private fun AnimatedIconButton(
         )
     }
 
-    LaunchedEffect(pressed) {
-        if (pressed) {
+    // Reset the press state after a short delay to create a 'pop' effect.
+    LaunchedEffect(isPressed) {
+        if (isPressed) {
             kotlinx.coroutines.delay(100)
-            pressed = false
+            isPressed = false
         }
     }
 }
 
+/**
+ * A dropdown menu item with a subtle size animation.
+ */
 @Composable
 private fun AnimatedDropdownItem(
     text: String,
     onClick: () -> Unit,
     textColor: Color = Color.Unspecified
 ) {
-    var hovered by remember { mutableStateOf(false) }
-
     DropdownMenuItem(
         text = {
             Text(
@@ -267,6 +326,6 @@ private fun AnimatedDropdownItem(
             )
         },
         onClick = onClick,
-        modifier = Modifier.animateContentSize()
+        modifier = Modifier.animateContentSize() // Animates size changes.
     )
 }

@@ -25,8 +25,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.suvojeet.notenext.R
 
+/**
+ * A dialog for managing labels, allowing users to create new labels or select existing ones.
+ *
+ * @param labels A list of existing labels to display.
+ * @param onDismiss Lambda to be invoked when the dialog is dismissed.
+ * @param onConfirm Lambda to be invoked when a label is created or selected.
+ *                  The selected/created label string is passed as a parameter.
+ */
 @Composable
 fun LabelDialog(
     labels: List<String>,
@@ -37,9 +47,10 @@ fun LabelDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(text = "Manage Labels") },
+        title = { Text(text = stringResource(id = R.string.manage_labels)) },
         text = {
             Column {
+                // Input field for creating a new label and a "Create" button.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -47,7 +58,7 @@ fun LabelDialog(
                     OutlinedTextField(
                         value = newLabel,
                         onValueChange = { newLabel = it },
-                        label = { Text("New label") },
+                        label = { Text(stringResource(id = R.string.new_label)) },
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -59,10 +70,11 @@ fun LabelDialog(
                             }
                         }
                     ) {
-                        Text("Create")
+                        Text(stringResource(id = R.string.create))
                     }
                 }
                 Spacer(modifier = Modifier.height(16.dp))
+                // List of existing labels.
                 LazyColumn {
                     items(labels) { label ->
                         ListItem(
@@ -70,7 +82,7 @@ fun LabelDialog(
                             leadingContent = {
                                 Icon(
                                     imageVector = Icons.Default.Label,
-                                    contentDescription = "Label icon"
+                                    contentDescription = stringResource(id = R.string.label_icon)
                                 )
                             },
                             modifier = Modifier
@@ -87,7 +99,7 @@ fun LabelDialog(
         confirmButton = { /* No confirm button needed here, actions are within content */ },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Cancel")
+                Text(stringResource(id = R.string.cancel))
             }
         }
     )

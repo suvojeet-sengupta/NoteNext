@@ -17,6 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -35,6 +37,23 @@ import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
 
+/**
+ * A customizable search bar with animated transitions for search activation, layout toggling,
+ * and sorting options.
+ *
+ * @param searchQuery The current text in the search field.
+ * @param onSearchQueryChange Lambda to be invoked when the search query changes.
+ * @param layoutType The current layout type (List or Grid) for displaying notes.
+ * @param onLayoutToggleClick Lambda to be invoked when the layout toggle button is clicked.
+ * @param onSortClick Lambda to be invoked when the sort button is clicked.
+ * @param sortMenuExpanded Boolean indicating if the sort dropdown menu is expanded.
+ * @param onSortMenuDismissRequest Lambda to be invoked when the sort dropdown menu is dismissed.
+ * @param onSortOptionClick Lambda to be invoked when a sort option is selected.
+ * @param isSearchActive Boolean indicating if the search bar is in active search mode.
+ * @param onSearchActiveChange Lambda to be invoked when the search active state changes.
+ * @param currentSortType The currently selected sort type.
+ * @param modifier The modifier to be applied to the search bar.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SearchBar(
@@ -81,7 +100,7 @@ fun SearchBar(
                 .padding(horizontal = 12.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            // Search/Back Icon with smooth animation
+            // Search/Back Icon with smooth animation based on search active state.
             AnimatedContent(
                 targetState = isSearchActive,
                 transitionSpec = {
@@ -90,9 +109,10 @@ fun SearchBar(
                             fadeOut(animationSpec = tween(200)) +
                             scaleOut(targetScale = 0.8f)
                 },
-                label = "searchIconTransition"
+                label = "SearchIconTransition"
             ) { active ->
                 if (active) {
+                    // Back button when search is active.
                     IconButton(
                         onClick = {
                             onSearchActiveChange(false)
@@ -109,13 +129,14 @@ fun SearchBar(
                         )
                     }
                 } else {
+                    // Search icon and text when search is inactive.
                     val iconScale by animateFloatAsState(
                         targetValue = if (isSearchFocused) 1.15f else 1f,
                         animationSpec = spring(
                             dampingRatio = Spring.DampingRatioMediumBouncy,
                             stiffness = Spring.StiffnessLow
                         ),
-                        label = "searchIconScale"
+                        label = "SearchIconScale"
                     )
 
                     Row(
@@ -171,7 +192,7 @@ fun SearchBar(
                 }
             )
 
-            // Clear button with animation
+            // Clear button with animation, visible when search is active and query is not empty.
             AnimatedVisibility(
                 visible = isSearchActive && searchQuery.isNotEmpty(),
                 enter = scaleIn(
@@ -192,7 +213,7 @@ fun SearchBar(
                 }
             }
 
-            // Controls with slide animation
+            // Controls (layout toggle and sort button) with slide animation, visible when search is inactive.
             AnimatedVisibility(
                 visible = !isSearchActive,
                 enter = slideInHorizontally(
@@ -257,6 +278,14 @@ fun SearchBar(
     }
 }
 
+/**
+ * A menu item for sorting options within a dropdown menu.
+ *
+ * @param text The display text for the menu item.
+ * @param icon The icon to display next to the text.
+ * @param isSelected Boolean indicating if this sort option is currently selected.
+ * @param onClick Lambda to be invoked when the menu item is clicked.
+ */
 @Composable
 fun SortMenuItem(
     text: String,
@@ -272,7 +301,7 @@ fun SortMenuItem(
             ) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null,
+                    contentDescription = null, // Content description is handled by the text itself.
                     modifier = Modifier.size(18.dp),
                     tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -295,6 +324,12 @@ fun SortMenuItem(
     )
 }
 
+/**
+ * A compact toggle button group for switching between list and grid view modes.
+ *
+ * @param currentMode The currently active [LayoutType].
+ * @param onModeChange Lambda to be invoked when the view mode is changed.
+ */
 @Composable
 fun CompactViewModeToggle(
     currentMode: LayoutType,
@@ -309,46 +344,60 @@ fun CompactViewModeToggle(
     ) {
         CompactViewModeButton(
             icon = Icons.Default.ViewList,
+            contentDescription = stringResource(id = R.string.list_view_icon_description),
             isSelected = currentMode == LayoutType.LIST,
             onClick = { if (currentMode != LayoutType.LIST) onModeChange() }
         )
 
         CompactViewModeButton(
             icon = Icons.Default.ViewModule,
+            contentDescription = stringResource(id = R.string.grid_view_icon_description),
             isSelected = currentMode == LayoutType.GRID,
             onClick = { if (currentMode != LayoutType.GRID) onModeChange() }
         )
     }
 }
 
+/**
+ * A single button within the [CompactViewModeToggle] group.
+ *
+ * @param icon The icon to display for the button.
+ * @param contentDescription The accessibility description for the icon.
+ * @param isSelected Boolean indicating if this button is currently selected.
+ * @param onClick Lambda to be invoked when the button is clicked.
+ */
 @Composable
 fun CompactViewModeButton(
     icon: ImageVector,
+    contentDescription: String,
     isSelected: Boolean,
     onClick: () -> Unit
 ) {
+    // Animate the background color change.
     val backgroundColor by animateColorAsState(
         targetValue = if (isSelected)
             MaterialTheme.colorScheme.primaryContainer
         else
             Color.Transparent,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "buttonBackground"
+        label = "ViewModeButtonBackground"
     )
 
+    // Animate the content (icon) color change.
     val contentColor by animateColorAsState(
         targetValue = if (isSelected)
             MaterialTheme.colorScheme.onPrimaryContainer
         else
             MaterialTheme.colorScheme.onSurfaceVariant,
         animationSpec = tween(300),
-        label = "buttonContent"
+        label = "ViewModeButtonContentColor"
     )
     
+    // Animate the scale for a subtle "pop" effect when selected.
     val scale by animateFloatAsState(
         targetValue = if (isSelected) 1.05f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "buttonScale"
+        label = "ViewModeButtonScale"
     )
 
     Box(
@@ -359,31 +408,37 @@ fun CompactViewModeButton(
             .background(backgroundColor)
             .clickable(
                 onClick = onClick,
-                indication = null,
+                indication = null, // No visual ripple effect.
                 interactionSource = remember { MutableInteractionSource() }
             ),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = null,
+            contentDescription = contentDescription,
             tint = contentColor,
             modifier = Modifier.size(18.dp)
         )
     }
 }
 
+/**
+ * A compact button for triggering sorting options. Includes a custom press animation.
+ *
+ * @param onClick Lambda to be invoked when the button is clicked.
+ */
 @Composable
 fun CompactSortButton(onClick: () -> Unit) {
     var isPressed by remember { mutableStateOf(false) }
 
+    // Animate the scale for a custom press effect.
     val scale by animateFloatAsState(
         targetValue = if (isPressed) 0.92f else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessHigh
         ),
-        label = "sortButtonScale"
+        label = "SortButtonPressScale"
     )
 
     FilledTonalButton(
@@ -414,6 +469,7 @@ fun CompactSortButton(onClick: () -> Unit) {
         )
     }
 
+    // Reset the press state after a short delay to create a 'pop' effect.
     LaunchedEffect(isPressed) {
         if (isPressed) {
             kotlinx.coroutines.delay(100)

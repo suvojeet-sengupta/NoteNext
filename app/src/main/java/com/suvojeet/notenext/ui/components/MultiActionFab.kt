@@ -46,6 +46,18 @@ import androidx.compose.material.icons.filled.CreateNewFolder
 
 import com.suvojeet.notenext.ui.settings.ThemeMode
 
+/**
+ * A Floating Action Button (FAB) that expands to reveal multiple action items (Note, Checklist, Project).
+ * Each action item appears with a staggered animation.
+ *
+ * @param isExpanded Boolean state indicating whether the FAB is expanded.
+ * @param onExpandedChange Lambda to be invoked when the expansion state changes.
+ * @param onNoteClick Lambda to be invoked when the "Note" action item is clicked.
+ * @param onChecklistClick Lambda to be invoked when the "Checklist" action item is clicked.
+ * @param onProjectClick Lambda to be invoked when the "Project" action item is clicked.
+ * @param showProjectButton Boolean to control the visibility of the "Project" action item.
+ * @param themeMode The current theme mode, used for styling the action items.
+ */
 @Composable
 fun MultiActionFab(
     isExpanded: Boolean,
@@ -56,23 +68,28 @@ fun MultiActionFab(
     showProjectButton: Boolean = true,
     themeMode: ThemeMode
 ) {
+    // Animate the rotation of the main FAB icon (Add/Close).
     val rotation by animateFloatAsState(
         targetValue = if (isExpanded) 45f else 0f,
-        animationSpec = tween(durationMillis = 300), label = ""
+        animationSpec = tween(durationMillis = 300), label = "FabIconRotation"
     )
 
+    // State variables to control the staggered visibility of action items.
     var showProject by remember { mutableStateOf(false) }
     var showChecklist by remember { mutableStateOf(false) }
     var showNote by remember { mutableStateOf(false) }
 
+    // LaunchedEffect to manage the staggered appearance/disappearance of action items.
     LaunchedEffect(isExpanded) {
         if (isExpanded) {
+            // When expanding, show items with a slight delay between each.
             showNote = true
             kotlinx.coroutines.delay(50)
             showChecklist = true
             kotlinx.coroutines.delay(50)
             showProject = true
         } else {
+            // When collapsing, hide items with a slight delay in reverse order.
             showProject = false
             kotlinx.coroutines.delay(50)
             showChecklist = false
@@ -81,6 +98,7 @@ fun MultiActionFab(
         }
     }
 
+    // State and animation for the main FAB's press effect.
     var pressed by remember { mutableStateOf(false) }
     val pressScale by animateFloatAsState(
         targetValue = if (pressed) 0.95f else 1f,
@@ -88,13 +106,14 @@ fun MultiActionFab(
             dampingRatio = Spring.DampingRatioLowBouncy,
             stiffness = Spring.StiffnessMedium
         ),
-        label = "pressScale"
+        label = "MainFabPressScale"
     )
 
     Column(
         horizontalAlignment = Alignment.End,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Project action item.
         AnimatedVisibility(
             visible = showProject && showProjectButton,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -105,12 +124,13 @@ fun MultiActionFab(
                 label = stringResource(id = R.string.projects),
                 onClick = {
                     onProjectClick()
-                    onExpandedChange(false)
+                    onExpandedChange(false) // Collapse FAB after action.
                 },
                 themeMode = themeMode
             )
         }
 
+        // Checklist action item.
         AnimatedVisibility(
             visible = showChecklist,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -121,12 +141,13 @@ fun MultiActionFab(
                 label = stringResource(id = R.string.checklist),
                 onClick = {
                     onChecklistClick()
-                    onExpandedChange(false)
+                    onExpandedChange(false) // Collapse FAB after action.
                 },
                 themeMode = themeMode
             )
         }
 
+        // Note action item.
         AnimatedVisibility(
             visible = showNote,
             enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
@@ -137,28 +158,30 @@ fun MultiActionFab(
                 label = stringResource(id = R.string.note),
                 onClick = {
                     onNoteClick()
-                    onExpandedChange(false)
+                    onExpandedChange(false) // Collapse FAB after action.
                 },
                 themeMode = themeMode
             )
         }
 
+        // Main Floating Action Button.
         FloatingActionButton(
             onClick = {
                 pressed = true
                 onExpandedChange(!isExpanded)
             },
             containerColor = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.scale(pressScale)
+            modifier = Modifier.scale(pressScale) // Apply press animation.
         ) {
             Icon(
                 imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Add,
                 contentDescription = stringResource(id = R.string.add),
-                modifier = Modifier.rotate(rotation)
+                modifier = Modifier.rotate(rotation) // Apply rotation animation.
             )
         }
     }
 
+    // Reset the press state after a short delay to create a 'pop' effect.
     LaunchedEffect(pressed) {
         if (pressed) {
             kotlinx.coroutines.delay(100)
@@ -167,6 +190,14 @@ fun MultiActionFab(
     }
 }
 
+/**
+ * A single item displayed within the [MultiActionFab] when expanded.
+ *
+ * @param icon The icon to display for the action item.
+ * @param label The text label for the action item.
+ * @param onClick Lambda to be invoked when the item is clicked.
+ * @param themeMode The current theme mode, used to determine the card's background and border.
+ */
 @Composable
 private fun FabItem(
     icon: ImageVector,
@@ -174,11 +205,13 @@ private fun FabItem(
     onClick: () -> Unit,
     themeMode: ThemeMode
 ) {
+    // Determine card color based on theme mode.
     val cardColor = if (themeMode == ThemeMode.AMOLED) {
         MaterialTheme.colorScheme.surface
     } else {
         MaterialTheme.colorScheme.surfaceVariant
     }
+    // Determine border style based on theme mode.
     val border = if (themeMode == ThemeMode.AMOLED) {
         BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
     } else {

@@ -46,6 +46,17 @@ import java.util.*
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+/**
+ * A modal bottom sheet displaying more options for the current note.
+ * Includes actions like delete, copy, share, add labels, and save as.
+ * Also shows the last edited timestamp of the note.
+ *
+ * @param state The current [NotesState] containing information about the note.
+ * @param onEvent Lambda to dispatch [NotesEvent]s for various actions.
+ * @param onDismiss Lambda to be invoked when the bottom sheet is dismissed.
+ * @param showDeleteDialog Lambda to show/hide the delete confirmation dialog.
+ * @param showSaveAsDialog Lambda to show/hide the save as dialog.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MoreOptionsSheet(
@@ -55,6 +66,7 @@ fun MoreOptionsSheet(
     showDeleteDialog: (Boolean) -> Unit,
     showSaveAsDialog: (Boolean) -> Unit
 ) {
+    // Remember SimpleDateFormat for efficient date formatting.
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
     val context = LocalContext.current
 
@@ -65,6 +77,7 @@ fun MoreOptionsSheet(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Display last edited time if available and not a new note.
             if (!state.editingIsNewNote && state.editingLastEdited != 0L) {
                 Text(
                     text = stringResource(id = R.string.last_edited, dateFormat.format(Date(state.editingLastEdited))),
@@ -75,6 +88,7 @@ fun MoreOptionsSheet(
                 Divider()
             }
 
+            // Define the list of options with their labels and icons.
             val options = listOf(
                 stringResource(id = R.string.delete) to Icons.Default.Delete,
                 stringResource(id = R.string.make_a_copy) to Icons.Default.ContentCopy,
@@ -83,6 +97,7 @@ fun MoreOptionsSheet(
                 stringResource(id = R.string.save_as) to Icons.Default.Check
             )
 
+            // Display options in a grid layout.
             LazyVerticalGrid(
                 columns = GridCells.Adaptive(minSize = 120.dp),
                 contentPadding = PaddingValues(16.dp),
@@ -95,11 +110,12 @@ fun MoreOptionsSheet(
                         icon = icon,
                         label = label,
                         onClick = {
-                            onDismiss()
+                            onDismiss() // Dismiss sheet before performing action.
                             when (label) {
                                 context.getString(R.string.delete) -> showDeleteDialog(true)
                                 context.getString(R.string.make_a_copy) -> onEvent(NotesEvent.OnCopyCurrentNoteClick)
                                 context.getString(R.string.share) -> {
+                                    // Create and launch an Intent for sharing note content.
                                     val sendIntent: Intent = Intent().apply {
                                         action = Intent.ACTION_SEND
                                         putExtra(Intent.EXTRA_TEXT, state.editingTitle + "\n\n" + state.editingContent.text)
@@ -120,6 +136,14 @@ fun MoreOptionsSheet(
     }
 }
 
+/**
+ * A single item displayed within the [MoreOptionsSheet].
+ *
+ * @param icon The [ImageVector] to display for the option.
+ * @param label The text label for the option.
+ * @param onClick Lambda to be invoked when the option item is clicked.
+ * @param modifier The modifier to be applied to the item.
+ */
 @Composable
 private fun MoreOptionsItem(
     icon: ImageVector,
@@ -143,7 +167,7 @@ private fun MoreOptionsItem(
     ) {
         Icon(
             imageVector = icon,
-            contentDescription = label,
+            contentDescription = label, // Label serves as content description for accessibility.
             modifier = Modifier.size(24.dp),
             tint = MaterialTheme.colorScheme.onSurface
         )

@@ -31,6 +31,13 @@ import com.suvojeet.notenext.ui.notes.NotesState
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+/**
+ * A composable for editing a checklist, allowing users to add, check/uncheck,
+ * edit text, and delete checklist items. It also manages focus for newly added items.
+ *
+ * @param state The current [NotesState] containing the checklist data.
+ * @param onEvent Lambda to dispatch [NotesEvent]s for checklist modifications.
+ */
 @Composable
 fun ChecklistEditor(
     state: NotesState,
@@ -39,25 +46,32 @@ fun ChecklistEditor(
     LazyColumn(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
+        // Separate unchecked and checked items for display order.
         val uncheckedItems = state.editingChecklist.filter { !it.isChecked }
         val checkedItems = state.editingChecklist.filter { it.isChecked }
 
+        // Display unchecked items first.
         items(uncheckedItems, key = { it.id }) { item ->
             val focusRequester = remember { FocusRequester() }
+            // Animated visibility for smooth item addition/removal.
             AnimatedVisibility(
-                visible = true,
+                visible = true, // Always visible once in the list.
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween // Distribute items evenly.
                 ) {
                     Checkbox(
                         checked = item.isChecked,
                         onCheckedChange = { isChecked ->
                             onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
-                        }
+                        },
+                        // Provide a content description for accessibility.
+                        // The actual text of the item can be read by screen readers.
+                        modifier = Modifier.padding(end = 8.dp)
                     )
                     OutlinedTextField(
                         value = item.text,
@@ -66,22 +80,25 @@ fun ChecklistEditor(
                         },
                         modifier = Modifier
                             .weight(1f)
-                            .focusRequester(focusRequester),
-                        placeholder = { Text(stringResource(id = R.string.list_item)) }
+                            .focusRequester(focusRequester), // Request focus for this item.
+                        placeholder = { Text(stringResource(id = R.string.list_item)) },
+                        singleLine = true // Ensure single line for checklist items.
                     )
                     IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
                         Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_item))
                     }
                 }
             }
+            // Request focus for newly added items.
             LaunchedEffect(state.newlyAddedChecklistItemId) {
                 if (item.id == state.newlyAddedChecklistItemId) {
                     focusRequester.requestFocus()
-                    onEvent(NotesEvent.ClearNewlyAddedChecklistItemId)
+                    onEvent(NotesEvent.ClearNewlyAddedChecklistItemId) // Clear the ID after focusing.
                 }
             }
         }
 
+        // Button to add a new checklist item.
         item {
             TextButton(onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
                 Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_item))
@@ -89,22 +106,26 @@ fun ChecklistEditor(
             }
         }
 
+        // Display checked items after the "Add Item" button.
         items(checkedItems, key = { it.id }) { item ->
             val focusRequester = remember { FocusRequester() }
             AnimatedVisibility(
-                visible = true,
+                visible = true, // Always visible once in the list.
                 enter = expandVertically(),
                 exit = shrinkVertically()
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween // Distribute items evenly.
                 ) {
                     Checkbox(
                         checked = item.isChecked,
                         onCheckedChange = { isChecked ->
                             onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
-                        }
+                        },
+                        // Provide a content description for accessibility.
+                        modifier = Modifier.padding(end = 8.dp)
                     )
                     OutlinedTextField(
                         value = item.text,
@@ -113,18 +134,20 @@ fun ChecklistEditor(
                         },
                         modifier = Modifier
                             .weight(1f)
-                            .focusRequester(focusRequester),
-                        placeholder = { Text(stringResource(id = R.string.list_item)) }
+                            .focusRequester(focusRequester), // Request focus for this item.
+                        placeholder = { Text(stringResource(id = R.string.list_item)) },
+                        singleLine = true // Ensure single line for checklist items.
                     )
                     IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
                         Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_item))
                     }
                 }
             }
+            // Request focus for newly added items (though typically checked items are not newly added).
             LaunchedEffect(state.newlyAddedChecklistItemId) {
                 if (item.id == state.newlyAddedChecklistItemId) {
                     focusRequester.requestFocus()
-                    onEvent(NotesEvent.ClearNewlyAddedChecklistItemId)
+                    onEvent(NotesEvent.ClearNewlyAddedChecklistItemId) // Clear the ID after focusing.
                 }
             }
         }

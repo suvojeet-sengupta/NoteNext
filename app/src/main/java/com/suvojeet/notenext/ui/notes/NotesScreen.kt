@@ -133,6 +133,9 @@ fun NotesScreen(
 
     val context = LocalContext.current
 
+    // Observe events from the ViewModel for side-effects like showing toasts or intents.
+    // We use `context.getString()` here because events are handled outside the Composable
+    // hierarchy and cannot call Composable functions like `stringResource()`.
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
             when (event) {
@@ -142,8 +145,7 @@ fun NotesScreen(
                         putExtra(Intent.EXTRA_SUBJECT, event.title)
                         putExtra(Intent.EXTRA_TEXT, event.content)
                     }
-                    // ***FIX 3: Use context.getString() here, inside the non-composable lambda***
-                    val chooser = android.content.Intent.createChooser(intent, context.getString(R.string.send_notes_via))
+                    val chooser = Intent.createChooser(intent, context.getString(R.string.send_notes_via))
                     context.startActivity(chooser)
                 }
 
@@ -151,11 +153,9 @@ fun NotesScreen(
                     Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
                 }
                 is NotesUiEvent.LinkPreviewRemoved -> {
-                    // ***FIX 4: Use context.getString() here***
                     Toast.makeText(context, context.getString(R.string.link_preview_removed), Toast.LENGTH_SHORT).show()
                 }
                 is NotesUiEvent.ProjectCreated -> {
-                    // ***FIX 5: Use context.getString() here, which can handle formatted strings***
                     Toast.makeText(context, context.getString(R.string.project_created, event.projectName), Toast.LENGTH_SHORT).show()
                 }
             }
@@ -165,6 +165,10 @@ fun NotesScreen(
     var showSortMenu by remember { mutableStateOf(false) }
     val focusManager = LocalFocusManager.current
 
+    // Handle back presses with priority:
+    // 1. Deactivate search mode.
+    // 2. Clear note selection.
+    // 3. Collapse the expanded note view.
     BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
         when {
             isSearchActive -> {
@@ -557,7 +561,6 @@ private fun CreateProjectDialog(
                 onClick = { onConfirm(projectName) },
                 enabled = projectName.isNotBlank()
             ) {
-                // This call was already correct, as it's inside a @Composable function
                 Text(stringResource(id = R.string.create))
             }
         },

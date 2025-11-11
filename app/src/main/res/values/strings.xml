@@ -1,3 +1,19 @@
 <resources>
     <string name="app_name">NoteNext</string>
+    <string name="manage_labels">Manage Labels</string>
+    <string name="label_icon">Label icon</string>
+    <string name="pinned_note_description">Pinned note</string>
+    <string name="attachment_icon_description">Attachment</string>
+    <string name="reminder_icon_description">Reminder</string>
+    <string name="reminder_date_format">MMM dd, yyyy HH:mm</string>
+    <string name="list_view_icon_description">List view</string>
+    <string name="grid_view_icon_description">Grid view</string>
+    <string name="checkbox_content_description">Checklist item checkbox</string>
+    <string name="selected_color_description">Selected color</string>
+    <string name="bold_description">Bold</string>
+    <string name="italic_description">Italic</string>
+    <string name="underline_description">Underline</string>
+    <string name="heading_style_description">Heading Style</string>
+    <string name="insert_link_description">Insert link</string>
+    <string name="image_content_description">Image</string>
 </resources>
