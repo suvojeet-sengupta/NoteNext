@@ -40,6 +40,10 @@ import kotlin.math.roundToInt
 import androidx.compose.foundation.border
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.unit.IntOffset
@@ -64,6 +68,7 @@ import androidx.compose.ui.draw.shadow
  * @param onImageClick Lambda to be invoked when "Add Image" is selected from the attachment menu.
  * @param onTakePhotoClick Lambda to be invoked when "Take Photo" is selected from the attachment menu.
  * @param onAudioClick Lambda to be invoked when "Audio Recording" is selected from the attachment menu.
+ * @param themeMode The current theme mode of the app, used to conditionally apply a border in dark mode.
  */
 @Composable
 fun AddEditNoteBottomAppBar(
@@ -75,7 +80,7 @@ fun AddEditNoteBottomAppBar(
     onImageClick: () -> Unit,
     onTakePhotoClick: () -> Unit,
     onAudioClick: () -> Unit,
-    themeMode: com.suvojeet.notenext.ui.settings.ThemeMode
+    themeMode: ThemeMode
 ) {
     var showAttachmentMenu by remember { mutableStateOf(false) }
 
@@ -119,61 +124,15 @@ fun AddEditNoteBottomAppBar(
                         val xOffset = fabCoordinates!!.x
                         val yOffset = fabCoordinates!!.y - fabSize!!.height
 
-                        Popup(
+                        AttachmentMenu(
+                            expanded = showAttachmentMenu,
                             onDismissRequest = { showAttachmentMenu = false },
-                            properties = PopupProperties(focusable = true),
-                            offset = IntOffset(x = xOffset, y = yOffset)
-                        ) {
-                            val isDark = when (themeMode) {
-                                com.suvojeet.notenext.ui.settings.ThemeMode.DARK, com.suvojeet.notenext.ui.settings.ThemeMode.AMOLED -> true
-                                com.suvojeet.notenext.ui.settings.ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
-                                else -> false
-                            }
-                            Surface(
-                                shape = RoundedCornerShape(20.dp),
-                                color = MaterialTheme.colorScheme.surface,
-                                contentColor = MaterialTheme.colorScheme.onSurface,
-                                shadowElevation = 6.dp,
-                                modifier = Modifier
-                                    .padding(8.dp) // Padding around the popup content
-                                    .width(IntrinsicSize.Max) // Make content take max width
-                                    .then(
-                                        if (isDark) {
-                                            Modifier.border(
-                                                1.dp,
-                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                                                RoundedCornerShape(20.dp)
-                                            )
-                                        } else {
-                                            Modifier
-                                        }
-                                    )
-                            ) {
-                                Column(modifier = Modifier.padding(vertical = 8.dp)) {
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(id = R.string.add_image)) },
-                                        onClick = {
-                                            onImageClick()
-                                            showAttachmentMenu = false
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(id = R.string.take_photo)) },
-                                        onClick = {
-                                            onTakePhotoClick()
-                                            showAttachmentMenu = false
-                                        }
-                                    )
-                                    DropdownMenuItem(
-                                        text = { Text(stringResource(id = R.string.audio_recording)) },
-                                        onClick = {
-                                            onAudioClick()
-                                            showAttachmentMenu = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
+                            offset = IntOffset(x = xOffset, y = yOffset),
+                            themeMode = themeMode,
+                            onImageClick = onImageClick,
+                            onTakePhotoClick = onTakePhotoClick,
+                            onAudioClick = onAudioClick
+                        )
                     }
                 }
                 // Color picker FAB.
@@ -260,3 +219,88 @@ fun AddEditNoteBottomAppBar(
         }
     }
 }
+
+/**
+ * A custom dropdown menu for attachment options, displayed in a Popup with a fade-in/fade-out animation.
+ *
+ * @param expanded Whether the menu is currently visible.
+ * @param onDismissRequest Lambda to be invoked when the menu should be dismissed.
+ * @param offset The offset of the popup from the top-left corner of the screen.
+ * @param themeMode The current theme mode, used to apply a border in dark mode.
+ * @param onImageClick Lambda for when the "Add Image" option is clicked.
+ * @param onTakePhotoClick Lambda for when the "Take Photo" option is clicked.
+ * @param onAudioClick Lambda for when the "Audio Recording" option is clicked.
+ */
+@Composable
+private fun AttachmentMenu(
+    expanded: Boolean,
+    onDismissRequest: () -> Unit,
+    offset: IntOffset,
+    themeMode: ThemeMode,
+    onImageClick: () -> Unit,
+    onTakePhotoClick: () -> Unit,
+    onAudioClick: () -> Unit
+) {
+    Popup(
+        onDismissRequest = onDismissRequest,
+        properties = PopupProperties(focusable = true),
+        offset = offset
+    ) {
+        AnimatedVisibility(
+            visible = expanded,
+            enter = fadeIn(animationSpec = tween(durationMillis = 150)),
+            exit = fadeOut(animationSpec = tween(durationMillis = 150))
+        ) {
+            val isDark = when (themeMode) {
+                ThemeMode.DARK, ThemeMode.AMOLED -> true
+                ThemeMode.SYSTEM -> isSystemInDarkTheme()
+                else -> false
+            }
+            Surface(
+                shape = RoundedCornerShape(20.dp),
+                color = MaterialTheme.colorScheme.surface,
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                shadowElevation = 6.dp,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .width(IntrinsicSize.Max)
+                    .then(
+                        if (isDark) {
+                            Modifier.border(
+                                1.dp,
+                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                RoundedCornerShape(20.dp)
+                            )
+                        } else {
+                            Modifier
+                        }
+                    )
+            ) {
+                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.add_image)) },
+                        onClick = {
+                            onImageClick()
+                            onDismissRequest()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.take_photo)) },
+                        onClick = {
+                            onTakePhotoClick()
+                            onDismissRequest()
+                        }
+                    )
+                    DropdownMenuItem(
+                        text = { Text(stringResource(id = R.string.audio_recording)) },
+                        onClick = {
+                            onAudioClick()
+                            onDismissRequest()
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
