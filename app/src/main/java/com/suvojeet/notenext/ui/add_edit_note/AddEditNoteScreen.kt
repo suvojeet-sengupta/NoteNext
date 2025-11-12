@@ -187,7 +187,8 @@ fun AddEditNoteScreen(
                 },
                 onAudioClick = {
                     Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
-                }
+                },
+                themeMode = themeMode
             )
         }
     ) { padding ->

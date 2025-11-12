@@ -36,6 +36,21 @@ import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
+import kotlin.math.roundToInt
+import androidx.compose.foundation.border
+import com.suvojeet.notenext.ui.settings.ThemeMode
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.material3.Surface
+import androidx.compose.ui.draw.shadow
 
 /**
  * Bottom app bar for the Add/Edit Note screen. Provides quick access to actions
@@ -59,7 +74,8 @@ fun AddEditNoteBottomAppBar(
     showMoreOptions: (Boolean) -> Unit,
     onImageClick: () -> Unit,
     onTakePhotoClick: () -> Unit,
-    onAudioClick: () -> Unit
+    onAudioClick: () -> Unit,
+    themeMode: com.suvojeet.notenext.ui.settings.ThemeMode
 ) {
     var showAttachmentMenu by remember { mutableStateOf(false) }
 
@@ -78,41 +94,86 @@ fun AddEditNoteBottomAppBar(
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 // Attachment menu FAB.
                 Box {
+                    var fabCoordinates by remember { mutableStateOf<IntOffset?>(null) }
+                    var fabSize by remember { mutableStateOf<IntSize?>(null) }
+
                     FloatingActionButton(
                         onClick = { showAttachmentMenu = true },
                         shape = RoundedCornerShape(12.dp),
-                        modifier = Modifier.size(40.dp),
+                        modifier = Modifier
+                            .size(40.dp)
+                            .onGloballyPositioned { coordinates ->
+                                fabCoordinates = IntOffset(
+                                    coordinates.positionInWindow().x.roundToInt(),
+                                    coordinates.positionInWindow().y.roundToInt()
+                                )
+                                fabSize = coordinates.size
+                            },
                         containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
                         Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_attachment))
                     }
-                    // Dropdown menu for attachment options.
-                    DropdownMenu(
-                        expanded = showAttachmentMenu,
-                        onDismissRequest = { showAttachmentMenu = false }
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(id = R.string.add_image)) },
-                            onClick = {
-                                onImageClick()
-                                showAttachmentMenu = false
+
+                    if (showAttachmentMenu && fabCoordinates != null && fabSize != null) {
+                        val xOffset = fabCoordinates!!.x
+                        val yOffset = fabCoordinates!!.y - fabSize!!.height
+
+                        Popup(
+                            onDismissRequest = { showAttachmentMenu = false },
+                            properties = PopupProperties(focusable = true),
+                            offset = IntOffset(x = xOffset, y = yOffset)
+                        ) {
+                            val isDark = when (themeMode) {
+                                com.suvojeet.notenext.ui.settings.ThemeMode.DARK, com.suvojeet.notenext.ui.settings.ThemeMode.AMOLED -> true
+                                com.suvojeet.notenext.ui.settings.ThemeMode.SYSTEM -> androidx.compose.foundation.isSystemInDarkTheme()
+                                else -> false
                             }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(id = R.string.take_photo)) },
-                            onClick = {
-                                onTakePhotoClick()
-                                showAttachmentMenu = false
+                            Surface(
+                                shape = RoundedCornerShape(20.dp),
+                                color = MaterialTheme.colorScheme.surface,
+                                contentColor = MaterialTheme.colorScheme.onSurface,
+                                shadowElevation = 6.dp,
+                                modifier = Modifier
+                                    .padding(8.dp) // Padding around the popup content
+                                    .width(IntrinsicSize.Max) // Make content take max width
+                                    .then(
+                                        if (isDark) {
+                                            Modifier.border(
+                                                1.dp,
+                                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                                                RoundedCornerShape(20.dp)
+                                            )
+                                        } else {
+                                            Modifier
+                                        }
+                                    )
+                            ) {
+                                Column(modifier = Modifier.padding(vertical = 8.dp)) {
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(id = R.string.add_image)) },
+                                        onClick = {
+                                            onImageClick()
+                                            showAttachmentMenu = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(id = R.string.take_photo)) },
+                                        onClick = {
+                                            onTakePhotoClick()
+                                            showAttachmentMenu = false
+                                        }
+                                    )
+                                    DropdownMenuItem(
+                                        text = { Text(stringResource(id = R.string.audio_recording)) },
+                                        onClick = {
+                                            onAudioClick()
+                                            showAttachmentMenu = false
+                                        }
+                                    )
+                                }
                             }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(id = R.string.audio_recording)) },
-                            onClick = {
-                                onAudioClick()
-                                showAttachmentMenu = false
-                            }
-                        )
+                        }
                     }
                 }
                 // Color picker FAB.
