@@ -8,15 +8,21 @@ import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.suvojeet.notenext.R
+import com.suvojeet.notenext.dependency_injection.ViewModelFactory
+import com.suvojeet.notenext.ui.setup.components.PermissionItem
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
     factory: ViewModelFactory,
@@ -30,6 +36,19 @@ fun SetupScreen(
         contract = ActivityResultContracts.StartActivityForResult()
     ) {
         viewModel.onEvent(SetupEvent.ExactAlarmPermissionResult)
+    }
+
+    var postNotificationsGranted by remember { mutableStateOf(false) }
+    val postNotificationsPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        postNotificationsGranted = isGranted
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        LaunchedEffect(Unit) {
+            postNotificationsGranted = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        }
     }
 
     Scaffold(
@@ -56,19 +75,6 @@ fun SetupScreen(
                 style = MaterialTheme.typography.headlineSmall,
                 modifier = Modifier.padding(bottom = 16.dp)
             )
-
-            var postNotificationsGranted by remember { mutableStateOf(false) }
-            val postNotificationsPermissionLauncher = rememberLauncherForActivityResult(
-                contract = ActivityResultContracts.RequestPermission()
-            ) { isGranted ->
-                postNotificationsGranted = isGranted
-            }
-
-            // Runtime Permissions
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                LaunchedEffect(Unit) {
-                    postNotificationsGranted = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
-                }
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 PermissionItem(
