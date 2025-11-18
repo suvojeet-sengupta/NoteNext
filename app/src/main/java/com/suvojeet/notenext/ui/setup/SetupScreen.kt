@@ -16,16 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.isGranted
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
-import com.suvojeet.notenext.ui.setup.components.PermissionItem
-import androidx.compose.foundation.Image
-import androidx.compose.ui.res.painterResource
-import com.suvojeet.notenext.R
 
-@OptIn(ExperimentalPermissionsApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
     factory: ViewModelFactory,
@@ -66,19 +57,25 @@ fun SetupScreen(
                 modifier = Modifier.padding(bottom = 16.dp)
             )
 
-            // Runtime Permissions
-            val postNotificationsPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
-            } else {
-                null
+            var postNotificationsGranted by remember { mutableStateOf(false) }
+            val postNotificationsPermissionLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.RequestPermission()
+            ) { isGranted ->
+                postNotificationsGranted = isGranted
             }
 
-            if (postNotificationsPermissionState != null) {
+            // Runtime Permissions
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                LaunchedEffect(Unit) {
+                    postNotificationsGranted = context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 PermissionItem(
                     title = "Notification Permission",
                     description = "Allow NoteNext to send you notifications for reminders and other important updates.",
-                    isGranted = postNotificationsPermissionState.status.isGranted,
-                    onRequestClick = { postNotificationsPermissionState.launchPermissionRequest() }
+                    isGranted = postNotificationsGranted,
+                    onRequestClick = { postNotificationsPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS) }
                 )
                 Spacer(modifier = Modifier.height(16.dp))
             }
@@ -96,8 +93,7 @@ fun SetupScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            val canContinue = (postNotificationsPermissionState?.status?.isGranted ?: true) &&
-                              state.exactAlarmGranted
+            val canContinue = postNotificationsGranted && state.exactAlarmGranted
 
             Button(
                 onClick = {

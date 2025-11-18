@@ -116,8 +116,7 @@ dependencies {
     // Biometric
     implementation("androidx.biometric:biometric:1.4.0-alpha02")
 
-    // Accompanist Permissions
-    implementation("com.google.accompanist:accompanist-permissions:0.34.0")
+
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.3.0")
