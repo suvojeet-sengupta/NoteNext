@@ -53,7 +53,7 @@ fun SetupScreen(
 
     Scaffold(
         topBar = {
-            CenterAlignedTopAppBar(title = { Text("Welcome to NoteNext") })
+            CenterAlignedTopAppBar(title = { Text(stringResource(id = R.string.welcome_to_notenext)) })
         }
     ) { paddingValues ->
         Column(
@@ -109,7 +109,7 @@ fun SetupScreen(
                 modifier = Modifier.fillMaxWidth(),
                 enabled = canContinue
             ) {
-                Text("Continue")
+                Text(stringResource(id = R.string.continue_button))
             }
         }
     }

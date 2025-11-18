@@ -44,7 +44,7 @@ fun PermissionItem(
                 onClick = onRequestClick,
                 modifier = Modifier.padding(start = 8.dp)
             ) {
-                Text("Request")
+                Text(stringResource(id = R.string.request))
             }
         }
     }
