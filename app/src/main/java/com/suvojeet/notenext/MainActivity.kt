@@ -50,6 +50,13 @@ class MainActivity : ComponentActivity() {
         val factory = ViewModelFactory(database.noteDao(), database.labelDao(), database.projectDao(), linkPreviewRepository, application)
 
         val startNoteId = intent.getIntExtra("NOTE_ID", -1)
+        val sharedText = when {
+            intent.action == Intent.ACTION_SEND && "text/plain" == intent.type -> {
+                intent.getStringExtra(Intent.EXTRA_TEXT)
+            }
+            else -> null
+        }
+
         setContent {
             val languageCode by settingsRepository.language.collectAsState(initial = "en")
             LaunchedEffect(languageCode) {
@@ -85,7 +92,7 @@ class MainActivity : ComponentActivity() {
                 } else if (enableAppLockLoaded!! && !unlocked) {
                     LockScreen(onUnlock = { unlocked = true })
                 } else {
-                    NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId)
+                    NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, sharedText = sharedText)
                 }
             }
         }

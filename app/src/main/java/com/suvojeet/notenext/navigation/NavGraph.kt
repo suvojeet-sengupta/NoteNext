@@ -147,7 +147,7 @@ import kotlinx.coroutines.flow.SharingStarted
 
 @Composable
 
-fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId: Int = -1) {
+fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId: Int = -1, sharedText: String? = null) {
 
     val navController = rememberNavController()
 
@@ -168,6 +168,12 @@ fun NavGraph(factory: ViewModelFactory, themeMode: ThemeMode, windowSizeClass: W
     LaunchedEffect(startNoteId) {
         if (startNoteId != -1) {
             notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+        }
+    }
+
+    LaunchedEffect(sharedText) {
+        if (sharedText != null) {
+            notesViewModel.onEvent(NotesEvent.CreateNoteFromSharedText(sharedText))
         }
     }
 

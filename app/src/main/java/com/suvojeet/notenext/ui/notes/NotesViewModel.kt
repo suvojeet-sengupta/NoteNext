@@ -799,6 +799,23 @@ fun onEvent(event: NotesEvent) {
                 _events.emit(NotesUiEvent.ShowToast("${selectedNotes.size} notes moved to project"))
             }
         }
+        is NotesEvent.CreateNoteFromSharedText -> {
+            _state.value = state.value.copy(
+                expandedNoteId = -1,
+                editingTitle = "",
+                editingContent = TextFieldValue(event.text),
+                editingColor = 0,
+                editingIsNewNote = true,
+                editingLastEdited = 0,
+                editingHistory = listOf("" to TextFieldValue(event.text)),
+                editingHistoryIndex = 0,
+                editingLabel = null,
+                linkPreviews = emptyList(),
+                editingNoteType = "TEXT",
+                editingChecklist = emptyList(),
+                editingAttachments = emptyList()
+            )
+        }
     }
 }
 
