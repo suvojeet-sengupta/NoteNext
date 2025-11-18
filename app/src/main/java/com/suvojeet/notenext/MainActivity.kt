@@ -32,6 +32,10 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import androidx.compose.foundation.layout.fillMaxSize
+import com.suvojeet.notenext.ui.setup.SetupScreen
 
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -61,7 +65,7 @@ class MainActivity : ComponentActivity() {
             val shapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
 
             var enableAppLockLoaded by remember { mutableStateOf<Boolean?>(null) }
-            var isSetupCompleteLoaded by remember { mutableState of<Boolean?>(null) }
+            var isSetupCompleteLoaded by remember { mutableStateOf<Boolean?>(null) }
 
             LaunchedEffect(Unit) {
                 settingsRepository.enableAppLock.collect { enableAppLockLoaded = it }
