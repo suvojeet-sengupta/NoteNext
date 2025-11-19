@@ -114,7 +114,6 @@ fun LockScreen(onUnlock: () -> Unit) {
         }
     }
 
-    // ***FIX 1: Get the string resource here, in the composable context***
     val incorrectPinString = stringResource(id = R.string.incorrect_pin)
 
     Scaffold { paddingValues ->
@@ -225,7 +224,6 @@ fun LockScreen(onUnlock: () -> Unit) {
                         if (pin == storedPin) {
                             onUnlock()
                         } else {
-                            // ***FIX 2: Use the variable here, inside the non-composable lambda***
                             error = incorrectPinString
                             triggerShake()
                             pin = ""
