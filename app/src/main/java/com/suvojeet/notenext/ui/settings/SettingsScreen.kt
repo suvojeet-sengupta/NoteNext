@@ -1,15 +1,13 @@
 package com.suvojeet.notenext.ui.settings
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -18,7 +16,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -28,11 +25,16 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Backup
+import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -41,17 +43,17 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.ListItem
+import androidx.compose.material3.ListItemDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,24 +65,20 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.ui.settings.SettingsRepository
-import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.theme.ShapeFamily
 import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
- @OptIn(ExperimentalMaterial3Api::class)
- @Composable
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
 fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     val context = LocalContext.current
     val settingsRepository = remember { SettingsRepository(context) }
@@ -104,7 +102,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
 
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = Modifier.fillMaxSize(),
         topBar = {
             LargeTopAppBar(
                 title = {
@@ -120,8 +118,8 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.background,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surface
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
                 )
             )
         }
@@ -130,49 +128,43 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(24.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             // --- Display Section ---
             item {
-                SettingsSection(
-                    title = stringResource(id = R.string.display_section_title),
-                    color = Color(0xFF2196F3) // Blue
-                ) {
+                SettingsSection(title = stringResource(id = R.string.display_section_title)) {
                     SettingsGroupCard {
-                        SettingsTile(
+                        SettingsItem(
                             icon = Icons.Default.Palette,
                             title = stringResource(id = R.string.theme),
                             subtitle = selectedThemeMode.name.lowercase().replaceFirstChar { it.uppercase() },
-                            iconColor = Color(0xFF2196F3),
                             onClick = { showThemeDialog = true }
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
                         
-                        SettingsSwitchTile(
-                            icon = Icons.Default.Palette, // You might want a different icon for Link Preview if available
+                        SettingsItem(
+                            icon = Icons.Default.Link,
                             title = stringResource(id = R.string.rich_link_preview),
                             subtitle = stringResource(id = R.string.rich_link_preview_subtitle),
+                            hasSwitch = true,
                             checked = enableRichLinkPreview,
-                            iconColor = Color(0xFF03A9F4),
                             onCheckedChange = { scope.launch { settingsRepository.saveEnableRichLinkPreview(it) } }
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                        SettingsTile(
-                            icon = Icons.Default.Palette, // Or a Shape icon
+                        SettingsItem(
+                            icon = Icons.Default.Category,
                             title = stringResource(id = R.string.shape_family),
                             subtitle = selectedShapeFamily.name.lowercase().replaceFirstChar { it.uppercase() },
-                            iconColor = Color(0xFF00BCD4),
                             onClick = { showShapeFamilyDialog = true }
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-                        SettingsTile(
-                            icon = Icons.Default.Info, // Using Info as generic language icon if standard globe unavailable
+                        SettingsItem(
+                            icon = Icons.Default.Language,
                             title = stringResource(id = R.string.language),
                             subtitle = stringResource(id = R.string.language_subtitle),
-                            iconColor = Color(0xFF3F51B5),
                             onClick = { showLanguageDialog = true }
                         )
                     }
@@ -181,16 +173,12 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Bin Section ---
             item {
-                SettingsSection(
-                    title = stringResource(id = R.string.bin_section_title),
-                    color = Color(0xFFF44336) // Red
-                ) {
+                SettingsSection(title = stringResource(id = R.string.bin_section_title)) {
                     SettingsGroupCard {
-                        SettingsTile(
+                        SettingsItem(
                             icon = Icons.Default.Delete,
                             title = stringResource(id = R.string.auto_delete_binned_notes),
                             subtitle = stringResource(id = R.string.auto_delete_subtitle, autoDeleteDays),
-                            iconColor = Color(0xFFF44336),
                             onClick = { showAutoDeleteDialog = true }
                         )
                     }
@@ -199,17 +187,14 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Security Section ---
             item {
-                SettingsSection(
-                    title = stringResource(id = R.string.security_section_title),
-                    color = Color(0xFF4CAF50) // Green
-                ) {
+                SettingsSection(title = stringResource(id = R.string.security_section_title)) {
                     SettingsGroupCard {
-                        SettingsSwitchTile(
+                        SettingsItem(
                             icon = Icons.Default.Security,
                             title = stringResource(id = R.string.app_lock),
                             subtitle = stringResource(id = R.string.app_lock_subtitle),
+                            hasSwitch = true,
                             checked = enableAppLock,
-                            iconColor = Color(0xFF4CAF50),
                             onCheckedChange = {
                                 if (it) {
                                     onNavigate("pin_setup")
@@ -224,25 +209,56 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Backup & Restore Section ---
             item {
-                SettingsSection(
-                    title = stringResource(id = R.string.backup_restore_section_title),
-                    color = Color(0xFFFF9800) // Orange
-                ) {
+                SettingsSection(title = stringResource(id = R.string.backup_restore_section_title)) {
                     SettingsGroupCard {
-                        SettingsTile(
+                        SettingsItem(
                             icon = Icons.Default.Backup,
                             title = stringResource(id = R.string.backup),
                             subtitle = "Save your notes locally",
-                            iconColor = Color(0xFFFF9800),
                             onClick = { onNavigate("backup") }
                         )
-                        HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        SettingsTile(
-                            icon = Icons.Default.Backup,
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        SettingsItem(
+                            icon = Icons.Default.Backup, // Or a different icon like Restore
                             title = stringResource(id = R.string.restore),
                             subtitle = "Restore from local backup",
-                            iconColor = Color(0xFFFFC107),
                             onClick = { onNavigate("restore") }
+                        )
+                    }
+                }
+            }
+
+            // --- Support Section ---
+            item {
+                SettingsSection(title = "Support") {
+                    SettingsGroupCard {
+                        SettingsItem(
+                            icon = Icons.Default.Star,
+                            title = "Rate App",
+                            subtitle = "Rate us on Play Store",
+                            onClick = {
+                                try {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                                    context.startActivity(intent)
+                                } catch (e: Exception) {
+                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                                    context.startActivity(intent)
+                                }
+                            }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        SettingsItem(
+                            icon = Icons.Default.Share,
+                            title = "Share App",
+                            subtitle = "Share with your friends",
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_SUBJECT, "Check out NoteNext")
+                                    putExtra(Intent.EXTRA_TEXT, "Hey, check out NoteNext, a cool note-taking app! https://play.google.com/store/apps/details?id=${context.packageName}")
+                                }
+                                context.startActivity(Intent.createChooser(intent, "Share via"))
+                            }
                         )
                     }
                 }
@@ -250,61 +266,24 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- About Section ---
             item {
-                SettingsGroupCard(modifier = Modifier.padding(top = 8.dp)) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clickable { onNavigate("about") }
-                            .padding(16.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Surface(
-                            shape = CircleShape,
-                            color = MaterialTheme.colorScheme.secondaryContainer,
-                            modifier = Modifier.size(48.dp)
-                        ) {
-                            Icon(
-                                imageVector = Icons.Filled.Info,
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSecondaryContainer,
-                                modifier = Modifier.padding(12.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Column {
-                            Text(
-                                stringResource(id = R.string.about),
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold
-                                )
-                            )
-                            Text(
-                                "Version, License & Credits",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        Spacer(modifier = Modifier.weight(1f))
-                        Icon(
-                            imageVector = Icons.Default.ChevronRight,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                SettingsSection(title = stringResource(id = R.string.about)) {
+                    SettingsGroupCard {
+                        SettingsItem(
+                            icon = Icons.Default.Info,
+                            title = stringResource(id = R.string.about),
+                            subtitle = "Version, License & Credits",
+                            onClick = { onNavigate("about") }
                         )
                     }
                 }
-                Spacer(modifier = Modifier.height(32.dp)) // Bottom padding
+                Spacer(modifier = Modifier.width(16.dp))
             }
         }
     }
 
     // --- Dialogs ---
-
-    AnimatedVisibility(
-        visible = showThemeDialog,
-        enter = scaleIn(animationSpec = tween(100)),
-        exit = scaleOut(animationSpec = tween(100))
-    ) {
+    // (Kept as is, simplified logic for display)
+    if (showThemeDialog) {
         ThemeChooserDialog(
             selectedThemeMode = selectedThemeMode,
             onThemeSelected = { themeMode ->
@@ -317,11 +296,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
         )
     }
 
-    AnimatedVisibility(
-        visible = showAutoDeleteDialog,
-        enter = scaleIn(animationSpec = tween(100)),
-        exit = scaleOut(animationSpec = tween(100))
-    ) {
+    if (showAutoDeleteDialog) {
         AutoDeleteDialog(
             currentDays = autoDeleteDays,
             onConfirm = { days ->
@@ -334,11 +309,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
         )
     }
 
-    AnimatedVisibility(
-        visible = showShapeFamilyDialog,
-        enter = scaleIn(animationSpec = tween(100)),
-        exit = scaleOut(animationSpec = tween(100))
-    ) {
+    if (showShapeFamilyDialog) {
         ShapeFamilyChooserDialog(
             selectedShapeFamily = selectedShapeFamily,
             onShapeFamilySelected = { shapeFamily ->
@@ -351,11 +322,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
         )
     }
 
-    AnimatedVisibility(
-        visible = showLanguageDialog,
-        enter = scaleIn(animationSpec = tween(100)),
-        exit = scaleOut(animationSpec = tween(100))
-    ) {
+    if (showLanguageDialog) {
         LanguageChooserDialog(
             selectedLanguage = selectedLanguage,
             onLanguageSelected = { language ->
@@ -371,28 +338,25 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     }
 }
 
-// --- Custom Components for Rich UI ---
+// --- Custom Components ---
 
- @Composable
+@Composable
 private fun SettingsSection(
     title: String,
-    color: Color,
     content: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
-            style = MaterialTheme.typography.labelLarge.copy(
-                fontWeight = FontWeight.Bold,
-                color = color
-            ),
-            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.padding(start = 24.dp, bottom = 8.dp, top = 8.dp)
         )
         content()
     }
 }
 
- @Composable
+@Composable
 private fun SettingsGroupCard(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit
@@ -401,7 +365,7 @@ private fun SettingsGroupCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -411,126 +375,60 @@ private fun SettingsGroupCard(
     }
 }
 
- @Composable
-private fun SettingsTile(
+@Composable
+private fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String? = null,
-    iconColor: Color,
-    onClick: () -> Unit
+    hasSwitch: Boolean = false,
+    checked: Boolean = false,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
+    onClick: (() -> Unit)? = null
 ) {
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(if (isPressed) 0.95f else 1f, label = "scale")
-
-    Row(
+    ListItem(
         modifier = Modifier
-            .fillMaxWidth()
-            .scale(scale)
-            .clickable(interactionSource = interactionSource, indication = null, onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 16.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Colorful Icon Box
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(iconColor.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
+            .clickable(enabled = onClick != null || hasSwitch) {
+                if (hasSwitch && onCheckedChange != null) {
+                    onCheckedChange(!checked)
+                } else {
+                    onClick?.invoke()
+                }
+            },
+        headlineContent = { Text(text = title, style = MaterialTheme.typography.titleMedium) },
+        supportingContent = if (subtitle != null) {
+            { Text(text = subtitle, style = MaterialTheme.typography.bodyMedium) }
+        } else null,
+        leadingContent = {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.size(24.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium)
-            )
-            if (subtitle != null) {
-                Text(
-                    text = subtitle,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        },
+        trailingContent = {
+            if (hasSwitch && onCheckedChange != null) {
+                Switch(
+                    checked = checked,
+                    onCheckedChange = onCheckedChange
+                )
+            } else if (onClick != null) {
+                Icon(
+                    imageVector = Icons.Default.ChevronRight,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-        }
-        
-        Icon(
-            imageVector = Icons.Default.ChevronRight,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+        },
+        colors = ListItemDefaults.colors(
+            containerColor = Color.Transparent
         )
-    }
+    )
 }
 
- @Composable
-private fun SettingsSwitchTile(
-    icon: ImageVector,
-    title: String,
-    subtitle: String,
-    checked: Boolean,
-    iconColor: Color,
-    onCheckedChange: (Boolean) -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Box(
-            modifier = Modifier
-                .size(40.dp)
-                .clip(CircleShape)
-                .background(iconColor.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = iconColor,
-                modifier = Modifier.size(20.dp)
-            )
-        }
-        
-        Spacer(modifier = Modifier.width(16.dp))
-        
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium)
-            )
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                checkedTrackColor = iconColor, // Match the switch color to the section theme
-                uncheckedBorderColor = MaterialTheme.colorScheme.outline,
-                uncheckedThumbColor = MaterialTheme.colorScheme.outline
-            )
-        )
-    }
-}
+// --- Dialogs remain mostly the same, just re-included ---
 
-// --- Dialogs (Kept logic same, updated UI slightly) ---
-
- @Composable
+@Composable
 private fun LanguageChooserDialog(
     selectedLanguage: String,
     onLanguageSelected: (String) -> Unit,
@@ -573,7 +471,7 @@ private fun LanguageChooserDialog(
     )
 }
 
- @Composable
+@Composable
 private fun ShapeFamilyChooserDialog(
     selectedShapeFamily: ShapeFamily,
     onShapeFamilySelected: (ShapeFamily) -> Unit,
@@ -606,7 +504,7 @@ private fun ShapeFamilyChooserDialog(
     )
 }
 
- @Composable
+@Composable
 private fun ThemeChooserDialog(
     selectedThemeMode: ThemeMode,
     onThemeSelected: (ThemeMode) -> Unit,
@@ -644,7 +542,7 @@ private fun ThemeChooserDialog(
     )
 }
 
- @Composable
+@Composable
 private fun AutoDeleteDialog(
     currentDays: Int,
     onConfirm: (Int) -> Unit,
