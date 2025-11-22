@@ -2,6 +2,7 @@ package com.suvojeet.notenext.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -16,6 +17,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -25,27 +27,23 @@ import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.suvojeet.notenext.data.ChecklistItem
-import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.ui.notes.HtmlConverter
-
 import com.suvojeet.notenext.data.NoteWithAttachments
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.ui.res.stringResource
+import com.suvojeet.notenext.R
+import com.suvojeet.notenext.ui.theme.NoteGradients
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import com.suvojeet.notenext.R
 
 /**
- * Displays a single note item in a card format, showing its title, content preview,
- * attachments, labels, and reminders. It supports click and long-click interactions.
- *
- * @param modifier The modifier to be applied to the card.
- * @param note The [NoteWithAttachments] object containing the note data.
- * @param isSelected Boolean indicating if the note is currently selected.
- * @param onNoteClick Lambda to be invoked when the note card is clicked.
- * @param onNoteLongClick Lambda to be invoked when the note card is long-clicked.
+ * Displays a single note item in a card format with dynamic styling.
+ * * Updates:
+ * - Gradient backgrounds
+ * - Dynamic font sizing for "Poster" effect on short notes
+ * - Softer, larger rounded corners
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -56,6 +54,11 @@ fun NoteItem(
     onNoteClick: () -> Unit,
     onNoteLongClick: () -> Unit,
 ) {
+    // Fetch dynamic gradient and content color
+    val backgroundBrush = NoteGradients.getGradientBrush(note.note.color)
+    val contentColor = NoteGradients.getContentColor(note.note.color)
+    val tintColor = contentColor.copy(alpha = 0.7f)
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -63,117 +66,138 @@ fun NoteItem(
                 onClick = onNoteClick,
                 onLongClick = onNoteLongClick
             ),
-        shape = MaterialTheme.shapes.medium,
+        shape = RoundedCornerShape(24.dp), // Increased radius for bubbly look
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
+            containerColor = Color.Transparent // Transparent to show Box gradient
         ),
         border = if (isSelected) {
-            BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
+            BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
         } else {
-            BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f))
+            BorderStroke(0.dp, Color.Transparent) // No border for cleaner look
         },
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 1.dp
+            defaultElevation = 0.dp // Flat look (gradient provides depth)
         )
     ) {
-        Column(
-            modifier = Modifier.padding(16.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(brush = backgroundBrush)
         ) {
-            // Display pin icon if the note is pinned.
-            if (note.note.isPinned) {
-                Icon(
-                    imageVector = Icons.Outlined.PushPin,
-                    contentDescription = stringResource(id = R.string.pinned_note_description),
-                    modifier = Modifier.size(16.dp).align(Alignment.End),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-            }
-            // Note Title
-            if (note.note.title.isNotEmpty()) {
-                Text(
-                    text = note.note.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface,
-                )
-            }
-
-            // Note Content Preview
-            if (note.note.content.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                if (note.note.noteType == "TEXT") {
-                    Text(
-                        text = HtmlConverter.htmlToAnnotatedString(note.note.content),
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                } else {
-                    // Display checklist preview for checklist notes.
-                    ChecklistPreview(note.note.content)
-                }
-            }
-
-            // Display attachment icon if there are attachments.
-            if (note.attachments.isNotEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Icon(
-                    imageVector = Icons.Default.Attachment,
-                    contentDescription = stringResource(id = R.string.attachment_icon_description),
-                    modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            // Display note label if available.
-            if (!note.note.label.isNullOrEmpty()) {
-                Spacer(modifier = Modifier.height(8.dp))
-                Surface(
-                    shape = RoundedCornerShape(4.dp),
-                    color = MaterialTheme.colorScheme.tertiaryContainer
-                ) {
-                    Text(
-                        text = note.note.label,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onTertiaryContainer,
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                    )
-                }
-            }
-
-            // Display reminder time if set.
-            note.note.reminderTime?.let { reminderTime ->
-                Spacer(modifier = Modifier.height(8.dp))
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                ) {
+            Column(
+                modifier = Modifier.padding(20.dp) // Increased padding
+            ) {
+                // Pin Icon
+                if (note.note.isPinned) {
                     Icon(
-                        imageVector = Icons.Default.Alarm,
-                        contentDescription = stringResource(id = R.string.reminder_icon_description),
-                        modifier = Modifier.size(16.dp),
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        imageVector = Icons.Outlined.PushPin,
+                        contentDescription = stringResource(id = R.string.pinned_note_description),
+                        modifier = Modifier
+                            .size(18.dp)
+                            .align(Alignment.End),
+                        tint = tintColor
                     )
-                    val sdf = SimpleDateFormat(stringResource(id = R.string.reminder_date_format), Locale.getDefault())
+                    Spacer(modifier = Modifier.height(4.dp))
+                }
+
+                // Note Title
+                if (note.note.title.isNotEmpty()) {
                     Text(
-                        text = sdf.format(Date(reminderTime)),
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = note.note.title,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
                     )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
+                // Note Content Preview (Dynamic Sizing)
+                if (note.note.content.isNotEmpty()) {
+                    if (note.note.noteType == "TEXT") {
+                        val plainText = HtmlConverter.htmlToPlainText(note.note.content)
+                        val contentLength = plainText.length
+                        
+                        // Dynamic Font Size Logic:
+                        // Short text (< 50 chars) -> Large Font (Poster style)
+                        // Medium text (< 100 chars) -> Medium Font
+                        // Long text -> Normal Font
+                        val (fontSize, lineHeight, maxLines) = when {
+                            contentLength < 50 -> Triple(22.sp, 28.sp, 6)
+                            contentLength < 120 -> Triple(16.sp, 22.sp, 8)
+                            else -> Triple(14.sp, 20.sp, 10)
+                        }
+
+                        // If title is empty and text is short, make it even bolder
+                        val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
+
+                        Text(
+                            text = HtmlConverter.htmlToAnnotatedString(note.note.content),
+                            fontSize = fontSize,
+                            lineHeight = lineHeight,
+                            fontWeight = fontWeight,
+                            color = contentColor.copy(alpha = 0.9f),
+                            maxLines = maxLines,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    } else {
+                        // Checklist Preview
+                        ChecklistPreview(note.note.content, contentColor)
+                    }
+                }
+
+                // Footer Section (Attachments, Labels, Reminders)
+                if (note.attachments.isNotEmpty() || !note.note.label.isNullOrEmpty() || note.note.reminderTime != null) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        // Attachment Icon
+                        if (note.attachments.isNotEmpty()) {
+                            Icon(
+                                imageVector = Icons.Default.Attachment,
+                                contentDescription = stringResource(id = R.string.attachment_icon_description),
+                                modifier = Modifier.size(16.dp),
+                                tint = tintColor
+                            )
+                        }
+
+                        // Reminder Icon & Text
+                        note.note.reminderTime?.let { reminderTime ->
+                            Icon(
+                                imageVector = Icons.Default.Alarm,
+                                contentDescription = stringResource(id = R.string.reminder_icon_description),
+                                modifier = Modifier.size(16.dp),
+                                tint = tintColor
+                            )
+                        }
+
+                        // Label Pill
+                        if (!note.note.label.isNullOrEmpty()) {
+                            Surface(
+                                shape = RoundedCornerShape(8.dp),
+                                color = contentColor.copy(alpha = 0.1f) // Semi-transparent pill
+                            ) {
+                                Text(
+                                    text = note.note.label,
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = contentColor,
+                                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                )
+                            }
+                        }
+                    }
                 }
             }
         }
     }
 }
 
-/**
- * Displays a preview of checklist items for a note.
- * Shows up to 5 checklist items, indicating if they are checked or unchecked.
- *
- * @param content The JSON string containing the checklist items.
- */
 @Composable
-private fun ChecklistPreview(content: String) {
+private fun ChecklistPreview(content: String, contentColor: Color) {
     val checklistItems = try {
         Gson().fromJson<List<ChecklistItem>>(content, object : TypeToken<List<ChecklistItem>>() {}.type)
     } catch (e: Exception) {
@@ -185,27 +209,28 @@ private fun ChecklistPreview(content: String) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(
                     imageVector = if (item.isChecked) Icons.Filled.CheckBox else Icons.Filled.CheckBoxOutlineBlank,
-                    contentDescription = null, // Content description for checklist items can be added if needed.
+                    contentDescription = null,
                     modifier = Modifier.size(16.dp),
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = contentColor.copy(alpha = 0.7f)
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
                     text = item.text,
                     fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    color = contentColor.copy(alpha = 0.9f),
                     maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
+                    overflow = TextOverflow.Ellipsis,
+                    style = if (item.isChecked) androidx.compose.ui.text.TextStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough) else androidx.compose.ui.text.TextStyle()
                 )
             }
         }
-        // Indicate if there are more checklist items than shown in the preview.
         if (checklistItems.size > 5) {
             Text(
                 text = "...",
                 fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = contentColor.copy(alpha = 0.7f)
             )
         }
     }
 }
+
