@@ -35,13 +35,13 @@ fun NoteEditor(
 ) {
     Column {
         // Determine text color for the title based on the note's background color.
-        val titleTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
+        val titleTextColor = MaterialTheme.colorScheme.onSurface
 
         // TextField for editing the note's title.
         TextField(
             value = state.editingTitle,
             onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
-            placeholder = { Text(stringResource(id = R.string.title), color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+            placeholder = { Text(stringResource(id = R.string.title), color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
@@ -49,10 +49,10 @@ fun NoteEditor(
                 disabledContainerColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                cursorColor = MaterialTheme.colorScheme.onSurface,
                 selectionColors = TextSelectionColors(
-                    handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                    backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                    handleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
             ),
             textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
@@ -63,7 +63,7 @@ fun NoteEditor(
         Spacer(modifier = Modifier.height(8.dp))
 
         // Determine text color for the content based on the note's background color.
-        val contentTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
+        val contentTextColor = MaterialTheme.colorScheme.onSurface
 
         // Dynamically determine the text style for the content based on the active heading style.
         val contentTextStyle = when (state.activeHeadingStyle) {
@@ -80,7 +80,7 @@ fun NoteEditor(
         TextField(
             value = state.editingContent,
             onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
-            placeholder = { Text(stringResource(id = R.string.content), color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+            placeholder = { Text(stringResource(id = R.string.content), color = MaterialTheme.colorScheme.onSurface) },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
                 focusedContainerColor = Color.Transparent,
@@ -88,10 +88,10 @@ fun NoteEditor(
                 disabledContainerColor = Color.Transparent,
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                cursorColor = MaterialTheme.colorScheme.onSurface,
                 selectionColors = TextSelectionColors(
-                    handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                    backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                    handleColor = MaterialTheme.colorScheme.onSurface,
+                    backgroundColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                 )
             ),
             textStyle = contentTextStyle

@@ -85,7 +85,7 @@ fun AddEditNoteBottomAppBar(
     var showAttachmentMenu by remember { mutableStateOf(false) }
 
     BottomAppBar(
-        containerColor = Color(state.editingColor), // Background color matches the note's editing color.
+        containerColor = MaterialTheme.colorScheme.surface, // Background color matches the note's editing color.
         windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp) // Remove default window insets for full-bleed.
     ) {
         Row(

@@ -58,8 +58,8 @@ fun AddEditNoteTopAppBar(
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = Color(state.editingColor), // Background color matches the note's editing color.
-            titleContentColor = contentColorFor(backgroundColor = Color(state.editingColor)), // Content color adapts to background.
+            containerColor = MaterialTheme.colorScheme.surface, // Background color matches the note's editing color.
+            titleContentColor = MaterialTheme.colorScheme.onSurface, // Content color adapts to background.
         ),
         actions = {
             // Actions are only visible for existing notes, not for newly created ones.
@@ -69,7 +69,7 @@ fun AddEditNoteTopAppBar(
                     Icon(
                         imageVector = Icons.Filled.PushPin,
                         contentDescription = if (state.isPinned) stringResource(id = R.string.unpin_note) else stringResource(id = R.string.pin_note),
-                        tint = if (state.isPinned) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor)) // Tint changes based on pinned state.
+                        tint = if (state.isPinned) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface // Tint changes based on pinned state.
                     )
                 }
                 // Archive/Unarchive action.
@@ -77,7 +77,7 @@ fun AddEditNoteTopAppBar(
                     Icon(
                         imageVector = Icons.Filled.Archive,
                         contentDescription = if (state.isArchived) stringResource(id = R.string.unarchive_note) else stringResource(id = R.string.archive_note),
-                        tint = if (state.isArchived) MaterialTheme.colorScheme.primary else contentColorFor(backgroundColor = Color(state.editingColor)) // Tint changes based on archived state.
+                        tint = if (state.isArchived) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface // Tint changes based on archived state.
                     )
                 }
                 // Delete action.
@@ -85,7 +85,7 @@ fun AddEditNoteTopAppBar(
                     Icon(
                         Icons.Default.Delete,
                         contentDescription = stringResource(id = R.string.delete_note),
-                        tint = contentColorFor(backgroundColor = Color(state.editingColor)) // Tint adapts to background color.
+                        tint = MaterialTheme.colorScheme.onSurface // Tint adapts to background color.
                     )
                 }
             }
