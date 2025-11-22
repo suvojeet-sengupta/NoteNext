@@ -95,6 +95,7 @@ import com.suvojeet.notenext.ui.components.LabelDialog
 import com.suvojeet.notenext.ui.components.NoteItem
 import com.suvojeet.notenext.ui.components.MultiActionFab
 import com.suvojeet.notenext.ui.components.SearchBar
+import com.suvojeet.notenext.ui.components.ColorSelectionDialog
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.notes.LayoutType
@@ -130,6 +131,7 @@ fun NotesScreen(
     var showReminderSetDialog by remember { mutableStateOf(false) }
     var showCreateProjectDialog by remember { mutableStateOf(false) }
     var showMoveToProjectDialog by remember { mutableStateOf(false) }
+    var showColorPickerDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
 
@@ -197,7 +199,7 @@ fun NotesScreen(
                             onClearSelection = { viewModel.onEvent(NotesEvent.ClearSelection) },
                             onTogglePinClick = { viewModel.onEvent(NotesEvent.TogglePinForSelectedNotes) },
                             onReminderClick = { showReminderSetDialog = true },
-                            onColorClick = { /* TODO */ },
+                            onColorClick = { showColorPickerDialog = true },
                             onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
                             onDeleteClick = { showDeleteDialog = true },
                             onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
@@ -301,6 +303,17 @@ fun NotesScreen(
                         viewModel.onEvent(NotesEvent.SetReminderForSelectedNotes(date, time, repeatOption))
                         showReminderSetDialog = false
                     }
+                )
+            }
+
+            if (showColorPickerDialog) {
+                ColorSelectionDialog(
+                    onDismiss = { showColorPickerDialog = false },
+                    onColorSelected = { color ->
+                        viewModel.onEvent(NotesEvent.ChangeColorForSelectedNotes(color))
+                        showColorPickerDialog = false
+                    },
+                    themeMode = themeMode
                 )
             }
 
@@ -629,3 +642,4 @@ private fun MoveToProjectDialog(
         }
     )
 }
+
