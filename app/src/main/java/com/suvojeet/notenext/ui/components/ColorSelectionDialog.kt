@@ -33,6 +33,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.settings.ThemeMode
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FormatColorReset
+import androidx.compose.material3.Icon
 
 @Composable
 fun ColorSelectionDialog(
@@ -87,6 +90,31 @@ fun ColorSelectionDialog(
                 verticalArrangement = Arrangement.spacedBy(8.dp),
                 contentPadding = PaddingValues(4.dp)
             ) {
+                // Option to remove color / reset to default
+                item {
+                    Box(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(Color.Transparent)
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                                shape = CircleShape
+                            )
+                            .clickable {
+                                onColorSelected(0) // 0 represents default/no color
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.FormatColorReset,
+                            contentDescription = "No Color",
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+                }
+
                 items(colors) { colorInt ->
                     Box(
                         modifier = Modifier
