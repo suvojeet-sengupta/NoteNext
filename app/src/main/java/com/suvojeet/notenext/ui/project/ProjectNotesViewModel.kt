@@ -56,6 +56,8 @@ class ProjectNotesViewModel(
 
     private val projectId: Int = savedStateHandle.get<String>("projectId")?.toIntOrNull() ?: -1
 
+    private val _sortType = MutableStateFlow(SortType.DATE_MODIFIED)
+
     init {
         if (projectId != -1) {
             viewModelScope.launch {
@@ -64,15 +66,16 @@ class ProjectNotesViewModel(
                 }
             }
 
-            combine(noteDao.getNotesByProjectId(projectId), labelDao.getLabels(), _state) { notes, labels, state ->
-                val sortedNotes = when (state.sortType) {
+            combine(noteDao.getNotesByProjectId(projectId), labelDao.getLabels(), _sortType) { notes, labels, sortType ->
+                val sortedNotes = when (sortType) {
                     SortType.DATE_CREATED -> notes.sortedByDescending { it.note.createdAt }
                     SortType.DATE_MODIFIED -> notes.sortedByDescending { it.note.lastEdited }
                     SortType.TITLE -> notes.sortedBy { it.note.title }
                 }
-                _state.value = state.copy(
+                _state.value = _state.value.copy(
                     notes = sortedNotes,
-                    labels = labels.map { it.name }
+                    labels = labels.map { it.name },
+                    sortType = sortType
                 )
             }.launchIn(viewModelScope)
         }
@@ -660,7 +663,7 @@ class ProjectNotesViewModel(
                 _state.value = state.value.copy(layoutType = newLayout)
             }
             is ProjectNotesEvent.SortNotes -> {
-                _state.value = state.value.copy(sortType = event.sortType)
+                _sortType.value = event.sortType
             }
             is ProjectNotesEvent.OnRemoveLinkPreview -> {
                 val updatedLinkPreviews = state.value.linkPreviews.filter { it.url != event.url }
