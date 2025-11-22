@@ -575,23 +575,29 @@ private fun ThemeChooserDialog(
         text = {
             Column {
                 ThemeMode.values().forEach { themeMode ->
-                    Row(
+                    ListItem(
+                        headlineContent = {
+                            Text(
+                                when (themeMode) {
+                                    ThemeMode.AMOLED -> stringResource(id = R.string.theme_amoled)
+                                    else -> themeMode.name.lowercase().replaceFirstChar { it.uppercase() }
+                                }
+                            )
+                        },
+                        leadingContent = {
+                            RadioButton(
+                                selected = (themeMode == selectedThemeMode),
+                                onClick = null
+                            )
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onThemeSelected(themeMode) }
-                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = (themeMode == selectedThemeMode), onClick = null)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(
-                            when (themeMode) {
-                                ThemeMode.AMOLED -> stringResource(id = R.string.theme_amoled)
-                                else -> themeMode.name.lowercase().replaceFirstChar { it.uppercase() }
-                            }
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onThemeSelected(themeMode) },
+                        colors = ListItemDefaults.colors(
+                            containerColor = Color.Transparent
                         )
-                    }
+                    )
                 }
             }
         },
