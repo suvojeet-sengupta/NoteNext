@@ -63,6 +63,15 @@ fun NoteItem(
         contentColor.copy(alpha = 0.7f)
     }
 
+    // Determine border stroke
+    val borderStroke = if (isSelected) {
+        BorderStroke(3.dp, MaterialTheme.colorScheme.primary) // Thick primary border when selected
+    } else if (isDefaultColor) {
+        BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) // Default thin border for uncolored notes
+    } else {
+        BorderStroke(0.dp, Color.Transparent) // No border for colored/gradient notes
+    }
+
     Card(
         modifier = modifier
             .fillMaxWidth()
@@ -75,11 +84,7 @@ fun NoteItem(
             // If default, use standard Surface color. If custom, make transparent to show gradient Box.
             containerColor = if (isDefaultColor) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent
         ),
-        border = if (isSelected) {
-            BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
-        } else {
-            BorderStroke(0.dp, Color.Transparent)
-        },
+        border = borderStroke,
         elevation = CardDefaults.cardElevation(
             defaultElevation = if (isDefaultColor) 2.dp else 0.dp // Elevation only for default flat cards
         )
