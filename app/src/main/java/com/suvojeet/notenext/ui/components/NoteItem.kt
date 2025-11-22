@@ -38,13 +38,6 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-/**
- * Displays a single note item in a card format with dynamic styling.
- * * Updates:
- * - Gradient backgrounds
- * - Dynamic font sizing for "Poster" effect on short notes
- * - Softer, larger rounded corners
- */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun NoteItem(
@@ -54,10 +47,21 @@ fun NoteItem(
     onNoteClick: () -> Unit,
     onNoteLongClick: () -> Unit,
 ) {
-    // Fetch dynamic gradient and content color
-    val backgroundBrush = NoteGradients.getGradientBrush(note.note.color)
-    val contentColor = NoteGradients.getContentColor(note.note.color)
-    val tintColor = contentColor.copy(alpha = 0.7f)
+    // Check if the note has a custom color or is using the default (0)
+    val isDefaultColor = note.note.color == 0
+
+    // Determine colors based on whether it's default or custom
+    val contentColor = if (isDefaultColor) {
+        MaterialTheme.colorScheme.onSurface // Default Theme Text Color
+    } else {
+        NoteGradients.getContentColor(note.note.color) // Dynamic Text Color for Gradient
+    }
+    
+    val tintColor = if (isDefaultColor) {
+        MaterialTheme.colorScheme.onSurfaceVariant
+    } else {
+        contentColor.copy(alpha = 0.7f)
+    }
 
     Card(
         modifier = modifier
@@ -66,26 +70,33 @@ fun NoteItem(
                 onClick = onNoteClick,
                 onLongClick = onNoteLongClick
             ),
-        shape = RoundedCornerShape(24.dp), // Increased radius for bubbly look
+        shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = Color.Transparent // Transparent to show Box gradient
+            // If default, use standard Surface color. If custom, make transparent to show gradient Box.
+            containerColor = if (isDefaultColor) MaterialTheme.colorScheme.surfaceContainer else Color.Transparent
         ),
         border = if (isSelected) {
             BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
         } else {
-            BorderStroke(0.dp, Color.Transparent) // No border for cleaner look
+            BorderStroke(0.dp, Color.Transparent)
         },
         elevation = CardDefaults.cardElevation(
-            defaultElevation = 0.dp // Flat look (gradient provides depth)
+            defaultElevation = if (isDefaultColor) 2.dp else 0.dp // Elevation only for default flat cards
         )
     ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(brush = backgroundBrush)
+                .then(
+                    if (!isDefaultColor) {
+                        Modifier.background(brush = NoteGradients.getGradientBrush(note.note.color))
+                    } else {
+                        Modifier
+                    }
+                )
         ) {
             Column(
-                modifier = Modifier.padding(20.dp) // Increased padding
+                modifier = Modifier.padding(20.dp)
             ) {
                 // Pin Icon
                 if (note.note.isPinned) {
@@ -119,17 +130,12 @@ fun NoteItem(
                         val plainText = HtmlConverter.htmlToPlainText(note.note.content)
                         val contentLength = plainText.length
                         
-                        // Dynamic Font Size Logic:
-                        // Short text (< 50 chars) -> Large Font (Poster style)
-                        // Medium text (< 100 chars) -> Medium Font
-                        // Long text -> Normal Font
                         val (fontSize, lineHeight, maxLines) = when {
                             contentLength < 50 -> Triple(22.sp, 28.sp, 6)
                             contentLength < 120 -> Triple(16.sp, 22.sp, 8)
                             else -> Triple(14.sp, 20.sp, 10)
                         }
 
-                        // If title is empty and text is short, make it even bolder
                         val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
 
                         Text(
@@ -137,24 +143,23 @@ fun NoteItem(
                             fontSize = fontSize,
                             lineHeight = lineHeight,
                             fontWeight = fontWeight,
-                            color = contentColor.copy(alpha = 0.9f),
+                            color = if (isDefaultColor) MaterialTheme.colorScheme.onSurfaceVariant else contentColor.copy(alpha = 0.9f),
                             maxLines = maxLines,
                             overflow = TextOverflow.Ellipsis
                         )
                     } else {
                         // Checklist Preview
-                        ChecklistPreview(note.note.content, contentColor)
+                        ChecklistPreview(note.note.content, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor)
                     }
                 }
 
-                // Footer Section (Attachments, Labels, Reminders)
+                // Footer Section
                 if (note.attachments.isNotEmpty() || !note.note.label.isNullOrEmpty() || note.note.reminderTime != null) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        // Attachment Icon
                         if (note.attachments.isNotEmpty()) {
                             Icon(
                                 imageVector = Icons.Default.Attachment,
@@ -164,8 +169,7 @@ fun NoteItem(
                             )
                         }
 
-                        // Reminder Icon & Text
-                        note.note.reminderTime?.let { reminderTime ->
+                        note.note.reminderTime?.let {
                             Icon(
                                 imageVector = Icons.Default.Alarm,
                                 contentDescription = stringResource(id = R.string.reminder_icon_description),
@@ -174,17 +178,16 @@ fun NoteItem(
                             )
                         }
 
-                        // Label Pill
                         if (!note.note.label.isNullOrEmpty()) {
                             Surface(
                                 shape = RoundedCornerShape(8.dp),
-                                color = contentColor.copy(alpha = 0.1f) // Semi-transparent pill
+                                color = if (isDefaultColor) MaterialTheme.colorScheme.secondaryContainer else contentColor.copy(alpha = 0.15f)
                             ) {
                                 Text(
                                     text = note.note.label,
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Medium,
-                                    color = contentColor,
+                                    color = if (isDefaultColor) MaterialTheme.colorScheme.onSecondaryContainer else contentColor,
                                     modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }
@@ -233,4 +236,5 @@ private fun ChecklistPreview(content: String, contentColor: Color) {
         }
     }
 }
+
 
