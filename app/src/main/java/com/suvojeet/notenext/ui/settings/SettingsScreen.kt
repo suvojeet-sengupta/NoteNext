@@ -77,9 +77,13 @@ import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
+
+// ... (previous imports)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
+    // ... (state setup remains same)
     val context = LocalContext.current
     val settingsRepository = remember { SettingsRepository(context) }
     val scope = rememberCoroutineScope()
@@ -118,8 +122,8 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 },
                 scrollBehavior = scrollBehavior,
                 colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer
+                    containerColor = MaterialTheme.colorScheme.background, // Restored to background
+                    scrolledContainerColor = MaterialTheme.colorScheme.surface
                 )
             )
         }
@@ -128,20 +132,24 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(20.dp)
+            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 16.dp), // Restored padding
+            verticalArrangement = Arrangement.spacedBy(24.dp) // Restored spacing
         ) {
             // --- Display Section ---
             item {
-                SettingsSection(title = stringResource(id = R.string.display_section_title)) {
+                SettingsSection(
+                    title = stringResource(id = R.string.display_section_title),
+                    color = Color(0xFF2196F3) // Blue
+                ) {
                     SettingsGroupCard {
                         SettingsItem(
                             icon = Icons.Default.Palette,
                             title = stringResource(id = R.string.theme),
                             subtitle = selectedThemeMode.name.lowercase().replaceFirstChar { it.uppercase() },
+                            iconColor = Color(0xFF2196F3),
                             onClick = { showThemeDialog = true }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                         
                         SettingsItem(
                             icon = Icons.Default.Link,
@@ -149,22 +157,25 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                             subtitle = stringResource(id = R.string.rich_link_preview_subtitle),
                             hasSwitch = true,
                             checked = enableRichLinkPreview,
+                            iconColor = Color(0xFF03A9F4),
                             onCheckedChange = { scope.launch { settingsRepository.saveEnableRichLinkPreview(it) } }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
                         SettingsItem(
                             icon = Icons.Default.Category,
                             title = stringResource(id = R.string.shape_family),
                             subtitle = selectedShapeFamily.name.lowercase().replaceFirstChar { it.uppercase() },
+                            iconColor = Color(0xFF00BCD4),
                             onClick = { showShapeFamilyDialog = true }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
                         SettingsItem(
                             icon = Icons.Default.Language,
                             title = stringResource(id = R.string.language),
                             subtitle = stringResource(id = R.string.language_subtitle),
+                            iconColor = Color(0xFF3F51B5),
                             onClick = { showLanguageDialog = true }
                         )
                     }
@@ -173,12 +184,16 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Bin Section ---
             item {
-                SettingsSection(title = stringResource(id = R.string.bin_section_title)) {
+                SettingsSection(
+                    title = stringResource(id = R.string.bin_section_title),
+                    color = Color(0xFFF44336) // Red
+                ) {
                     SettingsGroupCard {
                         SettingsItem(
                             icon = Icons.Default.Delete,
                             title = stringResource(id = R.string.auto_delete_binned_notes),
                             subtitle = stringResource(id = R.string.auto_delete_subtitle, autoDeleteDays),
+                            iconColor = Color(0xFFF44336),
                             onClick = { showAutoDeleteDialog = true }
                         )
                     }
@@ -187,7 +202,10 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Security Section ---
             item {
-                SettingsSection(title = stringResource(id = R.string.security_section_title)) {
+                SettingsSection(
+                    title = stringResource(id = R.string.security_section_title),
+                    color = Color(0xFF4CAF50) // Green
+                ) {
                     SettingsGroupCard {
                         SettingsItem(
                             icon = Icons.Default.Security,
@@ -195,6 +213,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                             subtitle = stringResource(id = R.string.app_lock_subtitle),
                             hasSwitch = true,
                             checked = enableAppLock,
+                            iconColor = Color(0xFF4CAF50),
                             onCheckedChange = {
                                 if (it) {
                                     onNavigate("pin_setup")
@@ -209,19 +228,24 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Backup & Restore Section ---
             item {
-                SettingsSection(title = stringResource(id = R.string.backup_restore_section_title)) {
+                SettingsSection(
+                    title = stringResource(id = R.string.backup_restore_section_title),
+                    color = Color(0xFFFF9800) // Orange
+                ) {
                     SettingsGroupCard {
                         SettingsItem(
                             icon = Icons.Default.Backup,
                             title = stringResource(id = R.string.backup),
                             subtitle = "Save your notes locally",
+                            iconColor = Color(0xFFFF9800),
                             onClick = { onNavigate("backup") }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                         SettingsItem(
-                            icon = Icons.Default.Backup, // Or a different icon like Restore
+                            icon = Icons.Default.Backup, 
                             title = stringResource(id = R.string.restore),
                             subtitle = "Restore from local backup",
+                            iconColor = Color(0xFFFFC107),
                             onClick = { onNavigate("restore") }
                         )
                     }
@@ -230,12 +254,16 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- Support Section ---
             item {
-                SettingsSection(title = "Support") {
+                SettingsSection(
+                    title = "Support",
+                    color = Color(0xFF9C27B0) // Purple
+                ) {
                     SettingsGroupCard {
                         SettingsItem(
                             icon = Icons.Default.Star,
                             title = "Rate App",
                             subtitle = "Rate us on Play Store",
+                            iconColor = Color(0xFF9C27B0),
                             onClick = {
                                 try {
                                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
@@ -246,11 +274,12 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                                 }
                             }
                         )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                         SettingsItem(
                             icon = Icons.Default.Share,
                             title = "Share App",
                             subtitle = "Share with your friends",
+                            iconColor = Color(0xFF673AB7),
                             onClick = {
                                 val intent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
@@ -266,23 +295,21 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 
             // --- About Section ---
             item {
-                SettingsSection(title = stringResource(id = R.string.about)) {
-                    SettingsGroupCard {
-                        SettingsItem(
-                            icon = Icons.Default.Info,
-                            title = stringResource(id = R.string.about),
-                            subtitle = "Version, License & Credits",
-                            onClick = { onNavigate("about") }
-                        )
-                    }
+                SettingsGroupCard(modifier = Modifier.padding(top = 8.dp)) {
+                    SettingsItem(
+                        icon = Icons.Default.Info,
+                        title = stringResource(id = R.string.about),
+                        subtitle = "Version, License & Credits",
+                        iconColor = MaterialTheme.colorScheme.onSurfaceVariant, // Neutral color for about
+                        onClick = { onNavigate("about") }
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
             }
         }
     }
 
-    // --- Dialogs ---
-    // (Kept as is, simplified logic for display)
+    // ... (Dialogs remain unchanged)
     if (showThemeDialog) {
         ThemeChooserDialog(
             selectedThemeMode = selectedThemeMode,
@@ -343,14 +370,17 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
 @Composable
 private fun SettingsSection(
     title: String,
+    color: Color,
     content: @Composable () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.padding(start = 24.dp, bottom = 8.dp, top = 8.dp)
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontWeight = FontWeight.Bold,
+                color = color
+            ),
+            modifier = Modifier.padding(start = 16.dp, bottom = 8.dp) // Adjusted padding
         )
         content()
     }
@@ -365,7 +395,7 @@ private fun SettingsGroupCard(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow // Restored container color
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -382,6 +412,7 @@ private fun SettingsItem(
     subtitle: String? = null,
     hasSwitch: Boolean = false,
     checked: Boolean = false,
+    iconColor: Color,
     onCheckedChange: ((Boolean) -> Unit)? = null,
     onClick: (() -> Unit)? = null
 ) {
@@ -394,29 +425,54 @@ private fun SettingsItem(
                     onClick?.invoke()
                 }
             },
-        headlineContent = { Text(text = title, style = MaterialTheme.typography.titleMedium) },
+        headlineContent = { 
+            Text(
+                text = title, 
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Medium)
+            ) 
+        },
         supportingContent = if (subtitle != null) {
-            { Text(text = subtitle, style = MaterialTheme.typography.bodyMedium) }
+            { 
+                Text(
+                    text = subtitle, 
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                ) 
+            }
         } else null,
         leadingContent = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                modifier = Modifier.size(24.dp),
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(iconColor.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = iconColor
+                )
+            }
         },
         trailingContent = {
             if (hasSwitch && onCheckedChange != null) {
                 Switch(
                     checked = checked,
-                    onCheckedChange = onCheckedChange
+                    onCheckedChange = onCheckedChange,
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                        checkedTrackColor = iconColor,
+                        uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                        uncheckedThumbColor = MaterialTheme.colorScheme.outline
+                    )
                 )
             } else if (onClick != null) {
                 Icon(
                     imageVector = Icons.Default.ChevronRight,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
                 )
             }
         },
