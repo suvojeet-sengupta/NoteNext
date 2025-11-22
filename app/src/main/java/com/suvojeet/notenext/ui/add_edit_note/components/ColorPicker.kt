@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.contentColorFor
@@ -48,6 +49,29 @@ fun ColorPicker(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // No Color Option
+        item {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color.Transparent, CircleShape)
+                    .border(
+                        width = 2.dp,
+                        color = if (editingColor == 0) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                        shape = CircleShape
+                    )
+                    .clickable { onEvent(NotesEvent.OnColorChange(0)) }, // 0 for default/no color
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Outlined.FormatColorReset,
+                    contentDescription = "No Color",
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+
         items(colors) { color ->
             // Each color item is a clickable circle.
             Box(
