@@ -159,6 +159,12 @@ fun AddEditNoteScreen(
         else -> lightNoteColors
     }
 
+    val backgroundColor = if (state.editingColor == 0) {
+        MaterialTheme.colorScheme.surface
+    } else {
+        Color(state.editingColor)
+    }
+
     Scaffold(
         modifier = Modifier.imePadding(),
         topBar = {
@@ -202,7 +208,7 @@ fun AddEditNoteScreen(
                     Column(
                         modifier = Modifier
                             .weight(1f)
-                            .background(Color(state.editingColor))
+                            .background(backgroundColor)
                             .verticalScroll(scrollState)
                     ) {
                         val imageAttachments = state.editingAttachments.filter { it.type == "IMAGE" }
@@ -281,14 +287,14 @@ fun AddEditNoteScreen(
                     LazyColumn(
                         modifier = Modifier
                             .weight(1f)
-                            .background(Color(state.editingColor))
+                            .background(backgroundColor)
                     ) {
                         item {
-                            val titleTextColor = contentColorFor(backgroundColor = Color(state.editingColor))
+                            val titleTextColor = contentColorFor(backgroundColor = backgroundColor)
                             TextField(
                                 value = state.editingTitle,
                                 onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
-                                placeholder = { Text("Title", color = contentColorFor(backgroundColor = Color(state.editingColor))) },
+                                placeholder = { Text("Title", color = contentColorFor(backgroundColor = backgroundColor)) },
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(horizontal = 16.dp),
@@ -298,10 +304,10 @@ fun AddEditNoteScreen(
                                     disabledContainerColor = Color.Transparent,
                                     focusedIndicatorColor = Color.Transparent,
                                     unfocusedIndicatorColor = Color.Transparent,
-                                    cursorColor = contentColorFor(backgroundColor = Color(state.editingColor)),
+                                    cursorColor = contentColorFor(backgroundColor = backgroundColor),
                                     selectionColors = TextSelectionColors(
-                                        handleColor = contentColorFor(backgroundColor = Color(state.editingColor)),
-                                        backgroundColor = contentColorFor(backgroundColor = Color(state.editingColor)).copy(alpha = 0.4f)
+                                        handleColor = contentColorFor(backgroundColor = backgroundColor),
+                                        backgroundColor = contentColorFor(backgroundColor = backgroundColor).copy(alpha = 0.4f)
                                     )
                                 ),
                                 textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
