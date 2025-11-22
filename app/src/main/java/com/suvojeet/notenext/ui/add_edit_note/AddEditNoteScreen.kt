@@ -159,11 +159,7 @@ fun AddEditNoteScreen(
         else -> lightNoteColors
     }
 
-    val backgroundColor = if (state.editingColor == 0) {
-        MaterialTheme.colorScheme.surface
-    } else {
-        Color(state.editingColor)
-    }
+    val backgroundColor = MaterialTheme.colorScheme.surface
 
     Scaffold(
         modifier = Modifier.imePadding(),
