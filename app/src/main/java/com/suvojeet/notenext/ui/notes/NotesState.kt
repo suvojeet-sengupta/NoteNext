@@ -42,7 +42,7 @@ data class NotesState(
     val editingChecklist: List<ChecklistItem> = emptyList(),
     val newlyAddedChecklistItemId: String? = null,
     val editingAttachments: List<Attachment> = emptyList(),
-    val editingAttachments: List<Attachment> = emptyList(),
+
     val projects: List<Project> = emptyList(),
     val searchQuery: String = ""
 )

@@ -45,19 +45,6 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.ToggleLayout -> ProjectNotesEvent.ToggleLayout
         is NotesEvent.SortNotes -> ProjectNotesEvent.SortNotes(this.sortType)
         is NotesEvent.OnInsertLink -> ProjectNotesEvent.OnInsertLink(this.url)
-        is NotesEvent.ClearNewlyAddedChecklistItemId -> ProjectNotesEvent.ClearNewlyAddedChecklistItemId
-        is NotesEvent.AddAttachment -> ProjectNotesEvent.AddAttachment(this.uri, this.mimeType)
-        is NotesEvent.RemoveAttachment -> ProjectNotesEvent.RemoveAttachment(this.tempId)
-        is NotesEvent.CreateProject -> throw IllegalArgumentException("CreateProject event cannot be converted")
-        is NotesEvent.FilterByLabel -> throw IllegalArgumentException("FilterByLabel event cannot be converted")
-        is NotesEvent.MoveSelectedNotesToProject -> throw IllegalArgumentException("MoveSelectedNotesToProject event cannot be converted")
-        is NotesEvent.CreateNoteFromSharedText -> throw IllegalArgumentException("CreateNoteFromSharedText event cannot be converted")
-    }
-}
-
-fun ProjectNotesUiEvent.toNotesUiEvent(): NotesUiEvent {
-    return when (this) {
-        is ProjectNotesUiEvent.SendNotes -> NotesUiEvent.SendNotes(this.title, this.content)
         is ProjectNotesUiEvent.ShowToast -> NotesUiEvent.ShowToast(this.message)
         is ProjectNotesUiEvent.LinkPreviewRemoved -> NotesUiEvent.LinkPreviewRemoved
     }
