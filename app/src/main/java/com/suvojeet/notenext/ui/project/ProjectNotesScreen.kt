@@ -83,6 +83,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import androidx.compose.material3.TopAppBarDefaults
 
 import com.suvojeet.notenext.ui.notes.NotesEvent
+import com.suvojeet.notenext.ui.project.toNotesUiEvent
 
 import com.suvojeet.notenext.ui.components.MultiActionFab
 import androidx.compose.runtime.setValue

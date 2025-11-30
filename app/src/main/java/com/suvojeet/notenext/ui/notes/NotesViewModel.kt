@@ -60,6 +60,7 @@ class NotesViewModel(
     private var recentlyDeletedNote: Note? = null
 
     private val _searchQuery = MutableStateFlow("")
+    private val _sortType = MutableStateFlow(SortType.DATE_MODIFIED)
 
     init {
         @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
