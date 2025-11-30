@@ -121,7 +121,7 @@ fun NotesScreen(
     events: kotlinx.coroutines.flow.SharedFlow<com.suvojeet.notenext.ui.notes.NotesUiEvent>
 ) {
     val state by viewModel.state.collectAsState()
-    var searchQuery by remember { mutableStateOf("") }
+    // var searchQuery by remember { mutableStateOf("") } // Removed local state
     var isFabExpanded by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
 
@@ -211,8 +211,8 @@ fun NotesScreen(
                         TopAppBar(
                             title = {
                                 SearchBar(
-                                    searchQuery = searchQuery,
-                                    onSearchQueryChange = { searchQuery = it },
+                                    searchQuery = state.searchQuery,
+                                    onSearchQueryChange = { viewModel.onEvent(NotesEvent.OnSearchQueryChange(it)) },
                                     isSearchActive = isSearchActive,
                                     onSearchActiveChange = { isSearchActive = it },
                                     onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
@@ -385,9 +385,8 @@ fun NotesScreen(
                         }
                     }
                 } else {
-                    val filteredNotes = notesToDisplay.filter { note ->
-                        !note.note.isArchived && (note.note.title.contains(searchQuery, ignoreCase = true) || note.note.content.contains(searchQuery, ignoreCase = true))
-                    }
+                    // Filtered notes are now coming directly from the ViewModel via FTS
+                    val filteredNotes = notesToDisplay
                     val pinnedNotes = filteredNotes.filter { it.note.isPinned }
                     val otherNotes = filteredNotes.filter { !it.note.isPinned }
 

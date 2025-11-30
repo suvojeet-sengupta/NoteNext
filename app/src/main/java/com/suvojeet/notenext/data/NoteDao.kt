@@ -58,4 +58,14 @@ interface NoteDao {
     @Transaction
     @Query("SELECT * FROM notes WHERE projectId = :projectId AND isBinned = 0 ORDER BY isPinned DESC, lastEdited DESC")
     fun getNotesByProjectId(projectId: Int): Flow<List<NoteWithAttachments>>
+
+    @Transaction
+    @Query("""
+        SELECT notes.* FROM notes
+        JOIN notes_fts ON notes.id = notes_fts.rowid
+        WHERE notes_fts MATCH :query
+        AND notes.isArchived = 0 AND notes.isBinned = 0
+        ORDER BY notes.isPinned DESC, notes.lastEdited DESC
+    """)
+    fun searchNotes(query: String): Flow<List<NoteWithAttachments>>
 }

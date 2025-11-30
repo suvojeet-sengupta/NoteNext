@@ -38,6 +38,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.flatMapLatest
 
 import com.suvojeet.notenext.data.Attachment
 import com.suvojeet.notenext.data.NoteWithAttachments
@@ -58,10 +59,24 @@ class NotesViewModel(
 
     private var recentlyDeletedNote: Note? = null
 
-    private val _sortType = MutableStateFlow(SortType.DATE_MODIFIED)
+    private val _searchQuery = MutableStateFlow("")
 
     init {
-        combine(noteDao.getNotes(), labelDao.getLabels(), projectDao.getProjects(), _sortType) { notes, labels, projects, sortType ->
+        @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
+        combine(
+            _searchQuery.flatMapLatest { query ->
+                if (query.isBlank()) {
+                    noteDao.getNotes()
+                } else {
+                    // Append * to allow prefix matching (e.g., "app" matches "apple")
+                    noteDao.searchNotes("$query*")
+                }
+            },
+            labelDao.getLabels(),
+            projectDao.getProjects(),
+            _sortType,
+            _searchQuery
+        ) { notes, labels, projects, sortType, query ->
             val filteredNotes = notes.filter { it.note.projectId == null }
             val sortedNotes = when (sortType) {
                 SortType.DATE_CREATED -> filteredNotes.sortedByDescending { it.note.createdAt }
@@ -73,13 +88,17 @@ class NotesViewModel(
                 labels = labels.map { it.name },
                 projects = projects,
                 isLoading = false,
-                sortType = sortType
+                sortType = sortType,
+                searchQuery = query
             )
         }.launchIn(viewModelScope)
     }
 
     fun onEvent(event: NotesEvent) {
         when (event) {
+            is NotesEvent.OnSearchQueryChange -> {
+                _searchQuery.value = event.query
+            }
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
                     val noteToBin = event.note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())

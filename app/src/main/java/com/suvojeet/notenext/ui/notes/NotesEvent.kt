@@ -65,4 +65,5 @@ sealed class NotesEvent {
     data class CreateProject(val name: String) : NotesEvent()
     data class MoveSelectedNotesToProject(val projectId: Int?) : NotesEvent()
     data class CreateNoteFromSharedText(val text: String) : NotesEvent()
+    data class OnSearchQueryChange(val query: String) : NotesEvent()
 }
