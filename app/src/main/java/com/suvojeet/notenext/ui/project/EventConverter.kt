@@ -1,4 +1,22 @@
 package com.suvojeet.notenext.ui.project
+
+import com.suvojeet.notenext.ui.notes.NotesEvent
+import com.suvojeet.notenext.ui.notes.NotesUiEvent
+
+fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
+    return when (this) {
+        is NotesEvent.DeleteNote -> ProjectNotesEvent.DeleteNote(this.note)
+        is NotesEvent.RestoreNote -> ProjectNotesEvent.RestoreNote
+        is NotesEvent.ToggleNoteSelection -> ProjectNotesEvent.ToggleNoteSelection(this.noteId)
+        is NotesEvent.ClearSelection -> ProjectNotesEvent.ClearSelection
+        is NotesEvent.TogglePinForSelectedNotes -> ProjectNotesEvent.TogglePinForSelectedNotes
+        is NotesEvent.DeleteSelectedNotes -> ProjectNotesEvent.DeleteSelectedNotes
+        is NotesEvent.ArchiveSelectedNotes -> ProjectNotesEvent.ArchiveSelectedNotes
+        is NotesEvent.ChangeColorForSelectedNotes -> ProjectNotesEvent.ChangeColorForSelectedNotes(this.color)
+        is NotesEvent.CopySelectedNotes -> ProjectNotesEvent.CopySelectedNotes
+        is NotesEvent.SendSelectedNotes -> ProjectNotesEvent.SendSelectedNotes
+        is NotesEvent.SetReminderForSelectedNotes -> ProjectNotesEvent.SetReminderForSelectedNotes(this.date, this.time, this.repeatOption)
+        is NotesEvent.ToggleImportantForSelectedNotes -> ProjectNotesEvent.ToggleImportantForSelectedNotes
         is NotesEvent.SetLabelForSelectedNotes -> ProjectNotesEvent.SetLabelForSelectedNotes(this.label)
         is NotesEvent.ExpandNote -> ProjectNotesEvent.ExpandNote(this.noteId, this.noteType)
         is NotesEvent.CollapseNote -> ProjectNotesEvent.CollapseNote
@@ -27,6 +45,20 @@ package com.suvojeet.notenext.ui.project
         is NotesEvent.ToggleLayout -> ProjectNotesEvent.ToggleLayout
         is NotesEvent.SortNotes -> ProjectNotesEvent.SortNotes(this.sortType)
         is NotesEvent.OnInsertLink -> ProjectNotesEvent.OnInsertLink(this.url)
+        is NotesEvent.ClearNewlyAddedChecklistItemId -> ProjectNotesEvent.ClearNewlyAddedChecklistItemId
+        is NotesEvent.AddAttachment -> ProjectNotesEvent.AddAttachment(this.uri, this.mimeType)
+        is NotesEvent.RemoveAttachment -> ProjectNotesEvent.RemoveAttachment(this.tempId)
+        is NotesEvent.CreateProject -> throw IllegalArgumentException("CreateProject event cannot be converted")
+        is NotesEvent.FilterByLabel -> throw IllegalArgumentException("FilterByLabel event cannot be converted")
+        is NotesEvent.MoveSelectedNotesToProject -> throw IllegalArgumentException("MoveSelectedNotesToProject event cannot be converted")
+        is NotesEvent.CreateNoteFromSharedText -> throw IllegalArgumentException("CreateNoteFromSharedText event cannot be converted")
+        is NotesEvent.OnSearchQueryChange -> throw IllegalArgumentException("OnSearchQueryChange event cannot be converted")
+    }
+}
+
+fun ProjectNotesUiEvent.toNotesUiEvent(): NotesUiEvent {
+    return when (this) {
+        is ProjectNotesUiEvent.SendNotes -> NotesUiEvent.SendNotes(this.title, this.content)
         is ProjectNotesUiEvent.ShowToast -> NotesUiEvent.ShowToast(this.message)
         is ProjectNotesUiEvent.LinkPreviewRemoved -> NotesUiEvent.LinkPreviewRemoved
     }
