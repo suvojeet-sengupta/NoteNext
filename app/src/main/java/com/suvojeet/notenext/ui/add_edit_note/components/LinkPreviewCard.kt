@@ -151,29 +151,6 @@ fun LinkPreviewCard(linkPreview: LinkPreview, onEvent: (NotesEvent) -> Unit) {
                                     onClick = {
                                         clipboardManager.setText(AnnotatedString(linkPreview.url))
                                         showMenu = false
-                                    },
-                                    leadingIcon = { Icon(Icons.Default.ContentCopy, contentDescription = stringResource(id = R.string.copy_url)) }
-                                )
-                            }
-                        }
-                    }
-                    // Link image preview.
-                    linkPreview.imageUrl?.let { imageUrl ->
-                        AsyncImage(
-                            model = imageUrl,
-                            contentDescription = stringResource(id = R.string.link_preview_image),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                    }
-                    // Link description.
-                    linkPreview.description?.let { description ->
-                        Text(
-                            text = description,
-                            style = MaterialTheme.typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                         Spacer(modifier = Modifier.height(2.dp))
