@@ -88,7 +88,6 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.suvojeet.notenext.data.Note
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 import com.suvojeet.notenext.ui.components.ContextualTopAppBar
 import com.suvojeet.notenext.ui.components.LabelDialog

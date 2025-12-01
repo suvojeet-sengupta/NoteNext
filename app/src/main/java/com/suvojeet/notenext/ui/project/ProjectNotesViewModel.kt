@@ -27,6 +27,7 @@ import com.suvojeet.notenext.util.AlarmScheduler
 import java.time.LocalDateTime
 import java.time.ZoneId
 import com.suvojeet.notenext.ui.reminder.RepeatOption
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -36,8 +37,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class ProjectNotesViewModel(
+@HiltViewModel
+class ProjectNotesViewModel @Inject constructor(
     private val noteDao: NoteDao,
     private val projectDao: ProjectDao,
     private val labelDao: LabelDao,

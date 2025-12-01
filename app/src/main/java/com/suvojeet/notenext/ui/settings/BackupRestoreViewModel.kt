@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.suvojeet.notenext.data.*
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -19,6 +20,7 @@ import java.io.InputStreamReader
 import java.util.zip.ZipEntry
 import java.util.zip.ZipInputStream
 import java.util.zip.ZipOutputStream
+import javax.inject.Inject
 
 data class BackupDetails(
     val notesCount: Int,
@@ -36,7 +38,8 @@ data class BackupRestoreState(
     val restoreResult: String? = null
 )
 
-class BackupRestoreViewModel(
+@HiltViewModel
+class BackupRestoreViewModel @Inject constructor(
     private val noteDao: NoteDao,
     private val labelDao: LabelDao,
     private val projectDao: ProjectDao,

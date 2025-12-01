@@ -17,19 +17,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.setup.components.PermissionItem
 import androidx.compose.ui.res.stringResource
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SetupScreen(
-    factory: ViewModelFactory,
     onSetupComplete: () -> Unit
 ) {
-    val viewModel: SetupViewModel = viewModel(factory = factory)
+    val viewModel: SetupViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
     val context = LocalContext.current
 

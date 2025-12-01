@@ -14,8 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
+import androidx.hilt.navigation.compose.hiltViewModel
 
 import com.suvojeet.notenext.ui.components.MultiActionFab
 import androidx.compose.runtime.LaunchedEffect
@@ -31,13 +30,12 @@ import com.suvojeet.notenext.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ProjectScreen(
-    factory: ViewModelFactory,
     onMenuClick: () -> Unit,
     onProjectClick: (Int) -> Unit,
     navController: androidx.navigation.NavController,
     settingsRepository: SettingsRepository
 ) {
-    val viewModel: ProjectViewModel = viewModel(factory = factory)
+    val viewModel: ProjectViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
     var isFabExpanded by remember { mutableStateOf(false) }
     val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)

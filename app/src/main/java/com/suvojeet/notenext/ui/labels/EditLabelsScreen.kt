@@ -13,19 +13,17 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.suvojeet.notenext.data.Label
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditLabelsScreen(
-    factory: ViewModelFactory,
     onBackPressed: () -> Unit
 ) {
-    val viewModel: EditLabelsViewModel = viewModel(factory = factory)
+    val viewModel: EditLabelsViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 
     Scaffold(

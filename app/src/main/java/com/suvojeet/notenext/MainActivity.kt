@@ -2,52 +2,41 @@
 package com.suvojeet.notenext
 
 import android.os.Bundle
-import android.content.Intent
-import android.provider.Settings
-import android.app.AlarmManager
-import android.os.Build
-import java.util.Locale
-import android.content.res.Configuration
-
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.ui.Modifier
+import com.suvojeet.notenext.navigation.NavGraph
+import com.suvojeet.notenext.ui.theme.NoteNextTheme
+import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import com.suvojeet.notenext.data.NoteDatabase
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
-import com.suvojeet.notenext.navigation.NavGraph
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.settings.ThemeMode
-import com.suvojeet.notenext.ui.theme.NoteNextTheme
-import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.ui.theme.ShapeFamily
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import com.suvojeet.notenext.ui.lock.LockScreen
-import androidx.core.view.WindowCompat
-import androidx.activity.ComponentActivity
 import androidx.compose.runtime.LaunchedEffect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.launch
-import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
-import androidx.compose.foundation.layout.fillMaxSize
 import com.suvojeet.notenext.ui.setup.SetupScreen
+import java.util.Locale
+import android.content.res.Configuration
+import android.content.Intent
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
 
         val settingsRepository = SettingsRepository(this)
-
-        enableEdgeToEdge()
-        val database = NoteDatabase.getDatabase(this)
-        val linkPreviewRepository = LinkPreviewRepository()
-        val factory = ViewModelFactory(database.noteDao(), database.labelDao(), database.projectDao(), linkPreviewRepository, application)
 
         val startNoteId = intent.getIntExtra("NOTE_ID", -1)
         val sharedText = when {
@@ -84,15 +73,21 @@ class MainActivity : ComponentActivity() {
             var unlocked by remember { mutableStateOf(false) }
 
             NoteNextTheme(themeMode = themeMode, shapeFamily = shapeFamily) {
-                if (enableAppLockLoaded == null || isSetupCompleteLoaded == null) {
-                    // Show a blank screen or splash screen while settings are loading
-                    Surface(modifier = Modifier.fillMaxSize()) {}
-                } else if (isSetupCompleteLoaded == false) {
-                    SetupScreen(factory = factory) { /* Setup is complete, UI will recompose based on isSetupComplete */ }
-                } else if (enableAppLockLoaded!! && !unlocked) {
-                    LockScreen(onUnlock = { unlocked = true })
-                } else {
-                    NavGraph(factory = factory, themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, sharedText = sharedText)
+                // A surface container using the 'background' color from the theme
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    if (enableAppLockLoaded == null || isSetupCompleteLoaded == null) {
+                        // Show a blank screen or splash screen while settings are loading
+                        Surface(modifier = Modifier.fillMaxSize()) {}
+                    } else if (isSetupCompleteLoaded == false) {
+                        SetupScreen { /* Setup is complete, UI will recompose based on isSetupComplete */ }
+                    } else if (enableAppLockLoaded!! && !unlocked) {
+                        LockScreen(onUnlock = { unlocked = true })
+                    } else {
+                        NavGraph(themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, sharedText = sharedText)
+                    }
                 }
             }
         }

@@ -10,8 +10,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
+import androidx.hilt.navigation.compose.hiltViewModel
 import java.text.SimpleDateFormat
 import java.util.*
 import androidx.compose.ui.res.stringResource
@@ -20,10 +19,9 @@ import com.suvojeet.notenext.R
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BackupScreen(
-    factory: ViewModelFactory,
     onBackClick: () -> Unit
 ) {
-    val viewModel: BackupRestoreViewModel = viewModel(factory = factory)
+    val viewModel: BackupRestoreViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 
     LaunchedEffect(Unit) {

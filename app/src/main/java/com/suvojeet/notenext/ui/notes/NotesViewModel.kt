@@ -42,8 +42,11 @@ import kotlinx.coroutines.flow.flatMapLatest
 
 import com.suvojeet.notenext.data.Attachment
 import com.suvojeet.notenext.data.NoteWithAttachments
+import dagger.hilt.android.lifecycle.HiltViewModel
+import javax.inject.Inject
 
-class NotesViewModel(
+@HiltViewModel
+class NotesViewModel @Inject constructor(
     private val noteDao: NoteDao,
     private val labelDao: LabelDao,
     private val projectDao: ProjectDao,

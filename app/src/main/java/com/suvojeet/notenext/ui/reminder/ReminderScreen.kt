@@ -18,7 +18,7 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import java.text.SimpleDateFormat
@@ -33,7 +33,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.text.font.FontWeight
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
@@ -43,8 +42,7 @@ import com.suvojeet.notenext.R
 fun ReminderScreen(
     onBackClick: () -> Unit,
     onAddReminderClick: () -> Unit,
-    factory: ViewModelFactory,
-    reminderViewModel: ReminderViewModel = viewModel(factory = factory)
+    reminderViewModel: ReminderViewModel = hiltViewModel()
 ) {
     val reminders by reminderViewModel.reminders.collectAsState()
 

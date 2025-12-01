@@ -17,9 +17,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.suvojeet.notenext.data.Note
-import com.suvojeet.notenext.dependency_injection.ViewModelFactory
 import com.suvojeet.notenext.ui.components.NoteItem
 import com.suvojeet.notenext.ui.archive.ArchiveEvent
 import androidx.compose.ui.res.stringResource
@@ -32,10 +31,9 @@ import com.suvojeet.notenext.data.NoteWithAttachments
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ArchiveScreen(
-    factory: ViewModelFactory,
     onMenuClick: () -> Unit
 ) {
-    val viewModel: ArchiveViewModel = viewModel(factory = factory)
+    val viewModel: ArchiveViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
     var showRestoreDialog by remember { mutableStateOf(false) }
     var noteToRestore by remember { mutableStateOf<Note?>(null) }

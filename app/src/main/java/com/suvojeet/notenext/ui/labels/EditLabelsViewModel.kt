@@ -5,13 +5,16 @@ import androidx.lifecycle.viewModelScope
 import com.suvojeet.notenext.data.Label
 import com.suvojeet.notenext.data.LabelDao
 import com.suvojeet.notenext.data.NoteDao
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
-class EditLabelsViewModel(private val labelDao: LabelDao, private val noteDao: NoteDao) : ViewModel() {
+@HiltViewModel
+class EditLabelsViewModel @Inject constructor(private val labelDao: LabelDao, private val noteDao: NoteDao) : ViewModel() {
 
     private val _state = MutableStateFlow(EditLabelsState())
     val state = _state.asStateFlow()
