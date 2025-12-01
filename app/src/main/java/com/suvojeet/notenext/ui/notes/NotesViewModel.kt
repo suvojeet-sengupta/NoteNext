@@ -65,27 +65,30 @@ class NotesViewModel(
     init {
         @OptIn(kotlinx.coroutines.ExperimentalCoroutinesApi::class)
         combine(
-            _searchQuery.flatMapLatest { query ->
-                if (query.isBlank()) {
-                    noteDao.getNotes()
-                } else {
-                    // Append * to allow prefix matching (e.g., "app" matches "apple")
-                    noteDao.searchNotes("$query*")
-                }
-            },
+            combine(_searchQuery, _sortType) { query, sortType -> query to sortType }
+                .flatMapLatest { (query, sortType) ->
+                    if (query.isBlank()) {
+                        when (sortType) {
+                            SortType.DATE_MODIFIED -> noteDao.getNotesOrderedByDateModified()
+                            SortType.DATE_CREATED -> noteDao.getNotesOrderedByDateCreated()
+                            SortType.TITLE -> noteDao.getNotesOrderedByTitle()
+                        }
+                    } else {
+                        val formattedQuery = "$query*"
+                        when (sortType) {
+                            SortType.DATE_MODIFIED -> noteDao.searchNotesOrderedByDateModified(formattedQuery)
+                            SortType.DATE_CREATED -> noteDao.searchNotesOrderedByDateCreated(formattedQuery)
+                            SortType.TITLE -> noteDao.searchNotesOrderedByTitle(formattedQuery)
+                        }
+                    }
+                },
             labelDao.getLabels(),
             projectDao.getProjects(),
             _sortType,
             _searchQuery
         ) { notes, labels, projects, sortType, query ->
-            val filteredNotes = notes.filter { it.note.projectId == null }
-            val sortedNotes = when (sortType) {
-                SortType.DATE_CREATED -> filteredNotes.sortedByDescending { it.note.createdAt }
-                SortType.DATE_MODIFIED -> filteredNotes.sortedByDescending { it.note.lastEdited }
-                SortType.TITLE -> filteredNotes.sortedBy { it.note.title }
-            }
             _state.value = _state.value.copy(
-                notes = sortedNotes,
+                notes = notes,
                 labels = labels.map { it.name },
                 projects = projects,
                 isLoading = false,
