@@ -3,6 +3,7 @@ package com.suvojeet.notenext.di
 import android.app.Application
 import android.content.Context
 import androidx.room.Room
+import com.suvojeet.notenext.data.ChecklistItemDao
 import com.suvojeet.notenext.data.LabelDao
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.NoteDao
@@ -51,12 +52,19 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideChecklistItemDao(db: NoteDatabase): ChecklistItemDao {
+        return db.checklistItemDao()
+    }
+
+    @Provides
+    @Singleton
     fun provideNoteRepository(
         noteDao: NoteDao,
         labelDao: LabelDao,
-        projectDao: ProjectDao
+        projectDao: ProjectDao,
+        checklistItemDao: ChecklistItemDao
     ): com.suvojeet.notenext.data.NoteRepository {
-        return com.suvojeet.notenext.data.NoteRepositoryImpl(noteDao, labelDao, projectDao)
+        return com.suvojeet.notenext.data.NoteRepositoryImpl(noteDao, labelDao, projectDao, checklistItemDao)
     }
 
     @Provides

@@ -183,6 +183,11 @@ class NotesViewModel @Inject constructor(
                         noteWithAttachments.attachments.forEach { attachment ->
                             repository.insertAttachment(attachment.copy(id = 0, noteId = newNoteId.toInt()))
                         }
+                        // Copy checklist items
+                        val newChecklistItems = noteWithAttachments.checklistItems.map { item ->
+                            item.copy(id = java.util.UUID.randomUUID().toString(), noteId = newNoteId.toInt())
+                        }
+                        repository.insertChecklistItems(newChecklistItems)
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                     val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
@@ -241,11 +246,7 @@ class NotesViewModel @Inject constructor(
                                 AnnotatedString("")
                             }
                             val checklist = if (note.noteType == "CHECKLIST") {
-                                try {
-                                    Gson().fromJson(note.content, object : TypeToken<List<ChecklistItem>>() {}.type)
-                                } catch (e: Exception) {
-                                    emptyList<ChecklistItem>()
-                                }
+                                noteWithAttachments.checklistItems.sortedBy { it.position }
                             } else {
                                 emptyList<ChecklistItem>()
                             }
@@ -515,7 +516,7 @@ class NotesViewModel @Inject constructor(
                     val content = if (state.value.editingNoteType == "TEXT") {
                         HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
                     } else {
-                        Gson().toJson(state.value.editingChecklist)
+                        ""
                     }
 
                     if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
@@ -558,6 +559,15 @@ class NotesViewModel @Inject constructor(
                             } else { // Existing note
                                 repository.updateNote(note)
                                 noteId.toLong() // Convert Int to Long for consistency
+                            }
+
+                            // Handle Checklist Items
+                            if (state.value.editingNoteType == "CHECKLIST") {
+                                val checklistItems = state.value.editingChecklist.mapIndexed { index, item ->
+                                    item.copy(noteId = currentNoteId.toInt(), position = index)
+                                }
+                                repository.deleteChecklistForNote(currentNoteId.toInt())
+                                repository.insertChecklistItems(checklistItems)
                             }
 
                             // Handle attachments

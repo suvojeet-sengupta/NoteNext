@@ -9,5 +9,11 @@ data class NoteWithAttachments(
         parentColumn = "id",
         entityColumn = "noteId"
     )
-    val attachments: List<Attachment>
+    val attachments: List<Attachment>,
+    
+    @Relation(
+        parentColumn = "id",
+        entityColumn = "noteId"
+    )
+    val checklistItems: List<ChecklistItem>
 )

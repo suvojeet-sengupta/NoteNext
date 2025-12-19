@@ -8,7 +8,8 @@ import javax.inject.Singleton
 class NoteRepositoryImpl @Inject constructor(
     private val noteDao: NoteDao,
     private val labelDao: LabelDao,
-    private val projectDao: ProjectDao
+    private val projectDao: ProjectDao,
+    private val checklistItemDao: ChecklistItemDao
 ) : NoteRepository {
 
     override fun getNotes(searchQuery: String, sortType: SortType): Flow<List<NoteWithAttachments>> {
@@ -75,4 +76,14 @@ class NoteRepositoryImpl @Inject constructor(
 
     override fun getNotesWithReminders(currentTime: Long): Flow<List<Note>> = 
         noteDao.getNotesWithReminders(currentTime)
+
+    override suspend fun insertChecklistItems(items: List<ChecklistItem>) = checklistItemDao.insertChecklistItems(items)
+
+    override suspend fun updateChecklistItem(item: ChecklistItem) = checklistItemDao.updateChecklistItem(item)
+
+    override suspend fun updateChecklistItems(items: List<ChecklistItem>) = checklistItemDao.updateChecklistItems(items)
+
+    override suspend fun deleteChecklistItem(item: ChecklistItem) = checklistItemDao.deleteChecklistItem(item)
+
+    override suspend fun deleteChecklistForNote(noteId: Int) = checklistItemDao.deleteChecklistForNote(noteId)
 }

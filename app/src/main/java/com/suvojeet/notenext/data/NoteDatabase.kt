@@ -9,13 +9,14 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Note::class, Label::class, Attachment::class, Project::class, NoteFts::class], version = 11, exportSchema = false)
+@Database(entities = [Note::class, Label::class, Attachment::class, Project::class, NoteFts::class, ChecklistItem::class], version = 12, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class NoteDatabase : RoomDatabase() {
 
     abstract fun noteDao(): NoteDao
     abstract fun labelDao(): LabelDao
     abstract fun projectDao(): ProjectDao
+    abstract fun checklistItemDao(): ChecklistItemDao
 
     companion object {
         @Volatile
@@ -28,10 +29,56 @@ abstract class NoteDatabase : RoomDatabase() {
                     NoteDatabase::class.java,
                     "note_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12)
                 .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        private val MIGRATION_11_12 = object : Migration(11, 12) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `checklist_items` (
+                        `id` TEXT NOT NULL,
+                        `noteId` INTEGER NOT NULL,
+                        `text` TEXT NOT NULL,
+                        `isChecked` INTEGER NOT NULL,
+                        `position` INTEGER NOT NULL,
+                        PRIMARY KEY(`id`),
+                        FOREIGN KEY(`noteId`) REFERENCES `notes`(`id`) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_checklist_items_noteId` ON `checklist_items` (`noteId`)")
+
+                // Data Migration
+                val cursor = db.query("SELECT id, content FROM notes WHERE noteType = 'CHECKLIST'")
+                if (cursor.moveToFirst()) {
+                    val gson = com.google.gson.Gson()
+                    val type = object : com.google.gson.reflect.TypeToken<List<Map<String, Any>>>() {}.type
+                    
+                    do {
+                        val noteId = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
+                        val content = cursor.getString(cursor.getColumnIndexOrThrow("content"))
+                        
+                        try {
+                            val oldItems: List<Map<String, Any>>? = gson.fromJson(content, type)
+                            
+                            oldItems?.forEachIndexed { index, itemMap ->
+                                val id = itemMap["id"] as? String ?: java.util.UUID.randomUUID().toString()
+                                val text = itemMap["text"] as? String ?: ""
+                                val isChecked = (itemMap["isChecked"] as? Boolean) == true
+                                
+                                db.execSQL("INSERT INTO checklist_items (id, noteId, text, isChecked, position) VALUES (?, ?, ?, ?, ?)",
+                                    arrayOf(id, noteId, text, if (isChecked) 1 else 0, index))
+                            }
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    } while (cursor.moveToNext())
+                }
+                cursor.close()
             }
         }
 

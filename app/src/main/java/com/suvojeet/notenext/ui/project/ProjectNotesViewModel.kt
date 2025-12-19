@@ -162,8 +162,17 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.CopySelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
-                    for (note in selectedNotes) {
-                        repository.insertNote(note.note.copy(id = 0, title = "${note.note.title} (Copy)"))
+                    for (noteWithAttachments in selectedNotes) {
+                        val copiedNote = noteWithAttachments.note.copy(id = 0, title = "${noteWithAttachments.note.title} (Copy)")
+                        val newNoteId = repository.insertNote(copiedNote)
+                        noteWithAttachments.attachments.forEach { attachment ->
+                            repository.insertAttachment(attachment.copy(id = 0, noteId = newNoteId.toInt()))
+                        }
+                        // Copy checklist items
+                        val newChecklistItems = noteWithAttachments.checklistItems.map { item ->
+                            item.copy(id = java.util.UUID.randomUUID().toString(), noteId = newNoteId.toInt())
+                        }
+                        repository.insertChecklistItems(newChecklistItems)
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                     val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
@@ -222,11 +231,7 @@ class ProjectNotesViewModel @Inject constructor(
                                 AnnotatedString("")
                             }
                             val checklist = if (note.noteType == "CHECKLIST") {
-                                try {
-                                    Gson().fromJson(note.content, object : TypeToken<List<ChecklistItem>>() {}.type)
-                                } catch (e: Exception) {
-                                    emptyList<ChecklistItem>()
-                                }
+                                noteWithAttachments.checklistItems.sortedBy { it.position }
                             } else {
                                 emptyList<ChecklistItem>()
                             }
@@ -530,7 +535,7 @@ class ProjectNotesViewModel @Inject constructor(
                     val content = if (state.value.editingNoteType == "TEXT") {
                         HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
                     } else {
-                        Gson().toJson(state.value.editingChecklist)
+                        ""
                     }
 
                     if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
@@ -575,6 +580,15 @@ class ProjectNotesViewModel @Inject constructor(
                             } else { // Existing note
                                 repository.updateNote(note)
                                 noteId.toLong() // Convert Int to Long for consistency
+                            }
+
+                            // Handle Checklist Items
+                            if (state.value.editingNoteType == "CHECKLIST") {
+                                val checklistItems = state.value.editingChecklist.mapIndexed { index, item ->
+                                    item.copy(noteId = currentNoteId.toInt(), position = index)
+                                }
+                                repository.deleteChecklistForNote(currentNoteId.toInt())
+                                repository.insertChecklistItems(checklistItems)
                             }
 
                             // Handle attachments
@@ -645,9 +659,19 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.OnCopyCurrentNoteClick -> {
                 viewModelScope.launch {
                     state.value.expandedNoteId?.let {
-                        repository.getNoteById(it)?.let { note ->
-                            val copiedNote = note.note.copy(id = 0, title = "${note.note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
-                            repository.insertNote(copiedNote)
+                        repository.getNoteById(it)?.let { noteWithAttachments ->
+                            val copiedNote = noteWithAttachments.note.copy(id = 0, title = "${noteWithAttachments.note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
+                            val newNoteId = repository.insertNote(copiedNote)
+                            
+                            noteWithAttachments.attachments.forEach { attachment ->
+                                repository.insertAttachment(attachment.copy(id = 0, noteId = newNoteId.toInt()))
+                            }
+                            
+                            val newChecklistItems = noteWithAttachments.checklistItems.map { item ->
+                                item.copy(id = java.util.UUID.randomUUID().toString(), noteId = newNoteId.toInt())
+                            }
+                            repository.insertChecklistItems(newChecklistItems)
+                            
                             _events.emit(ProjectNotesUiEvent.ShowToast("Note copied"))
                         }
                     }

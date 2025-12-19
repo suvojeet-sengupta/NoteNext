@@ -84,7 +84,7 @@ fun ArchiveScreen(
             ) {
                 items(state.notes) { note ->
                     NoteItem(
-                        note = NoteWithAttachments(note, emptyList()),
+                        note = NoteWithAttachments(note, emptyList(), emptyList()),
                         isSelected = false, // Not selectable in archive
                         onNoteClick = {
                             noteToRestore = note

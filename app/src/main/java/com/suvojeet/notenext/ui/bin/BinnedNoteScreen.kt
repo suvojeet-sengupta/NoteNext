@@ -35,7 +35,7 @@ fun BinnedNoteScreen(
     state: BinState,
     onDismiss: () -> Unit
 ) {
-    val noteWithAttachments = state.notes.find { it.id == state.expandedNoteId }?.let { NoteWithAttachments(it, emptyList()) }
+    val noteWithAttachments = state.notes.find { it.id == state.expandedNoteId }?.let { NoteWithAttachments(it, emptyList(), emptyList()) }
 
     BackHandler { onDismiss() }
 
