@@ -130,7 +130,7 @@ fun NoteItem(
                 }
 
                 // Note Content Preview (Dynamic Sizing)
-                if (note.note.content.isNotEmpty()) {
+                if ((note.note.noteType == "TEXT" && note.note.content.isNotEmpty()) || (note.note.noteType == "CHECKLIST" && note.checklistItems.isNotEmpty())) {
                     if (note.note.noteType == "TEXT") {
                         val plainText = HtmlConverter.htmlToPlainText(note.note.content)
                         val contentLength = plainText.length
