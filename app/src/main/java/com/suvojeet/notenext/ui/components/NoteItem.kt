@@ -154,7 +154,7 @@ fun NoteItem(
                         )
                     } else {
                         // Checklist Preview
-                        ChecklistPreview(note.note.content, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor)
+                        ChecklistPreview(note.checklistItems, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor)
                     }
                 }
 
@@ -205,13 +205,7 @@ fun NoteItem(
 }
 
 @Composable
-private fun ChecklistPreview(content: String, contentColor: Color) {
-    val checklistItems = try {
-        Gson().fromJson<List<ChecklistItem>>(content, object : TypeToken<List<ChecklistItem>>() {}.type)
-    } catch (e: Exception) {
-        emptyList<ChecklistItem>()
-    }
-
+private fun ChecklistPreview(checklistItems: List<ChecklistItem>, contentColor: Color) {
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
         checklistItems.take(5).forEach { item ->
             Row(verticalAlignment = Alignment.CenterVertically) {
