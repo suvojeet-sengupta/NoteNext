@@ -26,41 +26,45 @@ fun SaveAsDialog(
     onSaveAsTxt: () -> Unit,
     onSaveAsMd: () -> Unit
 ) {
-    Dialog(onDismissRequest = onDismiss) {
-        Card(
-            shape = MaterialTheme.shapes.large
-        ) {
-            Column(modifier = Modifier.padding(24.dp)) {
-                // Dialog title.
-                Text(text = stringResource(id = R.string.save_note_as), style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(16.dp))
-                // Dialog message.
-                Text(stringResource(id = R.string.select_format_to_save_note))
-                Spacer(modifier = Modifier.height(24.dp))
-                // Action buttons for Cancel, Save as TXT, Save as MD, and Save as PDF.
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.End
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(text = stringResource(id = R.string.save_note_as)) },
+        text = {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.select_format_to_save_note),
+                    modifier = Modifier.padding(bottom = 8.dp)
+                )
+                OutlinedButton(
+                    onClick = { onSaveAsPdf(); onDismiss() },
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    TextButton(onClick = onDismiss) {
-                        Text(stringResource(id = R.string.cancel))
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { onSaveAsTxt(); onDismiss() }) {
-                        Text(stringResource(id = R.string.txt))
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    TextButton(onClick = { onSaveAsMd(); onDismiss() }) {
-                        Text("MD")
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Button(onClick = { onSaveAsPdf(); onDismiss() }) {
-                        Text(stringResource(id = R.string.pdf))
-                    }
+                    Text(stringResource(id = R.string.pdf))
+                }
+                OutlinedButton(
+                    onClick = { onSaveAsTxt(); onDismiss() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text(stringResource(id = R.string.txt))
+                }
+                OutlinedButton(
+                    onClick = { onSaveAsMd(); onDismiss() },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Markdown (.md)")
                 }
             }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(id = R.string.cancel))
+            }
         }
-    }
+    )
 }
 
 /**
