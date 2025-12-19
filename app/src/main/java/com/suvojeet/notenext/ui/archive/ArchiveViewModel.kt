@@ -12,9 +12,9 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class ArchiveViewModel @Inject constructor(private val noteDao: NoteDao) : ViewModel() {
+class ArchiveViewModel @Inject constructor(private val repository: com.suvojeet.notenext.data.NoteRepository) : ViewModel() {
 
-    val state: StateFlow<ArchiveState> = noteDao.getArchivedNotes()
+    val state: StateFlow<ArchiveState> = repository.getArchivedNotes()
         .map { list -> list.map { it.note } }
         .map { ArchiveState(notes = it) }
         .stateIn(
@@ -27,7 +27,7 @@ class ArchiveViewModel @Inject constructor(private val noteDao: NoteDao) : ViewM
         when (event) {
             is ArchiveEvent.UnarchiveNote -> {
                 viewModelScope.launch {
-                    noteDao.insertNote(event.note.copy(isArchived = false))
+                    repository.insertNote(event.note.copy(isArchived = false))
                 }
             }
         }

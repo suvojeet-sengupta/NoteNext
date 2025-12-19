@@ -40,9 +40,7 @@ data class BackupRestoreState(
 
 @HiltViewModel
 class BackupRestoreViewModel @Inject constructor(
-    private val noteDao: NoteDao,
-    private val labelDao: LabelDao,
-    private val projectDao: ProjectDao,
+    private val repository: com.suvojeet.notenext.data.NoteRepository,
     private val application: Application
 ) : ViewModel() {
 
@@ -52,9 +50,9 @@ class BackupRestoreViewModel @Inject constructor(
     fun getBackupDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                val notes = noteDao.getNotes().first()
-                val labels = labelDao.getLabels().first()
-                val projects = projectDao.getProjects().first()
+                val notes = repository.getNotes().first()
+                val labels = repository.getLabels().first()
+                val projects = repository.getProjects().first()
                 val attachments = notes.flatMap { it.attachments }
 
                 val notesJson = Gson().toJson(notes)
@@ -97,21 +95,21 @@ class BackupRestoreViewModel @Inject constructor(
                         FileOutputStream(pfd.fileDescriptor).use { fos ->
                             ZipOutputStream(fos).use { zos ->
                                 // Backup notes
-                                val notes = noteDao.getNotes().first()
+                                val notes = repository.getNotes().first()
                                 val notesJson = Gson().toJson(notes)
                                 zos.putNextEntry(ZipEntry("notes.json"))
                                 zos.write(notesJson.toByteArray())
                                 zos.closeEntry()
 
                                 // Backup labels
-                                val labels = labelDao.getLabels().first()
+                                val labels = repository.getLabels().first()
                                 val labelsJson = Gson().toJson(labels)
                                 zos.putNextEntry(ZipEntry("labels.json"))
                                 zos.write(labelsJson.toByteArray())
                                 zos.closeEntry()
 
                                 // Backup projects
-                                val projects = projectDao.getProjects().first()
+                                val projects = repository.getProjects().first()
                                 val projectsJson = Gson().toJson(projects)
                                 zos.putNextEntry(ZipEntry("projects.json"))
                                 zos.write(projectsJson.toByteArray())
@@ -150,10 +148,10 @@ class BackupRestoreViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 try {
                     // Clear existing data
-                    noteDao.getNotes().first().flatMap { it.attachments }.forEach { noteDao.deleteAttachment(it) }
-                    noteDao.getNotes().first().forEach { noteDao.deleteNote(it.note) }
-                    labelDao.getLabels().first().forEach { labelDao.deleteLabel(it) }
-                    projectDao.getProjects().first().forEach { projectDao.deleteProject(it.id) }
+                    repository.getNotes().first().flatMap { it.attachments }.forEach { repository.deleteAttachment(it) }
+                    repository.getNotes().first().forEach { repository.deleteNote(it.note) }
+                    repository.getLabels().first().forEach { repository.deleteLabel(it) }
+                    repository.getProjects().first().forEach { repository.deleteProject(it.id) }
 
                     application.contentResolver.openInputStream(uri)?.use { inputStream ->
                         ZipInputStream(inputStream).use { zis ->
@@ -181,7 +179,7 @@ class BackupRestoreViewModel @Inject constructor(
                                 val projects: List<Project> = Gson().fromJson(it, projectsType)
                                 projects.forEach { project ->
                                     val oldId = project.id
-                                    val newId = projectDao.insertProject(project.copy(id = 0)).toInt()
+                                    val newId = repository.insertProject(project.copy(id = 0)).toInt()
                                     oldToNewProjectIds[oldId] = newId
                                 }
                             }
@@ -190,7 +188,7 @@ class BackupRestoreViewModel @Inject constructor(
                             labelsJson?.let {
                                 val labelsType = object : TypeToken<List<Label>>() {}.type
                                 val labels: List<Label> = Gson().fromJson(it, labelsType)
-                                labels.forEach { labelDao.insertLabel(it) }
+                                labels.forEach { repository.insertLabel(it) }
                             }
 
                             // Restore notes
@@ -201,7 +199,7 @@ class BackupRestoreViewModel @Inject constructor(
                                     val oldProjectId = noteWithAttachments.note.projectId
                                     val newProjectId = oldToNewProjectIds[oldProjectId]
                                     val newNote = noteWithAttachments.note.copy(id = 0, projectId = newProjectId)
-                                    noteDao.insertNote(newNote)
+                                    repository.insertNote(newNote)
                                 }
                             }
                         }

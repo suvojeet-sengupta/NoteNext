@@ -14,13 +14,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class EditLabelsViewModel @Inject constructor(private val labelDao: LabelDao, private val noteDao: NoteDao) : ViewModel() {
+class EditLabelsViewModel @Inject constructor(private val repository: com.suvojeet.notenext.data.NoteRepository) : ViewModel() {
 
     private val _state = MutableStateFlow(EditLabelsState())
     val state = _state.asStateFlow()
 
     init {
-        labelDao.getLabels()
+        repository.getLabels()
             .onEach { labels ->
                 _state.value = _state.value.copy(labels = labels)
             }
@@ -31,26 +31,26 @@ class EditLabelsViewModel @Inject constructor(private val labelDao: LabelDao, pr
         when (event) {
             is EditLabelsEvent.AddLabel -> {
                 viewModelScope.launch {
-                    labelDao.insertLabel(Label(event.name))
+                    repository.insertLabel(Label(event.name))
                     _state.value = _state.value.copy(showAddLabelDialog = false)
                 }
             }
             is EditLabelsEvent.UpdateLabel -> {
                 viewModelScope.launch {
                     // 1. Create new label
-                    labelDao.insertLabel(Label(event.newName))
+                    repository.insertLabel(Label(event.newName))
                     // 2. Update notes
-                    noteDao.updateLabelName(event.oldLabel.name, event.newName)
+                    repository.updateLabelName(event.oldLabel.name, event.newName)
                     // 3. Delete old label
-                    labelDao.deleteLabel(event.oldLabel)
+                    repository.deleteLabel(event.oldLabel)
 
                     _state.value = _state.value.copy(showEditLabelDialog = false, selectedLabel = null)
                 }
             }
             is EditLabelsEvent.DeleteLabel -> {
                 viewModelScope.launch {
-                    noteDao.removeLabelFromNotes(event.label.name)
-                    labelDao.deleteLabel(event.label)
+                    repository.removeLabelFromNotes(event.label.name)
+                    repository.deleteLabel(event.label)
                     _state.value = _state.value.copy(showEditLabelDialog = false, selectedLabel = null)
                 }
             }

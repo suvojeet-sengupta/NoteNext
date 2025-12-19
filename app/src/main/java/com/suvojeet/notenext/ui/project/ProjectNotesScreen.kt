@@ -125,7 +125,7 @@ import com.suvojeet.notenext.ui.components.SearchBar
 
 import com.suvojeet.notenext.ui.notes.LayoutType
 
-import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.data.SortType
 
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 

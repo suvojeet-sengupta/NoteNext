@@ -29,7 +29,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.data.SortType
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.automirrored.filled.ArrowBack

@@ -22,7 +22,7 @@ import com.suvojeet.notenext.data.NoteDao
 import com.suvojeet.notenext.ui.notes.HtmlConverter
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.ProjectDao
-import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.data.SortType
 import com.suvojeet.notenext.util.AlarmScheduler
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -41,9 +41,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class ProjectNotesViewModel @Inject constructor(
-    private val noteDao: NoteDao,
-    private val projectDao: ProjectDao,
-    private val labelDao: LabelDao,
+    private val repository: com.suvojeet.notenext.data.NoteRepository,
     private val linkPreviewRepository: LinkPreviewRepository,
     private val alarmScheduler: AlarmScheduler,
     private val savedStateHandle: SavedStateHandle
@@ -64,12 +62,12 @@ class ProjectNotesViewModel @Inject constructor(
     init {
         if (projectId != -1) {
             viewModelScope.launch {
-                projectDao.getProjectById(projectId)?.let { project ->
+                repository.getProjectById(projectId)?.let { project ->
                     _state.value = _state.value.copy(projectName = project.name)
                 }
             }
 
-            combine(noteDao.getNotesByProjectId(projectId), labelDao.getLabels(), _sortType) { notes, labels, sortType ->
+            combine(repository.getNotesByProjectId(projectId), repository.getLabels(), _sortType) { notes, labels, sortType ->
                 val sortedNotes = when (sortType) {
                     SortType.DATE_CREATED -> notes.sortedByDescending { it.note.createdAt }
                     SortType.DATE_MODIFIED -> notes.sortedByDescending { it.note.lastEdited }
@@ -89,7 +87,7 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.DeleteNote -> {
                 viewModelScope.launch {
                     val noteToBin = event.note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
-                    noteDao.updateNote(noteToBin)
+                    repository.updateNote(noteToBin)
                     recentlyDeletedNote = event.note.note
                     _events.emit(ProjectNotesUiEvent.ShowToast("Note moved to Bin"))
                 }
@@ -97,7 +95,7 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.RestoreNote -> {
                 viewModelScope.launch {
                     recentlyDeletedNote?.let { restoredNote ->
-                        noteDao.updateNote(restoredNote.copy(isBinned = false))
+                        repository.updateNote(restoredNote.copy(isBinned = false))
                         recentlyDeletedNote = null
                     }
                 }
@@ -119,7 +117,7 @@ class ProjectNotesViewModel @Inject constructor(
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     val areNotesBeingPinned = selectedNotes.firstOrNull()?.note?.isPinned == false
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.note.copy(isPinned = areNotesBeingPinned))
+                        repository.insertNote(note.note.copy(isPinned = areNotesBeingPinned))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                     val message = if (areNotesBeingPinned) {
@@ -134,7 +132,7 @@ class ProjectNotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     for (note in selectedNotes) {
-                        noteDao.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
+                        repository.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                     _events.emit(ProjectNotesUiEvent.ShowToast("${selectedNotes.size} notes moved to Bin"))
@@ -144,7 +142,7 @@ class ProjectNotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.note.copy(isArchived = !note.note.isArchived))
+                        repository.insertNote(note.note.copy(isArchived = !note.note.isArchived))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -153,7 +151,7 @@ class ProjectNotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.note.copy(isImportant = !note.note.isImportant))
+                        repository.insertNote(note.note.copy(isImportant = !note.note.isImportant))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -165,7 +163,7 @@ class ProjectNotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.note.copy(id = 0, title = "${note.note.title} (Copy)"))
+                        repository.insertNote(note.note.copy(id = 0, title = "${note.note.title} (Copy)"))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                     val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
@@ -194,7 +192,7 @@ class ProjectNotesViewModel @Inject constructor(
                             reminderTime = reminderMillis,
                             repeatOption = event.repeatOption.name // Store enum name as string
                         )
-                        noteDao.updateNote(updatedNote)
+                        repository.updateNote(updatedNote)
                         alarmScheduler.schedule(updatedNote)
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
@@ -204,11 +202,11 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.SetLabelForSelectedNotes -> {
                 viewModelScope.launch {
                     if (event.label.isNotBlank()) {
-                        labelDao.insertLabel(Label(event.label))
+                        repository.insertLabel(Label(event.label))
                     }
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     for (note in selectedNotes) {
-                        noteDao.insertNote(note.note.copy(label = event.label))
+                        repository.insertNote(note.note.copy(label = event.label))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }
@@ -216,7 +214,7 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.ExpandNote -> {
                 viewModelScope.launch {
                     if (event.noteId != -1) {
-                        noteDao.getNoteById(event.noteId)?.let { noteWithAttachments ->
+                        repository.getNoteById(event.noteId)?.let { noteWithAttachments ->
                             val note = noteWithAttachments.note
                             val content = if (note.noteType == "TEXT") {
                                 HtmlConverter.htmlToAnnotatedString(note.content)
@@ -465,16 +463,16 @@ class ProjectNotesViewModel @Inject constructor(
             }
             is ProjectNotesEvent.OnLabelChange -> {
                 viewModelScope.launch {
-                    labelDao.insertLabel(Label(event.label))
+                    repository.insertLabel(Label(event.label))
                     _state.value = state.value.copy(editingLabel = event.label)
                 }
             }
             is ProjectNotesEvent.OnTogglePinClick -> {
                 viewModelScope.launch {
                     state.value.expandedNoteId?.let { noteId ->
-                        noteDao.getNoteById(noteId)?.let { note ->
+                        repository.getNoteById(noteId)?.let { note ->
                             val updatedNote = note.note.copy(isPinned = !note.note.isPinned)
-                            noteDao.insertNote(updatedNote)
+                            repository.insertNote(updatedNote)
                             val updatedNotesList = state.value.notes.map { if (it.note.id == updatedNote.id) it.copy(note = updatedNote) else it }
                             _state.value = state.value.copy(
                                 isPinned = updatedNote.isPinned,
@@ -489,9 +487,9 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.OnToggleArchiveClick -> {
                 viewModelScope.launch {
                     state.value.expandedNoteId?.let { noteId ->
-                        noteDao.getNoteById(noteId)?.let { note ->
+                        repository.getNoteById(noteId)?.let { note ->
                             val updatedNote = note.note.copy(isArchived = !note.note.isArchived)
-                            noteDao.insertNote(updatedNote)
+                            repository.insertNote(updatedNote)
                             val updatedNotesList = state.value.notes.map { if (it.note.id == updatedNote.id) it.copy(note = updatedNote) else it }
                             _state.value = state.value.copy(
                                 isArchived = updatedNote.isArchived,
@@ -537,7 +535,7 @@ class ProjectNotesViewModel @Inject constructor(
 
                     if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
                         if (noteId != -1) { // It's an existing note, so delete it
-                            noteDao.getNoteById(noteId)?.let { noteDao.updateNote(it.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
+                            repository.getNoteById(noteId)?.let { repository.updateNote(it.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
                         }
                     } else {
                         val currentTime = System.currentTimeMillis()
@@ -556,7 +554,7 @@ class ProjectNotesViewModel @Inject constructor(
                                 projectId = projectId
                             )
                         } else { // Existing note
-                            noteDao.getNoteById(noteId)?.let { existingNote ->
+                            repository.getNoteById(noteId)?.let { existingNote ->
                                 existingNote.note.copy(
                                     title = title,
                                     content = content,
@@ -573,15 +571,15 @@ class ProjectNotesViewModel @Inject constructor(
                         }
                         if (note != null) {
                             val currentNoteId = if (noteId == -1) { // New note
-                                noteDao.insertNote(note)
+                                repository.insertNote(note)
                             } else { // Existing note
-                                noteDao.updateNote(note)
+                                repository.updateNote(note)
                                 noteId.toLong() // Convert Int to Long for consistency
                             }
 
                             // Handle attachments
                             val existingAttachmentsInDb = if (noteId != -1) {
-                                noteDao.getNoteById(noteId)?.attachments ?: emptyList()
+                                repository.getNoteById(noteId)?.attachments ?: emptyList()
                             } else {
                                 emptyList()
                             }
@@ -599,11 +597,11 @@ class ProjectNotesViewModel @Inject constructor(
                             }
 
                             attachmentsToRemove.forEach { attachment ->
-                                noteDao.deleteAttachment(attachment)
+                                repository.deleteAttachment(attachment)
                             }
 
                             attachmentsToAdd.forEach { attachment ->
-                                noteDao.insertAttachment(attachment.copy(noteId = currentNoteId.toInt()))
+                                repository.insertAttachment(attachment.copy(noteId = currentNoteId.toInt()))
                             }
                         }
                     }
@@ -635,8 +633,8 @@ class ProjectNotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     state.value.expandedNoteId?.let {
                         if (it != -1) {
-                            noteDao.getNoteById(it)?.let { note ->
-                                noteDao.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
+                            repository.getNoteById(it)?.let { note ->
+                                repository.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                                 _events.emit(ProjectNotesUiEvent.ShowToast("Note moved to Bin"))
                             }
                         }
@@ -647,9 +645,9 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.OnCopyCurrentNoteClick -> {
                 viewModelScope.launch {
                     state.value.expandedNoteId?.let {
-                        noteDao.getNoteById(it)?.let { note ->
+                        repository.getNoteById(it)?.let { note ->
                             val copiedNote = note.note.copy(id = 0, title = "${note.note.title} (Copy)", createdAt = System.currentTimeMillis(), lastEdited = System.currentTimeMillis())
-                            noteDao.insertNote(copiedNote)
+                            repository.insertNote(copiedNote)
                             _events.emit(ProjectNotesUiEvent.ShowToast("Note copied"))
                         }
                     }
@@ -719,7 +717,7 @@ class ProjectNotesViewModel @Inject constructor(
                     val attachmentToRemove = _state.value.editingAttachments.firstOrNull { it.tempId == event.tempId }
                     attachmentToRemove?.let {
                         if (it.id != 0) { // Only delete from DB if it has a real ID
-                            noteDao.deleteAttachmentById(it.id)
+                            repository.deleteAttachmentById(it.id)
                         }
                         val updatedAttachments = _state.value.editingAttachments.filter { attachment -> attachment.tempId != event.tempId }
                         _state.value = _state.value.copy(editingAttachments = updatedAttachments)

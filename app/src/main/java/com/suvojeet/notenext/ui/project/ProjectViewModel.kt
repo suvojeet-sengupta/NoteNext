@@ -20,7 +20,7 @@ sealed interface ProjectScreenEvent {
 
 @HiltViewModel
 class ProjectViewModel @Inject constructor(
-    private val projectDao: ProjectDao
+    private val repository: com.suvojeet.notenext.data.NoteRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(ProjectState())
@@ -30,7 +30,7 @@ class ProjectViewModel @Inject constructor(
     val events = _events.receiveAsFlow()
 
     init {
-        projectDao.getProjects().onEach { projects ->
+        repository.getProjects().onEach { projects ->
             _state.value = _state.value.copy(projects = projects)
         }.launchIn(viewModelScope)
     }

@@ -1,6 +1,8 @@
 
 package com.suvojeet.notenext.ui.notes
 
+import com.suvojeet.notenext.data.SortType
+
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.Attachment

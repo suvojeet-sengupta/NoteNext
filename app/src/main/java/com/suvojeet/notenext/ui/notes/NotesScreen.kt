@@ -98,7 +98,7 @@ import com.suvojeet.notenext.ui.components.ColorSelectionDialog
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.data.SortType
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 

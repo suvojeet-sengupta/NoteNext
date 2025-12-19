@@ -13,13 +13,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
-class BinViewModel @Inject constructor(private val noteDao: NoteDao, private val savedStateHandle: androidx.lifecycle.SavedStateHandle) : ViewModel() {
+class BinViewModel @Inject constructor(private val repository: com.suvojeet.notenext.data.NoteRepository, private val savedStateHandle: androidx.lifecycle.SavedStateHandle) : ViewModel() {
 
     private val _state = MutableStateFlow(BinState())
     val state = _state.asStateFlow()
 
     init {
-        noteDao.getBinnedNotes()
+        repository.getBinnedNotes()
             .onEach { list ->
                 _state.value = state.value.copy(notes = list.map { it.note })
             }
@@ -31,7 +31,7 @@ class BinViewModel @Inject constructor(private val noteDao: NoteDao, private val
             is BinEvent.RestoreNote -> {
                 viewModelScope.launch {
                     try {
-                        noteDao.updateNote(event.note.copy(isBinned = false, binnedOn = null))
+                        repository.updateNote(event.note.copy(isBinned = false, binnedOn = null))
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -40,7 +40,7 @@ class BinViewModel @Inject constructor(private val noteDao: NoteDao, private val
             is BinEvent.DeleteNotePermanently -> {
                 viewModelScope.launch {
                     try {
-                        noteDao.deleteNote(event.note)
+                        repository.deleteNote(event.note)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -49,7 +49,7 @@ class BinViewModel @Inject constructor(private val noteDao: NoteDao, private val
             is BinEvent.EmptyBin -> {
                 viewModelScope.launch {
                     try {
-                        noteDao.emptyBin()
+                        repository.emptyBin()
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -71,7 +71,7 @@ class BinViewModel @Inject constructor(private val noteDao: NoteDao, private val
                 viewModelScope.launch {
                     val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
                     selectedNotes.forEach { note ->
-                        noteDao.updateNote(note.copy(isBinned = false, binnedOn = null))
+                        repository.updateNote(note.copy(isBinned = false, binnedOn = null))
                     }
                     _state.value = _state.value.copy(selectedNoteIds = emptySet())
                 }
@@ -80,7 +80,7 @@ class BinViewModel @Inject constructor(private val noteDao: NoteDao, private val
                 viewModelScope.launch {
                     val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
                     selectedNotes.forEach { note ->
-                        noteDao.deleteNote(note)
+                        repository.deleteNote(note)
                     }
                     _state.value = _state.value.copy(selectedNoteIds = emptySet())
                 }

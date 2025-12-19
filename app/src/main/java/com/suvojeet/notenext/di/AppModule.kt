@@ -51,6 +51,16 @@ object AppModule {
 
     @Provides
     @Singleton
+    fun provideNoteRepository(
+        noteDao: NoteDao,
+        labelDao: LabelDao,
+        projectDao: ProjectDao
+    ): com.suvojeet.notenext.data.NoteRepository {
+        return com.suvojeet.notenext.data.NoteRepositoryImpl(noteDao, labelDao, projectDao)
+    }
+
+    @Provides
+    @Singleton
     fun provideAlarmScheduler(@ApplicationContext context: Context): AlarmScheduler {
         return AlarmSchedulerImpl(context)
     }

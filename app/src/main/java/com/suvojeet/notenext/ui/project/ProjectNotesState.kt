@@ -8,7 +8,7 @@ import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.NoteWithAttachments
 import com.suvojeet.notenext.data.Project
 import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.ui.notes.SortType
+import com.suvojeet.notenext.data.SortType
 
 data class ProjectNotesState(
     val notes: List<NoteWithAttachments> = emptyList(),

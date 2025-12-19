@@ -1,4 +1,4 @@
-package com.suvojeet.notenext.ui.notes
+package com.suvojeet.notenext.data
 
 enum class SortType {
     DATE_CREATED,
