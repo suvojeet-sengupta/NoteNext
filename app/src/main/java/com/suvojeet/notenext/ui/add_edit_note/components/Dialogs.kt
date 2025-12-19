@@ -23,7 +23,8 @@ import com.suvojeet.notenext.R
 fun SaveAsDialog(
     onDismiss: () -> Unit,
     onSaveAsPdf: () -> Unit,
-    onSaveAsTxt: () -> Unit
+    onSaveAsTxt: () -> Unit,
+    onSaveAsMd: () -> Unit
 ) {
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -36,7 +37,7 @@ fun SaveAsDialog(
                 // Dialog message.
                 Text(stringResource(id = R.string.select_format_to_save_note))
                 Spacer(modifier = Modifier.height(24.dp))
-                // Action buttons for Cancel, Save as TXT, and Save as PDF.
+                // Action buttons for Cancel, Save as TXT, Save as MD, and Save as PDF.
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
@@ -47,6 +48,10 @@ fun SaveAsDialog(
                     Spacer(modifier = Modifier.width(8.dp))
                     TextButton(onClick = { onSaveAsTxt(); onDismiss() }) {
                         Text(stringResource(id = R.string.txt))
+                    }
+                    Spacer(modifier = Modifier.width(8.dp))
+                    TextButton(onClick = { onSaveAsMd(); onDismiss() }) {
+                        Text("MD")
                     }
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(onClick = { onSaveAsPdf(); onDismiss() }) {

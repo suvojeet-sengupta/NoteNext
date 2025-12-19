@@ -49,7 +49,8 @@ import javax.inject.Inject
 class NotesViewModel @Inject constructor(
     private val repository: com.suvojeet.notenext.data.NoteRepository,
     private val linkPreviewRepository: LinkPreviewRepository,
-    private val alarmScheduler: AlarmScheduler
+    private val alarmScheduler: AlarmScheduler,
+    private val richTextController: RichTextController
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
@@ -338,50 +339,12 @@ class NotesViewModel @Inject constructor(
                     val newContent = event.content
                     val oldContent = state.value.editingContent
 
-                    val finalContent = if (newContent.text != oldContent.text) {
-                        val oldText = oldContent.text
-                        val newText = newContent.text
-
-                        // 1. Find common prefix
-                        val prefixLength = commonPrefixWith(oldText, newText).length
-
-                        // 2. Find common suffix of the remainder of the strings
-                        val oldRemainder = oldText.substring(prefixLength)
-                        val newRemainder = newText.substring(prefixLength)
-                        val suffixLength = commonSuffixWith(oldRemainder, newRemainder).length
-
-                        // 3. Determine the middle (changed) part of the new text
-                        val newChangedPart = newRemainder.substring(0, newRemainder.length - suffixLength)
-
-                        val newAnnotatedString = buildAnnotatedString {
-                            // Append the styled prefix from the original string
-                            append(oldContent.annotatedString.subSequence(0, prefixLength))
-
-                            // Append the newly typed text with the active styles
-                            val headingSpanStyle = when (state.value.activeHeadingStyle) {
-                                1 -> SpanStyle(fontSize = 24.sp)
-                                2 -> SpanStyle(fontSize = 20.sp)
-                                3 -> SpanStyle(fontSize = 18.sp)
-                                4 -> SpanStyle(fontSize = 16.sp)
-                                5 -> SpanStyle(fontSize = 14.sp)
-                                6 -> SpanStyle(fontSize = 12.sp)
-                                else -> SpanStyle()
-                            }
-                            val styleToApply = (state.value.activeStyles + headingSpanStyle).reduceOrNull { a, b -> a.merge(b) } ?: SpanStyle()
-                            withStyle(styleToApply) {
-                                append(newChangedPart)
-                            }
-
-                            // Append the styled suffix from the original string
-                            append(oldContent.annotatedString.subSequence(oldText.length - suffixLength, oldText.length))
-                        }
-                        newContent.copy(annotatedString = newAnnotatedString)
-                    } else {
-                        // When only the selection changes, trust the old AnnotatedString from our state
-                        // and just update the selection from the new value. This prevents the TextField
-                        // from stripping styles on selection/deselection.
-                        oldContent.copy(selection = newContent.selection)
-                    }
+                    val finalContent = richTextController.processContentChange(
+                        oldContent,
+                        newContent,
+                        state.value.activeStyles,
+                        state.value.activeHeadingStyle
+                    )
 
                     val selection = finalContent.selection
                     val styles = if (selection.collapsed) {
@@ -426,110 +389,57 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.ApplyStyleToContent -> {
-                val selection = state.value.editingContent.selection
-                if (selection.collapsed) {
-                    val styleToAddOrRemove = event.style
-                    val activeStyles = state.value.activeStyles.toMutableSet()
+                val result = richTextController.toggleStyle(
+                    state.value.editingContent,
+                    event.style,
+                    state.value.activeStyles,
+                    state.value.isBoldActive,
+                    state.value.isItalicActive,
+                    state.value.isUnderlineActive
+                )
 
-                    val isBold = styleToAddOrRemove.fontWeight == FontWeight.Bold
-                    val isItalic = styleToAddOrRemove.fontStyle == FontStyle.Italic
-                    val isUnderline = styleToAddOrRemove.textDecoration == TextDecoration.Underline
-
-                    val wasBold = activeStyles.any { it.fontWeight == FontWeight.Bold }
-                    val wasItalic = activeStyles.any { it.fontStyle == FontStyle.Italic }
-                    val wasUnderline = activeStyles.any { it.textDecoration == TextDecoration.Underline }
-
-                    if (isBold) {
-                        if (wasBold) activeStyles.removeAll { it.fontWeight == FontWeight.Bold }
-                        else activeStyles.add(SpanStyle(fontWeight = FontWeight.Bold))
-                    }
-                    if (isItalic) {
-                        if (wasItalic) activeStyles.removeAll { it.fontStyle == FontStyle.Italic }
-                        else activeStyles.add(SpanStyle(fontStyle = FontStyle.Italic))
-                    }
-                    if (isUnderline) {
-                        if (wasUnderline) activeStyles.removeAll { it.textDecoration == TextDecoration.Underline }
-                        else activeStyles.add(SpanStyle(textDecoration = TextDecoration.Underline))
-                    }
-
+                if (result.updatedActiveStyles != null) {
+                    val activeStyles = result.updatedActiveStyles
                     _state.value = state.value.copy(
                         activeStyles = activeStyles,
                         isBoldActive = activeStyles.any { it.fontWeight == FontWeight.Bold },
                         isItalicActive = activeStyles.any { it.fontStyle == FontStyle.Italic },
                         isUnderlineActive = activeStyles.any { it.textDecoration == TextDecoration.Underline }
                     )
-                } else {
-                    val selection = state.value.editingContent.selection
-                    val newAnnotatedString = AnnotatedString.Builder(state.value.editingContent.annotatedString).apply {
-                        val style = event.style
-                        val isApplyingBold = style.fontWeight == FontWeight.Bold
-                        val isApplyingItalic = style.fontStyle == FontStyle.Italic
-                        val isApplyingUnderline = style.textDecoration == TextDecoration.Underline
-
-                        val selectionIsAlreadyBold = state.value.isBoldActive
-                        val selectionIsAlreadyItalic = state.value.isItalicActive
-                        val selectionIsAlreadyUnderline = state.value.isUnderlineActive
-
-                        val styleToApply = when {
-                            isApplyingBold -> if (selectionIsAlreadyBold) SpanStyle(fontWeight = FontWeight.Normal) else SpanStyle(fontWeight = FontWeight.Bold)
-                            isApplyingItalic -> if (selectionIsAlreadyItalic) SpanStyle(fontStyle = FontStyle.Normal) else SpanStyle(fontStyle = FontStyle.Italic)
-                            isApplyingUnderline -> if (selectionIsAlreadyUnderline) SpanStyle(textDecoration = TextDecoration.None) else SpanStyle(textDecoration = TextDecoration.Underline)
-                            else -> style
-                        }
-                        addStyle(styleToApply, selection.start, selection.end)
-                    }.toAnnotatedString()
-
-                    val newTextFieldValue = state.value.editingContent.copy(annotatedString = newAnnotatedString)
-                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newTextFieldValue)
-
+                } else if (result.updatedContent != null) {
+                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to result.updatedContent)
                     _state.value = state.value.copy(
-                        editingContent = newTextFieldValue,
+                        editingContent = result.updatedContent,
                         editingHistory = newHistory,
                         editingHistoryIndex = newHistory.lastIndex
                     )
                 }
             }
             is NotesEvent.ApplyHeadingStyle -> {
-                val selection = state.value.editingContent.selection
-                val currentContent = state.value.editingContent
+                val updatedContent = richTextController.applyHeading(state.value.editingContent, event.level)
 
-                val headingStyle = when (event.level) {
-                    1 -> SpanStyle(fontSize = 24.sp)
-                    2 -> SpanStyle(fontSize = 20.sp)
-                    3 -> SpanStyle(fontSize = 18.sp)
-                    4 -> SpanStyle(fontSize = 16.sp)
-                    5 -> SpanStyle(fontSize = 14.sp)
-                    6 -> SpanStyle(fontSize = 12.sp)
-                    else -> SpanStyle() // Normal text
-                }
-
-                if (selection.collapsed) {
-                    // Apply style for future typing
+                if (updatedContent == null) {
+                    // Selection is collapsed, update active styles for future typing
                     val newActiveStyles = mutableSetOf<SpanStyle>()
                     if (event.level != 0) {
-                        newActiveStyles.add(headingStyle)
+                        newActiveStyles.add(richTextController.getHeadingStyle(event.level))
                     }
                     _state.value = state.value.copy(
                         activeHeadingStyle = event.level,
                         activeStyles = newActiveStyles,
-                        isBoldActive = false, // Clear other styles
+                        isBoldActive = false,
                         isItalicActive = false,
                         isUnderlineActive = false
                     )
                 } else {
-                    // Apply style to selected text
-                    val newAnnotatedString = AnnotatedString.Builder(currentContent.annotatedString).apply {
-                        addStyle(headingStyle, selection.start, selection.end)
-                    }.toAnnotatedString()
-
-                    val newTextFieldValue = currentContent.copy(annotatedString = newAnnotatedString)
-                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to newTextFieldValue)
+                    // Applied to selection
+                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to updatedContent)
 
                     _state.value = state.value.copy(
-                        editingContent = newTextFieldValue,
+                        editingContent = updatedContent,
                         editingHistory = newHistory,
                         editingHistoryIndex = newHistory.lastIndex,
-                        activeHeadingStyle = event.level // Update active heading style for the selection
+                        activeHeadingStyle = event.level
                     )
                 }
             }
@@ -840,24 +750,6 @@ class NotesViewModel @Inject constructor(
         }
     }
 
-    private fun commonPrefixWith(a: CharSequence, b: CharSequence): String {
-        val minLength = minOf(a.length, b.length)
-        for (i in 0 until minLength) {
-            if (a[i] != b[i]) {
-                return a.substring(0, i)
-            }
-        }
-        return a.substring(0, minLength)
-    }
 
-    private fun commonSuffixWith(a: CharSequence, b: CharSequence): String {
-        val minLength = minOf(a.length, b.length)
-        for (i in 0 until minLength) {
-            if (a[a.length - 1 - i] != b[b.length - 1 - i]) {
-                return a.substring(a.length - i)
-            }
-        }
-        return a.substring(a.length - minLength)
-    }
 }
 

@@ -1,0 +1,62 @@
+package com.suvojeet.notenext.util
+
+import org.jsoup.Jsoup
+import org.jsoup.nodes.Element
+import org.jsoup.nodes.TextNode
+
+object MarkdownExporter {
+
+    fun convertHtmlToMarkdown(html: String): String {
+        val doc = Jsoup.parseBodyFragment(html)
+        val sb = StringBuilder()
+        
+        traverse(doc.body(), sb)
+        
+        return sb.toString().trim()
+    }
+
+    private fun traverse(element: Element, sb: StringBuilder) {
+        for (node in element.childNodes()) {
+            if (node is TextNode) {
+                sb.append(node.text())
+            } else if (node is Element) {
+                when (node.tagName()) {
+                    "b", "strong" -> {
+                        sb.append("**")
+                        traverse(node, sb)
+                        sb.append("**")
+                    }
+                    "i", "em" -> {
+                        sb.append("*")
+                        traverse(node, sb)
+                        sb.append("*")
+                    }
+                    "u" -> {
+                        traverse(node, sb)
+                    }
+                    "br" -> sb.append("  \n")
+                    "p", "div" -> {
+                        traverse(node, sb)
+                        sb.append("\n\n")
+                    }
+                    "h1" -> { sb.append("# "); traverse(node, sb); sb.append("\n\n") }
+                    "h2" -> { sb.append("## "); traverse(node, sb); sb.append("\n\n") }
+                    "h3" -> { sb.append("### "); traverse(node, sb); sb.append("\n\n") }
+                    "h4" -> { sb.append("#### "); traverse(node, sb); sb.append("\n\n") }
+                    "h5" -> { sb.append("##### "); traverse(node, sb); sb.append("\n\n") }
+                    "h6" -> { sb.append("###### "); traverse(node, sb); sb.append("\n\n") }
+                    "ul" -> {
+                        traverse(node, sb)
+                        sb.append("\n")
+                    }
+                    "li" -> {
+                        sb.append("- ")
+                        traverse(node, sb)
+                        sb.append("\n")
+                    }
+                    else -> traverse(node, sb)
+                }
+            }
+        }
+    }
+}

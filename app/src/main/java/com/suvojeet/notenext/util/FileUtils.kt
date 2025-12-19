@@ -16,6 +16,43 @@ import androidx.core.app.NotificationCompat
 import com.suvojeet.notenext.data.ChecklistItem
 import java.io.IOException
 
+import com.suvojeet.notenext.ui.notes.HtmlConverter
+import com.suvojeet.notenext.util.MarkdownExporter
+import androidx.compose.ui.text.AnnotatedString
+
+fun saveAsMd(context: Context, title: String, content: AnnotatedString, checklist: List<ChecklistItem> = emptyList()) {
+    val contentResolver = context.contentResolver
+    val contentValues = ContentValues().apply {
+        put(MediaStore.MediaColumns.DISPLAY_NAME, "${title.ifBlank { "Untitled" }}.md")
+        put(MediaStore.MediaColumns.MIME_TYPE, "text/markdown")
+        put(MediaStore.MediaColumns.RELATIVE_PATH, Environment.DIRECTORY_DOCUMENTS)
+    }
+
+    val uri = contentResolver.insert(MediaStore.Files.getContentUri("external"), contentValues)
+
+    uri?.let {
+        try {
+            contentResolver.openOutputStream(it)?.use { outputStream ->
+                val fullContent = StringBuilder()
+                fullContent.append("# $title\n\n")
+                if (checklist.isNotEmpty()) {
+                    checklist.forEach { item ->
+                        fullContent.append("- [${if (item.isChecked) "x" else " "}] ${item.text}\n")
+                    }
+                } else {
+                    val html = HtmlConverter.annotatedStringToHtml(content)
+                    val markdown = MarkdownExporter.convertHtmlToMarkdown(html)
+                    fullContent.append(markdown)
+                }
+                outputStream.write(fullContent.toString().toByteArray())
+            }
+            showSaveSuccessNotification(context, title, "Documents", "MD")
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+    }
+}
+
 fun saveAsTxt(context: Context, title: String, content: String, checklist: List<ChecklistItem> = emptyList()) {
     val contentResolver = context.contentResolver
     val contentValues = ContentValues().apply {

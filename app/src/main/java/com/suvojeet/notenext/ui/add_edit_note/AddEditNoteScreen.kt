@@ -46,6 +46,7 @@ import com.suvojeet.notenext.ui.settings.SettingsRepository
 import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.util.saveAsPdf
 import com.suvojeet.notenext.util.saveAsTxt
+import com.suvojeet.notenext.util.saveAsMd
 import kotlinx.coroutines.flow.SharedFlow
 import java.io.File
 import java.text.SimpleDateFormat
@@ -501,6 +502,10 @@ fun AddEditNoteScreen(
             onSaveAsTxt = {
                 saveAsTxt(context, state.editingTitle, state.editingContent.text, state.editingChecklist)
                 Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
+            },
+            onSaveAsMd = {
+                saveAsMd(context, state.editingTitle, state.editingContent.annotatedString, state.editingChecklist)
+                Toast.makeText(context, "Note saved to Documents as MD", Toast.LENGTH_SHORT).show()
             }
         )
     }
