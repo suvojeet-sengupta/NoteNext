@@ -11,6 +11,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.clickable
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -21,6 +23,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.foundation.verticalScroll
@@ -47,6 +50,8 @@ import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.util.saveAsPdf
 import com.suvojeet.notenext.util.saveAsTxt
 import com.suvojeet.notenext.util.saveAsMd
+import com.suvojeet.notenext.util.ImageUtils
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharedFlow
 import java.io.File
 import java.text.SimpleDateFormat
@@ -64,7 +69,8 @@ fun AddEditNoteScreen(
     onDismiss: () -> Unit,
     themeMode: ThemeMode,
     settingsRepository: SettingsRepository,
-    events: SharedFlow<NotesUiEvent>
+    events: SharedFlow<NotesUiEvent>,
+    modifier: Modifier = Modifier
 ) {
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
@@ -76,23 +82,47 @@ fun AddEditNoteScreen(
     var selectedImageData by remember { mutableStateOf<ImageViewerData?>(null) }
     val scrollState = rememberScrollState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
 
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
-        uris.forEach { uri ->
-            val mimeType = context.contentResolver.getType(uri)
-            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            onEvent(NotesEvent.AddAttachment(uri.toString(), mimeType ?: ""))
+        scope.launch {
+            uris.forEach { uri ->
+                val compressedUri = ImageUtils.compressImage(context, uri)
+                if (compressedUri != null) {
+                    val mimeType = context.contentResolver.getType(compressedUri)
+                    onEvent(NotesEvent.AddAttachment(compressedUri.toString(), mimeType ?: "image/jpeg"))
+                } else {
+                    val mimeType = context.contentResolver.getType(uri)
+                    try {
+                        context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    } catch (e: Exception) {
+                        // Ignore if we can't take permission (e.g. if we don't need it or it's not persistable)
+                    }
+                    onEvent(NotesEvent.AddAttachment(uri.toString(), mimeType ?: ""))
+                }
+            }
         }
     }
 
     var photoUri by remember { mutableStateOf<Uri?>(null) }
     val takePictureLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { success ->
         if (success) {
-            photoUri?.let {
-                val mimeType = context.contentResolver.getType(it)
-                context.contentResolver.takePersistableUriPermission(it, Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                onEvent(NotesEvent.AddAttachment(it.toString(), mimeType ?: "image/jpeg"))
+            photoUri?.let { uri ->
+                scope.launch {
+                    val compressedUri = ImageUtils.compressImage(context, uri)
+                    if (compressedUri != null) {
+                        val mimeType = context.contentResolver.getType(compressedUri)
+                        onEvent(NotesEvent.AddAttachment(compressedUri.toString(), mimeType ?: "image/jpeg"))
+                    } else {
+                        val mimeType = context.contentResolver.getType(uri)
+                         try {
+                            context.contentResolver.takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                        } catch (e: Exception) {
+                        }
+                        onEvent(NotesEvent.AddAttachment(uri.toString(), mimeType ?: "image/jpeg"))
+                    }
+                }
             }
         }
     }
@@ -162,159 +192,53 @@ fun AddEditNoteScreen(
 
     val backgroundColor = MaterialTheme.colorScheme.surface
 
-    Scaffold(
-        modifier = Modifier.imePadding(),
-        topBar = {
-            AddEditNoteTopAppBar(
-                state = state,
-                onEvent = onEvent,
-                onDismiss = onDismiss,
-                showDeleteDialog = { showDeleteDialog = it },
-                editingNoteType = state.editingNoteType
-            )
-        },
-        bottomBar = {
-            AddEditNoteBottomAppBar(
-                state = state,
-                onEvent = onEvent,
-                showColorPicker = { showColorPicker = !showColorPicker },
-                showFormatBar = { showFormatBar = !showFormatBar },
-                showMoreOptions = { showMoreOptions = it },
-                onImageClick = {
-                    getContent.launch("image/*")
-                },
-                onTakePhotoClick = {
-                    val uri = createImageFile(context)
-                    photoUri = uri
-                    takePictureLauncher.launch(uri)
-                },
-                onAudioClick = {
-                    Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
-                },
-                themeMode = themeMode
-            )
-        }
-    ) { padding ->
-        SelectionContainer {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding)
-            ) {
-                if (state.editingNoteType == "TEXT") {
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .background(backgroundColor)
-                            .verticalScroll(scrollState)
-                    ) {
-                        val imageAttachments = state.editingAttachments.filter { it.type == "IMAGE" }
-                        if (imageAttachments.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            val imageCount = imageAttachments.size
-                            if (imageCount == 1) {
-                                // Single image: full width
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    AsyncImage(
-                                        model = imageAttachments.first().uri,
-                                        contentDescription = null,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .heightIn(max = 400.dp) // Larger max height for single image
-                                                                                                                            .clickable {
-                                                                                                                                selectedImageData = ImageViewerData(uri = Uri.parse(imageAttachments.first().uri), tempId = imageAttachments.first().tempId)
-                                                                                                                                showImageViewer = true
-                                                                                                                            },                                        contentScale = ContentScale.Fit
-                                    )
-                                    IconButton(
-                                        onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().tempId)) },
-                                        modifier = Modifier.align(Alignment.TopEnd)
-                                    ) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
-                                    }
-                                }
-                            } else {
-                                // Multiple images: up to 3 per row in a horizontal scrollable row
-                                LazyRow(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    contentPadding = PaddingValues(horizontal = 8.dp)
-                                ) {
-                                    items(imageAttachments, key = { it.uri }) { attachment ->
-                                        Box {
-                                            AsyncImage(
-                                                model = attachment.uri,
-                                                contentDescription = null,
-                                                modifier = Modifier
-                                                    .width(120.dp) // Fixed width for a 3-per-row look
-                                                    .height(120.dp)
-                                                    .aspectRatio(1f)
-                                                    .clickable {
-                                                        selectedImageData = ImageViewerData(uri = Uri.parse(attachment.uri), tempId = attachment.tempId)
-                                                        showImageViewer = true
-                                                    },
-                                                contentScale = ContentScale.Crop
-                                            )
-                                            IconButton(
-                                                onClick = { onEvent(NotesEvent.RemoveAttachment(attachment.tempId)) },
-                                                modifier = Modifier.align(Alignment.TopEnd)
-                                            ) {
-                                                Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                            Spacer(modifier = Modifier.height(16.dp))
-                        }
-
-                        NoteEditor(state = state, onEvent = onEvent)
-
-                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                            Spacer(modifier = Modifier.height(16.dp))
-                            state.linkPreviews.forEach { linkPreview ->
-                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
-                        }
-
-                        
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier
-                            .weight(1f)
-                            .background(backgroundColor)
-                    ) {
-                        item {
-                            val titleTextColor = contentColorFor(backgroundColor = backgroundColor)
-                            TextField(
-                                value = state.editingTitle,
-                                onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
-                                placeholder = { Text("Title", color = contentColorFor(backgroundColor = backgroundColor)) },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent,
-                                    disabledContainerColor = Color.Transparent,
-                                    focusedIndicatorColor = Color.Transparent,
-                                    unfocusedIndicatorColor = Color.Transparent,
-                                    cursorColor = contentColorFor(backgroundColor = backgroundColor),
-                                    selectionColors = TextSelectionColors(
-                                        handleColor = contentColorFor(backgroundColor = backgroundColor),
-                                        backgroundColor = contentColorFor(backgroundColor = backgroundColor).copy(alpha = 0.4f)
-                                    )
-                                ),
-                                textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
-                                singleLine = true,
-                                maxLines = 1
-                            )
-                            Spacer(modifier = Modifier.height(8.dp))
-                        }
-
-                        item {
+    Box(modifier = modifier.fillMaxSize()) {
+        Scaffold(
+            modifier = Modifier.imePadding(),
+            topBar = {
+                AddEditNoteTopAppBar(
+                    state = state,
+                    onEvent = onEvent,
+                    onDismiss = onDismiss,
+                    showDeleteDialog = { showDeleteDialog = it },
+                    editingNoteType = state.editingNoteType
+                )
+            },
+            bottomBar = {
+                AddEditNoteBottomAppBar(
+                    state = state,
+                    onEvent = onEvent,
+                    showColorPicker = { showColorPicker = !showColorPicker },
+                    showFormatBar = { showFormatBar = !showFormatBar },
+                    showMoreOptions = { showMoreOptions = it },
+                    onImageClick = {
+                        getContent.launch("image/*")
+                    },
+                    onTakePhotoClick = {
+                        val uri = createImageFile(context)
+                        photoUri = uri
+                        takePictureLauncher.launch(uri)
+                    },
+                    onAudioClick = {
+                        Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
+                    },
+                    themeMode = themeMode
+                )
+            }
+        ) { padding ->
+            SelectionContainer {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(padding)
+                ) {
+                    if (state.editingNoteType == "TEXT") {
+                        Column(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(backgroundColor)
+                                .verticalScroll(scrollState)
+                        ) {
                             val imageAttachments = state.editingAttachments.filter { it.type == "IMAGE" }
                             if (imageAttachments.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -375,75 +299,201 @@ fun AddEditNoteScreen(
                                 }
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
-                        }
 
-                        items(state.editingChecklist) {
-                            item ->
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Checkbox(
-                                    checked = item.isChecked,
-                                    onCheckedChange = { isChecked ->
-                                        onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
-                                    }
-                                )
-                                OutlinedTextField(
-                                    value = item.text,
-                                    onValueChange = { text ->
-                                        onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
-                                    },
-                                    modifier = Modifier.weight(1f),
-                                    placeholder = { Text("List item") }
-                                )
-                                IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
-                                    Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                            NoteEditor(state = state, onEvent = onEvent)
+
+                            if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                                Spacer(modifier = Modifier.height(16.dp))
+                                state.linkPreviews.forEach { linkPreview ->
+                                    LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                    Spacer(modifier = Modifier.height(8.dp))
                                 }
                             }
                         }
-                        item {
-                            TextButton(
-                                modifier = Modifier.padding(horizontal = 16.dp),
-                                onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
-                                Icon(Icons.Default.Add, contentDescription = "Add item")
-                                Text("Add item")
-                            }
-                        }
-
-                        if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(backgroundColor)
+                        ) {
                             item {
-                                Spacer(modifier = Modifier.height(16.dp))
-                            }
-                            items(state.linkPreviews) { linkPreview ->
-                                LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                val titleTextColor = contentColorFor(backgroundColor = backgroundColor)
+                                TextField(
+                                    value = state.editingTitle,
+                                    onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
+                                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = backgroundColor)) },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    colors = TextFieldDefaults.colors(
+                                        focusedContainerColor = Color.Transparent,
+                                        unfocusedContainerColor = Color.Transparent,
+                                        disabledContainerColor = Color.Transparent,
+                                        focusedIndicatorColor = Color.Transparent,
+                                        unfocusedIndicatorColor = Color.Transparent,
+                                        cursorColor = contentColorFor(backgroundColor = backgroundColor),
+                                        selectionColors = TextSelectionColors(
+                                            handleColor = contentColorFor(backgroundColor = backgroundColor),
+                                            backgroundColor = contentColorFor(backgroundColor = backgroundColor).copy(alpha = 0.4f)
+                                        )
+                                    ),
+                                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
+                                    singleLine = true,
+                                    maxLines = 1
+                                )
                                 Spacer(modifier = Modifier.height(8.dp))
+                            }
+
+                            item {
+                                val imageAttachments = state.editingAttachments.filter { it.type == "IMAGE" }
+                                if (imageAttachments.isNotEmpty()) {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                    val imageCount = imageAttachments.size
+                                    if (imageCount == 1) {
+                                        // Single image: full width
+                                        Box(modifier = Modifier.fillMaxWidth()) {
+                                            AsyncImage(
+                                                model = imageAttachments.first().uri,
+                                                contentDescription = null,
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .heightIn(max = 400.dp)
+                                                    .clickable {
+                                                        selectedImageData = ImageViewerData(uri = Uri.parse(imageAttachments.first().uri), tempId = imageAttachments.first().tempId)
+                                                        showImageViewer = true
+                                                    },
+                                                contentScale = ContentScale.Fit
+                                            )
+                                            IconButton(
+                                                onClick = { onEvent(NotesEvent.RemoveAttachment(imageAttachments.first().tempId)) },
+                                                modifier = Modifier.align(Alignment.TopEnd)
+                                            ) {
+                                                Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
+                                            }
+                                        }
+                                    } else {
+                                        // Multiple images: up to 3 per row in a horizontal scrollable row
+                                        LazyRow(
+                                            modifier = Modifier.fillMaxWidth(),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            contentPadding = PaddingValues(horizontal = 8.dp)
+                                        ) {
+                                            items(imageAttachments, key = { it.uri }) { attachment ->
+                                                Box {
+                                                    AsyncImage(
+                                                        model = attachment.uri,
+                                                        contentDescription = null,
+                                                        modifier = Modifier
+                                                            .width(120.dp)
+                                                            .height(120.dp)
+                                                            .aspectRatio(1f)
+                                                            .clickable {
+                                                                selectedImageData = ImageViewerData(uri = Uri.parse(attachment.uri), tempId = attachment.tempId)
+                                                                showImageViewer = true
+                                                            },
+                                                        contentScale = ContentScale.Crop
+                                                    )
+                                                    IconButton(
+                                                        onClick = { onEvent(NotesEvent.RemoveAttachment(attachment.tempId)) },
+                                                        modifier = Modifier.align(Alignment.TopEnd)
+                                                    ) {
+                                                        Icon(Icons.Default.Delete, contentDescription = "Remove image", tint = MaterialTheme.colorScheme.onSurface)
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                }
+                            }
+
+                            items(state.editingChecklist) {
+                                item ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 16.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Checkbox(
+                                        checked = item.isChecked,
+                                        onCheckedChange = { isChecked ->
+                                            onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
+                                        }
+                                    )
+                                    OutlinedTextField(
+                                        value = item.text,
+                                        onValueChange = { text ->
+                                            onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        placeholder = { Text("List item") }
+                                    )
+                                    IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
+                                        Icon(Icons.Default.Delete, contentDescription = "Delete item")
+                                    }
+                                }
+                            }
+                            item {
+                                TextButton(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
+                                    Icon(Icons.Default.Add, contentDescription = "Add item")
+                                    Text("Add item")
+                                }
+                            }
+
+                            if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                                item {
+                                    Spacer(modifier = Modifier.height(16.dp))
+                                }
+                                items(state.linkPreviews) { linkPreview ->
+                                    LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
                             }
                         }
                     }
-                }
 
-                AnimatedVisibility(
-                    visible = showFormatBar && state.editingNoteType == "TEXT",
-                    enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                    exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-                ) {
-                    FormatToolbar(state = state, onEvent = onEvent, onInsertLinkClick = { showInsertLinkDialog = true }, themeMode = themeMode)
+                    // FormatToolbar removed from here and moved to Box overlay below
+                    AnimatedVisibility(
+                        visible = showColorPicker,
+                        enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
+                        exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
+                    ) {
+                        ColorPicker(
+                            colors = colors,
+                            editingColor = state.editingColor,
+                            onEvent = onEvent
+                        )
+                    }
                 }
-
-                AnimatedVisibility(
-                    visible = showColorPicker,
-                    enter = slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)),
-                    exit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300))
-                ) {
-                    ColorPicker(
-                        colors = colors,
-                        editingColor = state.editingColor,
-                        onEvent = onEvent
-                    )
-                }
+            }
+        }
+        
+        // Floating Toolbar
+        AnimatedVisibility(
+            visible = showFormatBar && state.editingNoteType == "TEXT",
+            enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+            exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .imePadding()
+                .padding(bottom = 60.dp) // Sit above the bottom bar
+        ) {
+            Surface(
+                shadowElevation = 8.dp,
+                shape = RoundedCornerShape(16.dp),
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            ) {
+                FormatToolbar(
+                    state = state, 
+                    onEvent = onEvent, 
+                    onInsertLinkClick = { showInsertLinkDialog = true }, 
+                    themeMode = themeMode,
+                    modifier = Modifier.padding(8.dp)
+                )
             }
         }
     }

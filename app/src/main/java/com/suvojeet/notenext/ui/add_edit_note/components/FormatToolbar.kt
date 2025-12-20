@@ -55,7 +55,8 @@ fun FormatToolbar(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
     onInsertLinkClick: () -> Unit,
-    themeMode: ThemeMode
+    themeMode: ThemeMode,
+    modifier: Modifier = Modifier
 ) {
     val systemInDarkTheme = isSystemInDarkTheme()
     // Determine if dark theme is active based on themeMode and system settings.
@@ -72,7 +73,7 @@ fun FormatToolbar(
     var showHeadingPicker by remember { mutableStateOf(false) }
 
     LazyRow(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .background(MaterialTheme.colorScheme.surface)
             .padding(vertical = 8.dp),
