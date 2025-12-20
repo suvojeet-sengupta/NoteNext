@@ -43,6 +43,12 @@ import kotlinx.coroutines.flow.flatMapLatest
 import com.suvojeet.notenext.data.Attachment
 import com.suvojeet.notenext.data.NoteWithAttachments
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
+import android.content.Context
+import android.appwidget.AppWidgetManager
+import android.content.ComponentName
+import com.suvojeet.notenext.widget.NoteWidgetProvider
+import com.suvojeet.notenext.R
 import javax.inject.Inject
 
 @HiltViewModel
@@ -50,7 +56,8 @@ class NotesViewModel @Inject constructor(
     private val repository: com.suvojeet.notenext.data.NoteRepository,
     private val linkPreviewRepository: LinkPreviewRepository,
     private val alarmScheduler: AlarmScheduler,
-    private val richTextController: RichTextController
+    private val richTextController: RichTextController,
+    @ApplicationContext private val context: Context
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(NotesState())
@@ -98,6 +105,7 @@ class NotesViewModel @Inject constructor(
                     repository.updateNote(noteToBin)
                     recentlyDeletedNote = event.note.note
                     _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
+                    updateWidgets()
                 }
             }
             is NotesEvent.RestoreNote -> {
@@ -105,6 +113,7 @@ class NotesViewModel @Inject constructor(
                     recentlyDeletedNote?.let { restoredNote ->
                         repository.updateNote(restoredNote.copy(isBinned = false))
                         recentlyDeletedNote = null
+                        updateWidgets()
                     }
                 }
             }
@@ -134,6 +143,7 @@ class NotesViewModel @Inject constructor(
                         if (selectedNotes.size > 1) "${selectedNotes.size} notes unpinned" else "Note unpinned"
                     }
                     _events.emit(NotesUiEvent.ShowToast(message))
+                    updateWidgets()
                 }
             }
             is NotesEvent.DeleteSelectedNotes -> {
@@ -144,6 +154,7 @@ class NotesViewModel @Inject constructor(
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                     _events.emit(NotesUiEvent.ShowToast("${selectedNotes.size} notes moved to Bin"))
+                    updateWidgets()
                 }
             }
             is NotesEvent.ArchiveSelectedNotes -> {
@@ -153,6 +164,7 @@ class NotesViewModel @Inject constructor(
                         repository.insertNote(note.note.copy(isArchived = !note.note.isArchived))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
+                    updateWidgets()
                 }
             }
             is NotesEvent.ToggleImportantForSelectedNotes -> {
@@ -265,7 +277,8 @@ class NotesViewModel @Inject constructor(
                                 linkPreviews = note.linkPreviews,
                                 editingNoteType = note.noteType,
                                 editingChecklist = checklist,
-                                editingAttachments = noteWithAttachments.attachments.map { it.copy(tempId = java.util.UUID.randomUUID().toString()) }
+                                editingAttachments = noteWithAttachments.attachments.map { it.copy(tempId = java.util.UUID.randomUUID().toString()) },
+                                editingIsLocked = note.isLocked
                             )
                         }
                     } else {
@@ -282,8 +295,28 @@ class NotesViewModel @Inject constructor(
                             linkPreviews = emptyList(),
                             editingNoteType = event.noteType,
                             editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList(),
-                            editingAttachments = emptyList()
+                            editingAttachments = emptyList(),
+                            editingIsLocked = false
                         )
+                    }
+                }
+            }
+            is NotesEvent.OnToggleLockClick -> {
+                viewModelScope.launch {
+                    val currentLockState = state.value.editingIsLocked
+                    _state.value = state.value.copy(editingIsLocked = !currentLockState)
+                    // If note exists, update immediately
+                    state.value.expandedNoteId?.let { noteId ->
+                         if (noteId != -1) {
+                             repository.getNoteById(noteId)?.let { note ->
+                                 repository.insertNote(note.note.copy(isLocked = !currentLockState))
+                             }
+                             // Update list locally
+                             val updatedNotesList = state.value.notes.map { if (it.note.id == noteId) it.copy(note = it.note.copy(isLocked = !currentLockState)) else it }
+                             _state.value = _state.value.copy(notes = updatedNotesList)
+                             _events.emit(NotesUiEvent.ShowToast(if (!currentLockState) "Note locked" else "Note unlocked"))
+                             updateWidgets()
+                         }
                     }
                 }
             }
@@ -291,12 +324,30 @@ class NotesViewModel @Inject constructor(
                 onEvent(NotesEvent.OnSaveNoteClick)
             }
             is NotesEvent.AddChecklistItem -> {
-                val newItem = ChecklistItem(text = "", isChecked = false)
+                val newItem = ChecklistItem(text = "", isChecked = false, position = state.value.editingChecklist.size)
                 val updatedChecklist = state.value.editingChecklist + newItem
                 _state.value = state.value.copy(
                     editingChecklist = updatedChecklist,
                     newlyAddedChecklistItemId = newItem.id
                 )
+            }
+            is NotesEvent.SwapChecklistItems -> {
+                val list = state.value.editingChecklist.toMutableList()
+                if (event.fromIndex in list.indices && event.toIndex in list.indices) {
+                    val fromItem = list[event.fromIndex]
+                    val toItem = list[event.toIndex]
+                    list[event.fromIndex] = fromItem.copy(position = event.toIndex)
+                    list[event.toIndex] = toItem.copy(position = event.fromIndex)
+                    
+                    // Re-sort just in case, though swapping positions should be enough if we use position for sort
+                    // Actually, we should swap elements in the list AND update their position fields
+                    
+                    java.util.Collections.swap(list, event.fromIndex, event.toIndex)
+                    
+                    // Update all positions to match indices to be safe
+                    val updatedList = list.mapIndexed { index, item -> item.copy(position = index) }
+                    _state.value = state.value.copy(editingChecklist = updatedList)
+                }
             }
             is NotesEvent.DeleteChecklistItem -> {
                 val updatedChecklist = state.value.editingChecklist.filterNot { it.id == event.itemId }
@@ -466,6 +517,7 @@ class NotesViewModel @Inject constructor(
                             )
                             val message = if (updatedNote.isPinned) "Note pinned" else "Note unpinned"
                             _events.emit(NotesUiEvent.ShowToast(message))
+                            updateWidgets()
                         }
                     }
                 }
@@ -481,6 +533,7 @@ class NotesViewModel @Inject constructor(
                                 isArchived = updatedNote.isArchived,
                                 notes = updatedNotesList
                             )
+                            updateWidgets()
                         }
                     }
                 }
@@ -536,7 +589,8 @@ class NotesViewModel @Inject constructor(
                                 isArchived = state.value.isArchived,
                                 label = state.value.editingLabel,
                                 linkPreviews = state.value.linkPreviews,
-                                noteType = state.value.editingNoteType
+                                noteType = state.value.editingNoteType,
+                                isLocked = state.value.editingIsLocked
                             )
                         } else { // Existing note
                             repository.getNoteById(noteId)?.let { existingNote ->
@@ -549,7 +603,8 @@ class NotesViewModel @Inject constructor(
                                     isArchived = state.value.isArchived,
                                     label = state.value.editingLabel,
                                     linkPreviews = state.value.linkPreviews,
-                                    noteType = state.value.editingNoteType
+                                    noteType = state.value.editingNoteType,
+                                    isLocked = state.value.editingIsLocked
                                 )
                             }
                         }
@@ -620,6 +675,7 @@ class NotesViewModel @Inject constructor(
                         editingChecklist = emptyList(),
                         editingAttachments = emptyList()
                     )
+                    updateWidgets()
                 }
             }
             is NotesEvent.OnDeleteNoteClick -> {
@@ -629,6 +685,7 @@ class NotesViewModel @Inject constructor(
                             repository.getNoteById(it)?.let { note ->
                                 repository.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
                                 _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
+                                updateWidgets()
                             }
                         }
                     }
@@ -761,5 +818,10 @@ class NotesViewModel @Inject constructor(
     }
 
 
+    private fun updateWidgets() {
+        val appWidgetManager = AppWidgetManager.getInstance(context)
+        val ids = appWidgetManager.getAppWidgetIds(ComponentName(context, NoteWidgetProvider::class.java))
+        appWidgetManager.notifyAppWidgetViewDataChanged(ids, R.id.widget_list_view)
+    }
 }
 

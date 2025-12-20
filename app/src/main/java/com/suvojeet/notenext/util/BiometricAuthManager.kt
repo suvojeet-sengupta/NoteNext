@@ -8,10 +8,7 @@ import androidx.fragment.app.FragmentActivity
 
 class BiometricAuthManager(
     private val context: Context,
-    private val activity: FragmentActivity,
-    private val onAuthSuccess: () -> Unit,
-    private val onAuthError: (String) -> Unit,
-    private val onAuthFailed: () -> Unit
+    private val activity: FragmentActivity
 ) {
 
     private val executor = ContextCompat.getMainExecutor(context)
@@ -21,7 +18,11 @@ class BiometricAuthManager(
         return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
     }
 
-    fun showBiometricPrompt() {
+    fun showBiometricPrompt(
+        onAuthSuccess: () -> Unit,
+        onAuthError: (String) -> Unit = {},
+        onAuthFailed: () -> Unit = {}
+    ) {
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Biometric login for NoteNext")
             .setSubtitle("Log in using your biometric credential")

@@ -55,6 +55,22 @@
             android:enabled="true"
             android:exported="false" />
 
+        <receiver
+            android:name=".widget.NoteWidgetProvider"
+            android:exported="true"
+            android:label="Pinned Notes">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/note_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.NoteWidgetService"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.provider"

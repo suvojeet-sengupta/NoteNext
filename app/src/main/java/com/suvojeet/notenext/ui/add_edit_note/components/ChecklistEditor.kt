@@ -7,11 +7,14 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.ArrowDownward
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -84,6 +87,38 @@ fun ChecklistEditor(
                         placeholder = { Text(stringResource(id = R.string.list_item)) },
                         singleLine = true // Ensure single line for checklist items.
                     )
+                    
+                    // Move Up Button
+                    val visualIndex = uncheckedItems.indexOf(item)
+                    IconButton(
+                        onClick = { 
+                            if (visualIndex > 0) {
+                                val prevItem = uncheckedItems[visualIndex - 1]
+                                val fromIndex = state.editingChecklist.indexOfFirst { it.id == item.id }
+                                val toIndex = state.editingChecklist.indexOfFirst { it.id == prevItem.id }
+                                onEvent(NotesEvent.SwapChecklistItems(fromIndex, toIndex))
+                            }
+                        },
+                        enabled = visualIndex > 0
+                    ) {
+                        Icon(Icons.Default.ArrowUpward, contentDescription = "Move Up", modifier = Modifier.size(20.dp))
+                    }
+
+                    // Move Down Button
+                    IconButton(
+                        onClick = { 
+                            if (visualIndex < uncheckedItems.size - 1) {
+                                val nextItem = uncheckedItems[visualIndex + 1]
+                                val fromIndex = state.editingChecklist.indexOfFirst { it.id == item.id }
+                                val toIndex = state.editingChecklist.indexOfFirst { it.id == nextItem.id }
+                                onEvent(NotesEvent.SwapChecklistItems(fromIndex, toIndex))
+                            }
+                        },
+                        enabled = visualIndex < uncheckedItems.size - 1
+                    ) {
+                        Icon(Icons.Default.ArrowDownward, contentDescription = "Move Down", modifier = Modifier.size(20.dp))
+                    }
+
                     IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
                         Icon(Icons.Default.Delete, contentDescription = stringResource(id = R.string.delete_item))
                     }

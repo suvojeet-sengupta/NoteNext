@@ -85,7 +85,7 @@ import com.suvojeet.notenext.R
 import kotlinx.coroutines.flow.SharingStarted
 
 @Composable
-fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId: Int = -1, sharedText: String? = null) {
+fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId: Int = -1, startAddNote: Boolean = false, sharedText: String? = null) {
     val navController = rememberNavController()
     val context = LocalContext.current
     val settingsRepository = remember { SettingsRepository(context) }
@@ -97,6 +97,12 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
     LaunchedEffect(startNoteId) {
         if (startNoteId != -1) {
             notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+        }
+    }
+
+    LaunchedEffect(startAddNote) {
+        if (startAddNote) {
+            notesViewModel.onEvent(NotesEvent.ExpandNote(-1))
         }
     }
 

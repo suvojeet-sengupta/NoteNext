@@ -250,7 +250,8 @@ class ProjectNotesViewModel @Inject constructor(
                                 linkPreviews = note.linkPreviews,
                                 editingNoteType = note.noteType,
                                 editingChecklist = checklist,
-                                editingAttachments = noteWithAttachments.attachments.map { it.copy(tempId = java.util.UUID.randomUUID().toString()) }
+                                editingAttachments = noteWithAttachments.attachments.map { it.copy(tempId = java.util.UUID.randomUUID().toString()) },
+                                editingIsLocked = note.isLocked
                             )
                         }
                     } else {
@@ -267,7 +268,8 @@ class ProjectNotesViewModel @Inject constructor(
                             linkPreviews = emptyList(),
                             editingNoteType = event.noteType,
                             editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList(),
-                            editingAttachments = emptyList()
+                            editingAttachments = emptyList(),
+                            editingIsLocked = false
                         )
                     }
                 }
@@ -276,12 +278,26 @@ class ProjectNotesViewModel @Inject constructor(
                 onEvent(ProjectNotesEvent.OnSaveNoteClick)
             }
             is ProjectNotesEvent.AddChecklistItem -> {
-                val newItem = ChecklistItem(text = "", isChecked = false)
+                val newItem = ChecklistItem(text = "", isChecked = false, position = state.value.editingChecklist.size)
                 val updatedChecklist = state.value.editingChecklist + newItem
                 _state.value = state.value.copy(
                     editingChecklist = updatedChecklist,
                     newlyAddedChecklistItemId = newItem.id
                 )
+            }
+            is ProjectNotesEvent.SwapChecklistItems -> {
+                val list = state.value.editingChecklist.toMutableList()
+                if (event.fromIndex in list.indices && event.toIndex in list.indices) {
+                    val fromItem = list[event.fromIndex]
+                    val toItem = list[event.toIndex]
+                    list[event.fromIndex] = fromItem.copy(position = event.toIndex)
+                    list[event.toIndex] = toItem.copy(position = event.fromIndex)
+                    
+                    java.util.Collections.swap(list, event.fromIndex, event.toIndex)
+                    
+                    val updatedList = list.mapIndexed { index, item -> item.copy(position = index) }
+                    _state.value = state.value.copy(editingChecklist = updatedList)
+                }
             }
             is ProjectNotesEvent.DeleteChecklistItem -> {
                 val updatedChecklist = state.value.editingChecklist.filterNot { it.id == event.itemId }
@@ -489,6 +505,24 @@ class ProjectNotesViewModel @Inject constructor(
                     }
                 }
             }
+            is ProjectNotesEvent.OnToggleLockClick -> {
+                viewModelScope.launch {
+                    val currentLockState = state.value.editingIsLocked
+                    _state.value = state.value.copy(editingIsLocked = !currentLockState)
+                    // If note exists, update immediately
+                    state.value.expandedNoteId?.let { noteId ->
+                         if (noteId != -1) {
+                             repository.getNoteById(noteId)?.let { note ->
+                                 repository.insertNote(note.note.copy(isLocked = !currentLockState))
+                             }
+                             // Update list locally
+                             val updatedNotesList = state.value.notes.map { if (it.note.id == noteId) it.copy(note = it.note.copy(isLocked = !currentLockState)) else it }
+                             _state.value = _state.value.copy(notes = updatedNotesList)
+                             _events.emit(ProjectNotesUiEvent.ShowToast(if (!currentLockState) "Note locked" else "Note unlocked"))
+                         }
+                    }
+                }
+            }
             is ProjectNotesEvent.OnToggleArchiveClick -> {
                 viewModelScope.launch {
                     state.value.expandedNoteId?.let { noteId ->
@@ -556,7 +590,8 @@ class ProjectNotesViewModel @Inject constructor(
                                 label = state.value.editingLabel,
                                 linkPreviews = state.value.linkPreviews,
                                 noteType = state.value.editingNoteType,
-                                projectId = projectId
+                                projectId = projectId,
+                                isLocked = state.value.editingIsLocked
                             )
                         } else { // Existing note
                             repository.getNoteById(noteId)?.let { existingNote ->
@@ -570,7 +605,8 @@ class ProjectNotesViewModel @Inject constructor(
                                     label = state.value.editingLabel,
                                     linkPreviews = state.value.linkPreviews,
                                     noteType = state.value.editingNoteType,
-                                    projectId = projectId
+                                    projectId = projectId,
+                                    isLocked = state.value.editingIsLocked
                                 )
                             }
                         }

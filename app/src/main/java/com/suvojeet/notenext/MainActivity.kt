@@ -2,7 +2,7 @@
 package com.suvojeet.notenext
 
 import android.os.Bundle
-import androidx.activity.ComponentActivity
+import androidx.fragment.app.FragmentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -30,7 +30,7 @@ import android.content.res.Configuration
 import android.content.Intent
 
 @AndroidEntryPoint
-class MainActivity : ComponentActivity() {
+class MainActivity : FragmentActivity() {
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -39,6 +39,7 @@ class MainActivity : ComponentActivity() {
         val settingsRepository = SettingsRepository(this)
 
         val startNoteId = intent.getIntExtra("NOTE_ID", -1)
+        val startAddNote = intent.getBooleanExtra("START_ADD_NOTE", false)
         val sharedText = when {
             intent.action == Intent.ACTION_SEND && "text/plain" == intent.type -> {
                 intent.getStringExtra(Intent.EXTRA_TEXT)
@@ -86,7 +87,7 @@ class MainActivity : ComponentActivity() {
                     } else if (enableAppLockLoaded!! && !unlocked) {
                         LockScreen(onUnlock = { unlocked = true })
                     } else {
-                        NavGraph(themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, sharedText = sharedText)
+                        NavGraph(themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, startAddNote = startAddNote, sharedText = sharedText)
                     }
                 }
             }

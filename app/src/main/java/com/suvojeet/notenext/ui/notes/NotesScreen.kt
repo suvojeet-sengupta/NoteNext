@@ -3,6 +3,9 @@ package com.suvojeet.notenext.ui.notes
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandIn
+import androidx.compose.animation.shrinkOut
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.togetherWith
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.tween
@@ -104,6 +107,7 @@ import com.suvojeet.notenext.R
 
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 import com.suvojeet.notenext.ui.reminder.RepeatOption
+import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class, ExperimentalFoundationApi::class)
@@ -133,6 +137,15 @@ fun NotesScreen(
     var showColorPickerDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+
+    val activity = context.findActivity() as? androidx.fragment.app.FragmentActivity
+    val biometricAuthManager = if (activity != null) {
+        remember(activity) {
+            com.suvojeet.notenext.util.BiometricAuthManager(context, activity)
+        }
+    } else {
+        null
+    }
 
     // Observe events from the ViewModel for side-effects like showing toasts or intents.
     // We use `context.getString()` here because events are handled outside the Composable
@@ -389,6 +402,21 @@ fun NotesScreen(
                     val pinnedNotes = filteredNotes.filter { it.note.isPinned }
                     val otherNotes = filteredNotes.filter { !it.note.isPinned }
 
+                    val onNoteClickAction: (com.suvojeet.notenext.data.NoteWithAttachments) -> Unit = { note ->
+                        if (isSelectionModeActive) {
+                            viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
+                        } else {
+                            if (note.note.isLocked) {
+                                biometricAuthManager?.showBiometricPrompt(
+                                    onAuthSuccess = { viewModel.onEvent(NotesEvent.ExpandNote(note.note.id)) },
+                                    onAuthError = { Toast.makeText(context, "Authentication Failed", Toast.LENGTH_SHORT).show() }
+                                ) ?: Toast.makeText(context, "Biometrics not available", Toast.LENGTH_SHORT).show()
+                            } else {
+                                viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
+                            }
+                        }
+                    }
+
                     when (state.layoutType) {
                         LayoutType.GRID -> {
                             LazyVerticalStaggeredGrid(
@@ -413,13 +441,8 @@ fun NotesScreen(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
-                                            onNoteClick = {
-                                                if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
-                                                }
-                                            },
+                                            searchQuery = state.searchQuery,
+                                            onNoteClick = { onNoteClickAction(note) },
                                             onNoteLongClick = {
                                                 viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
@@ -444,13 +467,8 @@ fun NotesScreen(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
-                                            onNoteClick = {
-                                                if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
-                                                }
-                                            },
+                                            searchQuery = state.searchQuery,
+                                            onNoteClick = { onNoteClickAction(note) },
                                             onNoteLongClick = {
                                                 viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
@@ -480,13 +498,8 @@ fun NotesScreen(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
-                                            onNoteClick = {
-                                                if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
-                                                }
-                                            },
+                                            searchQuery = state.searchQuery,
+                                            onNoteClick = { onNoteClickAction(note) },
                                             onNoteLongClick = {
                                                 viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
@@ -511,13 +524,8 @@ fun NotesScreen(
                                             modifier = Modifier.graphicsLayer { alpha = if (isExpanded) 0f else 1f },
                                             note = note,
                                             isSelected = state.selectedNoteIds.contains(note.note.id),
-                                            onNoteClick = {
-                                                if (isSelectionModeActive) {
-                                                    viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                } else {
-                                                    viewModel.onEvent(NotesEvent.ExpandNote(note.note.id))
-                                                }
-                                            },
+                                            searchQuery = state.searchQuery,
+                                            onNoteClick = { onNoteClickAction(note) },
                                             onNoteLongClick = {
                                                 viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
                                             }
@@ -533,8 +541,14 @@ fun NotesScreen(
 
         AnimatedVisibility(
             visible = state.expandedNoteId != null,
-            enter = scaleIn(animationSpec = tween(300)) + fadeIn(animationSpec = tween(300)),
-            exit = scaleOut(animationSpec = tween(300)) + fadeOut(animationSpec = tween(300))
+            enter = expandIn(
+                animationSpec = tween(300, easing = FastOutSlowInEasing),
+                expandFrom = Alignment.Center
+            ) + fadeIn(animationSpec = tween(300)),
+            exit = shrinkOut(
+                animationSpec = tween(300, easing = FastOutSlowInEasing),
+                shrinkTowards = Alignment.Center
+            ) + fadeOut(animationSpec = tween(300))
         ) {
             AddEditNoteScreen(
                 state = state,

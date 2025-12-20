@@ -23,6 +23,8 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.AddLink
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -89,7 +91,11 @@ fun MoreOptionsSheet(
             }
 
             // Define the list of options with their labels and icons.
+            val lockLabel = if (state.editingIsLocked) "Unlock" else "Lock"
+            val lockIcon = if (state.editingIsLocked) Icons.Default.LockOpen else Icons.Default.Lock
+
             val options = listOf(
+                lockLabel to lockIcon,
                 stringResource(id = R.string.delete) to Icons.Default.Delete,
                 stringResource(id = R.string.make_a_copy) to Icons.Default.ContentCopy,
                 stringResource(id = R.string.share) to Icons.Default.Share,
@@ -112,6 +118,7 @@ fun MoreOptionsSheet(
                         onClick = {
                             onDismiss() // Dismiss sheet before performing action.
                             when (label) {
+                                "Lock", "Unlock" -> onEvent(NotesEvent.OnToggleLockClick)
                                 context.getString(R.string.delete) -> showDeleteDialog(true)
                                 context.getString(R.string.make_a_copy) -> onEvent(NotesEvent.OnCopyCurrentNoteClick)
                                 context.getString(R.string.share) -> {

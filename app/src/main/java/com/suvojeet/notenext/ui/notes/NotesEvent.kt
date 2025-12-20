@@ -34,6 +34,7 @@ sealed class NotesEvent {
     // Checklist Events
     data class OnChecklistItemCheckedChange(val itemId: String, val isChecked: Boolean) : NotesEvent()
     data class OnChecklistItemTextChange(val itemId: String, val text: String) : NotesEvent()
+    data class SwapChecklistItems(val fromIndex: Int, val toIndex: Int) : NotesEvent()
     object AddChecklistItem : NotesEvent()
     data class DeleteChecklistItem(val itemId: String) : NotesEvent()
 
@@ -46,6 +47,7 @@ sealed class NotesEvent {
     object OnSaveNoteClick : NotesEvent()
     object OnDeleteNoteClick : NotesEvent()
     object OnTogglePinClick : NotesEvent()
+    object OnToggleLockClick : NotesEvent()
     object OnToggleArchiveClick : NotesEvent()
     object OnUndoClick : NotesEvent()
     object OnRedoClick : NotesEvent()

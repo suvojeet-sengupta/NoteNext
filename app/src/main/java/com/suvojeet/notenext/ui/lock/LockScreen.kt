@@ -72,14 +72,7 @@ fun LockScreen(onUnlock: () -> Unit) {
         remember(activity) {
             BiometricAuthManager(
                 context = context,
-                activity = activity,
-                onAuthSuccess = onUnlock,
-                onAuthError = {
-                    if (it != "Authentication error: User Canceled") {
-                        error = it
-                    }
-                },
-                onAuthFailed = { error = biometricAuthFailedString }
+                activity = activity
             )
         }
     } else {
@@ -90,7 +83,15 @@ fun LockScreen(onUnlock: () -> Unit) {
 
     LaunchedEffect(biometricAuthManager) {
         if (canAuthenticateResult == BiometricManager.BIOMETRIC_SUCCESS) {
-            biometricAuthManager?.showBiometricPrompt()
+            biometricAuthManager?.showBiometricPrompt(
+                onAuthSuccess = onUnlock,
+                onAuthError = {
+                    if (it != "Authentication error: User Canceled") {
+                        error = it
+                    }
+                },
+                onAuthFailed = { error = biometricAuthFailedString }
+            )
         }
     }
 
@@ -189,7 +190,17 @@ fun LockScreen(onUnlock: () -> Unit) {
                     Box(modifier = Modifier.size(72.dp)) {
                         if (canAuthenticateResult == BiometricManager.BIOMETRIC_SUCCESS) {
                             FilledTonalIconButton(
-                                onClick = { biometricAuthManager?.showBiometricPrompt() },
+                                onClick = {
+                                    biometricAuthManager?.showBiometricPrompt(
+                                        onAuthSuccess = onUnlock,
+                                        onAuthError = {
+                                            if (it != "Authentication error: User Canceled") {
+                                                error = it
+                                            }
+                                        },
+                                        onAuthFailed = { error = biometricAuthFailedString }
+                                    )
+                                },
                                 modifier = Modifier.size(72.dp)
                             ) {
                                 Icon(
