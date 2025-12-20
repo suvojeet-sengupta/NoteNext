@@ -122,115 +122,117 @@ fun NoteItem(
                     Spacer(modifier = Modifier.height(4.dp))
                 }
 
+                // Note Title (Always Visible)
+                if (note.note.title.isNotEmpty()) {
+                    val titleText = if (searchQuery.isNotEmpty()) {
+                        buildAnnotatedString {
+                            val text = note.note.title
+                            append(text)
+                            val lowerText = text.lowercase()
+                            val lowerQuery = searchQuery.lowercase()
+                            var index = lowerText.indexOf(lowerQuery)
+                            while (index >= 0) {
+                                addStyle(
+                                    style = SpanStyle(
+                                        background = MaterialTheme.colorScheme.primaryContainer,
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                    ),
+                                    start = index,
+                                    end = index + searchQuery.length
+                                )
+                                index = lowerText.indexOf(lowerQuery, index + searchQuery.length)
+                            }
+                        }
+                    } else {
+                        androidx.compose.ui.text.AnnotatedString(note.note.title)
+                    }
+
+                    Text(
+                        text = titleText,
+                        fontSize = 17.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = contentColor,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+
                 if (note.note.isLocked) {
                     // Locked State Display
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 8.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Lock,
-                            contentDescription = "Locked Note",
-                            modifier = Modifier.size(32.dp),
+                            contentDescription = "Locked Content",
+                            modifier = Modifier.size(24.dp),
                             tint = tintColor
                         )
-                        Spacer(modifier = Modifier.height(8.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
                         Text(
-                            text = "Locked Note",
-                            fontSize = 16.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = contentColor
+                            text = "Content is locked",
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Medium,
+                            color = contentColor.copy(alpha = 0.7f)
                         )
                     }
                 } else {
-                                    // Note Title
-                                    if (note.note.title.isNotEmpty()) {
-                                        val titleText = if (searchQuery.isNotEmpty()) {
-                                            buildAnnotatedString {
-                                                val text = note.note.title
-                                                append(text)
-                                                val lowerText = text.lowercase()
-                                                val lowerQuery = searchQuery.lowercase()
-                                                var index = lowerText.indexOf(lowerQuery)
-                                                while (index >= 0) {
-                                                    addStyle(
-                                                        style = SpanStyle(
-                                                            background = MaterialTheme.colorScheme.primaryContainer,
-                                                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                                                        ),
-                                                        start = index,
-                                                        end = index + searchQuery.length
-                                                    )
-                                                    index = lowerText.indexOf(lowerQuery, index + searchQuery.length)
-                                                }
-                                            }
-                                        } else {
-                                            androidx.compose.ui.text.AnnotatedString(note.note.title)
-                                        }
-                    
-                                        Text(
-                                            text = titleText,
-                                            fontSize = 17.sp,
-                                            fontWeight = FontWeight.Bold,
-                                            color = contentColor,
-                                            maxLines = 2,
-                                            overflow = TextOverflow.Ellipsis
+                    // Note Content Preview (Dynamic Sizing)
+                    if ((note.note.noteType == "TEXT" && note.note.content.isNotEmpty()) || (note.note.noteType == "CHECKLIST" && note.checklistItems.isNotEmpty())) {
+                        if (note.note.noteType == "TEXT") {
+                            val plainText = HtmlConverter.htmlToPlainText(note.note.content)
+                            val contentLength = plainText.length
+                            
+                            val (fontSize, lineHeight, maxLines) = when {
+                                contentLength < 50 -> Triple(22.sp, 28.sp, 6)
+                                contentLength < 120 -> Triple(16.sp, 22.sp, 8)
+                                else -> Triple(14.sp, 20.sp, 10)
+                            }
+    
+                            val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
+    
+                            val annotatedContent = HtmlConverter.htmlToAnnotatedString(note.note.content)
+                            val highlightedContent = if (searchQuery.isNotEmpty()) {
+                                buildAnnotatedString {
+                                    append(annotatedContent)
+                                    val lowerText = annotatedContent.text.lowercase()
+                                    val lowerQuery = searchQuery.lowercase()
+                                    var index = lowerText.indexOf(lowerQuery)
+                                    while (index >= 0) {
+                                        addStyle(
+                                            style = SpanStyle(
+                                                background = MaterialTheme.colorScheme.primaryContainer,
+                                                color = MaterialTheme.colorScheme.onPrimaryContainer
+                                            ),
+                                            start = index,
+                                            end = index + searchQuery.length
                                         )
-                                        Spacer(modifier = Modifier.height(8.dp))
+                                        index = lowerText.indexOf(lowerQuery, index + searchQuery.length)
                                     }
-                    
-                                    // Note Content Preview (Dynamic Sizing)
-                                    if ((note.note.noteType == "TEXT" && note.note.content.isNotEmpty()) || (note.note.noteType == "CHECKLIST" && note.checklistItems.isNotEmpty())) {
-                                        if (note.note.noteType == "TEXT") {
-                                            val plainText = HtmlConverter.htmlToPlainText(note.note.content)
-                                            val contentLength = plainText.length
-                                            
-                                            val (fontSize, lineHeight, maxLines) = when {
-                                                contentLength < 50 -> Triple(22.sp, 28.sp, 6)
-                                                contentLength < 120 -> Triple(16.sp, 22.sp, 8)
-                                                else -> Triple(14.sp, 20.sp, 10)
-                                            }
-                    
-                                            val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
-                    
-                                            val annotatedContent = HtmlConverter.htmlToAnnotatedString(note.note.content)
-                                            val highlightedContent = if (searchQuery.isNotEmpty()) {
-                                                buildAnnotatedString {
-                                                    append(annotatedContent)
-                                                    val lowerText = annotatedContent.text.lowercase()
-                                                    val lowerQuery = searchQuery.lowercase()
-                                                    var index = lowerText.indexOf(lowerQuery)
-                                                    while (index >= 0) {
-                                                        addStyle(
-                                                            style = SpanStyle(
-                                                                background = MaterialTheme.colorScheme.primaryContainer,
-                                                                color = MaterialTheme.colorScheme.onPrimaryContainer
-                                                            ),
-                                                            start = index,
-                                                            end = index + searchQuery.length
-                                                        )
-                                                        index = lowerText.indexOf(lowerQuery, index + searchQuery.length)
-                                                    }
-                                                }
-                                            } else {
-                                                annotatedContent
-                                            }
-                    
-                                            Text(
-                                                text = highlightedContent,
-                                                fontSize = fontSize,
-                                                lineHeight = lineHeight,
-                                                fontWeight = fontWeight,
-                                                color = if (isDefaultColor) MaterialTheme.colorScheme.onSurfaceVariant else contentColor.copy(alpha = 0.9f),
-                                                maxLines = maxLines,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        } else {
-                                            // Checklist Preview
-                                            ChecklistPreview(note.checklistItems, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor, searchQuery)
-                                        }
-                                    }
+                                }
+                            } else {
+                                annotatedContent
+                            }
+    
+                            Text(
+                                text = highlightedContent,
+                                fontSize = fontSize,
+                                lineHeight = lineHeight,
+                                fontWeight = fontWeight,
+                                color = if (isDefaultColor) MaterialTheme.colorScheme.onSurfaceVariant else contentColor.copy(alpha = 0.9f),
+                                maxLines = maxLines,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        } else {
+                            // Checklist Preview
+                            ChecklistPreview(note.checklistItems, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor, searchQuery)
+                        }
+                    }
                     // Footer Section
                     if (note.attachments.isNotEmpty() || !note.note.label.isNullOrEmpty() || note.note.reminderTime != null) {
                         Spacer(modifier = Modifier.height(16.dp))
