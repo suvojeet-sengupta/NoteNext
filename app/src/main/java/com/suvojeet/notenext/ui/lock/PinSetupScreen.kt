@@ -10,7 +10,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
-import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.data.repository.SettingsRepository
 import kotlinx.coroutines.launch
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R

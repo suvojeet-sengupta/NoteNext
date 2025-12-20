@@ -5,7 +5,7 @@ import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.suvojeet.notenext.data.NoteDao
-import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.data.repository.SettingsRepository
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.flow.first

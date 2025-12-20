@@ -16,3 +16,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "NotesApp"
 include(":app")
+include(":core")
+include(":data")

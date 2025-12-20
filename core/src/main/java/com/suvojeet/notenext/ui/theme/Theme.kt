@@ -15,7 +15,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.core.view.WindowCompat
-import com.suvojeet.notenext.ui.settings.ThemeMode
 import com.suvojeet.notenext.ui.theme.ShapeFamily
 import com.suvojeet.notenext.ui.theme.RoundedShapes
 import com.suvojeet.notenext.ui.theme.ExpressiveShapes

@@ -1,5 +1,7 @@
 package com.suvojeet.notenext.ui.settings
 
+import com.suvojeet.notenext.data.repository.SettingsRepository
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import android.content.Intent
 import android.net.Uri
 import androidx.compose.animation.AnimatedVisibility

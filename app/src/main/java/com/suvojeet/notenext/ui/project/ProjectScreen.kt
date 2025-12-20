@@ -22,8 +22,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 
-import com.suvojeet.notenext.ui.settings.SettingsRepository
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.data.repository.SettingsRepository
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 

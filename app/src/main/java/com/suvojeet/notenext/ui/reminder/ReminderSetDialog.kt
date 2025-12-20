@@ -13,13 +13,7 @@ import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
-enum class RepeatOption(val label: String) {
-    NEVER("Never"),
-    DAILY("Daily"),
-    WEEKLY("Weekly"),
-    MONTHLY("Monthly"),
-    YEARLY("Yearly")
-}
+import com.suvojeet.notenext.data.RepeatOption
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

@@ -1,4 +1,4 @@
-package com.suvojeet.notenext.ui.notes
+package com.suvojeet.notenext.util
 
 import android.text.Spannable
 import android.text.SpannableStringBuilder

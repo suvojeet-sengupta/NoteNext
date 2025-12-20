@@ -38,7 +38,7 @@ import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 import kotlin.math.roundToInt
 import androidx.compose.foundation.border
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween

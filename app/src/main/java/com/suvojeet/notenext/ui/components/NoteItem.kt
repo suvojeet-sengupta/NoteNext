@@ -29,7 +29,7 @@ import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.suvojeet.notenext.data.ChecklistItem
-import com.suvojeet.notenext.ui.notes.HtmlConverter
+import com.suvojeet.notenext.util.HtmlConverter
 import com.suvojeet.notenext.data.NoteWithAttachments
 import androidx.compose.material.icons.filled.Attachment
 import androidx.compose.material.icons.filled.Alarm
@@ -259,13 +259,14 @@ fun NoteItem(
                                 )
                             }
 
-                            if (!note.note.label.isNullOrEmpty()) {
+                            val label = note.note.label
+                            if (!label.isNullOrEmpty()) {
                                 Surface(
                                     shape = RoundedCornerShape(8.dp),
                                     color = if (isDefaultColor) MaterialTheme.colorScheme.secondaryContainer else contentColor.copy(alpha = 0.15f)
                                 ) {
                                     Text(
-                                        text = note.note.label,
+                                        text = label,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = if (isDefaultColor) MaterialTheme.colorScheme.onSecondaryContainer else contentColor,

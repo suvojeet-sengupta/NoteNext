@@ -1,11 +1,11 @@
-package com.suvojeet.notenext.util
+package com.suvojeet.notenext.data
 
 import android.app.AlarmManager
 import android.app.PendingIntent
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import com.suvojeet.notenext.data.Note
-import com.suvojeet.notenext.ui.reminder.RepeatOption
+import com.suvojeet.notenext.data.RepeatOption
 import java.util.Calendar
 
 interface AlarmScheduler {
@@ -19,7 +19,8 @@ class AlarmSchedulerImpl(private val context: Context) : AlarmScheduler {
 
     override fun schedule(note: Note) {
         note.reminderTime?.let { reminderTimeMillis ->
-            val intent = Intent(context, ReminderBroadcastReceiver::class.java).apply {
+            val intent = Intent().apply {
+                component = ComponentName(context, "com.suvojeet.notenext.util.ReminderBroadcastReceiver")
                 putExtra("NOTE_ID", note.id)
                 putExtra("NOTE_TITLE", note.title)
                 putExtra("NOTE_CONTENT", note.content)
@@ -35,7 +36,14 @@ class AlarmSchedulerImpl(private val context: Context) : AlarmScheduler {
                 timeInMillis = reminderTimeMillis
             }
 
-            when (RepeatOption.valueOf(note.repeatOption ?: RepeatOption.NEVER.name)) {
+            // Using enum directly now that it is in data module
+            val repeatOption = try {
+                RepeatOption.valueOf(note.repeatOption ?: RepeatOption.NEVER.name)
+            } catch (e: IllegalArgumentException) {
+                RepeatOption.NEVER
+            }
+
+            when (repeatOption) {
                 RepeatOption.NEVER -> {
                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
                 }
@@ -46,8 +54,6 @@ class AlarmSchedulerImpl(private val context: Context) : AlarmScheduler {
                     alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY * 7, pendingIntent)
                 }
                 RepeatOption.MONTHLY -> {
-                    // For monthly, we need to calculate the next month's date manually
-                    // This is a simplified approach, a more robust solution would involve a WorkManager or more complex AlarmManager logic
                     alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY * 30, pendingIntent)
                 }
                 RepeatOption.YEARLY -> {
@@ -58,7 +64,8 @@ class AlarmSchedulerImpl(private val context: Context) : AlarmScheduler {
     }
 
     override fun cancel(note: Note) {
-        val intent = Intent(context, ReminderBroadcastReceiver::class.java).apply {
+        val intent = Intent().apply {
+            component = ComponentName(context, "com.suvojeet.notenext.util.ReminderBroadcastReceiver")
             putExtra("NOTE_ID", note.id)
         }
         val pendingIntent = PendingIntent.getBroadcast(

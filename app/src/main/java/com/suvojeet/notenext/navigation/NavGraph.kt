@@ -73,9 +73,9 @@ import com.suvojeet.notenext.ui.project.ProjectNotesViewModel
 import com.suvojeet.notenext.ui.project.toNotesState
 import com.suvojeet.notenext.ui.project.toProjectNotesEvent
 import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.data.LinkPreviewRepository
-import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.data.repository.SettingsRepository
 import com.suvojeet.notenext.ui.settings.BackupScreen
 import com.suvojeet.notenext.ui.settings.RestoreScreen
 import kotlinx.coroutines.launch

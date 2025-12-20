@@ -60,8 +60,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.ui.settings.SettingsRepository
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.data.repository.SettingsRepository
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.util.NetworkUtils
 
  @OptIn(ExperimentalMaterial3Api::class)

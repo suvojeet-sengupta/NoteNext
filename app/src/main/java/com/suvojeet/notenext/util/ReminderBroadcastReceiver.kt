@@ -12,7 +12,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import com.suvojeet.notenext.MainActivity
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.ui.notes.HtmlConverter
+import com.suvojeet.notenext.util.HtmlConverter
 
 class ReminderBroadcastReceiver : BroadcastReceiver() {
 

@@ -32,7 +32,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.FormatColorReset
 import androidx.compose.material3.Icon

@@ -16,8 +16,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import com.suvojeet.notenext.ui.settings.SettingsRepository
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.data.repository.SettingsRepository
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.ui.theme.ShapeFamily
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember

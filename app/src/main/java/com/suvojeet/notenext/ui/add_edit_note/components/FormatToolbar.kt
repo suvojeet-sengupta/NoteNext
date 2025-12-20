@@ -33,7 +33,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.ui.theme.button_color
 import com.suvojeet.notenext.ui.theme.dark_button_color
 import androidx.compose.ui.res.stringResource

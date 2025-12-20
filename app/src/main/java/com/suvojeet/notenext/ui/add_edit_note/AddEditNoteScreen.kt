@@ -45,11 +45,11 @@ import com.suvojeet.notenext.ui.add_edit_note.components.*
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import com.suvojeet.notenext.ui.notes.NotesUiEvent
-import com.suvojeet.notenext.ui.settings.SettingsRepository
-import com.suvojeet.notenext.ui.settings.ThemeMode
-import com.suvojeet.notenext.util.saveAsPdf
-import com.suvojeet.notenext.util.saveAsTxt
-import com.suvojeet.notenext.util.saveAsMd
+import com.suvojeet.notenext.data.repository.SettingsRepository
+import com.suvojeet.notenext.ui.theme.ThemeMode
+import com.suvojeet.notenext.data.saveAsPdf
+import com.suvojeet.notenext.data.saveAsTxt
+import com.suvojeet.notenext.data.saveAsMd
 import com.suvojeet.notenext.util.ImageUtils
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.SharedFlow

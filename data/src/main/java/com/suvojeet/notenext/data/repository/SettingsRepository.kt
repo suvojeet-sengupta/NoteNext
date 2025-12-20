@@ -1,4 +1,4 @@
-package com.suvojeet.notenext.ui.settings
+package com.suvojeet.notenext.data.repository
 
 import android.content.Context
 import androidx.datastore.core.DataStore
@@ -9,14 +9,11 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.suvojeet.notenext.ui.theme.ShapeFamily
+import com.suvojeet.notenext.ui.theme.ThemeMode
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 
 val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "settings")
-
-enum class ThemeMode {
-    SYSTEM, LIGHT, DARK, AMOLED
-}
 
 object PreferencesKeys {
     val THEME_MODE = stringPreferencesKey("theme_mode")

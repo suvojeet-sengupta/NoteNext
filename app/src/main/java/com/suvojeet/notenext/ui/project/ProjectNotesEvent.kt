@@ -4,7 +4,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.NoteWithAttachments
 import com.suvojeet.notenext.data.SortType
-import com.suvojeet.notenext.ui.reminder.RepeatOption
+import com.suvojeet.notenext.data.RepeatOption
 import java.time.LocalDate
 import java.time.LocalTime
 

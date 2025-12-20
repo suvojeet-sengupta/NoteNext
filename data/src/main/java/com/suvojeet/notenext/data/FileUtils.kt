@@ -1,4 +1,4 @@
-package com.suvojeet.notenext.util
+package com.suvojeet.notenext.data
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -16,8 +16,8 @@ import androidx.core.app.NotificationCompat
 import com.suvojeet.notenext.data.ChecklistItem
 import java.io.IOException
 
-import com.suvojeet.notenext.ui.notes.HtmlConverter
-import com.suvojeet.notenext.util.MarkdownExporter
+import com.suvojeet.notenext.util.HtmlConverter
+import com.suvojeet.notenext.data.MarkdownExporter
 import androidx.compose.ui.text.AnnotatedString
 
 fun saveAsMd(context: Context, title: String, content: AnnotatedString, checklist: List<ChecklistItem> = emptyList()) {

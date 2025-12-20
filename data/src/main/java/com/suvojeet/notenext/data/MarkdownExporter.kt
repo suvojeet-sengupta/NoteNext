@@ -1,4 +1,4 @@
-package com.suvojeet.notenext.util
+package com.suvojeet.notenext.data
 
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Element

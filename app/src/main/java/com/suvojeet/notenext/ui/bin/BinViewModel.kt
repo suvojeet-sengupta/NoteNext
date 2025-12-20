@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
-import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.data.repository.SettingsRepository
 import javax.inject.Inject
 
 @HiltViewModel

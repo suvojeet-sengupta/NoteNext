@@ -7,7 +7,7 @@ import android.widget.RemoteViewsService
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.NoteRepository
-import com.suvojeet.notenext.ui.notes.HtmlConverter
+import com.suvojeet.notenext.util.HtmlConverter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking

@@ -19,14 +19,14 @@ import com.suvojeet.notenext.data.Label
 import com.suvojeet.notenext.data.LabelDao
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.NoteDao
-import com.suvojeet.notenext.ui.notes.HtmlConverter
+import com.suvojeet.notenext.util.HtmlConverter
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.ProjectDao
 import com.suvojeet.notenext.data.SortType
-import com.suvojeet.notenext.util.AlarmScheduler
+import com.suvojeet.notenext.data.AlarmScheduler
 import java.time.LocalDateTime
 import java.time.ZoneId
-import com.suvojeet.notenext.ui.reminder.RepeatOption
+import com.suvojeet.notenext.data.RepeatOption
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

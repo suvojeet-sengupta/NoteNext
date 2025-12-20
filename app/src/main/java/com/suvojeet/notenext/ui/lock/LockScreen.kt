@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.biometric.BiometricManager
 import androidx.fragment.app.FragmentActivity
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.ui.settings.SettingsRepository
+import com.suvojeet.notenext.data.repository.SettingsRepository
 import com.suvojeet.notenext.util.BiometricAuthManager
 import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.flow.first

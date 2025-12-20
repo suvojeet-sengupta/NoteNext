@@ -9,9 +9,9 @@ import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.NoteDao
 import com.suvojeet.notenext.data.NoteDatabase
 import com.suvojeet.notenext.data.ProjectDao
-import com.suvojeet.notenext.ui.settings.SettingsRepository
-import com.suvojeet.notenext.util.AlarmScheduler
-import com.suvojeet.notenext.util.AlarmSchedulerImpl
+import com.suvojeet.notenext.data.repository.SettingsRepository
+import com.suvojeet.notenext.data.AlarmScheduler
+import com.suvojeet.notenext.data.AlarmSchedulerImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn

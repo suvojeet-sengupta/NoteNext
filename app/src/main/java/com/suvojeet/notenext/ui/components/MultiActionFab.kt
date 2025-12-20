@@ -44,7 +44,7 @@ import com.suvojeet.notenext.R
 
 import androidx.compose.material.icons.filled.CreateNewFolder
 
-import com.suvojeet.notenext.ui.settings.ThemeMode
+import com.suvojeet.notenext.ui.theme.ThemeMode
 
 /**
  * A Floating Action Button (FAB) that expands to reveal multiple action items (Note, Checklist, Project).
