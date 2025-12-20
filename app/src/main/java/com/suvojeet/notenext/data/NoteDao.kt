@@ -43,6 +43,9 @@ interface NoteDao {
     @Query("DELETE FROM notes WHERE isBinned = 1")
     suspend fun emptyBin()
 
+    @Query("DELETE FROM notes WHERE isBinned = 1 AND binnedOn IS NOT NULL AND binnedOn < :threshold")
+    suspend fun deleteBinnedNotesOlderThan(threshold: Long)
+
     @Query("DELETE FROM attachments WHERE noteId = :noteId")
     suspend fun deleteAttachmentsForNote(noteId: Int)
 
