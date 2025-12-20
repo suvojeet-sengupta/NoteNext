@@ -120,19 +120,19 @@ fun BinScreen(
                     ) {
                         items(
                             items = state.notes,
-                            key = { note -> note.id }
-                        ) { note ->
+                            key = { it.note.id }
+                        ) { noteWithAttachments ->
                             NoteItem(
-                                note = NoteWithAttachments(note, emptyList(), emptyList()),
+                                note = noteWithAttachments,
                                 onNoteClick = {
                                     if (isSelectionModeActive) {
-                                        viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id))
+                                        viewModel.onEvent(BinEvent.ToggleNoteSelection(noteWithAttachments.note.id))
                                     } else {
-                                        viewModel.onEvent(BinEvent.ExpandNote(note.id))
+                                        viewModel.onEvent(BinEvent.ExpandNote(noteWithAttachments.note.id))
                                     }
                                 },
-                                onNoteLongClick = { viewModel.onEvent(BinEvent.ToggleNoteSelection(note.id)) },
-                                isSelected = state.selectedNoteIds.contains(note.id)
+                                onNoteLongClick = { viewModel.onEvent(BinEvent.ToggleNoteSelection(noteWithAttachments.note.id)) },
+                                isSelected = state.selectedNoteIds.contains(noteWithAttachments.note.id)
                             )
                         }
                     }

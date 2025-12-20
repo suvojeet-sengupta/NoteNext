@@ -8,10 +8,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.CheckBoxOutlineBlank
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,7 +38,7 @@ fun BinnedNoteScreen(
     state: BinState,
     onDismiss: () -> Unit
 ) {
-    val noteWithAttachments = state.notes.find { it.id == state.expandedNoteId }?.let { NoteWithAttachments(it, emptyList(), emptyList()) }
+    val noteWithAttachments = state.notes.find { it.note.id == state.expandedNoteId }
 
     BackHandler { onDismiss() }
 
@@ -70,16 +73,48 @@ fun BinnedNoteScreen(
                             color = MaterialTheme.colorScheme.onSurface
                         )
                         Spacer(modifier = Modifier.height(16.dp))
-                        Text(
-                            text = HtmlConverter.htmlToAnnotatedString(note.content),
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        
+                        if (note.noteType == "CHECKLIST") {
+                             noteWithAttachments.checklistItems.forEach { item ->
+                                androidx.compose.foundation.layout.Row(
+                                    verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
+                                    modifier = Modifier.padding(vertical = 4.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = if (item.isChecked) Icons.Default.CheckBox else Icons.Default.CheckBoxOutlineBlank,
+                                        contentDescription = null,
+                                        tint = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = item.text,
+                                        style = MaterialTheme.typography.bodyLarge,
+                                        color = MaterialTheme.colorScheme.onSurface,
+                                        textDecoration = if (item.isChecked) androidx.compose.ui.text.style.TextDecoration.LineThrough else null
+                                    )
+                                }
+                            }
+                        } else {
+                            Text(
+                                text = HtmlConverter.htmlToAnnotatedString(note.content),
+                                style = MaterialTheme.typography.bodyLarge,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
 
                         if (noteWithAttachments.attachments.isNotEmpty()) {
                             Spacer(modifier = Modifier.height(16.dp))
+                            // Simple attachment list for now, ideally reused attachment component
                             noteWithAttachments.attachments.forEach { attachment ->
-                                Text(text = attachment.uri)
+                                if (attachment.type == "IMAGE") {
+                                    coil.compose.AsyncImage(
+                                        model = attachment.uri,
+                                        contentDescription = null,
+                                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                                        contentScale = androidx.compose.ui.layout.ContentScale.Crop
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
                             }
                         }
                     }

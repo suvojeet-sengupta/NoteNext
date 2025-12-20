@@ -21,7 +21,7 @@ class BinViewModel @Inject constructor(private val repository: com.suvojeet.note
     init {
         repository.getBinnedNotes()
             .onEach { list ->
-                _state.value = state.value.copy(notes = list.map { it.note })
+                _state.value = state.value.copy(notes = list)
             }
             .launchIn(viewModelScope)
     }
@@ -69,18 +69,18 @@ class BinViewModel @Inject constructor(private val repository: com.suvojeet.note
             }
             is BinEvent.RestoreSelectedNotes -> {
                 viewModelScope.launch {
-                    val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
-                    selectedNotes.forEach { note ->
-                        repository.updateNote(note.copy(isBinned = false, binnedOn = null))
+                    val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.note.id) }
+                    selectedNotes.forEach { noteWithAttachments ->
+                        repository.updateNote(noteWithAttachments.note.copy(isBinned = false, binnedOn = null))
                     }
                     _state.value = _state.value.copy(selectedNoteIds = emptySet())
                 }
             }
             is BinEvent.DeleteSelectedNotesPermanently -> {
                 viewModelScope.launch {
-                    val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.id) }
-                    selectedNotes.forEach { note ->
-                        repository.deleteNote(note)
+                    val selectedNotes = _state.value.notes.filter { _state.value.selectedNoteIds.contains(it.note.id) }
+                    selectedNotes.forEach { noteWithAttachments ->
+                        repository.deleteNote(noteWithAttachments.note)
                     }
                     _state.value = _state.value.copy(selectedNoteIds = emptySet())
                 }
