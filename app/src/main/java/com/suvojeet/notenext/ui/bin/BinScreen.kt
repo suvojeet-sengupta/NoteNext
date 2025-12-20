@@ -132,7 +132,18 @@ fun BinScreen(
                                     }
                                 },
                                 onNoteLongClick = { viewModel.onEvent(BinEvent.ToggleNoteSelection(noteWithAttachments.note.id)) },
-                                isSelected = state.selectedNoteIds.contains(noteWithAttachments.note.id)
+                                isSelected = state.selectedNoteIds.contains(noteWithAttachments.note.id),
+                                binnedDaysRemaining = if (noteWithAttachments.note.isBinned) {
+                                    val binnedOn = noteWithAttachments.note.binnedOn
+                                    if (binnedOn != null) {
+                                        val daysSinceBinned = (System.currentTimeMillis() - binnedOn) / (1000 * 60 * 60 * 24)
+                                        (state.autoDeleteDays - daysSinceBinned).toInt().coerceAtLeast(0)
+                                    } else {
+                                        null
+                                    }
+                                } else {
+                                    null
+                                }
                             )
                         }
                     }

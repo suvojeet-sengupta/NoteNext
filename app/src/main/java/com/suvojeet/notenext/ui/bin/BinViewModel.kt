@@ -10,10 +10,15 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import com.suvojeet.notenext.ui.settings.SettingsRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class BinViewModel @Inject constructor(private val repository: com.suvojeet.notenext.data.NoteRepository, private val savedStateHandle: androidx.lifecycle.SavedStateHandle) : ViewModel() {
+class BinViewModel @Inject constructor(
+    private val repository: com.suvojeet.notenext.data.NoteRepository,
+    private val settingsRepository: SettingsRepository,
+    private val savedStateHandle: androidx.lifecycle.SavedStateHandle
+) : ViewModel() {
 
     private val _state = MutableStateFlow(BinState())
     val state = _state.asStateFlow()
@@ -22,6 +27,12 @@ class BinViewModel @Inject constructor(private val repository: com.suvojeet.note
         repository.getBinnedNotes()
             .onEach { list ->
                 _state.value = state.value.copy(notes = list)
+            }
+            .launchIn(viewModelScope)
+
+        settingsRepository.autoDeleteDays
+            .onEach { days ->
+                _state.value = state.value.copy(autoDeleteDays = days)
             }
             .launchIn(viewModelScope)
     }

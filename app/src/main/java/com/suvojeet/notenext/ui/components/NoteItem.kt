@@ -50,6 +50,7 @@ fun NoteItem(
     searchQuery: String = "",
     onNoteClick: () -> Unit,
     onNoteLongClick: () -> Unit,
+    binnedDaysRemaining: Int? = null
 ) {
     // Check if the note has a custom color or is using the default (0)
     val isDefaultColor = note.note.color == 0
@@ -268,6 +269,21 @@ fun NoteItem(
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = if (isDefaultColor) MaterialTheme.colorScheme.onSecondaryContainer else contentColor,
+                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
+                                    )
+                                }
+                            }
+
+                            if (binnedDaysRemaining != null) {
+                                Surface(
+                                    shape = RoundedCornerShape(8.dp),
+                                    color = MaterialTheme.colorScheme.errorContainer
+                                ) {
+                                    Text(
+                                        text = "$binnedDaysRemaining days left",
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = MaterialTheme.colorScheme.onErrorContainer,
                                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
                                     )
                                 }
