@@ -235,7 +235,7 @@ fun NoteItem(
                         }
                     }
                     // Footer Section
-                    if (note.attachments.isNotEmpty() || !note.note.label.isNullOrEmpty() || note.note.reminderTime != null) {
+                    if (note.attachments.isNotEmpty() || !note.note.label.isNullOrEmpty() || note.note.reminderTime != null || binnedDaysRemaining != null) {
                         Spacer(modifier = Modifier.height(16.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -280,7 +280,7 @@ fun NoteItem(
                                     color = MaterialTheme.colorScheme.errorContainer
                                 ) {
                                     Text(
-                                        text = "$binnedDaysRemaining days left",
+                                        text = stringResource(id = R.string.days_left, binnedDaysRemaining),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = MaterialTheme.colorScheme.onErrorContainer,

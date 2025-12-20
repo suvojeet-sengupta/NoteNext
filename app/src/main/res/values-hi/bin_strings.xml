@@ -12,6 +12,7 @@
 
     <string name="x_selected">%1$d चयनित</string>
     <string name="clear_selection">चयन साफ़ करें</string>
+    <string name="days_left">%1$d दिन शेष</string>
 
 
 </resources>

@@ -12,6 +12,7 @@
 
     <string name="x_selected">%1$d selected</string>
     <string name="clear_selection">Clear selection</string>
+    <string name="days_left">%1$d days left</string>
 
 
 </resources>
