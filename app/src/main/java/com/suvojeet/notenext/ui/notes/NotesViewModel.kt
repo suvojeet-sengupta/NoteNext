@@ -823,5 +823,9 @@ class NotesViewModel @Inject constructor(
         val ids = appWidgetManager.getAppWidgetIds(ComponentName(context, NoteWidgetProvider::class.java))
         appWidgetManager.notifyAppWidgetViewDataChanged(ids, R.id.widget_list_view)
     }
+
+    suspend fun getNoteLockStatus(noteId: Int): Boolean {
+        return repository.getNoteById(noteId)?.note?.isLocked == true
+    }
 }
 

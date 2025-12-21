@@ -83,6 +83,10 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
 import com.suvojeet.notenext.R
 import kotlinx.coroutines.flow.SharingStarted
+import com.suvojeet.notenext.util.BiometricAuthManager
+import com.suvojeet.notenext.util.findActivity
+import androidx.fragment.app.FragmentActivity
+import android.widget.Toast
 
 @Composable
 fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId: Int = -1, startAddNote: Boolean = false, sharedText: String? = null) {
@@ -94,9 +98,30 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
     val notesViewModel: NotesViewModel = hiltViewModel()
     val notesState by notesViewModel.state.collectAsState()
 
+    val activity = context.findActivity() as? FragmentActivity
+    val biometricAuthManager = if (activity != null) {
+        remember(activity) {
+            BiometricAuthManager(context, activity)
+        }
+    } else {
+        null
+    }
+
     LaunchedEffect(startNoteId) {
         if (startNoteId != -1) {
-            notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+            val isLocked = notesViewModel.getNoteLockStatus(startNoteId)
+            if (isLocked) {
+                biometricAuthManager?.showBiometricPrompt(
+                    onAuthSuccess = {
+                        notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+                    },
+                    onAuthError = {
+                        Toast.makeText(context, "Authentication Failed", Toast.LENGTH_SHORT).show()
+                    }
+                ) ?: Toast.makeText(context, "Biometrics not available", Toast.LENGTH_SHORT).show()
+            } else {
+                notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+            }
         }
     }
 
