@@ -43,6 +43,8 @@ import kotlinx.coroutines.flow.flatMapLatest
 import com.suvojeet.notenext.data.Attachment
 import com.suvojeet.notenext.data.NoteWithAttachments
 import com.suvojeet.notenext.data.NoteVersion
+import com.suvojeet.notenext.domain.use_case.NoteUseCases
+import com.suvojeet.notenext.ui.util.UndoRedoManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
@@ -55,6 +57,7 @@ import javax.inject.Inject
 @HiltViewModel
 class NotesViewModel @Inject constructor(
     private val repository: com.suvojeet.notenext.data.NoteRepository,
+    private val noteUseCases: NoteUseCases,
     private val linkPreviewRepository: LinkPreviewRepository,
     private val alarmScheduler: AlarmScheduler,
     private val richTextController: RichTextController,
@@ -68,6 +71,8 @@ class NotesViewModel @Inject constructor(
     val events = _events.asSharedFlow()
 
     private var recentlyDeletedNote: Note? = null
+    
+    private val undoRedoManager = UndoRedoManager<Pair<String, TextFieldValue>>("" to TextFieldValue())
 
     private val _searchQuery = MutableStateFlow("")
     private val _sortType = MutableStateFlow(SortType.DATE_MODIFIED)
@@ -77,7 +82,7 @@ class NotesViewModel @Inject constructor(
         combine(
             combine(_searchQuery, _sortType) { query, sortType -> query to sortType }
                 .flatMapLatest { (query, sortType) ->
-                    repository.getNotes(query, sortType)
+                    noteUseCases.getNotes(query, sortType)
                 },
             repository.getLabels(),
             repository.getProjects(),
@@ -118,8 +123,7 @@ class NotesViewModel @Inject constructor(
             }
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
-                    val noteToBin = event.note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
-                    repository.updateNote(noteToBin)
+                    noteUseCases.deleteNote(event.note.note)
                     recentlyDeletedNote = event.note.note
                     _events.emit(NotesUiEvent.ShowToast("Note moved to Bin"))
                     updateWidgets()
@@ -267,7 +271,7 @@ class NotesViewModel @Inject constructor(
             is NotesEvent.ExpandNote -> {
                 viewModelScope.launch {
                     if (event.noteId != -1) {
-                        repository.getNoteById(event.noteId)?.let { noteWithAttachments ->
+                        noteUseCases.getNote(event.noteId)?.let { noteWithAttachments ->
                             val note = noteWithAttachments.note
                             val content = if (note.noteType == "TEXT") {
                                 HtmlConverter.htmlToAnnotatedString(note.content)
@@ -286,19 +290,22 @@ class NotesViewModel @Inject constructor(
                                     _state.value = _state.value.copy(editingNoteVersions = versions)
                                 }
                             }
+                            
+                            val contentValue = TextFieldValue(content)
+                            undoRedoManager.reset(note.title to contentValue)
 
                             _state.value = state.value.copy(
                                 expandedNoteId = event.noteId,
                                 editingTitle = note.title,
-                                editingContent = TextFieldValue(content),
+                                editingContent = contentValue,
                                 editingColor = note.color,
                                 editingIsNewNote = false,
                                 editingLastEdited = note.lastEdited,
                                 isPinned = note.isPinned,
                                 isArchived = note.isArchived,
                                 editingLabel = note.label,
-                                editingHistory = listOf(note.title to TextFieldValue(content)),
-                                editingHistoryIndex = 0,
+                                canUndo = undoRedoManager.canUndo.value,
+                                canRedo = undoRedoManager.canRedo.value,
                                 linkPreviews = note.linkPreviews,
                                 editingNoteType = note.noteType,
                                 editingChecklist = checklist,
@@ -307,6 +314,7 @@ class NotesViewModel @Inject constructor(
                             )
                         }
                     } else {
+                        undoRedoManager.reset("" to TextFieldValue())
                         _state.value = state.value.copy(
                             expandedNoteId = -1,
                             editingTitle = "",
@@ -314,8 +322,8 @@ class NotesViewModel @Inject constructor(
                             editingColor = 0,
                             editingIsNewNote = true,
                             editingLastEdited = 0,
-                            editingHistory = listOf("" to TextFieldValue()),
-                            editingHistoryIndex = 0,
+                            canUndo = undoRedoManager.canUndo.value,
+                            canRedo = undoRedoManager.canRedo.value,
                             editingLabel = null,
                             linkPreviews = emptyList(),
                             editingNoteType = event.noteType,
@@ -405,11 +413,11 @@ class NotesViewModel @Inject constructor(
                 _state.value = state.value.copy(editingChecklist = updatedChecklist)
             }
             is NotesEvent.OnTitleChange -> {
-                val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
+                undoRedoManager.addState(event.title to state.value.editingContent)
                 _state.value = state.value.copy(
                     editingTitle = event.title,
-                    editingHistory = newHistory,
-                    editingHistoryIndex = newHistory.lastIndex
+                    canUndo = undoRedoManager.canUndo.value,
+                    canRedo = undoRedoManager.canRedo.value
                 )
             }
             is NotesEvent.OnContentChange -> {
@@ -438,11 +446,13 @@ class NotesViewModel @Inject constructor(
                             maxOf(selection.start, it.start) < minOf(selection.end, it.end)
                         }
                     }
-                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to finalContent)
+                    
+                    undoRedoManager.addState(state.value.editingTitle to finalContent)
+                    
                     _state.value = state.value.copy(
                         editingContent = finalContent,
-                        editingHistory = newHistory,
-                        editingHistoryIndex = newHistory.lastIndex,
+                        canUndo = undoRedoManager.canUndo.value,
+                        canRedo = undoRedoManager.canRedo.value,
                         isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
                         isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
                         isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
@@ -485,11 +495,11 @@ class NotesViewModel @Inject constructor(
                         isUnderlineActive = activeStyles.any { it.textDecoration == TextDecoration.Underline }
                     )
                 } else if (result.updatedContent != null) {
-                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to result.updatedContent)
+                    undoRedoManager.addState(state.value.editingTitle to result.updatedContent)
                     _state.value = state.value.copy(
                         editingContent = result.updatedContent,
-                        editingHistory = newHistory,
-                        editingHistoryIndex = newHistory.lastIndex
+                        canUndo = undoRedoManager.canUndo.value,
+                        canRedo = undoRedoManager.canRedo.value
                     )
                 }
             }
@@ -511,12 +521,12 @@ class NotesViewModel @Inject constructor(
                     )
                 } else {
                     // Applied to selection
-                    val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to updatedContent)
+                    undoRedoManager.addState(state.value.editingTitle to updatedContent)
 
                     _state.value = state.value.copy(
                         editingContent = updatedContent,
-                        editingHistory = newHistory,
-                        editingHistoryIndex = newHistory.lastIndex,
+                        canUndo = undoRedoManager.canUndo.value,
+                        canRedo = undoRedoManager.canRedo.value,
                         activeHeadingStyle = event.level
                     )
                 }
@@ -565,24 +575,22 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.OnUndoClick -> {
-                if (state.value.editingHistoryIndex > 0) {
-                    val newIndex = state.value.editingHistoryIndex - 1
-                    val (title, content) = state.value.editingHistory[newIndex]
+                undoRedoManager.undo()?.let { (title, content) ->
                     _state.value = state.value.copy(
                         editingTitle = title,
                         editingContent = content,
-                        editingHistoryIndex = newIndex
+                        canUndo = undoRedoManager.canUndo.value,
+                        canRedo = undoRedoManager.canRedo.value
                     )
                 }
             }
             is NotesEvent.OnRedoClick -> {
-                if (state.value.editingHistoryIndex < state.value.editingHistory.lastIndex) {
-                    val newIndex = state.value.editingHistoryIndex + 1
-                    val (title, content) = state.value.editingHistory[newIndex]
+                undoRedoManager.redo()?.let { (title, content) ->
                     _state.value = state.value.copy(
                         editingTitle = title,
                         editingContent = content,
-                        editingHistoryIndex = newIndex
+                        canUndo = undoRedoManager.canUndo.value,
+                        canRedo = undoRedoManager.canRedo.value
                     )
                 }
             }
@@ -705,8 +713,8 @@ class NotesViewModel @Inject constructor(
                         editingColor = 0,
                         editingIsNewNote = true,
                         editingLastEdited = 0,
-                        editingHistory = listOf("" to TextFieldValue()),
-                        editingHistoryIndex = 0,
+                        canUndo = false,
+                        canRedo = false,
                         isPinned = false,
                         isArchived = false,
                         editingLabel = null,
@@ -841,6 +849,7 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.CreateNoteFromSharedText -> {
+                undoRedoManager.reset("" to TextFieldValue(event.text))
                 _state.value = state.value.copy(
                     expandedNoteId = -1,
                     editingTitle = "",
@@ -848,8 +857,8 @@ class NotesViewModel @Inject constructor(
                     editingColor = 0,
                     editingIsNewNote = true,
                     editingLastEdited = 0,
-                    editingHistory = listOf("" to TextFieldValue(event.text)),
-                    editingHistoryIndex = 0,
+                    canUndo = undoRedoManager.canUndo.value,
+                    canRedo = undoRedoManager.canRedo.value,
                     editingLabel = null,
                     linkPreviews = emptyList(),
                     editingNoteType = "TEXT",

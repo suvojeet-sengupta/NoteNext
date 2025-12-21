@@ -161,8 +161,8 @@ fun AddEditNoteBottomAppBar(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Undo/Redo buttons are only visible if there's editing history.
-                if (state.editingHistory.size > 1) {
+                // Undo/Redo buttons are only visible if there's editing history (can undo or redo).
+                if (state.canUndo || state.canRedo) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
@@ -172,7 +172,7 @@ fun AddEditNoteBottomAppBar(
                             shape = CircleShape,
                             modifier = Modifier.size(40.dp),
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                            contentColor = if (state.editingHistoryIndex > 0) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
+                            contentColor = if (state.canUndo) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = 0.38f
                             ) // Dimmed if no undo available.
                         ) {
@@ -188,7 +188,7 @@ fun AddEditNoteBottomAppBar(
                             shape = CircleShape,
                             modifier = Modifier.size(40.dp),
                             containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
-                            contentColor = if (state.editingHistoryIndex < state.editingHistory.size - 1) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
+                            contentColor = if (state.canRedo) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
                                 alpha = 0.38f
                             ) // Dimmed if no redo available.
                         ) {
