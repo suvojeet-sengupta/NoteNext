@@ -339,11 +339,31 @@ fun NotesScreen(
                             }
 
                             if (state.isLoading) {
-                                Box(
-                                    modifier = Modifier.fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    CircularProgressIndicator()
+                                when (state.layoutType) {
+                                    LayoutType.GRID -> {
+                                        LazyVerticalStaggeredGrid(
+                                            columns = StaggeredGridCells.Fixed(2),
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentPadding = PaddingValues(8.dp),
+                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                            verticalItemSpacing = 8.dp
+                                        ) {
+                                            items(10) {
+                                                com.suvojeet.notenext.ui.components.SkeletonNoteItem()
+                                            }
+                                        }
+                                    }
+                                    LayoutType.LIST -> {
+                                        LazyColumn(
+                                            modifier = Modifier.fillMaxSize(),
+                                            contentPadding = PaddingValues(8.dp),
+                                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        ) {
+                                            items(10) {
+                                                com.suvojeet.notenext.ui.components.SkeletonNoteItem()
+                                            }
+                                        }
+                                    }
                                 }
                             } else if (notesToDisplay.isEmpty()) {
                                 Box(

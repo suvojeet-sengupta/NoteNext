@@ -24,6 +24,9 @@ import com.suvojeet.notenext.ui.notes.NotesState
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+
 /**
  * Top app bar for the Add/Edit Note screen. Provides navigation back,
  * and actions like pinning, archiving, and deleting the note.
@@ -34,6 +37,8 @@ import com.suvojeet.notenext.R
  * @param onDismiss Lambda to be invoked when the back button is clicked, typically to dismiss the screen.
  * @param showDeleteDialog Lambda to show/hide the delete confirmation dialog.
  * @param editingNoteType The type of the note being edited (e.g., "TEXT", "CHECKLIST").
+ * @param onToggleFocusMode Lambda to toggle focus mode.
+ * @param isFocusMode Boolean to indicate if focus mode is active.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,7 +47,9 @@ fun AddEditNoteTopAppBar(
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
     showDeleteDialog: (Boolean) -> Unit,
-    editingNoteType: String
+    editingNoteType: String,
+    onToggleFocusMode: () -> Unit,
+    isFocusMode: Boolean
 ) {
     TopAppBar(
         title = {
@@ -62,6 +69,15 @@ fun AddEditNoteTopAppBar(
             titleContentColor = MaterialTheme.colorScheme.onSurface, // Content color adapts to background.
         ),
         actions = {
+            // Focus Mode Toggle
+            IconButton(onClick = onToggleFocusMode) {
+                Icon(
+                    imageVector = if (isFocusMode) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                    contentDescription = "Toggle Focus Mode",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
             // Actions are only visible for existing notes, not for newly created ones.
             if (!state.editingIsNewNote) {
                 // Pin/Unpin action.

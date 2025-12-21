@@ -85,6 +85,7 @@ fun AddEditNoteScreen(
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
+    var isFocusMode by remember { mutableStateOf(false) }
 
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         scope.launch {
@@ -131,6 +132,8 @@ fun AddEditNoteScreen(
     BackHandler {
         if (showImageViewer) {
             showImageViewer = false
+        } else if (isFocusMode) {
+            isFocusMode = false
         } else {
             onDismiss()
         }
@@ -197,34 +200,48 @@ fun AddEditNoteScreen(
         Scaffold(
             modifier = Modifier.imePadding(),
             topBar = {
-                AddEditNoteTopAppBar(
-                    state = state,
-                    onEvent = onEvent,
-                    onDismiss = onDismiss,
-                    showDeleteDialog = { showDeleteDialog = it },
-                    editingNoteType = state.editingNoteType
-                )
+                AnimatedVisibility(
+                    visible = !isFocusMode,
+                    enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
+                ) {
+                    AddEditNoteTopAppBar(
+                        state = state,
+                        onEvent = onEvent,
+                        onDismiss = onDismiss,
+                        showDeleteDialog = { showDeleteDialog = it },
+                        editingNoteType = state.editingNoteType,
+                        onToggleFocusMode = { isFocusMode = !isFocusMode },
+                        isFocusMode = isFocusMode
+                    )
+                }
             },
             bottomBar = {
-                AddEditNoteBottomAppBar(
-                    state = state,
-                    onEvent = onEvent,
-                    showColorPicker = { showColorPicker = !showColorPicker },
-                    showFormatBar = { showFormatBar = !showFormatBar },
-                    showMoreOptions = { showMoreOptions = it },
-                    onImageClick = {
-                        getContent.launch("image/*")
-                    },
-                    onTakePhotoClick = {
-                        val uri = createImageFile(context)
-                        photoUri = uri
-                        takePictureLauncher.launch(uri)
-                    },
-                    onAudioClick = {
-                        Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
-                    },
-                    themeMode = themeMode
-                )
+                AnimatedVisibility(
+                    visible = !isFocusMode,
+                    enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
+                    exit = slideOutVertically(targetOffsetY = { it }) + fadeOut()
+                ) {
+                    AddEditNoteBottomAppBar(
+                        state = state,
+                        onEvent = onEvent,
+                        showColorPicker = { showColorPicker = !showColorPicker },
+                        showFormatBar = { showFormatBar = !showFormatBar },
+                        showMoreOptions = { showMoreOptions = it },
+                        onImageClick = {
+                            getContent.launch("image/*")
+                        },
+                        onTakePhotoClick = {
+                            val uri = createImageFile(context)
+                            photoUri = uri
+                            takePictureLauncher.launch(uri)
+                        },
+                        onAudioClick = {
+                            Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
+                        },
+                        themeMode = themeMode
+                    )
+                }
             }
         ) { padding ->
             SelectionContainer {

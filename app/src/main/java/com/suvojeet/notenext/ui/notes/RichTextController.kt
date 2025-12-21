@@ -11,7 +11,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.sp
 import javax.inject.Inject
 
+import androidx.compose.ui.graphics.Color
+
 class RichTextController @Inject constructor() {
+
+    private val WikiLinkStyle = SpanStyle(color = Color.Blue, textDecoration = TextDecoration.Underline)
 
     fun getHeadingStyle(level: Int): SpanStyle {
         return when (level) {
@@ -56,7 +60,48 @@ class RichTextController @Inject constructor() {
 
             append(oldContent.annotatedString.subSequence(oldText.length - suffixLength, oldText.length))
         }
-        return newContent.copy(annotatedString = newAnnotatedString)
+        
+        return reapplyWikiLinks(newContent.copy(annotatedString = newAnnotatedString))
+    }
+
+    private fun reapplyWikiLinks(content: TextFieldValue): TextFieldValue {
+        val text = content.text
+        val styles = content.annotatedString.spanStyles
+        
+        // Find existing NOTE_LINK annotations to identify which styles to remove
+        val oldLinkAnnotations = content.annotatedString.getStringAnnotations("NOTE_LINK", 0, text.length)
+        
+        // Filter out styles that exactly match the WikiLinkStyle and overlap with old link annotations
+        val cleanedStyles = styles.filterNot { styleRange ->
+            oldLinkAnnotations.any { linkRange ->
+                linkRange.start == styleRange.start && linkRange.end == styleRange.end && styleRange.item == WikiLinkStyle
+            }
+        }
+        
+        // Filter out existing NOTE_LINK annotations
+        val cleanedAnnotations = content.annotatedString.getStringAnnotations(0, text.length).filter { it.tag != "NOTE_LINK" }
+
+        val builder = AnnotatedString.Builder(text)
+        
+        // Add back preserved styles
+        cleanedStyles.forEach { builder.addStyle(it.item, it.start, it.end) }
+        
+        // Add back preserved annotations
+        cleanedAnnotations.forEach { builder.addStringAnnotation(it.tag, it.item, it.start, it.end) }
+
+        // Find and apply new Wiki Links
+        val regex = "\\[\\[(.*?)\\]\\]".toRegex()
+        regex.findAll(text).forEach { matchResult ->
+            val start = matchResult.range.first
+            val end = matchResult.range.last + 1
+            val title = matchResult.groupValues[1]
+            if (title.isNotBlank()) {
+                builder.addStringAnnotation("NOTE_LINK", title, start, end)
+                builder.addStyle(WikiLinkStyle, start, end)
+            }
+        }
+
+        return content.copy(annotatedString = builder.toAnnotatedString())
     }
 
     data class StyleToggleResult(
