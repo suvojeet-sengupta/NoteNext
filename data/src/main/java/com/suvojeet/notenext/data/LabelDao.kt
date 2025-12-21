@@ -22,4 +22,10 @@ interface LabelDao {
 
     @Query("SELECT * FROM labels ORDER BY name ASC")
     fun getLabels(): Flow<List<Label>>
+
+    @Query("SELECT * FROM labels WHERE parentName = :parentName ORDER BY name ASC")
+    fun getLabelsWithParent(parentName: String): Flow<List<Label>>
+
+    @Query("SELECT * FROM labels WHERE parentName IS NULL ORDER BY name ASC")
+    fun getRootLabels(): Flow<List<Label>>
 }

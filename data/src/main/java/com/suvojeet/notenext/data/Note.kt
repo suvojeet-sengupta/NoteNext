@@ -24,5 +24,6 @@ data class Note(
     val linkPreviews: List<LinkPreview> = emptyList(),
     val noteType: String = "TEXT",
     val projectId: Int? = null,
-    val isLocked: Boolean = false
+    val isLocked: Boolean = false,
+    val position: Int = 0
 )

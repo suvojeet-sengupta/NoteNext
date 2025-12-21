@@ -11,6 +11,7 @@ interface NoteRepository {
     suspend fun getNoteById(id: Int): NoteWithAttachments?
     suspend fun insertNote(note: Note): Long
     suspend fun updateNote(note: Note)
+    suspend fun updateNotePosition(id: Int, position: Int)
     suspend fun deleteNote(note: Note)
     suspend fun emptyBin()
     
@@ -21,6 +22,8 @@ interface NoteRepository {
     
     // Label operations
     fun getLabels(): Flow<List<Label>>
+    fun getLabelsWithParent(parentName: String): Flow<List<Label>>
+    fun getRootLabels(): Flow<List<Label>>
     suspend fun insertLabel(label: Label)
     suspend fun updateLabel(label: Label)
     suspend fun deleteLabel(label: Label)

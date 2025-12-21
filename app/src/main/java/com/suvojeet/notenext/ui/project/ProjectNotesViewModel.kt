@@ -72,6 +72,7 @@ class ProjectNotesViewModel @Inject constructor(
                     SortType.DATE_CREATED -> notes.sortedByDescending { it.note.createdAt }
                     SortType.DATE_MODIFIED -> notes.sortedByDescending { it.note.lastEdited }
                     SortType.TITLE -> notes.sortedBy { it.note.title }
+                    SortType.CUSTOM -> notes.sortedBy { it.note.position }
                 }
                 _state.value = _state.value.copy(
                     notes = sortedNotes,

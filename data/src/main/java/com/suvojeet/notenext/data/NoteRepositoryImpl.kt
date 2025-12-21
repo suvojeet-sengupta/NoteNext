@@ -18,6 +18,7 @@ class NoteRepositoryImpl @Inject constructor(
                 SortType.DATE_MODIFIED -> noteDao.getNotesOrderedByDateModified()
                 SortType.DATE_CREATED -> noteDao.getNotesOrderedByDateCreated()
                 SortType.TITLE -> noteDao.getNotesOrderedByTitle()
+                SortType.CUSTOM -> noteDao.getNotesOrderedByPosition()
             }
         } else {
             val formattedQuery = "$searchQuery*"
@@ -25,6 +26,7 @@ class NoteRepositoryImpl @Inject constructor(
                 SortType.DATE_MODIFIED -> noteDao.searchNotesOrderedByDateModified(formattedQuery)
                 SortType.DATE_CREATED -> noteDao.searchNotesOrderedByDateCreated(formattedQuery)
                 SortType.TITLE -> noteDao.searchNotesOrderedByTitle(formattedQuery)
+                SortType.CUSTOM -> noteDao.searchNotesOrderedByPosition(formattedQuery)
             }
         }
     }
@@ -42,6 +44,8 @@ class NoteRepositoryImpl @Inject constructor(
 
     override suspend fun updateNote(note: Note) = noteDao.updateNote(note)
 
+    override suspend fun updateNotePosition(id: Int, position: Int) = noteDao.updateNotePosition(id, position)
+
     override suspend fun deleteNote(note: Note) = noteDao.deleteNote(note)
 
     override suspend fun emptyBin() = noteDao.emptyBin()
@@ -53,6 +57,10 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun deleteAttachmentById(attachmentId: Int) = noteDao.deleteAttachmentById(attachmentId)
 
     override fun getLabels(): Flow<List<Label>> = labelDao.getLabels()
+
+    override fun getLabelsWithParent(parentName: String): Flow<List<Label>> = labelDao.getLabelsWithParent(parentName)
+
+    override fun getRootLabels(): Flow<List<Label>> = labelDao.getRootLabels()
 
     override suspend fun insertLabel(label: Label) = labelDao.insertLabel(label)
 
