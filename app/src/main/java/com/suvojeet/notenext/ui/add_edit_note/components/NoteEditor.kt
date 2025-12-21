@@ -47,7 +47,9 @@ fun NoteEditor(
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val interactionSource = remember { MutableInteractionSource() }
     
-    Column {
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
         // Determine text color for the title based on the note's background color.
         val titleTextColor = MaterialTheme.colorScheme.onSurface
 
