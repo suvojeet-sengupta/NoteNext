@@ -64,8 +64,8 @@ object HtmlConverter {
             
             // Detect [[Note Title]] and add styling/annotation
             val text = spanned.toString()
-            val regex = "\\[\\[(.*?)\\]\\]".toRegex()
-            regex.findAll(text).forEach { matchResult ->
+            val noteLinkRegex = "\\[\\[(.*?)\\]\\]".toRegex()
+            noteLinkRegex.findAll(text).forEach { matchResult ->
                 val start = matchResult.range.first
                 val end = matchResult.range.last + 1
                 val title = matchResult.groupValues[1]
@@ -81,6 +81,73 @@ object HtmlConverter {
                 addStringAnnotation(
                     tag = "NOTE_LINK",
                     annotation = title,
+                    start = start,
+                    end = end
+                )
+            }
+
+            // Detect URLs
+            val urlRegex = "(https?://\\S+|www\\.\\S+)".toRegex()
+            urlRegex.findAll(text).forEach { matchResult ->
+                val start = matchResult.range.first
+                val end = matchResult.range.last + 1
+                val url = matchResult.value
+                addStyle(
+                    SpanStyle(
+                        color = androidx.compose.ui.graphics.Color(0xFF0000EE), // Standard Link Blue
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    start,
+                    end
+                )
+                addStringAnnotation(
+                    tag = "URL",
+                    annotation = url,
+                    start = start,
+                    end = end
+                )
+            }
+
+            // Detect Emails
+            val emailRegex = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+".toRegex()
+            emailRegex.findAll(text).forEach { matchResult ->
+                val start = matchResult.range.first
+                val end = matchResult.range.last + 1
+                val email = matchResult.value
+                addStyle(
+                    SpanStyle(
+                        color = androidx.compose.ui.graphics.Color(0xFF0000EE),
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    start,
+                    end
+                )
+                addStringAnnotation(
+                    tag = "EMAIL",
+                    annotation = "mailto:$email",
+                    start = start,
+                    end = end
+                )
+            }
+
+            // Detect Phone Numbers (Simple regex)
+            // Matches: +1-555-555-5555, 555-555-5555, 5555555555
+            val phoneRegex = "(\\+\\d{1,3}[- ]?)?\\d{10}".toRegex()
+            phoneRegex.findAll(text).forEach { matchResult ->
+                val start = matchResult.range.first
+                val end = matchResult.range.last + 1
+                val phone = matchResult.value
+                addStyle(
+                    SpanStyle(
+                        color = androidx.compose.ui.graphics.Color(0xFF0000EE),
+                        textDecoration = TextDecoration.Underline
+                    ),
+                    start,
+                    end
+                )
+                addStringAnnotation(
+                    tag = "PHONE",
+                    annotation = "tel:$phone",
                     start = start,
                     end = end
                 )

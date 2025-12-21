@@ -220,14 +220,48 @@ fun NoteItem(
                                 annotatedContent
                             }
     
-                            Text(
+                            val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+
+                            androidx.compose.foundation.text.ClickableText(
                                 text = highlightedContent,
-                                fontSize = fontSize,
-                                lineHeight = lineHeight,
-                                fontWeight = fontWeight,
-                                color = if (isDefaultColor) MaterialTheme.colorScheme.onSurfaceVariant else contentColor.copy(alpha = 0.9f),
+                                style = androidx.compose.ui.text.TextStyle(
+                                    fontSize = fontSize,
+                                    lineHeight = lineHeight,
+                                    fontWeight = fontWeight,
+                                    color = if (isDefaultColor) MaterialTheme.colorScheme.onSurfaceVariant else contentColor.copy(alpha = 0.9f)
+                                ),
                                 maxLines = maxLines,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                onClick = { offset ->
+                                    var isLink = false
+                                    highlightedContent.getStringAnnotations(tag = "URL", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                        isLink = true
+                                        try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                    }
+                                    if (!isLink) {
+                                        highlightedContent.getStringAnnotations(tag = "EMAIL", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                            isLink = true
+                                            try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                        }
+                                    }
+                                    if (!isLink) {
+                                        highlightedContent.getStringAnnotations(tag = "PHONE", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                            isLink = true
+                                            try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                        }
+                                    }
+                                    if (!isLink) {
+                                        highlightedContent.getStringAnnotations(tag = "NOTE_LINK", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                            // Handle internal note link if needed, or just open the note
+                                            // For now, treat as normal click (open note)
+                                            // isLink = true 
+                                        }
+                                    }
+                                    
+                                    if (!isLink) {
+                                        onNoteClick()
+                                    }
+                                }
                             )
                         } else {
                             // Checklist Preview
