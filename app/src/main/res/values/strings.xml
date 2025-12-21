@@ -16,4 +16,5 @@
     <string name="heading_style_description">Heading Style</string>
     <string name="insert_link_description">Insert link</string>
     <string name="image_content_description">Image</string>
+    <string name="history">History</string>
 </resources>

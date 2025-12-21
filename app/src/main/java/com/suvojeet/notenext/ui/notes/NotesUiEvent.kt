@@ -5,4 +5,5 @@ sealed class NotesUiEvent {
     data class ShowToast(val message: String) : NotesUiEvent()
     object LinkPreviewRemoved : NotesUiEvent()
     data class ProjectCreated(val projectName: String) : NotesUiEvent()
+    data class NavigateToNoteByTitle(val title: String) : NotesUiEvent()
 }

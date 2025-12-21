@@ -42,6 +42,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 
 import com.suvojeet.notenext.data.Attachment
 import com.suvojeet.notenext.data.NoteWithAttachments
+import com.suvojeet.notenext.data.NoteVersion
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import android.content.Context
@@ -98,6 +99,22 @@ class NotesViewModel @Inject constructor(
         when (event) {
             is NotesEvent.OnSearchQueryChange -> {
                 _searchQuery.value = event.query
+            }
+            is NotesEvent.OnRestoreVersion -> {
+                viewModelScope.launch {
+                    val content = HtmlConverter.htmlToAnnotatedString(event.version.content)
+                    _state.value = state.value.copy(
+                        editingTitle = event.version.title,
+                        editingContent = TextFieldValue(content),
+                        editingNoteType = event.version.noteType
+                    )
+                    _events.emit(NotesUiEvent.ShowToast("Version restored"))
+                }
+            }
+            is NotesEvent.NavigateToNoteByTitle -> {
+                viewModelScope.launch {
+                    _events.emit(NotesUiEvent.NavigateToNoteByTitle(event.title))
+                }
             }
             is NotesEvent.DeleteNote -> {
                 viewModelScope.launch {
@@ -262,6 +279,14 @@ class NotesViewModel @Inject constructor(
                             } else {
                                 emptyList<ChecklistItem>()
                             }
+
+                            // Fetch versions
+                            viewModelScope.launch {
+                                repository.getNoteVersions(event.noteId).collect { versions ->
+                                    _state.value = _state.value.copy(editingNoteVersions = versions)
+                                }
+                            }
+
                             _state.value = state.value.copy(
                                 expandedNoteId = event.noteId,
                                 editingTitle = note.title,
@@ -296,7 +321,8 @@ class NotesViewModel @Inject constructor(
                             editingNoteType = event.noteType,
                             editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList(),
                             editingAttachments = emptyList(),
-                            editingIsLocked = false
+                            editingIsLocked = false,
+                            editingNoteVersions = emptyList()
                         )
                     }
                 }
@@ -612,6 +638,23 @@ class NotesViewModel @Inject constructor(
                             val currentNoteId = if (noteId == -1) { // New note
                                 repository.insertNote(note)
                             } else { // Existing note
+                                // Before updating, save current state as a version if it's not a new note
+                                repository.getNoteById(noteId)?.let { oldNoteWithAttachments ->
+                                    val oldNote = oldNoteWithAttachments.note
+                                    // Only save version if content or title changed
+                                    if (oldNote.title != title || oldNote.content != content) {
+                                        repository.insertNoteVersion(
+                                            NoteVersion(
+                                                noteId = noteId,
+                                                title = oldNote.title,
+                                                content = oldNote.content,
+                                                timestamp = oldNote.lastEdited,
+                                                noteType = oldNote.noteType
+                                            )
+                                        )
+                                        repository.limitNoteVersions(noteId, 10)
+                                    }
+                                }
                                 repository.updateNote(note)
                                 noteId.toLong() // Convert Int to Long for consistency
                             }
@@ -826,6 +869,10 @@ class NotesViewModel @Inject constructor(
 
     suspend fun getNoteLockStatus(noteId: Int): Boolean {
         return repository.getNoteById(noteId)?.note?.isLocked == true
+    }
+
+    suspend fun getNoteIdByTitle(title: String): Int? {
+        return repository.getNoteIdByTitle(title)
     }
 }
 

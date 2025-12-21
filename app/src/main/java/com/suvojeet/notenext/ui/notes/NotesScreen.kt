@@ -129,6 +129,14 @@ fun NotesScreen(
                 is NotesUiEvent.ProjectCreated -> {
                     Toast.makeText(context, context.getString(R.string.project_created, event.projectName), Toast.LENGTH_SHORT).show()
                 }
+                is NotesUiEvent.NavigateToNoteByTitle -> {
+                    val noteId = viewModel.getNoteIdByTitle(event.title)
+                    if (noteId != null) {
+                        viewModel.onEvent(NotesEvent.ExpandNote(noteId))
+                    } else {
+                        Toast.makeText(context, "Note \"${event.title}\" not found", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
     }

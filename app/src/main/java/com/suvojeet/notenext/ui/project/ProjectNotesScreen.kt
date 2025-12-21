@@ -98,6 +98,10 @@ import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.runtime.LaunchedEffect
+import android.content.Intent
+import android.widget.Toast
 
 import androidx.compose.ui.Modifier
 
@@ -180,10 +184,38 @@ fun ProjectNotesScreen(
     var showReminderSetDialog by remember { mutableStateOf(false) }
 
     var showSortMenu by remember { mutableStateOf(false) }
-
     val focusManager = LocalFocusManager.current
+    val context = LocalContext.current
 
-
+    LaunchedEffect(Unit) {
+        viewModel.events.collect { event ->
+            when (event) {
+                is ProjectNotesUiEvent.SendNotes -> {
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        type = "text/plain"
+                        putExtra(Intent.EXTRA_SUBJECT, event.title)
+                        putExtra(Intent.EXTRA_TEXT, event.content)
+                    }
+                    val chooser = Intent.createChooser(intent, context.getString(R.string.send_notes_via))
+                    context.startActivity(chooser)
+                }
+                is ProjectNotesUiEvent.ShowToast -> {
+                    Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show()
+                }
+                is ProjectNotesUiEvent.LinkPreviewRemoved -> {
+                    Toast.makeText(context, context.getString(R.string.link_preview_removed), Toast.LENGTH_SHORT).show()
+                }
+                is ProjectNotesUiEvent.NavigateToNoteByTitle -> {
+                    val foundNoteId = viewModel.getNoteIdByTitle(event.title)
+                    if (foundNoteId != null) {
+                        viewModel.onEvent(ProjectNotesEvent.ExpandNote(noteId = foundNoteId))
+                    } else {
+                        Toast.makeText(context, "Note \"${event.title}\" not found", Toast.LENGTH_SHORT).show()
+                    }
+                }
+            }
+        }
+    }
 
     BackHandler(enabled = isSearchActive || isSelectionModeActive || state.expandedNoteId != null) {
 

@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -66,7 +67,8 @@ fun MoreOptionsSheet(
     onEvent: (NotesEvent) -> Unit,
     onDismiss: () -> Unit,
     showDeleteDialog: (Boolean) -> Unit,
-    showSaveAsDialog: (Boolean) -> Unit
+    showSaveAsDialog: (Boolean) -> Unit,
+    showHistoryDialog: (Boolean) -> Unit
 ) {
     // Remember SimpleDateFormat for efficient date formatting.
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
@@ -94,7 +96,7 @@ fun MoreOptionsSheet(
             val lockLabel = if (state.editingIsLocked) "Unlock" else "Lock"
             val lockIcon = if (state.editingIsLocked) Icons.Default.LockOpen else Icons.Default.Lock
 
-            val options = listOf(
+            val options = mutableListOf(
                 lockLabel to lockIcon,
                 stringResource(id = R.string.delete) to Icons.Default.Delete,
                 stringResource(id = R.string.make_a_copy) to Icons.Default.ContentCopy,
@@ -102,6 +104,10 @@ fun MoreOptionsSheet(
                 stringResource(id = R.string.labels) to Icons.AutoMirrored.Filled.Label,
                 stringResource(id = R.string.save_as) to Icons.Default.Check
             )
+
+            if (!state.editingIsNewNote) {
+                options.add(stringResource(id = R.string.history) to Icons.Default.History)
+            }
 
             // Display options in a grid layout.
             LazyVerticalGrid(
@@ -134,6 +140,7 @@ fun MoreOptionsSheet(
                                 }
                                 context.getString(R.string.labels) -> onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick)
                                 context.getString(R.string.save_as) -> showSaveAsDialog(true)
+                                context.getString(R.string.history) -> showHistoryDialog(true)
                             }
                         }
                     )

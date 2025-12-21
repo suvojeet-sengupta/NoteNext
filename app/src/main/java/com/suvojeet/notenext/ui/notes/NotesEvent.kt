@@ -11,6 +11,7 @@ import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.NoteWithAttachments
 
 import com.suvojeet.notenext.data.RepeatOption
+import com.suvojeet.notenext.data.NoteVersion
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -70,4 +71,6 @@ sealed class NotesEvent {
     data class MoveSelectedNotesToProject(val projectId: Int?) : NotesEvent()
     data class CreateNoteFromSharedText(val text: String) : NotesEvent()
     data class OnSearchQueryChange(val query: String) : NotesEvent()
+    data class OnRestoreVersion(val version: NoteVersion) : NotesEvent()
+    data class NavigateToNoteByTitle(val title: String) : NotesEvent()
 }

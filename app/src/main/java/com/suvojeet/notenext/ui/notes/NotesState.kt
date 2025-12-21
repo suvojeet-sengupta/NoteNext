@@ -11,6 +11,7 @@ import com.suvojeet.notenext.data.NoteWithAttachments
 import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.Project
+import com.suvojeet.notenext.data.NoteVersion
 
 data class NotesState(
     val notes: List<NoteWithAttachments> = emptyList(),
@@ -45,6 +46,7 @@ data class NotesState(
     val newlyAddedChecklistItemId: String? = null,
     val editingAttachments: List<Attachment> = emptyList(),
     val editingIsLocked: Boolean = false,
+    val editingNoteVersions: List<NoteVersion> = emptyList(),
 
     val projects: List<Project> = emptyList(),
     val searchQuery: String = ""

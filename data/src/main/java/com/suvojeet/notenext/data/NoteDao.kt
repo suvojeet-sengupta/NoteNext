@@ -118,4 +118,17 @@ interface NoteDao {
         ORDER BY notes.isPinned DESC, notes.title ASC
     """)
     fun searchNotesOrderedByTitle(query: String): Flow<List<NoteWithAttachments>>
+
+    // Note Versioning
+    @Insert
+    suspend fun insertNoteVersion(version: NoteVersion)
+
+    @Query("SELECT * FROM note_versions WHERE noteId = :noteId ORDER BY timestamp DESC")
+    fun getNoteVersions(noteId: Int): Flow<List<NoteVersion>>
+
+    @Query("DELETE FROM note_versions WHERE noteId = :noteId AND id NOT IN (SELECT id FROM note_versions WHERE noteId = :noteId ORDER BY timestamp DESC LIMIT :limit)")
+    suspend fun limitNoteVersions(noteId: Int, limit: Int)
+
+    @Query("SELECT id FROM notes WHERE title = :title AND isBinned = 0 LIMIT 1")
+    suspend fun getNoteIdByTitle(title: String): Int?
 }

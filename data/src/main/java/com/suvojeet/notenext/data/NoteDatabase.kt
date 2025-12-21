@@ -9,7 +9,7 @@ import androidx.room.TypeConverters
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 
-@Database(entities = [Note::class, Label::class, Attachment::class, Project::class, NoteFts::class, ChecklistItem::class], version = 13, exportSchema = false)
+@Database(entities = [Note::class, Label::class, Attachment::class, Project::class, NoteFts::class, ChecklistItem::class, NoteVersion::class], version = 14, exportSchema = false)
 @TypeConverters(Converters::class)
 abstract class NoteDatabase : RoomDatabase() {
 
@@ -29,10 +29,27 @@ abstract class NoteDatabase : RoomDatabase() {
                     NoteDatabase::class.java,
                     "note_database"
                 )
-                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13)
+                .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5, MIGRATION_5_6, MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14)
                 .build()
                 INSTANCE = instance
                 instance
+            }
+        }
+
+        private val MIGRATION_13_14 = object : Migration(13, 14) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `note_versions` (
+                        `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                        `noteId` INTEGER NOT NULL,
+                        `title` TEXT NOT NULL,
+                        `content` TEXT NOT NULL,
+                        `timestamp` INTEGER NOT NULL,
+                        `noteType` TEXT NOT NULL DEFAULT 'TEXT',
+                        FOREIGN KEY(`noteId`) REFERENCES `notes`(`id`) ON DELETE CASCADE
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_note_versions_noteId` ON `note_versions` (`noteId`)")
             }
         }
 

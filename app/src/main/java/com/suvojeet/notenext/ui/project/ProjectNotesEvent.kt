@@ -5,6 +5,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.NoteWithAttachments
 import com.suvojeet.notenext.data.SortType
 import com.suvojeet.notenext.data.RepeatOption
+import com.suvojeet.notenext.data.NoteVersion
 import java.time.LocalDate
 import java.time.LocalTime
 
@@ -59,4 +60,6 @@ sealed class ProjectNotesEvent {
     object ClearNewlyAddedChecklistItemId : ProjectNotesEvent()
     data class AddAttachment(val uri: String, val mimeType: String) : ProjectNotesEvent()
     data class RemoveAttachment(val tempId: String) : ProjectNotesEvent()
+    data class OnRestoreVersion(val version: NoteVersion) : ProjectNotesEvent()
+    data class NavigateToNoteByTitle(val title: String) : ProjectNotesEvent()
 }

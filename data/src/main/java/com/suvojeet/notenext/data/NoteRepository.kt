@@ -42,4 +42,10 @@ interface NoteRepository {
     suspend fun updateChecklistItems(items: List<ChecklistItem>)
     suspend fun deleteChecklistItem(item: ChecklistItem)
     suspend fun deleteChecklistForNote(noteId: Int)
+
+    // Versioning operations
+    suspend fun insertNoteVersion(version: NoteVersion)
+    fun getNoteVersions(noteId: Int): Flow<List<NoteVersion>>
+    suspend fun limitNoteVersions(noteId: Int, limit: Int)
+    suspend fun getNoteIdByTitle(title: String): Int?
 }

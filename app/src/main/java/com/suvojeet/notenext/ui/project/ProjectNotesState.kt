@@ -41,5 +41,6 @@ data class ProjectNotesState(
     val newlyAddedChecklistItemId: String? = null,
     val editingAttachments: List<com.suvojeet.notenext.data.Attachment> = emptyList(),
     val editingIsLocked: Boolean = false,
+    val editingNoteVersions: List<com.suvojeet.notenext.data.NoteVersion> = emptyList(),
     val projectName: String = ""
 )

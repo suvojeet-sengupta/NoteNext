@@ -86,4 +86,12 @@ class NoteRepositoryImpl @Inject constructor(
     override suspend fun deleteChecklistItem(item: ChecklistItem) = checklistItemDao.deleteChecklistItem(item)
 
     override suspend fun deleteChecklistForNote(noteId: Int) = checklistItemDao.deleteChecklistForNote(noteId)
+
+    override suspend fun insertNoteVersion(version: NoteVersion) = noteDao.insertNoteVersion(version)
+
+    override fun getNoteVersions(noteId: Int): Flow<List<NoteVersion>> = noteDao.getNoteVersions(noteId)
+
+    override suspend fun limitNoteVersions(noteId: Int, limit: Int) = noteDao.limitNoteVersions(noteId, limit)
+
+    override suspend fun getNoteIdByTitle(title: String): Int? = noteDao.getNoteIdByTitle(title)
 }

@@ -78,6 +78,7 @@ fun AddEditNoteScreen(
     var showMoreOptions by remember { mutableStateOf(false) }
     var showSaveAsDialog by remember { mutableStateOf(false) }
     var showInsertLinkDialog by remember { mutableStateOf(false) }
+    var showHistoryDialog by remember { mutableStateOf(false) }
     var showImageViewer by remember { mutableStateOf(false) }
     var selectedImageData by remember { mutableStateOf<ImageViewerData?>(null) }
     val scrollState = rememberScrollState()
@@ -504,7 +505,18 @@ fun AddEditNoteScreen(
             onEvent = onEvent,
             onDismiss = { showMoreOptions = false },
             showDeleteDialog = { showDeleteDialog = it },
-            showSaveAsDialog = { showSaveAsDialog = it }
+            showSaveAsDialog = { showSaveAsDialog = it },
+            showHistoryDialog = { showHistoryDialog = it }
+        )
+    }
+
+    if (showHistoryDialog) {
+        NoteHistoryDialog(
+            versions = state.editingNoteVersions,
+            onDismiss = { showHistoryDialog = false },
+            onVersionSelected = { version ->
+                onEvent(NotesEvent.OnRestoreVersion(version))
+            }
         )
     }
 

@@ -61,6 +61,30 @@ object HtmlConverter {
                     is UnderlineSpan -> addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
                 }
             }
+            
+            // Detect [[Note Title]] and add styling/annotation
+            val text = spanned.toString()
+            val regex = "\\[\\[(.*?)\\]\\]".toRegex()
+            regex.findAll(text).forEach { matchResult ->
+                val start = matchResult.range.first
+                val end = matchResult.range.last + 1
+                val title = matchResult.groupValues[1]
+                addStyle(
+                    SpanStyle(
+                        color = androidx.compose.ui.graphics.Color(0xFF6200EE),
+                        textDecoration = TextDecoration.Underline,
+                        fontWeight = FontWeight.Medium
+                    ),
+                    start,
+                    end
+                )
+                addStringAnnotation(
+                    tag = "NOTE_LINK",
+                    annotation = title,
+                    start = start,
+                    end = end
+                )
+            }
         }
     }
 }

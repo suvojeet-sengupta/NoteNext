@@ -84,6 +84,22 @@ class ProjectNotesViewModel @Inject constructor(
 
     fun onEvent(event: ProjectNotesEvent) {
         when (event) {
+            is ProjectNotesEvent.OnRestoreVersion -> {
+                viewModelScope.launch {
+                    val content = HtmlConverter.htmlToAnnotatedString(event.version.content)
+                    _state.value = state.value.copy(
+                        editingTitle = event.version.title,
+                        editingContent = TextFieldValue(content),
+                        editingNoteType = event.version.noteType
+                    )
+                    _events.emit(ProjectNotesUiEvent.ShowToast("Version restored"))
+                }
+            }
+            is ProjectNotesEvent.NavigateToNoteByTitle -> {
+                viewModelScope.launch {
+                    _events.emit(ProjectNotesUiEvent.NavigateToNoteByTitle(event.title))
+                }
+            }
             is ProjectNotesEvent.DeleteNote -> {
                 viewModelScope.launch {
                     val noteToBin = event.note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())
@@ -235,6 +251,14 @@ class ProjectNotesViewModel @Inject constructor(
                             } else {
                                 emptyList<ChecklistItem>()
                             }
+
+                            // Fetch versions
+                            viewModelScope.launch {
+                                repository.getNoteVersions(event.noteId).collect { versions ->
+                                    _state.value = _state.value.copy(editingNoteVersions = versions)
+                                }
+                            }
+
                             _state.value = state.value.copy(
                                 expandedNoteId = event.noteId,
                                 editingTitle = note.title,
@@ -269,7 +293,8 @@ class ProjectNotesViewModel @Inject constructor(
                             editingNoteType = event.noteType,
                             editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList(),
                             editingAttachments = emptyList(),
-                            editingIsLocked = false
+                            editingIsLocked = false,
+                            editingNoteVersions = emptyList()
                         )
                     }
                 }
@@ -614,6 +639,23 @@ class ProjectNotesViewModel @Inject constructor(
                             val currentNoteId = if (noteId == -1) { // New note
                                 repository.insertNote(note)
                             } else { // Existing note
+                                // Before updating, save current state as a version if it's not a new note
+                                repository.getNoteById(noteId)?.let { oldNoteWithAttachments ->
+                                    val oldNote = oldNoteWithAttachments.note
+                                    // Only save version if content or title changed
+                                    if (oldNote.title != title || oldNote.content != content) {
+                                        repository.insertNoteVersion(
+                                            com.suvojeet.notenext.data.NoteVersion(
+                                                noteId = noteId,
+                                                title = oldNote.title,
+                                                content = oldNote.content,
+                                                timestamp = oldNote.lastEdited,
+                                                noteType = oldNote.noteType
+                                            )
+                                        )
+                                        repository.limitNoteVersions(noteId, 10)
+                                    }
+                                }
                                 repository.updateNote(note)
                                 noteId.toLong() // Convert Int to Long for consistency
                             }
@@ -785,6 +827,10 @@ class ProjectNotesViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    suspend fun getNoteIdByTitle(title: String): Int? {
+        return repository.getNoteIdByTitle(title)
     }
 
     private fun commonPrefixWith(a: CharSequence, b: CharSequence): String {
