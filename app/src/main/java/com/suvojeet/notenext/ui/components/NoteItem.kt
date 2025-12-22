@@ -186,7 +186,10 @@ fun NoteItem(
                     // Note Content Preview (Dynamic Sizing)
                     if ((note.note.noteType == "TEXT" && note.note.content.isNotEmpty()) || (note.note.noteType == "CHECKLIST" && note.checklistItems.isNotEmpty())) {
                         if (note.note.noteType == "TEXT") {
-                            val plainText = HtmlConverter.htmlToPlainText(note.note.content)
+                            val plainTextState = androidx.compose.runtime.produceState(initialValue = "", note.note.content) {
+                                value = HtmlConverter.htmlToPlainText(note.note.content)
+                            }
+                            val plainText = plainTextState.value
                             val contentLength = plainText.length
                             
                             val (fontSize, lineHeight, maxLines) = when {
@@ -197,7 +200,10 @@ fun NoteItem(
     
                             val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
     
-                            val annotatedContent = HtmlConverter.htmlToAnnotatedString(note.note.content)
+                            val annotatedContentState = androidx.compose.runtime.produceState(initialValue = androidx.compose.ui.text.AnnotatedString(""), note.note.content) {
+                                value = HtmlConverter.htmlToAnnotatedString(note.note.content)
+                            }
+                            val annotatedContent = annotatedContentState.value
                             val highlightedContent = if (searchQuery.isNotEmpty()) {
                                 buildAnnotatedString {
                                     append(annotatedContent)

@@ -20,7 +20,7 @@ import com.suvojeet.notenext.util.HtmlConverter
 import com.suvojeet.notenext.data.MarkdownExporter
 import androidx.compose.ui.text.AnnotatedString
 
-fun saveAsMd(context: Context, title: String, content: AnnotatedString, checklist: List<ChecklistItem> = emptyList()) {
+suspend fun saveAsMd(context: Context, title: String, content: AnnotatedString, checklist: List<ChecklistItem> = emptyList()) {
     val contentResolver = context.contentResolver
     val contentValues = ContentValues().apply {
         put(MediaStore.MediaColumns.DISPLAY_NAME, "${title.ifBlank { "Untitled" }}.md")

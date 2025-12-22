@@ -232,8 +232,14 @@ class NotesViewModel @Inject constructor(
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
                     if (selectedNotes.isNotEmpty()) {
                         val title = if (selectedNotes.size == 1) selectedNotes.first().note.title else "Multiple Notes"
-                        val content = selectedNotes.joinToString("\n\n---\n\n") { "Title: ${it.note.title}\n\n${HtmlConverter.htmlToPlainText(it.note.content)}" }
-                        _events.emit(NotesUiEvent.SendNotes(title, content))
+                        val contentBuilder = StringBuilder()
+                        selectedNotes.forEachIndexed { index, it ->
+                            contentBuilder.append("Title: ${it.note.title}\n\n${HtmlConverter.htmlToPlainText(it.note.content)}")
+                            if (index < selectedNotes.size - 1) {
+                                contentBuilder.append("\n\n---\n\n")
+                            }
+                        }
+                        _events.emit(NotesUiEvent.SendNotes(title, contentBuilder.toString()))
                     }
                     _state.value = state.value.copy(selectedNoteIds = emptyList())
                 }

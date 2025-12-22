@@ -62,7 +62,7 @@ class NoteWidgetRemoteViewsFactory(
         
         // HtmlConverter needs Android context, usually safe here.
         val plainContent = try {
-            if (note.noteType == "CHECKLIST") "Checklist..." else HtmlConverter.htmlToPlainText(note.content)
+            if (note.noteType == "CHECKLIST") "Checklist..." else runBlocking { HtmlConverter.htmlToPlainText(note.content) }
         } catch (e: Exception) {
             ""
         }

@@ -13,24 +13,33 @@ import androidx.core.app.NotificationManagerCompat
 import com.suvojeet.notenext.MainActivity
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.util.HtmlConverter
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 class ReminderBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        context?.let {
-            val noteId = intent?.getIntExtra("NOTE_ID", -1) ?: -1
-            val noteTitle = intent?.getStringExtra("NOTE_TITLE") ?: "Reminder"
-            val noteContent = intent?.getStringExtra("NOTE_CONTENT") ?: ""
+        val pendingResult = goAsync()
+        kotlinx.coroutines.GlobalScope.launch {
+            try {
+                context?.let {
+                    val noteId = intent?.getIntExtra("NOTE_ID", -1) ?: -1
+                    val noteTitle = intent?.getStringExtra("NOTE_TITLE") ?: "Reminder"
+                    val noteContent = intent?.getStringExtra("NOTE_CONTENT") ?: ""
 
-            val plainTextContent = HtmlConverter.htmlToPlainText(noteContent)
-            val truncatedContent = if (plainTextContent.length > 150) {
-                plainTextContent.substring(0, 150) + "..."
-            } else {
-                plainTextContent
+                    val plainTextContent = HtmlConverter.htmlToPlainText(noteContent)
+                    val truncatedContent = if (plainTextContent.length > 150) {
+                        plainTextContent.substring(0, 150) + "..."
+                    } else {
+                        plainTextContent
+                    }
+
+                    createNotificationChannel(context)
+                    showNotification(context, noteId, noteTitle, truncatedContent)
+                }
+            } finally {
+                pendingResult.finish()
             }
-
-            createNotificationChannel(context)
-            showNotification(context, noteId, noteTitle, truncatedContent)
         }
     }
 
@@ -59,7 +68,7 @@ class ReminderBroadcastReceiver : BroadcastReceiver() {
         val builder = NotificationCompat.Builder(context, "reminder_channel_id")
             .setSmallIcon(android.R.drawable.ic_dialog_alert) // Replaced with generic alert icon
             .setContentTitle(title)
-            .setContentText(HtmlConverter.htmlToPlainText(content))
+            .setContentText(kotlinx.coroutines.runBlocking { HtmlConverter.htmlToPlainText(content) })
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setContentIntent(pendingIntent)
             .setAutoCancel(true)

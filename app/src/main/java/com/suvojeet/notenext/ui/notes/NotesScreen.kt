@@ -44,10 +44,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.platform.LocalFocusManager
 import android.content.Intent
@@ -95,8 +97,20 @@ fun NotesScreen(
     var showCreateProjectDialog by remember { mutableStateOf(false) }
     var showMoveToProjectDialog by remember { mutableStateOf(false) }
     var showColorPickerDialog by remember { mutableStateOf(false) }
+    var showWhatsNewDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        val currentVersion = 10 // Matches app/build.gradle.kts versionCode
+        settingsRepository.lastSeenVersion.collect { lastSeen ->
+            if (currentVersion > lastSeen) {
+                showWhatsNewDialog = true
+                settingsRepository.saveLastSeenVersion(currentVersion)
+            }
+        }
+    }
 
     val activity = context.findActivity() as? androidx.fragment.app.FragmentActivity
     val biometricAuthManager = if (activity != null) {
@@ -320,6 +334,10 @@ fun NotesScreen(
                                     showMoveToProjectDialog = false
                                 }
                             )
+                        }
+
+                        if (showWhatsNewDialog) {
+                            WhatsNewDialog(onDismiss = { showWhatsNewDialog = false })
                         }
 
                         Column(modifier = Modifier.padding(padding).clickable(
@@ -650,6 +668,60 @@ private fun MoveToProjectDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(id = R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+private fun WhatsNewDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Text(
+                text = stringResource(id = R.string.whats_new),
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+            )
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = stringResource(id = R.string.whats_new_description),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                
+                val features = listOf(
+                    R.string.whats_new_feature_1,
+                    R.string.whats_new_feature_2,
+                    R.string.whats_new_feature_3
+                )
+                
+                features.forEach { featureRes ->
+                    val fullText = stringResource(id = featureRes)
+                    val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
+                        // Very simple parser for <b>...</b> in these specific strings
+                        val parts = fullText.split("<b>", "</b>")
+                        parts.forEachIndexed { index, part ->
+                            if (index % 2 == 1) {
+                                withStyle(style = androidx.compose.ui.text.SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) {
+                                    append(part)
+                                }
+                            } else {
+                                append(part)
+                            }
+                        }
+                    }
+                    Text(
+                        text = annotatedString,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(id = R.string.dismiss))
             }
         }
     )

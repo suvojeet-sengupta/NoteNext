@@ -179,4 +179,10 @@
     <string name="notenext_logo">NoteNext Logo</string>
     <string name="profile_picture">Profile Picture</string>
     <string name="labels_title">LABELS</string>
+    <string name="whats_new">What\'s New</string>
+    <string name="whats_new_description">We\'ve made several improvements and bug fixes to enhance your experience!</string>
+    <string name="whats_new_feature_1">• <b>Optimized Performance:</b> Faster rich text processing and improved app responsiveness.</string>
+    <string name="whats_new_feature_2">• <b>New "What\'s New" Dialog:</b> Stay updated with the latest changes in NoteNext.</string>
+    <string name="whats_new_feature_3">• <b>Bug Fixes:</b> Fixed several minor issues reported by users for a smoother experience.</string>
+    <string name="dismiss">Dismiss</string>
 </resources>

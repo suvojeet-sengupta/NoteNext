@@ -24,9 +24,21 @@ object PreferencesKeys {
     val APP_LOCK_PIN = stringPreferencesKey("app_lock_pin")
     val IS_SETUP_COMPLETE = booleanPreferencesKey("is_setup_complete")
     val LANGUAGE = stringPreferencesKey("language")
+    val LAST_SEEN_VERSION = intPreferencesKey("last_seen_version")
 }
 
 class SettingsRepository(private val context: Context) {
+
+    val lastSeenVersion: Flow<Int> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.LAST_SEEN_VERSION] ?: 0
+        }
+
+    suspend fun saveLastSeenVersion(version: Int) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_SEEN_VERSION] = version
+        }
+    }
 
     val themeMode: Flow<ThemeMode> = context.dataStore.data
         .map {

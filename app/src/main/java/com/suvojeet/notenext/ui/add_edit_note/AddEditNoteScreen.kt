@@ -583,8 +583,10 @@ fun AddEditNoteScreen(
                 Toast.makeText(context, "Note saved to Documents as TXT", Toast.LENGTH_SHORT).show()
             },
             onSaveAsMd = {
-                saveAsMd(context, state.editingTitle, state.editingContent.annotatedString, state.editingChecklist)
-                Toast.makeText(context, "Note saved to Documents as MD", Toast.LENGTH_SHORT).show()
+                scope.launch {
+                    saveAsMd(context, state.editingTitle, state.editingContent.annotatedString, state.editingChecklist)
+                    Toast.makeText(context, "Note saved to Documents as MD", Toast.LENGTH_SHORT).show()
+                }
             }
         )
     }

@@ -32,6 +32,9 @@ import com.suvojeet.notenext.util.HtmlConverter
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.runtime.produceState
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BinnedNoteScreen(
@@ -44,6 +47,10 @@ fun BinnedNoteScreen(
 
     if (noteWithAttachments != null) {
         val note = noteWithAttachments.note
+        val annotatedContent = produceState<AnnotatedString>(initialValue = AnnotatedString(""), note.content) {
+            value = HtmlConverter.htmlToAnnotatedString(note.content)
+        }
+        
         Scaffold(
             topBar = {
                 TopAppBar(
@@ -96,7 +103,7 @@ fun BinnedNoteScreen(
                             }
                         } else {
                             Text(
-                                text = HtmlConverter.htmlToAnnotatedString(note.content),
+                                text = annotatedContent.value,
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurface
                             )

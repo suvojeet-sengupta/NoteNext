@@ -12,12 +12,14 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.core.text.HtmlCompat
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 object HtmlConverter {
 
-    fun annotatedStringToHtml(annotatedString: AnnotatedString): String {
+    suspend fun annotatedStringToHtml(annotatedString: AnnotatedString): String = withContext(Dispatchers.Default) {
         val spanned = annotatedStringToSpanned(annotatedString)
-        return HtmlCompat.toHtml(spanned, HtmlCompat.TO_HTML_PARAGRAPH_LINES_CONSECUTIVE)
+        HtmlCompat.toHtml(spanned, HtmlCompat.TO_HTML_PARAGRAPH_LINES_CONSECUTIVE)
     }
 
     private fun annotatedStringToSpanned(annotatedString: AnnotatedString): Spanned {
@@ -39,13 +41,13 @@ object HtmlConverter {
         return spannable
     }
 
-    fun htmlToPlainText(html: String): String {
-        return HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+    suspend fun htmlToPlainText(html: String): String = withContext(Dispatchers.Default) {
+        HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
     }
 
-    fun htmlToAnnotatedString(html: String): AnnotatedString {
+    suspend fun htmlToAnnotatedString(html: String): AnnotatedString = withContext(Dispatchers.Default) {
         val spanned = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
-        return buildAnnotatedString {
+        buildAnnotatedString {
             append(spanned.toString())
             spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
