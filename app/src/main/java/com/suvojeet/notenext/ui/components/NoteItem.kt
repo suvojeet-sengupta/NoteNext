@@ -40,6 +40,13 @@ import com.suvojeet.notenext.ui.theme.NoteGradients
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.TextLayoutResult
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -227,8 +234,9 @@ fun NoteItem(
                             }
     
                             val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                            var textLayoutResult by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf<androidx.compose.ui.text.TextLayoutResult?>(null) }
 
-                            androidx.compose.foundation.text.ClickableText(
+                            Text(
                                 text = highlightedContent,
                                 style = androidx.compose.ui.text.TextStyle(
                                     fontSize = fontSize,
@@ -238,35 +246,44 @@ fun NoteItem(
                                 ),
                                 maxLines = maxLines,
                                 overflow = TextOverflow.Ellipsis,
-                                onClick = { offset ->
-                                    var isLink = false
-                                    highlightedContent.getStringAnnotations(tag = "URL", start = offset, end = offset).firstOrNull()?.let { annotation ->
-                                        isLink = true
-                                        try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
-                                    }
-                                    if (!isLink) {
-                                        highlightedContent.getStringAnnotations(tag = "EMAIL", start = offset, end = offset).firstOrNull()?.let { annotation ->
-                                            isLink = true
-                                            try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                onTextLayout = { textLayoutResult = it },
+                                modifier = Modifier.pointerInput(Unit) {
+                                    detectTapGestures(
+                                        onLongPress = {
+                                            onNoteLongClick()
+                                        },
+                                        onTap = { pos ->
+                                            val layoutResult = textLayoutResult ?: return@detectTapGestures
+                                            val offset = layoutResult.getOffsetForPosition(pos)
+                                            
+                                            var isLink = false
+                                            highlightedContent.getStringAnnotations(tag = "URL", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                                isLink = true
+                                                try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                            }
+                                            if (!isLink) {
+                                                highlightedContent.getStringAnnotations(tag = "EMAIL", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                                    isLink = true
+                                                    try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                                }
+                                            }
+                                            if (!isLink) {
+                                                highlightedContent.getStringAnnotations(tag = "PHONE", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                                    isLink = true
+                                                    try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
+                                                }
+                                            }
+                                            if (!isLink) {
+                                                highlightedContent.getStringAnnotations(tag = "NOTE_LINK", start = offset, end = offset).firstOrNull()?.let { annotation ->
+                                                    // Handle internal note link
+                                                }
+                                            }
+                                            
+                                            if (!isLink) {
+                                                onNoteClick()
+                                            }
                                         }
-                                    }
-                                    if (!isLink) {
-                                        highlightedContent.getStringAnnotations(tag = "PHONE", start = offset, end = offset).firstOrNull()?.let { annotation ->
-                                            isLink = true
-                                            try { uriHandler.openUri(annotation.item) } catch (e: Exception) { e.printStackTrace() }
-                                        }
-                                    }
-                                    if (!isLink) {
-                                        highlightedContent.getStringAnnotations(tag = "NOTE_LINK", start = offset, end = offset).firstOrNull()?.let { annotation ->
-                                            // Handle internal note link if needed, or just open the note
-                                            // For now, treat as normal click (open note)
-                                            // isLink = true 
-                                        }
-                                    }
-                                    
-                                    if (!isLink) {
-                                        onNoteClick()
-                                    }
+                                    )
                                 }
                             )
                         } else {
