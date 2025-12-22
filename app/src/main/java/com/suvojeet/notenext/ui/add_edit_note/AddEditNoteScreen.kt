@@ -650,12 +650,10 @@ private fun createImageFile(context: Context): Uri {
 
 @Composable
 fun MarkdownPreview(content: String) {
-    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp)
-            .verticalScroll(scrollState),
+            .fillMaxWidth()
+            .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         val lines = content.split("\n")
