@@ -58,6 +58,9 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import android.content.Intent
+import com.suvojeet.notenext.util.HtmlConverter
+import com.suvojeet.notenext.data.MarkdownExporter
+import androidx.compose.ui.text.font.FontFamily
 
 data class ImageViewerData(val uri: Uri, val tempId: String)
 
@@ -86,6 +89,7 @@ fun AddEditNoteScreen(
     val scope = rememberCoroutineScope()
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
     var isFocusMode by remember { mutableStateOf(false) }
+    var showMarkdownPreview by remember { mutableStateOf(false) }
 
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         scope.launch {
@@ -212,7 +216,9 @@ fun AddEditNoteScreen(
                         showDeleteDialog = { showDeleteDialog = it },
                         editingNoteType = state.editingNoteType,
                         onToggleFocusMode = { isFocusMode = !isFocusMode },
-                        isFocusMode = isFocusMode
+                        isFocusMode = isFocusMode,
+                        onToggleMarkdownPreview = { showMarkdownPreview = !showMarkdownPreview },
+                        isMarkdownPreviewVisible = showMarkdownPreview
                     )
                 }
             },
@@ -318,7 +324,15 @@ fun AddEditNoteScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
 
-                            NoteEditor(state = state, onEvent = onEvent)
+                            if (showMarkdownPreview) {
+                                val markdownContent = produceState(initialValue = "") {
+                                    val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
+                                    value = MarkdownExporter.convertHtmlToMarkdown(html)
+                                }
+                                MarkdownPreview(content = markdownContent.value)
+                            } else {
+                                NoteEditor(state = state, onEvent = onEvent)
+                            }
 
                             if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -631,4 +645,15 @@ private fun createImageFile(context: Context): Uri {
         "${context.packageName}.provider",
         file
     )
+}
+
+@Composable
+fun MarkdownPreview(content: String) {
+    Box(modifier = Modifier.padding(16.dp)) {
+         Text(
+            text = content,
+            style = MaterialTheme.typography.bodyMedium.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
 }

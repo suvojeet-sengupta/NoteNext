@@ -24,6 +24,8 @@ import com.suvojeet.notenext.ui.notes.NotesState
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.CodeOff
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 
@@ -39,6 +41,8 @@ import androidx.compose.material.icons.filled.VisibilityOff
  * @param editingNoteType The type of the note being edited (e.g., "TEXT", "CHECKLIST").
  * @param onToggleFocusMode Lambda to toggle focus mode.
  * @param isFocusMode Boolean to indicate if focus mode is active.
+ * @param onToggleMarkdownPreview Lambda to toggle markdown preview.
+ * @param isMarkdownPreviewVisible Boolean to indicate if markdown preview is active.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,7 +53,9 @@ fun AddEditNoteTopAppBar(
     showDeleteDialog: (Boolean) -> Unit,
     editingNoteType: String,
     onToggleFocusMode: () -> Unit,
-    isFocusMode: Boolean
+    isFocusMode: Boolean,
+    onToggleMarkdownPreview: () -> Unit,
+    isMarkdownPreviewVisible: Boolean
 ) {
     TopAppBar(
         title = {
@@ -69,6 +75,17 @@ fun AddEditNoteTopAppBar(
             titleContentColor = MaterialTheme.colorScheme.onSurface, // Content color adapts to background.
         ),
         actions = {
+            // Markdown Preview Toggle
+            if (editingNoteType == "TEXT") {
+                 IconButton(onClick = onToggleMarkdownPreview) {
+                    Icon(
+                        imageVector = if (isMarkdownPreviewVisible) Icons.Default.CodeOff else Icons.Default.Code,
+                        contentDescription = "Toggle Markdown Preview",
+                        tint = if (isMarkdownPreviewVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            
             // Focus Mode Toggle
             IconButton(onClick = onToggleFocusMode) {
                 Icon(
