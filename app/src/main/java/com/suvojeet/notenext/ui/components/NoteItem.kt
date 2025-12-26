@@ -322,8 +322,30 @@ fun NoteItem(
                                     shape = RoundedCornerShape(8.dp),
                                     color = if (isDefaultColor) MaterialTheme.colorScheme.secondaryContainer else contentColor.copy(alpha = 0.15f)
                                 ) {
+                                    val labelText = if (searchQuery.isNotEmpty()) {
+                                        buildAnnotatedString {
+                                            append(label)
+                                            val lowerText = label.lowercase()
+                                            val lowerQuery = searchQuery.lowercase()
+                                            var index = lowerText.indexOf(lowerQuery)
+                                            while (index >= 0) {
+                                                addStyle(
+                                                    style = SpanStyle(
+                                                        background = MaterialTheme.colorScheme.primaryContainer,
+                                                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                                                    ),
+                                                    start = index,
+                                                    end = index + searchQuery.length
+                                                )
+                                                index = lowerText.indexOf(lowerQuery, index + searchQuery.length)
+                                            }
+                                        }
+                                    } else {
+                                        androidx.compose.ui.text.AnnotatedString(label)
+                                    }
+
                                     Text(
-                                        text = label,
+                                        text = labelText,
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Medium,
                                         color = if (isDefaultColor) MaterialTheme.colorScheme.onSecondaryContainer else contentColor,

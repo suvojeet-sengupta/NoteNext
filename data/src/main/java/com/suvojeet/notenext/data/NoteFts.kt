@@ -7,5 +7,6 @@ import androidx.room.Fts4
 @Fts4(contentEntity = Note::class)
 data class NoteFts(
     val title: String,
-    val content: String
+    val content: String,
+    val label: String?
 )
