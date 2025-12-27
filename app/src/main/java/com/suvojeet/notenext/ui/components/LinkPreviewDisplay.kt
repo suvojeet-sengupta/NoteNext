@@ -100,10 +100,9 @@ fun LinkPreviewDisplay(
             Text(
                 text = linkPreview.url,
                 style = MaterialTheme.typography.labelSmall,
-                color = MaterialTheme.colorScheme.primary,
+                color = MaterialTheme.colorScheme.tertiary,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                textDecoration = TextDecoration.Underline
+                overflow = TextOverflow.Ellipsis
             )
         }
     }
