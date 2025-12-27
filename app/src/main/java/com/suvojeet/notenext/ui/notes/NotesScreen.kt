@@ -387,8 +387,9 @@ fun NotesScreen(
                                     }
                                 }
                             } else if (notesToDisplay.isEmpty()) {
-                                val emptyMessage = if (state.filteredLabel != null) {
-                                    stringResource(id = R.string.no_notes_found_label, state.filteredLabel)
+                                val currentLabel = state.filteredLabel
+                                val emptyMessage = if (currentLabel != null) {
+                                    stringResource(id = R.string.no_notes_found_label, currentLabel)
                                 } else if (state.searchQuery.isNotEmpty()) {
                                     stringResource(id = R.string.no_notes_found)
                                 } else {
