@@ -4,12 +4,16 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface ProjectDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertProject(project: Project): Long
+
+    @Update
+    suspend fun updateProject(project: Project)
 
     @Query("SELECT * FROM projects ORDER BY createdAt DESC")
     fun getProjects(): Flow<List<Project>>

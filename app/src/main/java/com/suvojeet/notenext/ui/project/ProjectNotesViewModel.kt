@@ -63,7 +63,10 @@ class ProjectNotesViewModel @Inject constructor(
         if (projectId != -1) {
             viewModelScope.launch {
                 repository.getProjectById(projectId)?.let { project ->
-                    _state.value = _state.value.copy(projectName = project.name)
+                    _state.value = _state.value.copy(
+                        projectName = project.name,
+                        projectDescription = project.description
+                    )
                 }
             }
 
@@ -830,6 +833,15 @@ class ProjectNotesViewModel @Inject constructor(
                         }
                         val updatedAttachments = _state.value.editingAttachments.filter { attachment -> attachment.tempId != event.tempId }
                         _state.value = _state.value.copy(editingAttachments = updatedAttachments)
+                    }
+                }
+            }
+            is ProjectNotesEvent.UpdateProjectDescription -> {
+                viewModelScope.launch {
+                    repository.getProjectById(projectId)?.let { project ->
+                        val updatedProject = project.copy(description = event.description)
+                        repository.updateProject(updatedProject)
+                        _state.value = _state.value.copy(projectDescription = event.description)
                     }
                 }
             }

@@ -7,5 +7,6 @@ import androidx.room.PrimaryKey
 data class Project(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
     val name: String,
+    val description: String? = null,
     val createdAt: Long = System.currentTimeMillis()
 )

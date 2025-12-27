@@ -78,6 +78,8 @@ class NoteRepositoryImpl @Inject constructor(
 
     override suspend fun insertProject(project: Project): Long = projectDao.insertProject(project)
 
+    override suspend fun updateProject(project: Project) = projectDao.updateProject(project)
+
     override suspend fun deleteProject(projectId: Int) = projectDao.deleteProject(projectId)
 
     override suspend fun getProjectById(projectId: Int): Project? = projectDao.getProjectById(projectId)

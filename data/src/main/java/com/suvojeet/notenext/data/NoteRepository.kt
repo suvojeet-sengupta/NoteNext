@@ -33,6 +33,7 @@ interface NoteRepository {
     // Project operations
     fun getProjects(): Flow<List<Project>>
     suspend fun insertProject(project: Project): Long
+    suspend fun updateProject(project: Project)
     suspend fun deleteProject(projectId: Int)
     suspend fun getProjectById(projectId: Int): Project?
 

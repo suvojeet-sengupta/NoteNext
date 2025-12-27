@@ -63,6 +63,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 
 import androidx.compose.material.icons.filled.Info
 
+import androidx.compose.material.icons.filled.Edit
+
 import androidx.compose.material3.AlertDialog
 
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -484,6 +486,72 @@ fun ProjectNotesScreen(
 
 
             Column(modifier = Modifier.padding(padding)) {
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                // Description Section
+                var showEditDescriptionDialog by remember { mutableStateOf(false) }
+                var editingDescription by remember(state.projectDescription) { mutableStateOf(state.projectDescription ?: "") }
+
+                if (showEditDescriptionDialog) {
+                    AlertDialog(
+                        onDismissRequest = { showEditDescriptionDialog = false },
+                        title = { Text(stringResource(id = R.string.edit_description)) },
+                        text = {
+                            androidx.compose.material3.OutlinedTextField(
+                                value = editingDescription,
+                                onValueChange = { editingDescription = it },
+                                label = { Text(stringResource(id = R.string.project_description)) },
+                                singleLine = false,
+                                maxLines = 5,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        },
+                        confirmButton = {
+                            TextButton(onClick = {
+                                viewModel.onEvent(ProjectNotesEvent.UpdateProjectDescription(editingDescription.ifBlank { null }))
+                                showEditDescriptionDialog = false
+                            }) {
+                                Text(stringResource(id = R.string.save))
+                            }
+                        },
+                        dismissButton = {
+                            TextButton(onClick = { showEditDescriptionDialog = false }) {
+                                Text(stringResource(id = R.string.cancel))
+                            }
+                        }
+                    )
+                }
+
+                androidx.compose.foundation.layout.Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(modifier = Modifier.weight(1f)) {
+                        state.projectDescription?.let { description ->
+                            Text(
+                                text = description,
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 3,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        } ?: Text(
+                            text = stringResource(id = R.string.project_description),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+                        )
+                    }
+                    IconButton(onClick = { showEditDescriptionDialog = true }) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = stringResource(id = R.string.edit_description),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(8.dp))
 

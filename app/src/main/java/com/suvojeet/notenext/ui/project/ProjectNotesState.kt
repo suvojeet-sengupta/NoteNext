@@ -42,5 +42,6 @@ data class ProjectNotesState(
     val editingAttachments: List<com.suvojeet.notenext.data.Attachment> = emptyList(),
     val editingIsLocked: Boolean = false,
     val editingNoteVersions: List<com.suvojeet.notenext.data.NoteVersion> = emptyList(),
-    val projectName: String = ""
+    val projectName: String = "",
+    val projectDescription: String? = null
 )

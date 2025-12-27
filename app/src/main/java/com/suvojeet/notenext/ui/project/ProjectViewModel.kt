@@ -17,7 +17,7 @@ import javax.inject.Inject
 sealed interface ProjectScreenEvent {
     data class CreateNewNote(val projectId: Int) : ProjectScreenEvent
     data class CreateNewChecklist(val projectId: Int) : ProjectScreenEvent
-    data class CreateProject(val name: String) : ProjectScreenEvent
+    data class CreateProject(val name: String, val description: String?) : ProjectScreenEvent
 }
 
 @HiltViewModel
@@ -52,7 +52,7 @@ class ProjectViewModel @Inject constructor(
             is ProjectScreenEvent.CreateProject -> {
                 viewModelScope.launch {
                     if (event.name.isNotBlank()) {
-                        repository.insertProject(Project(name = event.name))
+                        repository.insertProject(Project(name = event.name, description = event.description))
                     }
                 }
             }

@@ -62,4 +62,5 @@ sealed class ProjectNotesEvent {
     data class RemoveAttachment(val tempId: String) : ProjectNotesEvent()
     data class OnRestoreVersion(val version: NoteVersion) : ProjectNotesEvent()
     data class NavigateToNoteByTitle(val title: String) : ProjectNotesEvent()
+    data class UpdateProjectDescription(val description: String?) : ProjectNotesEvent()
 }

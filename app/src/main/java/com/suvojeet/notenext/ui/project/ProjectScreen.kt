@@ -58,8 +58,8 @@ fun ProjectScreen(
     if (showCreateProjectDialog) {
         CreateProjectDialog(
             onDismiss = { showCreateProjectDialog = false },
-            onConfirm = { projectName ->
-                viewModel.onEvent(ProjectScreenEvent.CreateProject(projectName))
+            onConfirm = { projectName, projectDescription ->
+                viewModel.onEvent(ProjectScreenEvent.CreateProject(projectName, projectDescription))
                 showCreateProjectDialog = false
             }
         )
@@ -109,25 +109,37 @@ fun ProjectScreen(
 @Composable
 private fun CreateProjectDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String, String?) -> Unit
 ) {
     var projectName by remember { mutableStateOf("") }
+    var projectDescription by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text(stringResource(id = R.string.create_new_project)) },
         text = {
-            OutlinedTextField(
-                value = projectName,
-                onValueChange = { projectName = it },
-                label = { Text(stringResource(id = R.string.project_name)) },
-                singleLine = true,
-                modifier = Modifier.fillMaxWidth()
-            )
+            Column {
+                OutlinedTextField(
+                    value = projectName,
+                    onValueChange = { projectName = it },
+                    label = { Text(stringResource(id = R.string.project_name)) },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                OutlinedTextField(
+                    value = projectDescription,
+                    onValueChange = { projectDescription = it },
+                    label = { Text(stringResource(id = R.string.project_description)) },
+                    singleLine = false,
+                    maxLines = 3,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         },
         confirmButton = {
             TextButton(
-                onClick = { onConfirm(projectName) },
+                onClick = { onConfirm(projectName, projectDescription.ifBlank { null }) },
                 enabled = projectName.isNotBlank()
             ) {
                 Text(stringResource(id = R.string.create))
