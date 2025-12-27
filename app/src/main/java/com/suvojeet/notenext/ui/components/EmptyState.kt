@@ -36,16 +36,16 @@ fun EmptyState(
         ) {
             Box(
                 modifier = Modifier
-                    .size(120.dp)
+                    .size(140.dp)
                     .clip(CircleShape)
                     .background(
-                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
+                        color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.2f)
                     )
             )
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                modifier = Modifier.size(64.dp),
+                modifier = Modifier.size(72.dp),
                 tint = MaterialTheme.colorScheme.primary
             )
         }

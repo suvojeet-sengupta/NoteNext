@@ -19,7 +19,7 @@
     <string name="content">Content</string>
     <string name="search">Search</string>
     <string name="search_notes">Search notes</string>
-    <string name="no_notes_yet">No notes yet. Tap the \u002B button to add one.</string>
+    <string name="no_notes_yet">No notes yet</string>
     <string name="pinned">PINNED</string>
     <string name="others">OTHERS</string>
     <string name="note">Note</string>
