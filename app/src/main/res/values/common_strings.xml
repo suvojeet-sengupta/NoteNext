@@ -188,4 +188,6 @@
     <string name="no_notes_found">No notes found matching your search.</string>
     <string name="no_notes_found_label">No notes found with label \'%1$s\'.</string>
     <string name="create_your_first_note">Tap the + button to create your first note.</string>
+    <string name="create_new_project">Create New Project</string>
+    <string name="project_name">Project Name</string>
 </resources>
