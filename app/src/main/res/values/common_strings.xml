@@ -185,4 +185,7 @@
     <string name="whats_new_feature_2">• <b>New "What\'s New" Dialog:</b> Stay updated with the latest changes in NoteNext.</string>
     <string name="whats_new_feature_3">• <b>Bug Fixes:</b> Fixed several minor issues reported by users for a smoother experience.</string>
     <string name="dismiss">Dismiss</string>
+    <string name="no_notes_found">No notes found matching your search.</string>
+    <string name="no_notes_found_label">No notes found with label \'%1$s\'.</string>
+    <string name="create_your_first_note">Tap the + button to create your first note.</string>
 </resources>

@@ -291,6 +291,16 @@ fun NoteItem(
                             ChecklistPreview(note.checklistItems, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor, searchQuery)
                         }
                     }
+
+                    // Link Preview (Show first one if available)
+                    if (note.note.linkPreviews.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(12.dp))
+                        LinkPreviewDisplay(
+                            linkPreview = note.note.linkPreviews.first(),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+
                     // Footer Section
                     if (note.attachments.isNotEmpty() || !note.note.label.isNullOrEmpty() || note.note.reminderTime != null || binnedDaysRemaining != null) {
                         Spacer(modifier = Modifier.height(16.dp))

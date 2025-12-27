@@ -25,6 +25,8 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Note
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,6 +59,7 @@ import android.widget.Toast
 import androidx.compose.ui.platform.LocalContext
 import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 import com.suvojeet.notenext.ui.components.ContextualTopAppBar
+import com.suvojeet.notenext.ui.components.EmptyState
 import com.suvojeet.notenext.ui.components.LabelDialog
 import com.suvojeet.notenext.ui.components.NoteItem
 import com.suvojeet.notenext.ui.components.MultiActionFab
@@ -384,28 +387,21 @@ fun NotesScreen(
                                     }
                                 }
                             } else if (notesToDisplay.isEmpty()) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize(),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                        Icon(
-                                            imageVector = Icons.Default.Info,
-                                            contentDescription = null,
-                                            modifier = Modifier.size(96.dp),
-                                            tint = MaterialTheme.colorScheme.onBackground
-                                        )
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Text(
-                                            text = stringResource(id = R.string.no_notes_yet),
-                                            textAlign = TextAlign.Center,
-                                            style = MaterialTheme.typography.titleMedium,
-                                            color = MaterialTheme.colorScheme.onBackground,
-                                            modifier = Modifier.padding(horizontal = 32.dp)
-                                        )
-                                    }
+                                val emptyMessage = if (state.filteredLabel != null) {
+                                    stringResource(id = R.string.no_notes_found_label, state.filteredLabel)
+                                } else if (state.searchQuery.isNotEmpty()) {
+                                    stringResource(id = R.string.no_notes_found)
+                                } else {
+                                    stringResource(id = R.string.no_notes_yet)
                                 }
+                                
+                                val emptyIcon = if (state.searchQuery.isNotEmpty()) Icons.Default.Search else Icons.Default.Note
+
+                                EmptyState(
+                                    icon = emptyIcon,
+                                    message = emptyMessage,
+                                    description = if (state.searchQuery.isEmpty()) stringResource(id = R.string.create_your_first_note) else null
+                                )
                             } else {
                                 val filteredNotes = notesToDisplay
                                 val pinnedNotes = filteredNotes.filter { it.note.isPinned }
