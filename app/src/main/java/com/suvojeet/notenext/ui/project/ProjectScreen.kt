@@ -1,4 +1,4 @@
-```kotlin
+
 package com.suvojeet.notenext.ui.project
 
 import androidx.compose.foundation.layout.*
@@ -50,6 +50,7 @@ fun ProjectScreen(
                 is ProjectScreenEvent.CreateNewChecklist -> {
                     navController.navigate("add_edit_note?projectId=${event.projectId}&noteType=CHECKLIST")
                 }
+                else -> { /* CreateProject is handled synchronously, no navigation needed */ }
             }
         }
     }
@@ -139,4 +140,4 @@ private fun CreateProjectDialog(
         }
     )
 }
-```
+
