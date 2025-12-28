@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -89,14 +90,59 @@ fun BackupScreen(
                         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                         createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
                     },
-                    enabled = !state.isBackingUp
+                    enabled = !state.isBackingUp,
+                    modifier = Modifier.fillMaxWidth()
                 ) {
-                    if (state.isBackingUp) {
+                    if (state.isBackingUp && state.backupResult?.contains("Local") == true) {
                         CircularProgressIndicator(modifier = Modifier.size(24.dp))
                     } else {
-                        Text(stringResource(id = R.string.create_backup))
+                        Text(stringResource(id = R.string.create_backup) + " (Local)")
                     }
                 }
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                val context = androidx.compose.ui.platform.LocalContext.current
+                val googleSignInLauncher = rememberLauncherForActivityResult(
+                    contract = ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    if (result.resultCode == android.app.Activity.RESULT_OK) {
+                        val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                        try {
+                            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
+                            viewModel.backupToDrive(account)
+                        } catch (e: com.google.android.gms.common.api.ApiException) {
+                            // Handle error
+                        }
+                    }
+                }
+
+                Button(
+                    onClick = {
+                        val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestEmail()
+                            .requestScopes(com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE))
+                            .build()
+                        val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(context, gso)
+                        googleSignInLauncher.launch(client.signInIntent)
+                    },
+                    enabled = !state.isBackingUp,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+                ) {
+                     if (state.isBackingUp && state.backupResult?.contains("Drive") == true) {
+                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                    } else {
+                         Icon(
+                            imageVector = Icons.Default.CloudUpload,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text("Backup to Google Drive")
+                    }
+                }
+                
                 state.backupResult?.let {
                     Text(it, modifier = Modifier.padding(top = 16.dp))
                 }

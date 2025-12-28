@@ -34,6 +34,12 @@ android {
             jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
         }
     }
+    packaging {
+        resources {
+            excludes += "META-INF/INDEX.LIST"
+            excludes += "META-INF/DEPENDENCIES"
+        }
+    }
 }
 
 dependencies {
@@ -62,4 +68,10 @@ dependencies {
     
     // Compose Text (AnnotatedString)
     implementation("androidx.compose.ui:ui-text:1.7.6")
+
+    // Google Drive Backup
+    implementation("com.google.android.gms:play-services-auth:21.3.0")
+    implementation("com.google.api-client:google-api-client-android:2.8.1")
+    implementation("com.google.apis:google-api-services-drive:v3-rev20251210-2.0.0")
+    implementation("com.google.auth:google-auth-library-oauth2-http:1.30.1")
 }

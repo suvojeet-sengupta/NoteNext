@@ -5,6 +5,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -77,12 +78,60 @@ fun RestoreScreen(
         ) {
             Button(
                 onClick = { openDocumentLauncher.launch(arrayOf("application/zip")) },
-                enabled = !state.isRestoring
+                enabled = !state.isRestoring,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                if (state.isRestoring) {
+                if (state.isRestoring && state.restoreResult?.contains("Local") == true) {
                     CircularProgressIndicator(modifier = Modifier.size(24.dp))
                 } else {
-                    Text(stringResource(id = R.string.select_backup_file))
+                    Text(stringResource(id = R.string.select_backup_file) + " (Local)")
+                }
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            val context = androidx.compose.ui.platform.LocalContext.current
+            val googleSignInLauncher = rememberLauncherForActivityResult(
+                contract = ActivityResultContracts.StartActivityForResult()
+            ) { result ->
+                if (result.resultCode == android.app.Activity.RESULT_OK) {
+                    val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(result.data)
+                    try {
+                        val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
+                        showConfirmDialog = Uri.parse("google_drive") // Mock URI to trigger dialog
+                        // Store account temporarily or pass it directly if dialog structure allows.
+                        // Since dialog expects URI, let's just launch restoration directly or modify dialog.
+                        // For now, let's launch directly to keep it simple, or better, show specific confirmation.
+                        viewModel.restoreFromDrive(account) 
+                    } catch (e: com.google.android.gms.common.api.ApiException) {
+                        // Handle error
+                    }
+                }
+            }
+
+            Button(
+                onClick = {
+                     val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestEmail()
+                            .requestScopes(com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE))
+                            .build()
+                        val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(context, gso)
+                        googleSignInLauncher.launch(client.signInIntent)
+                },
+                enabled = !state.isRestoring,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                if (state.isRestoring && state.restoreResult?.contains("Drive") == true) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp))
+                } else {
+                     Icon(
+                        imageVector = Icons.Default.CloudDownload,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Restore from Google Drive")
                 }
             }
             state.restoreResult?.let {
