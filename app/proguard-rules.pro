@@ -11,3 +11,10 @@
 
 -dontwarn com.google.api.client.extensions.android.**
 -dontwarn com.google.api.client.googleapis.extensions.android.**
+
+# Apache HttpClient & Missing Java Classes on Android
+-dontwarn javax.naming.**
+-dontwarn javax.net.ssl.**
+-dontwarn org.ietf.jgss.**
+-dontwarn org.apache.http.**
+-dontwarn org.apache.commons.**
