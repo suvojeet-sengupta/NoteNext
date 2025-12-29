@@ -98,6 +98,33 @@ fun SetupScreen(
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
+        bottomBar = {
+            val canContinue = (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || postNotificationsGranted) && state.exactAlarmGranted
+            
+            Box(
+                 modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp)
+                    .imePadding() // Handle software keyboard
+            ) {
+                 Button(
+                    onClick = {
+                        viewModel.onEvent(SetupEvent.CompleteSetup)
+                        onSetupComplete()
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp),
+                    enabled = canContinue,
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Text(
+                         text = stringResource(id = R.string.continue_button),
+                         style = MaterialTheme.typography.titleMedium
+                    )
+                }
+            }
+        },
         containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
         Column(
@@ -281,26 +308,7 @@ fun SetupScreen(
                 }
             )
             
-            Spacer(modifier = Modifier.height(48.dp))
 
-            val canContinue = (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU || postNotificationsGranted) && state.exactAlarmGranted
-
-            Button(
-                onClick = {
-                    viewModel.onEvent(SetupEvent.CompleteSetup)
-                    onSetupComplete()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                enabled = canContinue,
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Text(
-                     text = stringResource(id = R.string.continue_button),
-                     style = MaterialTheme.typography.titleMedium
-                )
-            }
         }
     }
 }
