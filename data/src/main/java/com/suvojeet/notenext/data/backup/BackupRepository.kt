@@ -77,7 +77,7 @@ class BackupRepository @Inject constructor(
             }
         }
     }
-    }
+
 
     suspend fun readProjectsFromZip(uri: Uri): List<Project> {
         var projects: List<Project> = emptyList()
