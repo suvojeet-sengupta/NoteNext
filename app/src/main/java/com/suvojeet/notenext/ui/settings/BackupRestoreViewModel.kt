@@ -28,7 +28,11 @@ data class BackupDetails(
     val labelsCount: Int,
     val projectsCount: Int,
     val attachmentsCount: Int,
-    val totalSizeInMb: Double
+    val totalSize: Long,
+    val notesSize: Long,
+    val labelsSize: Long,
+    val projectsSize: Long,
+    val attachmentsSize: Long
 )
 
 data class BackupRestoreState(
@@ -74,7 +78,10 @@ class BackupRestoreViewModel @Inject constructor(
                     }
                 }
 
-                val totalSize = notesJson.toByteArray().size + labelsJson.toByteArray().size + projectsJson.toByteArray().size + attachmentsSize
+                val notesSize = notesJson.toByteArray().size.toLong()
+                val labelsSize = labelsJson.toByteArray().size.toLong()
+                val projectsSize = projectsJson.toByteArray().size.toLong()
+                val totalSize = notesSize + labelsSize + projectsSize + attachmentsSize
 
                 _state.value = _state.value.copy(
                     backupDetails = BackupDetails(
@@ -82,7 +89,11 @@ class BackupRestoreViewModel @Inject constructor(
                         labelsCount = labels.size,
                         projectsCount = projects.size,
                         attachmentsCount = attachments.size,
-                        totalSizeInMb = totalSize / (1024.0 * 1024.0)
+                        totalSize = totalSize,
+                        notesSize = notesSize,
+                        labelsSize = labelsSize,
+                        projectsSize = projectsSize,
+                        attachmentsSize = attachmentsSize
                     )
                 )
             }

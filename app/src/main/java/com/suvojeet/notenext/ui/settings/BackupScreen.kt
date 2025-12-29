@@ -1,21 +1,31 @@
 package com.suvojeet.notenext.ui.settings
 
+import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.common.api.Scope
+import com.google.api.services.drive.DriveScopes
+import com.suvojeet.notenext.R
 import java.text.SimpleDateFormat
 import java.util.*
-import androidx.compose.ui.res.stringResource
-import com.suvojeet.notenext.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -37,6 +47,21 @@ fun BackupScreen(
         }
     }
 
+    val context = LocalContext.current
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                viewModel.backupToDrive(account)
+            } catch (e: ApiException) {
+                // Handle error or log it
+            }
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -49,111 +74,277 @@ fun BackupScreen(
             )
         }
     ) { paddingValues ->
-        Column(
+        LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            state.backupDetails?.let { details ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text(stringResource(id = R.string.backup_information), style = MaterialTheme.typography.titleLarge)
-                        Spacer(modifier = Modifier.height(16.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.notes_count))
-                            Text(details.notesCount.toString())
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.labels_count))
-                            Text(details.labelsCount.toString())
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.projects_count))
-                            Text(details.projectsCount.toString())
-                        }
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.attachments_count))
-                            Text(details.attachmentsCount.toString())
-                        }
-                        HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
-                        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                            Text(stringResource(id = R.string.estimated_size), style = MaterialTheme.typography.bodyLarge)
-                            Text(String.format("%.2f MB", details.totalSizeInMb), style = MaterialTheme.typography.bodyLarge)
-                        }
+            item {
+                state.backupDetails?.let { details ->
+                    StorageUsageCard(details)
+                } ?: run {
+                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
+                        CircularProgressIndicator()
                     }
                 }
-                Spacer(modifier = Modifier.height(24.dp))
-                Button(
+            }
+
+            item {
+                Text(
+                    text = "Backup Actions",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+                )
+            }
+
+            item {
+                BackupActionCard(
+                    title = stringResource(id = R.string.create_backup),
+                    subtitle = "Save a .zip file to your device storage",
+                    icon = Icons.Default.Save,
+                    buttonText = "Create Local Backup",
+                    isLoading = state.isBackingUp && state.backupResult?.contains("Local") == true,
                     onClick = {
                         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                         createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
-                    },
-                    enabled = !state.isBackingUp,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (state.isBackingUp && state.backupResult?.contains("Local") == true) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    } else {
-                        Text(stringResource(id = R.string.create_backup) + " (Local)")
                     }
-                }
-                
-                Spacer(modifier = Modifier.height(16.dp))
-                
-                val context = androidx.compose.ui.platform.LocalContext.current
-                val googleSignInLauncher = rememberLauncherForActivityResult(
-                    contract = ActivityResultContracts.StartActivityForResult()
-                ) { result ->
-                    if (result.resultCode == android.app.Activity.RESULT_OK) {
-                        val task = com.google.android.gms.auth.api.signin.GoogleSignIn.getSignedInAccountFromIntent(result.data)
-                        try {
-                            val account = task.getResult(com.google.android.gms.common.api.ApiException::class.java)
-                            viewModel.backupToDrive(account)
-                        } catch (e: com.google.android.gms.common.api.ApiException) {
-                            // Handle error
+                )
+            }
+
+            item {
+                BackupActionCard(
+                    title = "Google Drive Backup",
+                    subtitle = "Upload your data securely to cloud",
+                    icon = Icons.Default.CloudUpload,
+                    buttonText = "Backup to Drive",
+                    isLoading = state.isBackingUp && state.backupResult?.contains("Drive") == true,
+                    isPrimary = true,
+                    onClick = {
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestEmail()
+                            .requestScopes(
+                                Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
+                                Scope(com.google.api.services.drive.DriveScopes.DRIVE_APPDATA)
+                            )
+                            .build()
+                        val client = GoogleSignIn.getClient(context, gso)
+                        googleSignInLauncher.launch(client.signInIntent)
+                    }
+                )
+            }
+
+            item {
+                state.backupResult?.let { result ->
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .padding(16.dp)
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = if (result.contains("failed", ignoreCase = true)) Icons.Default.Error else Icons.Default.CheckCircle,
+                                contentDescription = null,
+                                tint = if (result.contains("failed", ignoreCase = true)) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = result,
+                                style = MaterialTheme.typography.bodyMedium
+                            )
                         }
                     }
                 }
-
-                Button(
-                    onClick = {
-                        val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestEmail()
-                            .requestScopes(
-                                com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
-                                com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_APPDATA)
-                            )
-                            .build()
-                        val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(context, gso)
-                        googleSignInLauncher.launch(client.signInIntent)
-                    },
-                    enabled = !state.isBackingUp,
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
-                ) {
-                     if (state.isBackingUp && state.backupResult?.contains("Drive") == true) {
-                        CircularProgressIndicator(modifier = Modifier.size(24.dp))
-                    } else {
-                         Icon(
-                            imageVector = Icons.Default.CloudUpload,
-                            contentDescription = null,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Backup to Google Drive")
-                    }
-                }
-                
-                state.backupResult?.let {
-                    Text(it, modifier = Modifier.padding(top = 16.dp))
-                }
-            } ?: run {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    CircularProgressIndicator()
-                }
             }
         }
+    }
+}
+
+@Composable
+fun StorageUsageCard(details: BackupDetails) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("Current Usage", style = MaterialTheme.typography.titleLarge)
+                Surface(
+                    shape = MaterialTheme.shapes.small,
+                    color = MaterialTheme.colorScheme.primaryContainer
+                ) {
+                    Text(
+                        text = formatSize(details.totalSize),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(24.dp))
+
+            UsageItem(
+                label = stringResource(id = R.string.notes_count),
+                count = details.notesCount,
+                size = details.notesSize,
+                totalSize = details.totalSize,
+                icon = Icons.Default.Description
+            )
+            UsageItem(
+                label = stringResource(id = R.string.labels_count),
+                count = details.labelsCount,
+                size = details.labelsSize,
+                totalSize = details.totalSize,
+                icon = Icons.Default.Label
+            )
+            UsageItem(
+                label = stringResource(id = R.string.projects_count),
+                count = details.projectsCount,
+                size = details.projectsSize,
+                totalSize = details.totalSize,
+                icon = Icons.Default.Folder
+            )
+            UsageItem(
+                label = stringResource(id = R.string.attachments_count),
+                count = details.attachmentsCount,
+                size = details.attachmentsSize,
+                totalSize = details.totalSize,
+                icon = Icons.Default.AttachFile
+            )
+        }
+    }
+}
+
+@Composable
+fun UsageItem(
+    label: String,
+    count: Int,
+    size: Long,
+    totalSize: Long,
+    icon: ImageVector
+) {
+    val progress = if (totalSize > 0) size.toFloat() / totalSize.toFloat() else 0f
+    
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Medium
+                )
+                Text(
+                    text = "$count items • ${formatSize(size)}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Text(
+                text = "${(progress * 100).toInt()}%",
+                style = MaterialTheme.typography.labelSmall
+            )
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        LinearProgressIndicator(
+            progress = { progress },
+            modifier = Modifier.fillMaxWidth().height(6.dp),
+            trackColor = MaterialTheme.colorScheme.surfaceVariant,
+            color = MaterialTheme.colorScheme.secondary,
+            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
+        )
+    }
+}
+
+@Composable
+fun BackupActionCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    buttonText: String,
+    isLoading: Boolean,
+    isPrimary: Boolean = false,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .padding(8.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                 Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                     tint = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                 )
+            }
+            Spacer(modifier = Modifier.width(8.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(text = title, style = MaterialTheme.typography.titleSmall)
+                Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
+        
+        Button(
+            onClick = onClick,
+            enabled = !isLoading,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(bottom = 8.dp),
+            colors = if (isPrimary) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors()
+        ) {
+            if (isLoading) {
+                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                 Spacer(modifier = Modifier.width(8.dp))
+                 Text("Processing...")
+            } else {
+                 Text(buttonText)
+            }
+        }
+    }
+}
+
+private fun formatSize(size: Long): String {
+    val kb = size / 1024.0
+    val mb = kb / 1024.0
+    val gb = mb / 1024.0
+
+    return when {
+        gb >= 1 -> String.format("%.2f GB", gb)
+        mb >= 1 -> String.format("%.2f MB", mb)
+        kb >= 1 -> String.format("%.2f KB", kb)
+        else -> "$size B"
     }
 }
