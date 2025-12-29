@@ -42,7 +42,6 @@ data class BackupRestoreState(
     val backupResult: String? = null,
     val restoreResult: String? = null,
     val driveBackupExists: Boolean = false,
-    val driveBackupExists: Boolean = false,
     val isCheckingBackup: Boolean = false,
     val isDeleting: Boolean = false,
     val isAutoBackupEnabled: Boolean = false,
@@ -62,10 +61,16 @@ class BackupRestoreViewModel @Inject constructor(
     private val _state = MutableStateFlow(BackupRestoreState())
     val state = _state.asStateFlow()
 
+    init {
+        val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+        val enabled = sharedPrefs.getBoolean("auto_backup_enabled", false)
+        val frequency = sharedPrefs.getString("backup_frequency", "Daily") ?: "Daily"
+        _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+    }
+
     fun getBackupDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
-                // ... (Existing logic for stats calculation)
                 val notes = repository.getNotes().first()
                 val labels = repository.getLabels().first()
                 val projects = repository.getProjects().first()
@@ -109,8 +114,6 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-
-
     fun createBackup(uri: Uri) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isBackingUp = true, backupResult = null)
@@ -133,7 +136,6 @@ class BackupRestoreViewModel @Inject constructor(
             _state.value = _state.value.copy(isBackingUp = true, backupResult = "Uploading to Drive...")
             withContext(Dispatchers.IO) {
                 try {
-                    val tempFile = File(application.cacheDir, "temp_backup.zip")
                     val tempFile = File(application.cacheDir, "temp_backup.zip")
                     backupRepository.createBackupZip(tempFile)
                     
@@ -250,6 +252,7 @@ class BackupRestoreViewModel @Inject constructor(
             }
         }
     }
+
     fun checkDriveBackupStatus(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
         viewModelScope.launch {
             _state.value = _state.value.copy(
@@ -288,6 +291,7 @@ class BackupRestoreViewModel @Inject constructor(
             }
         }
     }
+
     fun toggleAutoBackup(enabled: Boolean, email: String? = null, frequency: String = "Daily") {
         viewModelScope.launch {
             val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
@@ -333,14 +337,6 @@ class BackupRestoreViewModel @Inject constructor(
 
     private fun cancelWorker() {
         androidx.work.WorkManager.getInstance(application).cancelUniqueWork("auto_backup")
-    }
-    
-    init {
-        val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
-        val enabled = sharedPrefs.getBoolean("auto_backup_enabled", false)
-        val frequency = sharedPrefs.getString("backup_frequency", "Daily") ?: "Daily"
-        _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
-    }
     }
 
     fun scanBackup(uri: Uri) {
