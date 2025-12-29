@@ -56,7 +56,7 @@ class BackupWorker @AssistedInject constructor(
         val notification = NotificationCompat.Builder(applicationContext, channelId)
             .setContentTitle("Backing up NoteNext")
             .setContentText("Uploading data to Google Drive...")
-            .setSmallIcon(R.drawable.ic_launcher_foreground) // Ensure this exists or use a generic one
+            .setSmallIcon(android.R.drawable.ic_popup_sync)
             .setOngoing(true)
             .build()
             
