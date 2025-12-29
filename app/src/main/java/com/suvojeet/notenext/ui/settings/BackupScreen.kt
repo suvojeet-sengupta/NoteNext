@@ -3,8 +3,12 @@ package com.suvojeet.notenext.ui.settings
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
@@ -13,6 +17,8 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -255,111 +261,125 @@ fun BackupScreen(
 fun StorageUsageCard(details: BackupDetails) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+        ),
+        shape = RoundedCornerShape(24.dp)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text("Current Usage", style = MaterialTheme.typography.titleLarge)
-                Surface(
-                    shape = MaterialTheme.shapes.small,
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
+                Column {
+                    Text(
+                        text = "Total Usage",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                     Text(
                         text = formatSize(details.totalSize),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                        style = MaterialTheme.typography.headlineMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
+                }
+                
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f),
+                    modifier = Modifier.size(48.dp)
+                ) {
+                    Box(contentAlignment = Alignment.Center) {
+                        Icon(
+                            imageVector = Icons.Default.CloudQueue,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
                 }
             }
             
             Spacer(modifier = Modifier.height(24.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            Spacer(modifier = Modifier.height(16.dp))
 
-            UsageItem(
-                label = stringResource(id = R.string.notes_count),
-                count = details.notesCount,
-                size = details.notesSize,
-                totalSize = details.totalSize,
-                icon = Icons.Default.Description
-            )
-            UsageItem(
-                label = stringResource(id = R.string.labels_count),
-                count = details.labelsCount,
-                size = details.labelsSize,
-                totalSize = details.totalSize,
-                icon = Icons.Default.Label
-            )
-            UsageItem(
-                label = stringResource(id = R.string.projects_count),
-                count = details.projectsCount,
-                size = details.projectsSize,
-                totalSize = details.totalSize,
-                icon = Icons.Default.Folder
-            )
-            UsageItem(
-                label = stringResource(id = R.string.attachments_count),
-                count = details.attachmentsCount,
-                size = details.attachmentsSize,
-                totalSize = details.totalSize,
-                icon = Icons.Default.AttachFile
-            )
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Column(modifier = Modifier.weight(1f)) {
+                    UsageStatItem(
+                        icon = Icons.Default.Description,
+                        count = details.notesCount.toString(),
+                        label = stringResource(id = R.string.notes_count),
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                     UsageStatItem(
+                        icon = Icons.Default.Folder,
+                        count = details.projectsCount.toString(),
+                        label = stringResource(id = R.string.projects_count),
+                        color = MaterialTheme.colorScheme.tertiary
+                    )
+                }
+                Column(modifier = Modifier.weight(1f)) {
+                    UsageStatItem(
+                        icon = Icons.Default.Label,
+                        count = details.labelsCount.toString(),
+                        label = stringResource(id = R.string.labels_count),
+                         color = MaterialTheme.colorScheme.secondary
+                    )
+                     Spacer(modifier = Modifier.height(16.dp))
+                    UsageStatItem(
+                        icon = Icons.Default.AttachFile,
+                        count = details.attachmentsCount.toString(),
+                        label = stringResource(id = R.string.attachments_count),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
         }
     }
 }
 
 @Composable
-fun UsageItem(
+fun UsageStatItem(
+    icon: ImageVector,
+    count: String,
     label: String,
-    count: Int,
-    size: Long,
-    totalSize: Long,
-    icon: ImageVector
+    color: Color
 ) {
-    val progress = if (totalSize > 0) size.toFloat() / totalSize.toFloat() else 0f
-    
-    Column(modifier = Modifier.padding(vertical = 8.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(color.copy(alpha = 0.1f), CircleShape),
+            contentAlignment = Alignment.Center
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(12.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = "$count items • ${formatSize(size)}",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Text(
-                text = "${(progress * 100).toInt()}%",
-                style = MaterialTheme.typography.labelSmall
+                tint = color,
+                modifier = Modifier.size(16.dp)
             )
         }
-        Spacer(modifier = Modifier.height(8.dp))
-        LinearProgressIndicator(
-            progress = { progress },
-            modifier = Modifier.fillMaxWidth().height(6.dp),
-            trackColor = MaterialTheme.colorScheme.surfaceVariant,
-            color = MaterialTheme.colorScheme.secondary,
-            strokeCap = androidx.compose.ui.graphics.StrokeCap.Round,
-        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Column {
+            Text(
+                text = count,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
+
+
 
 @Composable
 fun BackupActionCard(
@@ -367,63 +387,71 @@ fun BackupActionCard(
     subtitle: String,
     icon: ImageVector,
     buttonText: String,
-
     isLoading: Boolean,
     isPrimary: Boolean = false,
-    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
-    contentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
+    containerColor: androidx.compose.ui.graphics.Color = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
+    contentColor: androidx.compose.ui.graphics.Color = if (isPrimary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
     secondaryAction: (@Composable () -> Unit)? = null
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor)
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
+        shape = RoundedCornerShape(16.dp),
+        elevation = if (isPrimary) CardDefaults.cardElevation(defaultElevation = 2.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp),
+        border = if (!isPrimary) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .padding(8.dp),
-                contentAlignment = Alignment.Center
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(
+                             if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
+                             RoundedCornerShape(12.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                     Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                         tint = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
+                     )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text(text = subtitle, style = MaterialTheme.typography.bodyMedium.copy(color = contentColor.copy(alpha = 0.8f)))
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                 Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    modifier = Modifier.size(28.dp),
-                     tint = if (isPrimary) MaterialTheme.colorScheme.primary else contentColor
-                 )
-            }
-            Spacer(modifier = Modifier.width(8.dp))
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = title, style = MaterialTheme.typography.titleSmall)
-                Text(text = subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-        }
-        
-        Button(
-            onClick = onClick,
-            enabled = !isLoading,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
-                .padding(bottom = 8.dp),
-            colors = if (isPrimary) ButtonDefaults.buttonColors() else ButtonDefaults.filledTonalButtonColors()
-        ) {
-            if (isLoading) {
-                 CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
-                 Spacer(modifier = Modifier.width(8.dp))
-                 Text("Processing...")
-            } else {
-                 Text(buttonText)
-            }
-        }
-        
-        secondaryAction?.let {
-            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
-                it()
+                 Button(
+                    onClick = onClick,
+                    enabled = !isLoading,
+                    shape = RoundedCornerShape(12.dp),
+                    colors = if (isPrimary) ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.primary,
+                        contentColor = MaterialTheme.colorScheme.onPrimary
+                    ) else ButtonDefaults.outlinedButtonColors()
+                ) {
+                    if (isLoading) {
+                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = LocalContentColor.current)
+                         Spacer(modifier = Modifier.width(8.dp))
+                         Text("Processing...")
+                    } else {
+                         Text(buttonText)
+                    }
+                }
+                
+                secondaryAction?.invoke()
             }
         }
     }
@@ -454,7 +482,9 @@ fun AutoBackupCard(
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
@@ -465,56 +495,49 @@ fun AutoBackupCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
-                            .size(40.dp)
-                            .padding(4.dp),
+                            .size(48.dp)
+                            .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(12.dp)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             imageVector = Icons.Default.Schedule,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                     }
-                    Spacer(modifier = Modifier.width(12.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text(text = "Auto Backup", style = MaterialTheme.typography.titleSmall)
-                        Text(
-                            text = if (isEnabled) "Backing up $frequency" else "Disabled",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        Text(text = "Auto Backup", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                         AnimatedVisibility(visible = isEnabled) {
+                            Text(
+                                text = "Frequency: $frequency",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.primary
+                            )
+                        }
                     }
                 }
                 Switch(checked = isEnabled, onCheckedChange = onToggle)
             }
 
-            if (isEnabled) {
-                Spacer(modifier = Modifier.height(16.dp))
-                ExposedDropdownMenuBox(
-                    expanded = expanded,
-                    onExpandedChange = { expanded = !expanded }
-                ) {
-                    OutlinedTextField(
-                        value = frequency,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text("Frequency") },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
-                        modifier = Modifier
-                            .menuAnchor()
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false }
-                    ) {
+            AnimatedVisibility(visible = isEnabled) {
+                Column {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    Spacer(modifier = Modifier.height(16.dp))
+                    
+                    Text("Backup Frequency", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Spacer(modifier = Modifier.height(8.dp))
+                    
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         listOf("Daily", "Weekly").forEach { item ->
-                            DropdownMenuItem(
-                                text = { Text(text = item) },
-                                onClick = {
-                                    onFrequencyChange(item)
-                                    expanded = false
-                                }
+                            FilterChip(
+                                selected = frequency == item,
+                                onClick = { onFrequencyChange(item) },
+                                label = { Text(item) },
+                                leadingIcon = if (frequency == item) {
+                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
+                                } else null
                             )
                         }
                     }
