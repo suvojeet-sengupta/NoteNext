@@ -40,8 +40,11 @@ data class BackupRestoreState(
     val isBackingUp: Boolean = false,
     val isRestoring: Boolean = false,
     val backupResult: String? = null,
-    val restoreResult: String? = null
-)
+    val backupResult: String? = null,
+    val restoreResult: String? = null,
+    val driveBackupExists: Boolean = false,
+    val isCheckingBackup: Boolean = false,
+    val isDeleting: Boolean = false
 
 @HiltViewModel
 class BackupRestoreViewModel @Inject constructor(
@@ -175,7 +178,11 @@ class BackupRestoreViewModel @Inject constructor(
                     googleDriveManager.uploadBackup(application, account, tempFile)
                     tempFile.delete()
                     
-                    _state.value = _state.value.copy(isBackingUp = false, backupResult = "Drive Backup successful")
+                    _state.value = _state.value.copy(
+                        isBackingUp = false,
+                        backupResult = "Drive Backup successful",
+                        driveBackupExists = true
+                    )
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.value = _state.value.copy(isBackingUp = false, backupResult = "Drive Backup failed: ${e.message}")
@@ -277,6 +284,43 @@ class BackupRestoreViewModel @Inject constructor(
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.value = _state.value.copy(isRestoring = false, restoreResult = "Drive Restore failed: ${e.message}")
+                }
+            }
+        }
+    fun checkDriveBackupStatus(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(
+                isCheckingBackup = true
+            )
+            withContext(Dispatchers.IO) {
+                try {
+                    val exists = googleDriveManager.checkForBackup(application, account)
+                    _state.value = _state.value.copy(
+                        isCheckingBackup = false,
+                        driveBackupExists = exists
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                   _state.value = _state.value.copy(isCheckingBackup = false, driveBackupExists = false)
+                }
+            }
+        }
+    }
+
+    fun deleteDriveBackup(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+        viewModelScope.launch {
+             _state.value = _state.value.copy(isDeleting = true, backupResult = "Deleting Drive Backup...")
+            withContext(Dispatchers.IO) {
+                try {
+                     googleDriveManager.deleteBackup(application, account)
+                    _state.value = _state.value.copy(
+                        isDeleting = false, 
+                        backupResult = "Drive Backup deleted successfully",
+                        driveBackupExists = false
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isDeleting = false, backupResult = "Failed to delete backup: ${e.message}")
                 }
             }
         }

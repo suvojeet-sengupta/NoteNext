@@ -37,7 +37,12 @@ fun BackupScreen(
 
     LaunchedEffect(Unit) {
         viewModel.getBackupDetails()
+        GoogleSignIn.getLastSignedInAccount(LocalContext.current)?.let {
+            viewModel.checkDriveBackupStatus(it)
+        }
     }
+    
+    var showDeleteDialog by remember { mutableStateOf(false) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
@@ -137,6 +142,22 @@ fun BackupScreen(
             }
 
             item {
+                if (state.driveBackupExists) {
+                    BackupActionCard(
+                        title = "Delete Drive Backup",
+                        subtitle = "Remove the backup file from Google Drive",
+                        icon = Icons.Default.DeleteForever,
+                        buttonText = "Delete Backup",
+                        isLoading = state.isDeleting,
+                        isPrimary = false,
+                        containerColor = MaterialTheme.colorScheme.errorContainer,
+                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
+                        onClick = { showDeleteDialog = true }
+                    )
+                }
+            }
+
+            item {
                 state.backupResult?.let { result ->
                     Card(
                         colors = CardDefaults.cardColors(
@@ -165,6 +186,32 @@ fun BackupScreen(
                 }
             }
         }
+    }
+
+    if (showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = { showDeleteDialog = false },
+            title = { Text("Delete Drive Backup") },
+            text = { Text("Are you sure you want to permanently delete the backup from Google Drive? This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showDeleteDialog = false
+                        GoogleSignIn.getLastSignedInAccount(context)?.let {
+                            viewModel.deleteDriveBackup(it)
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Delete")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
@@ -285,12 +332,15 @@ fun BackupActionCard(
     icon: ImageVector,
     buttonText: String,
     isLoading: Boolean,
+    isLoading: Boolean,
     isPrimary: Boolean = false,
+    containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
+    contentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor)
     ) {
         Row(
             modifier = Modifier.padding(16.dp),
@@ -306,7 +356,7 @@ fun BackupActionCard(
                     imageVector = icon,
                     contentDescription = null,
                     modifier = Modifier.size(28.dp),
-                     tint = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
+                     tint = if (isPrimary) MaterialTheme.colorScheme.primary else contentColor
                  )
             }
             Spacer(modifier = Modifier.width(8.dp))

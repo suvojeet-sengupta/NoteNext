@@ -97,4 +97,18 @@ class GoogleDriveManager @Inject constructor() {
             .execute()
         return@withContext fileList.files.isNotEmpty()
     }
+    suspend fun deleteBackup(context: Context, account: GoogleSignInAccount) = withContext(Dispatchers.IO) {
+        val driveService = getDriveService(context, account)
+        val query = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
+        val fileList = driveService.files().list()
+            .setQ(query)
+            .setSpaces("appDataFolder")
+            .setFields("files(id)")
+            .execute()
+
+        if (fileList.files.isNotEmpty()) {
+            val fileId = fileList.files[0].id
+            driveService.files().delete(fileId).execute()
+        }
+    }
 }
