@@ -25,6 +25,7 @@ object PreferencesKeys {
     val IS_SETUP_COMPLETE = booleanPreferencesKey("is_setup_complete")
     val LANGUAGE = stringPreferencesKey("language")
     val LAST_SEEN_VERSION = intPreferencesKey("last_seen_version")
+    val DISALLOW_SCREENSHOTS = booleanPreferencesKey("disallow_screenshots")
 }
 
 class SettingsRepository(private val context: Context) {
@@ -131,6 +132,17 @@ class SettingsRepository(private val context: Context) {
     suspend fun saveLanguage(language: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.LANGUAGE] = language
+        }
+    }
+
+    val disallowScreenshots: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[PreferencesKeys.DISALLOW_SCREENSHOTS] ?: false
+        }
+
+    suspend fun saveDisallowScreenshots(disallow: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.DISALLOW_SCREENSHOTS] = disallow
         }
     }
 }

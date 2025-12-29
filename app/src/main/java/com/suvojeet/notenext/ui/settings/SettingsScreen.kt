@@ -33,6 +33,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Share
@@ -98,12 +99,16 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = false)
     val selectedShapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
     val selectedLanguage by settingsRepository.language.collectAsState(initial = "en")
+    val disallowScreenshots by settingsRepository.disallowScreenshots.collectAsState(initial = false)
 
     // -- Dialog States --
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
     var showShapeFamilyDialog by remember { mutableStateOf(false) }
+
     var showLanguageDialog by remember { mutableStateOf(false) }
+    var showAppLockInfoDialog by remember { mutableStateOf(false) }
+    var showScreenshotInfoDialog by remember { mutableStateOf(false) }
 
     // -- Scroll Behavior --
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -225,7 +230,19 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                                 } else {
                                     scope.launch { settingsRepository.saveEnableAppLock(false) }
                                 }
-                            }
+                            },
+                            onInfoClick = { showAppLockInfoDialog = true }
+                        )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        SettingsItem(
+                            icon = Icons.Default.Lock, // Use a suitable icon like Lock or MobileOff
+                            title = "Disallow Screenshots",
+                            subtitle = "Prevent screen capture in app",
+                            hasSwitch = true,
+                            checked = disallowScreenshots,
+                            iconColor = Color(0xFFF44336), 
+                            onCheckedChange = { scope.launch { settingsRepository.saveDisallowScreenshots(it) } },
+                            onInfoClick = { showScreenshotInfoDialog = true }
                         )
                     }
                 }
@@ -368,6 +385,24 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             onDismiss = { showLanguageDialog = false }
         )
     }
+
+    if (showAppLockInfoDialog) {
+        AlertDialog(
+            onDismissRequest = { showAppLockInfoDialog = false },
+            title = { Text("App Lock") },
+            text = { Text("Secure your private notes with a PIN or using your device's biometric authentication (Fingerprint, Face Unlock).") },
+            confirmButton = { TextButton(onClick = { showAppLockInfoDialog = false }) { Text("OK") } }
+        )
+    }
+
+    if (showScreenshotInfoDialog) {
+         AlertDialog(
+            onDismissRequest = { showScreenshotInfoDialog = false },
+            title = { Text("Disallow Screenshots") },
+            text = { Text("Prevents taking screenshots or screen recordings while using NoteNext to protect sensitive information.") },
+            confirmButton = { TextButton(onClick = { showScreenshotInfoDialog = false }) { Text("OK") } }
+        )
+    }
 }
 
 // --- Custom Components ---
@@ -419,7 +454,8 @@ private fun SettingsItem(
     checked: Boolean = false,
     iconColor: Color,
     onCheckedChange: ((Boolean) -> Unit)? = null,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onInfoClick: (() -> Unit)? = null
 ) {
     ListItem(
         modifier = Modifier
@@ -462,23 +498,35 @@ private fun SettingsItem(
             }
         },
         trailingContent = {
-            if (hasSwitch && onCheckedChange != null) {
-                Switch(
-                    checked = checked,
-                    onCheckedChange = onCheckedChange,
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
-                        checkedTrackColor = iconColor,
-                        uncheckedBorderColor = MaterialTheme.colorScheme.outline,
-                        uncheckedThumbColor = MaterialTheme.colorScheme.outline
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                if (onInfoClick != null) {
+                    IconButton(onClick = onInfoClick) {
+                        Icon(
+                            imageVector = Icons.Default.Info, 
+                            contentDescription = "Info",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                
+                if (hasSwitch && onCheckedChange != null) {
+                    Switch(
+                        checked = checked,
+                        onCheckedChange = onCheckedChange,
+                        colors = SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.onPrimary,
+                            checkedTrackColor = iconColor,
+                            uncheckedBorderColor = MaterialTheme.colorScheme.outline,
+                            uncheckedThumbColor = MaterialTheme.colorScheme.outline
+                        )
                     )
-                )
-            } else if (onClick != null) {
-                Icon(
-                    imageVector = Icons.Default.ChevronRight,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
-                )
+                } else if (onClick != null) {
+                    Icon(
+                        imageVector = Icons.Default.ChevronRight,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
+                    )
+                }
             }
         },
         colors = ListItemDefaults.colors(

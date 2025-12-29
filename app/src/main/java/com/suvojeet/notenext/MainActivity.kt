@@ -14,6 +14,10 @@ import com.suvojeet.notenext.ui.theme.NoteNextTheme
 import dagger.hilt.android.AndroidEntryPoint
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.launch
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import com.suvojeet.notenext.data.repository.SettingsRepository
@@ -45,6 +49,22 @@ class MainActivity : FragmentActivity() {
                 intent.getStringExtra(Intent.EXTRA_TEXT)
             }
             else -> null
+
+        }
+
+        lifecycleScope.launch {
+            repeatOnLifecycle(Lifecycle.State.STARTED) {
+                settingsRepository.disallowScreenshots.collect { disallow ->
+                    if (disallow) {
+                        window.setFlags(
+                            android.view.WindowManager.LayoutParams.FLAG_SECURE,
+                            android.view.WindowManager.LayoutParams.FLAG_SECURE
+                        )
+                    } else {
+                        window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
+                    }
+                }
+            }
         }
 
         setContent {
@@ -56,6 +76,8 @@ class MainActivity : FragmentActivity() {
                 config.setLocale(locale)
                 resources.updateConfiguration(config, resources.displayMetrics)
             }
+
+
 
             val windowSizeClass = calculateWindowSizeClass(this)
             val themeMode by settingsRepository.themeMode.collectAsState(initial = ThemeMode.SYSTEM)
