@@ -21,7 +21,7 @@ class GoogleDriveManager @Inject constructor() {
 
     private fun getDriveService(context: Context, account: GoogleSignInAccount): Drive {
         val credential = GoogleAccountCredential.usingOAuth2(
-            context, Collections.singleton(DriveScopes.DRIVE_FILE)
+            context, listOf(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_APPDATA)
         )
         credential.selectedAccount = account.account
         

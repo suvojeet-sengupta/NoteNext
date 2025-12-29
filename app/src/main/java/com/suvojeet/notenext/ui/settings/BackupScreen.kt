@@ -121,7 +121,10 @@ fun BackupScreen(
                     onClick = {
                         val gso = com.google.android.gms.auth.api.signin.GoogleSignInOptions.Builder(com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestEmail()
-                            .requestScopes(com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE))
+                            .requestScopes(
+                                com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
+                                com.google.android.gms.common.api.Scope(com.google.api.services.drive.DriveScopes.DRIVE_APPDATA)
+                            )
                             .build()
                         val client = com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(context, gso)
                         googleSignInLauncher.launch(client.signInIntent)
