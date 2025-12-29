@@ -35,9 +35,10 @@ fun BackupScreen(
     val viewModel: BackupRestoreViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
 
+    val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.getBackupDetails()
-        GoogleSignIn.getLastSignedInAccount(LocalContext.current)?.let {
+        GoogleSignIn.getLastSignedInAccount(context)?.let {
             viewModel.checkDriveBackupStatus(it)
         }
     }
@@ -52,7 +53,7 @@ fun BackupScreen(
         }
     }
 
-    val context = LocalContext.current
+
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -331,7 +332,7 @@ fun BackupActionCard(
     subtitle: String,
     icon: ImageVector,
     buttonText: String,
-    isLoading: Boolean,
+
     isLoading: Boolean,
     isPrimary: Boolean = false,
     containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,

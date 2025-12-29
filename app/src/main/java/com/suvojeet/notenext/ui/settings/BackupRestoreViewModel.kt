@@ -40,11 +40,11 @@ data class BackupRestoreState(
     val isBackingUp: Boolean = false,
     val isRestoring: Boolean = false,
     val backupResult: String? = null,
-    val backupResult: String? = null,
     val restoreResult: String? = null,
     val driveBackupExists: Boolean = false,
     val isCheckingBackup: Boolean = false,
     val isDeleting: Boolean = false
+)
 
 @HiltViewModel
 class BackupRestoreViewModel @Inject constructor(
@@ -287,6 +287,7 @@ class BackupRestoreViewModel @Inject constructor(
                 }
             }
         }
+    }
     fun checkDriveBackupStatus(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
         viewModelScope.launch {
             _state.value = _state.value.copy(
