@@ -49,9 +49,9 @@ class GoogleDriveManager @Inject constructor() {
         .build()
     }
 
-    suspend fun uploadBackup(context: Context, account: GoogleSignInAccount, dbFile: File): String = withContext(Dispatchers.IO) {
+    suspend fun uploadBackup(context: Context, account: GoogleSignInAccount, dbFile: File, onProgress: ((Long, Long) -> Unit)? = null): String = withContext(Dispatchers.IO) {
         val driveService = getDriveService(context, account)
-        uploadToDrive(driveService, dbFile)
+        uploadToDrive(driveService, dbFile, onProgress)
     }
 
     suspend fun uploadBackup(context: Context, email: String, dbFile: File): String = withContext(Dispatchers.IO) {
@@ -59,7 +59,7 @@ class GoogleDriveManager @Inject constructor() {
         uploadToDrive(driveService, dbFile)
     }
 
-    private fun uploadToDrive(driveService: Drive, dbFile: File): String {
+    private fun uploadToDrive(driveService: Drive, dbFile: File, onProgress: ((Long, Long) -> Unit)? = null): String {
         // 1. Search for existing backup folder/file
         val fileMetadata = com.google.api.services.drive.model.File()
         fileMetadata.name = "notenext_backup.zip"
@@ -79,12 +79,47 @@ class GoogleDriveManager @Inject constructor() {
         if (fileList.files.isNotEmpty()) {
             // Update existing file
             fileId = fileList.files[0].id
-            driveService.files().update(fileId, null, mediaContent).execute()
+            val updateRequest = driveService.files().update(fileId, null, mediaContent)
+            updateRequest.mediaHttpUploader.isDirectUploadEnabled = false
+            updateRequest.mediaHttpUploader.chunkSize = 1 * 1024 * 1024
+            
+            if (onProgress != null) {
+                updateRequest.mediaHttpUploader.setProgressListener { uploader ->
+                     when (uploader.uploadState) {
+                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS -> {
+                             onProgress(uploader.numBytesUploaded, dbFile.length())
+                         }
+                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
+                             onProgress(dbFile.length(), dbFile.length())
+                         }
+                         else -> {}
+                     }
+                }
+            }
+            updateRequest.execute()
         } else {
             // Create new file
-            val file = driveService.files().create(fileMetadata, mediaContent)
+            val createRequest = driveService.files().create(fileMetadata, mediaContent)
                 .setFields("id")
-                .execute()
+            
+            createRequest.mediaHttpUploader.isDirectUploadEnabled = false
+            createRequest.mediaHttpUploader.chunkSize = 1 * 1024 * 1024
+
+            if (onProgress != null) {
+                createRequest.mediaHttpUploader.setProgressListener { uploader ->
+                     when (uploader.uploadState) {
+                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS -> {
+                             onProgress(uploader.numBytesUploaded, dbFile.length())
+                         }
+                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
+                             onProgress(dbFile.length(), dbFile.length())
+                         }
+                         else -> {}
+                     }
+                }
+            }
+            
+            val file = createRequest.execute()
             fileId = file.id
         }
         return fileId

@@ -48,7 +48,8 @@ data class BackupRestoreState(
     val backupFrequency: String = "Daily",
     val foundProjects: List<com.suvojeet.notenext.data.Project> = emptyList(),
     val isScanning: Boolean = false,
-    val googleAccountEmail: String? = null
+    val googleAccountEmail: String? = null,
+    val uploadProgress: String? = null
 )
 
 @HiltViewModel
@@ -153,23 +154,38 @@ class BackupRestoreViewModel @Inject constructor(
 
     fun backupToDrive(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
         viewModelScope.launch {
-            _state.value = _state.value.copy(isBackingUp = true, backupResult = "Uploading to Drive...")
+            _state.value = _state.value.copy(
+                isBackingUp = true, 
+                backupResult = "Uploading to Drive...",
+                uploadProgress = "Starting..."
+            )
             withContext(Dispatchers.IO) {
                 try {
-                    val tempFile = File(application.cacheDir, "temp_backup.zip")
-                    backupRepository.createBackupZip(tempFile)
-                    
-                    googleDriveManager.uploadBackup(application, account, tempFile)
-                    tempFile.delete()
+                    backupRepository.backupToDrive(account) { uploaded, total ->
+                        val progress = if (total > 0) {
+                            val percent = (uploaded * 100) / total
+                            val uploadedMb = String.format("%.2f", uploaded / (1024.0 * 1024.0))
+                            val totalMb = String.format("%.2f", total / (1024.0 * 1024.0))
+                            "$uploadedMb MB / $totalMb MB ($percent%)"
+                        } else {
+                            "Uploading..."
+                        }
+                        _state.value = _state.value.copy(uploadProgress = progress)
+                    }
                     
                     _state.value = _state.value.copy(
                         isBackingUp = false,
                         backupResult = "Drive Backup successful",
-                        driveBackupExists = true
+                        driveBackupExists = true,
+                        uploadProgress = null
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
-                    _state.value = _state.value.copy(isBackingUp = false, backupResult = "Drive Backup failed: ${e.message}")
+                    _state.value = _state.value.copy(
+                        isBackingUp = false, 
+                        backupResult = "Drive Backup failed: ${e.message}",
+                        uploadProgress = null
+                    )
                 }
             }
         }

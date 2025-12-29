@@ -51,6 +51,7 @@ fun BackupScreen(
     }
     
     var showDeleteDialog by remember { mutableStateOf(false) }
+    var showUnlinkDialog by remember { mutableStateOf(false) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
@@ -175,11 +176,12 @@ fun BackupScreen(
                     },
                     secondaryAction = if (state.googleAccountEmail != null) {
                         { 
-                             TextButton(onClick = { viewModel.signOut(context) }) {
+                             TextButton(onClick = { showUnlinkDialog = true }) {
                                  Text("Unlink", color = MaterialTheme.colorScheme.error)
                              }
                         }
-                    } else null
+                    } else null,
+                    progressText = state.uploadProgress
                 )
             }
 
@@ -250,6 +252,30 @@ fun BackupScreen(
             },
             dismissButton = {
                 TextButton(onClick = { showDeleteDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+
+    if (showUnlinkDialog) {
+        AlertDialog(
+            onDismissRequest = { showUnlinkDialog = false },
+            title = { Text("Unlink Account") },
+            text = { Text("Are you sure you want to unlink your Google account? This will stop automatic backups to Drive.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showUnlinkDialog = false
+                        viewModel.signOut(context)
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) {
+                    Text("Unlink")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showUnlinkDialog = false }) {
                     Text("Cancel")
                 }
             }
@@ -392,7 +418,8 @@ fun BackupActionCard(
     containerColor: androidx.compose.ui.graphics.Color = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
     contentColor: androidx.compose.ui.graphics.Color = if (isPrimary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
     onClick: () -> Unit,
-    secondaryAction: (@Composable () -> Unit)? = null
+    secondaryAction: (@Composable () -> Unit)? = null,
+    progressText: String? = null
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -445,7 +472,8 @@ fun BackupActionCard(
                     if (isLoading) {
                          CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = LocalContentColor.current)
                          Spacer(modifier = Modifier.width(8.dp))
-                         Text("Processing...")
+                         // If progress text is provided via a lambda or simple loading text
+                         Text(progressText ?: "Processing...")
                     } else {
                          Text(buttonText)
                     }

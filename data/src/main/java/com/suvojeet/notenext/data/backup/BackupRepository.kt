@@ -18,11 +18,14 @@ import java.util.zip.ZipEntry
 import java.util.zip.ZipOutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount
+
 
 @Singleton
 class BackupRepository @Inject constructor(
     private val repository: NoteRepository,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val googleDriveManager: GoogleDriveManager
 ) {
 
     suspend fun createBackupZip(targetFile: File) {
@@ -36,6 +39,18 @@ class BackupRepository @Inject constructor(
     suspend fun createBackupZip(outputStream: java.io.OutputStream) {
          ZipOutputStream(outputStream).use { zos ->
             writeBackupToZip(zos)
+        }
+    }
+
+    suspend fun backupToDrive(account: GoogleSignInAccount, onProgress: ((Long, Long) -> Unit)? = null): String {
+        val dbFile = File(context.cacheDir, "temp_backup.zip")
+        createBackupZip(dbFile)
+        return try {
+            googleDriveManager.uploadBackup(context, account, dbFile, onProgress)
+        } finally {
+            if (dbFile.exists()) {
+                dbFile.delete()
+            }
         }
     }
 
