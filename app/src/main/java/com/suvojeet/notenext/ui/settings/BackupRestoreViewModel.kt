@@ -42,13 +42,19 @@ data class BackupRestoreState(
     val backupResult: String? = null,
     val restoreResult: String? = null,
     val driveBackupExists: Boolean = false,
+    val driveBackupExists: Boolean = false,
     val isCheckingBackup: Boolean = false,
-    val isDeleting: Boolean = false
+    val isDeleting: Boolean = false,
+    val isAutoBackupEnabled: Boolean = false,
+    val backupFrequency: String = "Daily",
+    val foundProjects: List<com.suvojeet.notenext.data.Project> = emptyList(),
+    val isScanning: Boolean = false
 )
 
 @HiltViewModel
 class BackupRestoreViewModel @Inject constructor(
     private val repository: com.suvojeet.notenext.data.NoteRepository,
+    private val backupRepository: com.suvojeet.notenext.data.backup.BackupRepository,
     private val application: Application,
     private val googleDriveManager: GoogleDriveManager
 ) : ViewModel() {
@@ -103,56 +109,15 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    private suspend fun writeBackupToZip(zos: ZipOutputStream) {
-        // Backup notes
-        val notes = repository.getNotes().first()
-        val notesJson = Gson().toJson(notes)
-        zos.putNextEntry(ZipEntry("notes.json"))
-        zos.write(notesJson.toByteArray())
-        zos.closeEntry()
 
-        // Backup labels
-        val labels = repository.getLabels().first()
-        val labelsJson = Gson().toJson(labels)
-        zos.putNextEntry(ZipEntry("labels.json"))
-        zos.write(labelsJson.toByteArray())
-        zos.closeEntry()
-
-        // Backup projects
-        val projects = repository.getProjects().first()
-        val projectsJson = Gson().toJson(projects)
-        zos.putNextEntry(ZipEntry("projects.json"))
-        zos.write(projectsJson.toByteArray())
-        zos.closeEntry()
-
-        // Backup attachments
-        val attachments = notes.flatMap { it.attachments }
-        attachments.forEach { attachment ->
-            try {
-                val attachmentUri = Uri.parse(attachment.uri)
-                application.contentResolver.openInputStream(attachmentUri)?.use { inputStream ->
-                    val fileName = File(attachmentUri.path!!).name
-                    zos.putNextEntry(ZipEntry("attachments/$fileName"))
-                    inputStream.copyTo(zos)
-                    zos.closeEntry()
-                }
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }
-    }
 
     fun createBackup(uri: Uri) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isBackingUp = true, backupResult = null)
             withContext(Dispatchers.IO) {
                 try {
-                    application.contentResolver.openFileDescriptor(uri, "w")?.use { pfd ->
-                        FileOutputStream(pfd.fileDescriptor).use { fos ->
-                            ZipOutputStream(fos).use { zos ->
-                                writeBackupToZip(zos)
-                            }
-                        }
+                    application.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                        backupRepository.createBackupZip(outputStream)
                     }
                     _state.value = _state.value.copy(isBackingUp = false, backupResult = "Local Backup successful")
                 } catch (e: Exception) {
@@ -169,11 +134,8 @@ class BackupRestoreViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 try {
                     val tempFile = File(application.cacheDir, "temp_backup.zip")
-                    FileOutputStream(tempFile).use { fos ->
-                        ZipOutputStream(fos).use { zos ->
-                            writeBackupToZip(zos)
-                        }
-                    }
+                    val tempFile = File(application.cacheDir, "temp_backup.zip")
+                    backupRepository.createBackupZip(tempFile)
                     
                     googleDriveManager.uploadBackup(application, account, tempFile)
                     tempFile.delete()
@@ -325,5 +287,93 @@ class BackupRestoreViewModel @Inject constructor(
                 }
             }
         }
+    }
+    fun toggleAutoBackup(enabled: Boolean, email: String? = null, frequency: String = "Daily") {
+        viewModelScope.launch {
+            val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+            sharedPrefs.edit().putBoolean("auto_backup_enabled", enabled).apply()
+            sharedPrefs.edit().putString("backup_frequency", frequency).apply()
+
+            _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+
+            if (enabled && email != null) {
+                scheduleWorker(email, frequency)
+            } else {
+                cancelWorker()
+            }
+        }
+    }
+
+    private fun scheduleWorker(email: String, frequency: String) {
+        val workManager = androidx.work.WorkManager.getInstance(application)
+        
+        val repeatInterval = if (frequency == "Daily") 1L else 7L
+        val timeUnit = java.util.concurrent.TimeUnit.DAYS
+
+        val inputData = androidx.work.Data.Builder()
+            .putString("email", email)
+            .build()
+
+        val constraints = androidx.work.Constraints.Builder()
+            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            .setRequiresBatteryNotLow(true)
+            .build()
+
+        val workRequest = androidx.work.PeriodicWorkRequestBuilder<com.suvojeet.notenext.data.backup.BackupWorker>(repeatInterval, timeUnit)
+            .setConstraints(constraints)
+            .setInputData(inputData)
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            "auto_backup",
+            androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+            workRequest
+        )
+    }
+
+    private fun cancelWorker() {
+        androidx.work.WorkManager.getInstance(application).cancelUniqueWork("auto_backup")
+    }
+    
+    init {
+        val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+        val enabled = sharedPrefs.getBoolean("auto_backup_enabled", false)
+        val frequency = sharedPrefs.getString("backup_frequency", "Daily") ?: "Daily"
+        _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+    }
+    }
+
+    fun scanBackup(uri: Uri) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isScanning = true, restoreResult = null, foundProjects = emptyList())
+            withContext(Dispatchers.IO) {
+                try {
+                    val projects = backupRepository.readProjectsFromZip(uri)
+                    _state.value = _state.value.copy(isScanning = false, foundProjects = projects)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isScanning = false, restoreResult = "Failed to scan backup: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun restoreSelectedProjects(uri: Uri, selectedProjectIds: List<Int>) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isRestoring = true, restoreResult = "Restoring selected projects...")
+            withContext(Dispatchers.IO) {
+                try {
+                    backupRepository.restoreSelectedProjects(uri, selectedProjectIds)
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Selected projects restored successfully", foundProjects = emptyList())
+                } catch (e: Exception) {
+                     e.printStackTrace()
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Restore failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun clearFoundProjects() {
+        _state.value = _state.value.copy(foundProjects = emptyList())
     }
 }

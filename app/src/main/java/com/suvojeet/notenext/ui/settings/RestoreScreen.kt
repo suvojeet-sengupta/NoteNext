@@ -4,8 +4,10 @@ import android.app.Activity
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Archive
@@ -30,6 +32,7 @@ import com.google.android.gms.common.api.ApiException
 import com.google.android.gms.common.api.Scope
 import com.google.api.services.drive.DriveScopes
 import com.suvojeet.notenext.R
+import com.suvojeet.notenext.data.Project
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -42,12 +45,25 @@ fun RestoreScreen(
     var restoreType by remember { mutableStateOf<RestoreType?>(null) }
     val context = LocalContext.current
 
+    // Launcher for Local Restore (All)
     val openDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri?.let {
             restoreType = RestoreType.LOCAL
             showConfirmDialog = it
+        }
+    }
+
+    // Launcher for Selective Restore (Scan first)
+    // We need to store the URI to pass it to restoreSelectedProjects later
+    var selectedBackupUri by remember { mutableStateOf<Uri?>(null) }
+    val selectiveRestoreLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            selectedBackupUri = it
+            viewModel.scanBackup(it)
         }
     }
 
@@ -63,6 +79,24 @@ fun RestoreScreen(
                // Handle error
             }
         }
+    }
+
+    // Selective Restore Dialog
+    if (state.foundProjects.isNotEmpty()) {
+        ProjectSelectionDialog(
+            projects = state.foundProjects,
+            onDismiss = { 
+                viewModel.clearFoundProjects() 
+                selectedBackupUri = null
+            },
+            onConfirm = { selectedIds ->
+                selectedBackupUri?.let { uri ->
+                    viewModel.restoreSelectedProjects(uri, selectedIds)
+                }
+                viewModel.clearFoundProjects()
+                selectedBackupUri = null
+            }
+        )
     }
 
     if (showConfirmDialog != null) {
@@ -156,7 +190,7 @@ fun RestoreScreen(
             item {
                 RestoreActionCard(
                     title = "Local Restore",
-                    subtitle = "Select a .zip backup file from device",
+                    subtitle = "Restore all data from a local .zip file",
                     icon = Icons.Default.Archive,
                     buttonText = "Select File",
                     isLoading = state.isRestoring && state.restoreResult?.contains("Local") == true,
@@ -167,7 +201,7 @@ fun RestoreScreen(
             item {
                 RestoreActionCard(
                     title = "Google Drive Restore",
-                    subtitle = "Restore data from Google Drive backup",
+                    subtitle = "Restore all data from Google Drive",
                     icon = Icons.Default.CloudDownload,
                     buttonText = "Restore from Drive",
                     isLoading = state.isRestoring && state.restoreResult?.contains("Drive") == true,
@@ -185,6 +219,19 @@ fun RestoreScreen(
                     }
                 )
             }
+            
+            item {
+                 RestoreActionCard(
+                    title = "Selective Restore",
+                    subtitle = "Choose specific projects to restore from local backup",
+                    icon = Icons.Default.CheckCircle, 
+                    buttonText = "Select File & Choose",
+                    isLoading = state.isScanning,
+                    onClick = { 
+                        selectiveRestoreLauncher.launch(arrayOf("application/zip"))
+                    }
+                )
+             }
 
             item {
                  state.restoreResult?.let { result ->
@@ -274,6 +321,65 @@ fun RestoreActionCard(
             }
         }
     }
+}
+
+@Composable
+fun ProjectSelectionDialog(
+    projects: List<Project>,
+    onDismiss: () -> Unit,
+    onConfirm: (List<Int>) -> Unit
+) {
+    val selectedIds = remember { mutableStateListOf<Int>() }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Projects to Restore") },
+        text = {
+            LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                items(projects) { project ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (selectedIds.contains(project.id)) {
+                                    selectedIds.remove(project.id)
+                                } else {
+                                    selectedIds.add(project.id)
+                                }
+                            }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selectedIds.contains(project.id),
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    selectedIds.add(project.id)
+                                } else {
+                                    selectedIds.remove(project.id)
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = project.name, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(selectedIds.toList()) },
+                enabled = selectedIds.isNotEmpty()
+            ) {
+                Text("Restore Selected")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
 enum class RestoreType {

@@ -34,9 +34,32 @@ class GoogleDriveManager @Inject constructor() {
         .build()
     }
 
+    private fun getDriveService(context: Context, email: String): Drive {
+        val credential = GoogleAccountCredential.usingOAuth2(
+            context, listOf(DriveScopes.DRIVE_FILE, DriveScopes.DRIVE_APPDATA)
+        )
+        credential.selectedAccountName = email
+
+        return Drive.Builder(
+            NetHttpTransport(),
+            GsonFactory(),
+            credential
+        )
+        .setApplicationName("NoteNext")
+        .build()
+    }
+
     suspend fun uploadBackup(context: Context, account: GoogleSignInAccount, dbFile: File): String = withContext(Dispatchers.IO) {
         val driveService = getDriveService(context, account)
+        uploadToDrive(driveService, dbFile)
+    }
 
+    suspend fun uploadBackup(context: Context, email: String, dbFile: File): String = withContext(Dispatchers.IO) {
+        val driveService = getDriveService(context, email)
+        uploadToDrive(driveService, dbFile)
+    }
+
+    private fun uploadToDrive(driveService: Drive, dbFile: File): String {
         // 1. Search for existing backup folder/file
         val fileMetadata = com.google.api.services.drive.model.File()
         fileMetadata.name = "notenext_backup.zip"
@@ -64,7 +87,7 @@ class GoogleDriveManager @Inject constructor() {
                 .execute()
             fileId = file.id
         }
-        return@withContext fileId
+        return fileId
     }
 
     suspend fun downloadBackup(context: Context, account: GoogleSignInAccount, targetFile: File) = withContext(Dispatchers.IO) {

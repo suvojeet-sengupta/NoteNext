@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -103,6 +104,27 @@ fun BackupScreen(
                     style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+                )
+            }
+            
+            item {
+                 AutoBackupCard(
+                    isEnabled = state.isAutoBackupEnabled,
+                    frequency = state.backupFrequency,
+                    onToggle = { enabled -> 
+                        if (enabled) {
+                             GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
+                                 viewModel.toggleAutoBackup(true, email, state.backupFrequency)
+                             }
+                        } else {
+                            viewModel.toggleAutoBackup(false)
+                        }
+                    },
+                    onFrequencyChange = { newFrequency ->
+                         GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
+                            viewModel.toggleAutoBackup(state.isAutoBackupEnabled, email, newFrequency)
+                        }
+                    }
                 )
             }
 
@@ -397,5 +419,87 @@ private fun formatSize(size: Long): String {
         mb >= 1 -> String.format("%.2f MB", mb)
         kb >= 1 -> String.format("%.2f KB", kb)
         else -> "$size B"
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AutoBackupCard(
+    isEnabled: Boolean,
+    frequency: String,
+    onToggle: (Boolean) -> Unit,
+    onFrequencyChange: (String) -> Unit
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .padding(4.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column {
+                        Text(text = "Auto Backup", style = MaterialTheme.typography.titleSmall)
+                        Text(
+                            text = if (isEnabled) "Backing up $frequency" else "Disabled",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+                Switch(checked = isEnabled, onCheckedChange = onToggle)
+            }
+
+            if (isEnabled) {
+                Spacer(modifier = Modifier.height(16.dp))
+                ExposedDropdownMenuBox(
+                    expanded = expanded,
+                    onExpandedChange = { expanded = !expanded }
+                ) {
+                    OutlinedTextField(
+                        value = frequency,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text("Frequency") },
+                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded) },
+                        modifier = Modifier
+                            .menuAnchor()
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        listOf("Daily", "Weekly").forEach { item ->
+                            DropdownMenuItem(
+                                text = { Text(text = item) },
+                                onClick = {
+                                    onFrequencyChange(item)
+                                    expanded = false
+                                }
+                            )
+                        }
+                    }
+                }
+            }
+        }
     }
 }
