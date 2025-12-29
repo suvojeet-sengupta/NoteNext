@@ -19,6 +19,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -130,7 +134,37 @@ fun SetupScreen(
                 textAlign = TextAlign.Center
             )
             
-            Spacer(modifier = Modifier.height(48.dp))
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Feature Highlights Carousel
+            val features = remember {
+                listOf(
+                    FeatureSlide(
+                        title = "Secure App Lock",
+                        description = "Protect your private notes with PIN or Biometric lock.",
+                        icon = Icons.Default.Lock
+                    ),
+                    FeatureSlide(
+                        title = "Google Drive Backup",
+                        description = "Keep your data safe and synchronized across devices.",
+                        icon = Icons.Default.CloudUpload
+                    ),
+                    FeatureSlide(
+                        title = "Rich Media & Checklists",
+                        description = "Add images, audio, link previews, and checklists to your notes.",
+                        icon = Icons.Default.List
+                    ),
+                    FeatureSlide(
+                        title = "Smart Organization",
+                        description = "Organize with Projects, Labels, and powerful Search.",
+                        icon = Icons.Default.FolderOpen
+                    )
+                )
+            }
+            
+            FeatureCarousel(features = features)
+            
+            Spacer(modifier = Modifier.height(24.dp))
 
             // Restore Section
             Card(
@@ -265,6 +299,80 @@ fun SetupScreen(
                 Text(
                      text = stringResource(id = R.string.continue_button),
                      style = MaterialTheme.typography.titleMedium
+                )
+            }
+        }
+    }
+}
+
+data class FeatureSlide(
+    val title: String,
+    val description: String,
+    val icon: androidx.compose.ui.graphics.vector.ImageVector
+)
+
+@OptIn(androidx.compose.foundation.ExperimentalFoundationApi::class)
+@Composable
+fun FeatureCarousel(features: List<FeatureSlide>) {
+    val pagerState = androidx.compose.foundation.pager.rememberPagerState(pageCount = { features.size })
+    
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        androidx.compose.foundation.pager.HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth()
+        ) { page ->
+            val feature = features[page]
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.padding(16.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(64.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.tertiaryContainer),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = feature.icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onTertiaryContainer,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    text = feature.title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = feature.description,
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 32.dp)
+                )
+            }
+        }
+        
+        // Indicators
+        Row(
+            Modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(bottom = 8.dp),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            repeat(pagerState.pageCount) { iteration ->
+                val color = if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+                Box(
+                    modifier = Modifier
+                        .padding(2.dp)
+                        .clip(RoundedCornerShape(50)) // circle
+                        .background(color)
+                        .size(8.dp)
                 )
             }
         }
