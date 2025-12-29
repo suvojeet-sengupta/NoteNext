@@ -39,9 +39,9 @@ fun BackupScreen(
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.getBackupDetails()
-        GoogleSignIn.getLastSignedInAccount(context)?.let {
-            viewModel.checkDriveBackupStatus(it)
-        }
+        viewModel.getBackupDetails()
+        val account = GoogleSignIn.getLastSignedInAccount(context)
+        viewModel.setGoogleAccount(account)
     }
     
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -62,6 +62,7 @@ fun BackupScreen(
             val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
             try {
                 val account = task.getResult(ApiException::class.java)
+                viewModel.setGoogleAccount(account)
                 viewModel.backupToDrive(account)
             } catch (e: ApiException) {
                 // Handle error or log it
@@ -145,22 +146,34 @@ fun BackupScreen(
             item {
                 BackupActionCard(
                     title = "Google Drive Backup",
-                    subtitle = "Upload your data securely to cloud",
+                    subtitle = state.googleAccountEmail?.let { "Linked: $it" } ?: "Upload your data securely to cloud",
                     icon = Icons.Default.CloudUpload,
-                    buttonText = "Backup to Drive",
+                    buttonText = if (state.googleAccountEmail != null) "Backup to Drive" else "Sign In & Backup",
                     isLoading = state.isBackingUp && state.backupResult?.contains("Drive") == true,
                     isPrimary = true,
                     onClick = {
-                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                            .requestEmail()
-                            .requestScopes(
-                                Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
-                                Scope(com.google.api.services.drive.DriveScopes.DRIVE_APPDATA)
-                            )
-                            .build()
-                        val client = GoogleSignIn.getClient(context, gso)
-                        googleSignInLauncher.launch(client.signInIntent)
-                    }
+                        val account = GoogleSignIn.getLastSignedInAccount(context)
+                        if (account != null) {
+                             viewModel.backupToDrive(account)
+                        } else {
+                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                                .requestEmail()
+                                .requestScopes(
+                                    Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
+                                    Scope(com.google.api.services.drive.DriveScopes.DRIVE_APPDATA)
+                                )
+                                .build()
+                            val client = GoogleSignIn.getClient(context, gso)
+                            googleSignInLauncher.launch(client.signInIntent)
+                        }
+                    },
+                    secondaryAction = if (state.googleAccountEmail != null) {
+                        { 
+                             TextButton(onClick = { viewModel.signOut(context) }) {
+                                 Text("Unlink", color = MaterialTheme.colorScheme.error)
+                             }
+                        }
+                    } else null
                 )
             }
 
@@ -359,7 +372,8 @@ fun BackupActionCard(
     isPrimary: Boolean = false,
     containerColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.surface,
     contentColor: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurface,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    secondaryAction: (@Composable () -> Unit)? = null
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -404,6 +418,12 @@ fun BackupActionCard(
                  Text("Processing...")
             } else {
                  Text(buttonText)
+            }
+        }
+        
+        secondaryAction?.let {
+            Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp), horizontalArrangement = Arrangement.End) {
+                it()
             }
         }
     }

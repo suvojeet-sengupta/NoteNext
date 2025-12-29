@@ -47,7 +47,8 @@ data class BackupRestoreState(
     val isAutoBackupEnabled: Boolean = false,
     val backupFrequency: String = "Daily",
     val foundProjects: List<com.suvojeet.notenext.data.Project> = emptyList(),
-    val isScanning: Boolean = false
+    val isScanning: Boolean = false,
+    val googleAccountEmail: String? = null
 )
 
 @HiltViewModel
@@ -66,6 +67,25 @@ class BackupRestoreViewModel @Inject constructor(
         val enabled = sharedPrefs.getBoolean("auto_backup_enabled", false)
         val frequency = sharedPrefs.getString("backup_frequency", "Daily") ?: "Daily"
         _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+        _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+    }
+
+    fun setGoogleAccount(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount?) {
+        _state.value = _state.value.copy(googleAccountEmail = account?.email)
+        if (account != null) {
+            checkDriveBackupStatus(account)
+        } else {
+            _state.value = _state.value.copy(driveBackupExists = false)
+        }
+    }
+
+    fun signOut(context: android.content.Context) {
+         com.google.android.gms.auth.api.signin.GoogleSignIn.getClient(
+            context,
+            com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN
+        ).signOut().addOnCompleteListener {
+             _state.value = _state.value.copy(googleAccountEmail = null, driveBackupExists = false)
+        }
     }
 
     fun getBackupDetails() {
@@ -263,7 +283,8 @@ class BackupRestoreViewModel @Inject constructor(
                     val exists = googleDriveManager.checkForBackup(application, account)
                     _state.value = _state.value.copy(
                         isCheckingBackup = false,
-                        driveBackupExists = exists
+                        driveBackupExists = exists,
+                        googleAccountEmail = account.email
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
