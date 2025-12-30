@@ -211,9 +211,23 @@ fun BackupScreen(
             }
 
             item {
+                val driveSubtitle = state.googleAccountEmail?.let { email ->
+                    val metadata = state.driveBackupMetadata
+                    if (metadata != null) {
+                        val size = formatSize(metadata.size)
+                        val date = metadata.modifiedTime?.let {
+                             val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+                             sdf.format(Date(it.value))
+                        } ?: "Unknown date"
+                        "Linked: $email\nLast Backup: $date ($size)"
+                    } else {
+                        "Linked: $email"
+                    }
+                } ?: "Upload your data securely to cloud"
+
                 BackupActionCard(
                     title = "Google Drive Backup",
-                    subtitle = state.googleAccountEmail?.let { "Linked: $it" } ?: "Upload your data securely to cloud",
+                    subtitle = driveSubtitle,
                     icon = Icons.Default.CloudUpload,
                     buttonText = if (state.googleAccountEmail != null) "Backup to Drive" else "Sign In & Backup",
                     isLoading = state.isBackingUp && state.backupResult?.contains("Drive") == true,
@@ -236,8 +250,20 @@ fun BackupScreen(
                     },
                     secondaryAction = if (state.googleAccountEmail != null) {
                         { 
-                             TextButton(onClick = { showUnlinkDialog = true }) {
-                                 Text("Unlink", color = MaterialTheme.colorScheme.error)
+                             // Show restore button explicitly if backup exists
+                             Row {
+                                 if (state.driveBackupExists) {
+                                     TextButton(onClick = { 
+                                          val account = GoogleSignIn.getLastSignedInAccount(context)
+                                          account?.let { viewModel.restoreFromDrive(it) }
+                                     }) {
+                                         Text("Restore")
+                                     }
+                                     Spacer(modifier = Modifier.width(8.dp))
+                                 }
+                                 TextButton(onClick = { showUnlinkDialog = true }) {
+                                     Text("Unlink", color = MaterialTheme.colorScheme.error)
+                                 }
                              }
                         }
                     } else null,

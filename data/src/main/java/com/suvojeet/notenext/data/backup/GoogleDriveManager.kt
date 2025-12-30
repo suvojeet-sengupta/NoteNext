@@ -145,15 +145,39 @@ class GoogleDriveManager @Inject constructor() {
         outputStream.close()
     }
 
-    suspend fun checkForBackup(context: Context, account: GoogleSignInAccount): Boolean = withContext(Dispatchers.IO) {
+    data class DriveBackupMetadata(
+        val size: Long,
+        val modifiedTime: com.google.api.client.util.DateTime?
+    )
+
+    suspend fun getBackupMetadata(context: Context, account: GoogleSignInAccount): DriveBackupMetadata? = withContext(Dispatchers.IO) {
         val driveService = getDriveService(context, account)
         val query = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
         val fileList = driveService.files().list()
             .setQ(query)
             .setSpaces("appDataFolder")
-            .setFields("files(id)")
+            .setFields("files(id, size, modifiedTime)")
             .execute()
-        return@withContext fileList.files.isNotEmpty()
+        
+        if (fileList.files.isNotEmpty()) {
+            val file = fileList.files[0]
+            DriveBackupMetadata(
+                size = file.getSize() ?: 0L,
+                modifiedTime = file.modifiedTime
+            )
+        } else {
+            null
+        }
+    }
+
+    suspend fun checkForBackup(context: Context, account: GoogleSignInAccount): Boolean = withContext(Dispatchers.IO) {
+        // Keep existing method for simple checks, or could deprecate.
+        // For now, let's just reuse logic or re-query. Re-query is simpler.
+        try {
+             getBackupMetadata(context, account) != null
+        } catch(e: Exception) {
+            false
+        }
     }
     suspend fun deleteBackup(context: Context, account: GoogleSignInAccount) = withContext(Dispatchers.IO) {
         val driveService = getDriveService(context, account)

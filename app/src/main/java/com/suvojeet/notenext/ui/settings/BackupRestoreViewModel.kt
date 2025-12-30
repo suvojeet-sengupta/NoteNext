@@ -50,6 +50,7 @@ data class BackupRestoreState(
     val isScanning: Boolean = false,
     val googleAccountEmail: String? = null,
     val uploadProgress: String? = null,
+    val driveBackupMetadata: com.suvojeet.notenext.data.backup.GoogleDriveManager.DriveBackupMetadata? = null,
     val isSdCardAutoBackupEnabled: Boolean = false,
     val sdCardFolderUri: String? = null
 )
@@ -316,15 +317,16 @@ class BackupRestoreViewModel @Inject constructor(
             )
             withContext(Dispatchers.IO) {
                 try {
-                    val exists = googleDriveManager.checkForBackup(application, account)
+                    val metadata = googleDriveManager.getBackupMetadata(application, account)
                     _state.value = _state.value.copy(
                         isCheckingBackup = false,
-                        driveBackupExists = exists,
+                        driveBackupExists = metadata != null,
+                        driveBackupMetadata = metadata,
                         googleAccountEmail = account.email
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
-                   _state.value = _state.value.copy(isCheckingBackup = false, driveBackupExists = false)
+                   _state.value = _state.value.copy(isCheckingBackup = false, driveBackupExists = false, driveBackupMetadata = null)
                 }
             }
         }
