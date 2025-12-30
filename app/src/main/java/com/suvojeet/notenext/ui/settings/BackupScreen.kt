@@ -187,15 +187,8 @@ fun BackupScreen(
 
             item {
                 if (state.driveBackupExists) {
-                    BackupActionCard(
-                        title = "Delete Drive Backup",
-                        subtitle = "Remove the backup file from Google Drive",
-                        icon = Icons.Default.DeleteForever,
-                        buttonText = "Delete Backup",
+                    DeleteBackupCard(
                         isLoading = state.isDeleting,
-                        isPrimary = false,
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
                         onClick = { showDeleteDialog = true }
                     )
                 }
@@ -569,6 +562,74 @@ fun AutoBackupCard(
                             )
                         }
                     }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DeleteBackupCard(
+    isLoading: Boolean,
+    onClick: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Box(
+                    modifier = Modifier
+                        .size(48.dp)
+                        .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(12.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.DeleteForever,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+                Column {
+                    Text(
+                        text = "Danger Zone",
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.error
+                    )
+                    Text(
+                        text = "Permanently delete backup from Drive",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            Button(
+                onClick = onClick,
+                enabled = !isLoading,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.error,
+                    contentColor = MaterialTheme.colorScheme.onError
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                 if (isLoading) {
+                     CircularProgressIndicator(
+                         modifier = Modifier.size(16.dp),
+                         strokeWidth = 2.dp, 
+                         color = MaterialTheme.colorScheme.onError
+                     )
+                     Spacer(modifier = Modifier.width(8.dp))
+                     Text("Deleting...")
+                } else {
+                     Text("Delete Backup")
                 }
             }
         }
