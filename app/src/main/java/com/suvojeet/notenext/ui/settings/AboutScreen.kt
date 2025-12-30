@@ -240,7 +240,7 @@ private fun HeroSection() {
     }
 }
 
-// SectionHeader removed; using shared definition
+// SectionHeader using shared definition
 
  @Composable
 private fun AboutGroupCard(

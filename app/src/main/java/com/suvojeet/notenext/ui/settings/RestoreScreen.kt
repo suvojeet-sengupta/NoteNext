@@ -132,7 +132,18 @@ fun RestoreScreen(
         )
     }
 
+    // Snackbar Host State
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Listen for Restore Results
+    LaunchedEffect(state.restoreResult) {
+        state.restoreResult?.let { result ->
+            snackbarHostState.showSnackbar(result)
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.restore_title)) },

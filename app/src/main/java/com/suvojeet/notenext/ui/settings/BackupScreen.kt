@@ -80,7 +80,18 @@ fun BackupScreen(
         uri?.let { viewModel.setSdCardLocation(it) }
     }
 
+    // Snackbar Host State
+    val snackbarHostState = remember { SnackbarHostState() }
+    
+    // Listen for Backup Results
+    LaunchedEffect(state.backupResult) {
+        state.backupResult?.let { result ->
+            snackbarHostState.showSnackbar(result)
+        }
+    }
+
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(id = R.string.backup_title)) },
