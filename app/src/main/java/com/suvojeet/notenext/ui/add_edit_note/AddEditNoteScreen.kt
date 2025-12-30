@@ -440,41 +440,13 @@ fun AddEditNoteScreen(
                                 }
                             }
 
-                            items(state.editingChecklist) {
-                                item ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Checkbox(
-                                        checked = item.isChecked,
-                                        onCheckedChange = { isChecked ->
-                                            onEvent(NotesEvent.OnChecklistItemCheckedChange(item.id, isChecked))
-                                        }
-                                    )
-                                    OutlinedTextField(
-                                        value = item.text,
-                                        onValueChange = { text ->
-                                            onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
-                                        },
-                                        modifier = Modifier.weight(1f),
-                                        placeholder = { Text("List item") }
-                                    )
-                                    IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
-                                        Icon(Icons.Default.Delete, contentDescription = "Delete item")
-                                    }
-                                }
-                            }
-                            item {
-                                TextButton(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    onClick = { onEvent(NotesEvent.AddChecklistItem) }) {
-                                    Icon(Icons.Default.Add, contentDescription = "Add item")
-                                    Text("Add item")
-                                }
-                            }
+                            // ChecklistEditor usage
+                            ChecklistEditor(
+                                state = state,
+                                onEvent = onEvent,
+                                isCheckedItemsExpanded = state.isCheckedItemsExpanded,
+                                onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) }
+                            )
 
                             if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
                                 item {

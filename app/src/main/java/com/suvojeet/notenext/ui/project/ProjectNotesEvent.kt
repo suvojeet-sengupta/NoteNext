@@ -64,4 +64,6 @@ sealed class ProjectNotesEvent {
     data class NavigateToNoteByTitle(val title: String) : ProjectNotesEvent()
     data class UpdateProjectDescription(val description: String?) : ProjectNotesEvent()
     object OnToggleNoteType : ProjectNotesEvent()
+    object DeleteAllCheckedItems : ProjectNotesEvent()
+    object ToggleCheckedItemsExpanded : ProjectNotesEvent()
 }

@@ -242,7 +242,18 @@ class BackupRestoreViewModel @Inject constructor(
                 val oldProjectId = noteWithAttachments.note.projectId
                 val newProjectId = oldToNewProjectIds[oldProjectId]
                 val newNote = noteWithAttachments.note.copy(id = 0, projectId = newProjectId)
-                repository.insertNote(newNote)
+                val newNoteId = repository.insertNote(newNote).toInt()
+                
+                // Restore Checklist Items
+                if (noteWithAttachments.checklistItems.isNotEmpty()) {
+                    val newChecklistItems = noteWithAttachments.checklistItems.map { checklistItem ->
+                        checklistItem.copy(
+                            id = java.util.UUID.randomUUID().toString(),
+                            noteId = newNoteId
+                        )
+                    }
+                    repository.insertChecklistItems(newChecklistItems)
+                }
             }
         }
     }

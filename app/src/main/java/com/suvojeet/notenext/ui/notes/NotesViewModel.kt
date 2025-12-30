@@ -880,6 +880,15 @@ class NotesViewModel @Inject constructor(
                     )
                 }
             }
+            is NotesEvent.ToggleCheckedItemsExpanded -> {
+                _state.value = state.value.copy(
+                    isCheckedItemsExpanded = !state.value.isCheckedItemsExpanded
+                )
+            }
+            is NotesEvent.DeleteAllCheckedItems -> {
+                val updatedChecklist = state.value.editingChecklist.filter { !it.isChecked }
+                _state.value = state.value.copy(editingChecklist = updatedChecklist)
+            }
             is NotesEvent.CreateNoteFromSharedText -> {
                 undoRedoManager.reset("" to TextFieldValue(event.text))
                 _state.value = state.value.copy(

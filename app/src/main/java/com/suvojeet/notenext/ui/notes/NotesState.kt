@@ -43,6 +43,7 @@ data class NotesState(
     val linkPreviews: List<LinkPreview> = emptyList(),
     val editingNoteType: String = "TEXT",
     val editingChecklist: List<ChecklistItem> = emptyList(),
+    val isCheckedItemsExpanded: Boolean = true,
     val newlyAddedChecklistItemId: String? = null,
     val editingAttachments: List<Attachment> = emptyList(),
     val editingIsLocked: Boolean = false,
