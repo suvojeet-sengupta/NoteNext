@@ -48,6 +48,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -85,6 +86,9 @@ fun LazyListScope.ChecklistEditor(
         val dragOffset = remember { mutableStateOf(0f) }
         val isDragging = dragOffset.value != 0f
         
+        val currentUncheckedItems by rememberUpdatedState(uncheckedItems)
+        val currentIndex by rememberUpdatedState(index)
+        
         val dragModifier = Modifier
             .pointerInput(Unit) {
                 detectDragGesturesAfterLongPress(
@@ -95,14 +99,17 @@ fun LazyListScope.ChecklistEditor(
                         
                         // Threshold for swapping (approx item height)
                         val threshold = 100f 
+                        val items = currentUncheckedItems
+                        val i = currentIndex
+
                         if (dragOffset.value > threshold) {
-                            if (index < uncheckedItems.lastIndex) {
-                                onEvent(NotesEvent.SwapChecklistItems(item.id, uncheckedItems[index + 1].id))
+                            if (i < items.lastIndex) {
+                                onEvent(NotesEvent.SwapChecklistItems(item.id, items[i + 1].id))
                                 dragOffset.value -= threshold 
                             }
                         } else if (dragOffset.value < -threshold) {
-                            if (index > 0) {
-                                onEvent(NotesEvent.SwapChecklistItems(item.id, uncheckedItems[index - 1].id))
+                            if (i > 0) {
+                                onEvent(NotesEvent.SwapChecklistItems(item.id, items[i - 1].id))
                                 dragOffset.value += threshold
                             }
                         }
