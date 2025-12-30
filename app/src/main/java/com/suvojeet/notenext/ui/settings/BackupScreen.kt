@@ -47,7 +47,6 @@ fun BackupScreen(
     val context = LocalContext.current
     LaunchedEffect(Unit) {
         viewModel.getBackupDetails()
-        viewModel.getBackupDetails()
         val account = GoogleSignIn.getLastSignedInAccount(context)
         viewModel.setGoogleAccount(account)
     }
@@ -58,11 +57,8 @@ fun BackupScreen(
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
     ) { uri ->
-        uri?.let {
-            viewModel.createBackup(it)
-        }
+        uri?.let { viewModel.createBackup(it) }
     }
-
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
@@ -73,18 +69,14 @@ fun BackupScreen(
                 val account = task.getResult(ApiException::class.java)
                 viewModel.setGoogleAccount(account)
                 viewModel.backupToDrive(account)
-            } catch (e: ApiException) {
-                // Handle error or log it
-            }
+            } catch (e: ApiException) { }
         }
     }
 
-            val sdCardLauncher = rememberLauncherForActivityResult(
+    val sdCardLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
-        uri?.let {
-            viewModel.setSdCardLocation(it)
-        }
+        uri?.let { viewModel.setSdCardLocation(it) }
     }
 
     Scaffold(
@@ -103,209 +95,108 @@ fun BackupScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
+            // 1. Storage Summary
             item {
                 state.backupDetails?.let { details ->
                     StorageUsageCard(details)
-                } ?: run {
-                    Box(modifier = Modifier.fillMaxWidth().height(200.dp), contentAlignment = Alignment.Center) {
-                        CircularProgressIndicator()
-                    }
+                } ?: Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(180.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CircularProgressIndicator()
                 }
             }
 
+            // 2. Sections: Manual Backup
             item {
-                Text(
-                    text = "Backup Actions",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 4.dp, top = 8.dp)
-                )
-            }
-            
-            item {
-                 AutoBackupCard(
-                    isEnabled = state.isAutoBackupEnabled || state.isSdCardAutoBackupEnabled,
-                    frequency = state.backupFrequency,
-                    onToggle = { enabled -> 
-                        // This logic is a bit complex now with two toggles.
-                        // Let's simplify: This card now controls the frequency. 
-                        // The individual toggles for Drive and SD Card should probably be in their respective cards or a dedicated section.
-                        // But for now, let's keep it simple: Changing frequency affects both if enabled.
-                        // But the master toggle here is ambiguous.
-                        // Let's change the AutoBackupCard to be just a "Backup Frequency" setting, and move toggles to specific cards.
-                        // OR, we keep this as "Google Drive Auto Backup" and add "SD Card Auto Backup" elsewhere.
-                        
-                        // Current implementation assumes this toggle is for Drive.
-                         if (enabled) {
-                             GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
-                                 viewModel.toggleAutoBackup(true, email, state.backupFrequency)
-                             }
-                        } else {
-                            viewModel.toggleAutoBackup(false)
-                        }
-                    },
-                    onFrequencyChange = { newFrequency ->
-                         GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
-                            viewModel.toggleAutoBackup(state.isAutoBackupEnabled, email, newFrequency)
-                        }
-                        // Also update for SD card if relevant, though toggleSdCardAutoBackup doesn't take frequency (it uses shared prefs)
-                        // Ideally we save frequency globally.
-                         val sharedPrefs = context.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
-                         sharedPrefs.edit().putString("backup_frequency", newFrequency).apply()
-                    },
-                    title = "Drive Auto Backup"
-                )
+                SectionHeader("Manual Backup")
             }
 
+            // Google Drive Backup Card
             item {
-                BackupActionCard(
-                    title = "SD Card / Local Folder",
-                    subtitle = state.sdCardFolderUri?.let { 
-                        try {
-                            // Decode to be readable if possible, though raw URI is okay
-                            android.net.Uri.parse(it).path?.substringAfterLast(":") ?: it
-                        } catch(e: Exception) { it }
-                    } ?: "Select a folder for backups",
-                    icon = Icons.Default.SdStorage,
-                    buttonText = if (state.sdCardFolderUri != null) "Backup Now" else "Select Folder",
-                    isLoading = state.isBackingUp && state.backupResult?.contains("SD Card") == true,
-                    onClick = {
-                        if (state.sdCardFolderUri != null) {
-                            viewModel.backupToSdCard()
-                        } else {
-                            sdCardLauncher.launch(null)
-                        }
-                    },
-                    secondaryAction = {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            if (state.sdCardFolderUri != null) {
-                                TextButton(onClick = { sdCardLauncher.launch(null) }) {
-                                    Text("Change")
-                                }
-                                Switch(
-                                    checked = state.isSdCardAutoBackupEnabled,
-                                    onCheckedChange = { viewModel.toggleSdCardAutoBackup(it) },
-                                    modifier = Modifier.scale(0.8f)
-                                )
-                            }
-                        }
-                    }
-                )
-            }
-
-            item {
-                BackupActionCard(
-                    title = stringResource(id = R.string.create_backup),
-                    subtitle = "Save a .zip file to a specific location",
-                    icon = Icons.Default.Save,
-                    buttonText = "Save As...",
-                    isLoading = state.isBackingUp && state.backupResult?.contains("Local") == true,
-                    onClick = {
-                        val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                        createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
-                    }
-                )
-            }
-
-            item {
-                val driveSubtitle = state.googleAccountEmail?.let { email ->
-                    val metadata = state.driveBackupMetadata
-                    if (metadata != null) {
-                        val size = formatSize(metadata.size)
-                        val date = metadata.modifiedTime?.let {
-                             val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
-                             sdf.format(Date(it.value))
-                        } ?: "Unknown date"
-                        "Linked: $email\nLast Backup: $date ($size)"
-                    } else {
-                        "Linked: $email"
-                    }
-                } ?: "Upload your data securely to cloud"
-
-                BackupActionCard(
-                    title = "Google Drive Backup",
-                    subtitle = driveSubtitle,
-                    icon = Icons.Default.CloudUpload,
-                    buttonText = if (state.googleAccountEmail != null) "Backup to Drive" else "Sign In & Backup",
-                    isLoading = state.isBackingUp && state.backupResult?.contains("Drive") == true,
-                    isPrimary = true,
-                    onClick = {
+                ManualDriveBackupCard(
+                    state = state,
+                    onSignInBackup = {
                         val account = GoogleSignIn.getLastSignedInAccount(context)
                         if (account != null) {
                              viewModel.backupToDrive(account)
                         } else {
                             val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                                 .requestEmail()
-                                .requestScopes(
-                                    Scope(com.google.api.services.drive.DriveScopes.DRIVE_FILE),
-                                    Scope(com.google.api.services.drive.DriveScopes.DRIVE_APPDATA)
-                                )
+                                .requestScopes(Scope(DriveScopes.DRIVE_FILE), Scope(DriveScopes.DRIVE_APPDATA))
                                 .build()
                             val client = GoogleSignIn.getClient(context, gso)
                             googleSignInLauncher.launch(client.signInIntent)
                         }
                     },
-                    secondaryAction = if (state.googleAccountEmail != null) {
-                        { 
-                             // Show restore button explicitly if backup exists
-                             Row {
-                                 if (state.driveBackupExists) {
-                                     TextButton(onClick = { 
-                                          val account = GoogleSignIn.getLastSignedInAccount(context)
-                                          account?.let { viewModel.restoreFromDrive(it) }
-                                     }) {
-                                         Text("Restore")
-                                     }
-                                     Spacer(modifier = Modifier.width(8.dp))
-                                 }
-                                 TextButton(onClick = { showUnlinkDialog = true }) {
-                                     Text("Unlink", color = MaterialTheme.colorScheme.error)
-                                 }
-                             }
-                        }
-                    } else null,
-                    progressText = state.uploadProgress
+                    onUnlink = { showUnlinkDialog = true },
+                    onRestore = {
+                        val account = GoogleSignIn.getLastSignedInAccount(context)
+                        account?.let { viewModel.restoreFromDrive(it) }
+                    }
                 )
             }
 
+            // Local Backup Card
+            item {
+                 ManualLocalBackupCard(
+                     state = state,
+                     onBackupToSd = {
+                         if (state.sdCardFolderUri != null) {
+                             viewModel.backupToSdCard()
+                         } else {
+                             sdCardLauncher.launch(null)
+                         }
+                     },
+                     onSaveToFile = {
+                         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                         createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
+                     }
+                 )
+            }
+
+            // 3. Sections: Settings (Auto Backup)
+            item {
+                SectionHeader("Backup Settings")
+            }
+
+            item {
+                AutoBackupSettingsCard(
+                    state = state,
+                    onToggleAutoBackup = { enabled, account -> 
+                         viewModel.toggleAutoBackup(enabled, account, state.backupFrequency)
+                    },
+                    onToggleSdBackup = { viewModel.toggleSdCardAutoBackup(it) },
+                    onFrequencyChange = { 
+                        GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
+                             viewModel.toggleAutoBackup(state.isAutoBackupEnabled, email, it)
+                        } ?: run {
+                             // Just update pref if not signed in / disabled
+                             val sharedPrefs = context.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+                             sharedPrefs.edit().putString("backup_frequency", it).apply()
+                        }
+                    },
+                    onChangeSdLocation = { sdCardLauncher.launch(null) },
+                    context = context
+                )
+            }
+
+            // 4. Danger Zone
             item {
                 if (state.driveBackupExists) {
+                    Spacer(Modifier.height(8.dp))
                     DeleteBackupCard(
                         isLoading = state.isDeleting,
                         onClick = { showDeleteDialog = true }
                     )
-                }
-            }
-
-            item {
-                state.backupResult?.let { result ->
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            modifier = Modifier
-                                .padding(16.dp)
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                imageVector = if (result.contains("failed", ignoreCase = true)) Icons.Default.Error else Icons.Default.CheckCircle,
-                                contentDescription = null,
-                                tint = if (result.contains("failed", ignoreCase = true)) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Text(
-                                text = result,
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -320,19 +211,13 @@ fun BackupScreen(
                 TextButton(
                     onClick = {
                         showDeleteDialog = false
-                        GoogleSignIn.getLastSignedInAccount(context)?.let {
-                            viewModel.deleteDriveBackup(it)
-                        }
+                        GoogleSignIn.getLastSignedInAccount(context)?.let { viewModel.deleteDriveBackup(it) }
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Delete")
-                }
+                ) { Text("Delete") }
             },
             dismissButton = {
-                TextButton(onClick = { showDeleteDialog = false }) {
-                    Text("Cancel")
-                }
+                TextButton(onClick = { showDeleteDialog = false }) { Text("Cancel") }
             }
         )
     }
@@ -341,7 +226,7 @@ fun BackupScreen(
         AlertDialog(
             onDismissRequest = { showUnlinkDialog = false },
             title = { Text("Unlink Account") },
-            text = { Text("Are you sure you want to unlink your Google account? This will stop automatic backups to Drive.") },
+            text = { Text("Unlinking will stop automatic backups to Drive. Local backups will not be affected.") },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -349,18 +234,263 @@ fun BackupScreen(
                         viewModel.signOut(context)
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
-                ) {
-                    Text("Unlink")
-                }
+                ) { Text("Unlink") }
             },
             dismissButton = {
-                TextButton(onClick = { showUnlinkDialog = false }) {
-                    Text("Cancel")
-                }
+                TextButton(onClick = { showUnlinkDialog = false }) { Text("Cancel") }
             }
         )
     }
 }
+
+@Composable
+fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 4.dp, top = 8.dp)
+    )
+}
+
+@Composable
+fun ManualDriveBackupCard(
+    state: BackupRestoreState,
+    onSignInBackup: () -> Unit,
+    onUnlink: () -> Unit,
+    onRestore: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+         Column(modifier = Modifier.padding(20.dp)) {
+             Row(verticalAlignment = Alignment.Top) {
+                 Icon(
+                     imageVector = Icons.Default.CloudUpload,
+                     contentDescription = null,
+                     tint = MaterialTheme.colorScheme.primary,
+                     modifier = Modifier.size(28.dp)
+                 )
+                 Spacer(Modifier.width(16.dp))
+                 Column {
+                     Text("Google Drive", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                     Spacer(Modifier.height(4.dp))
+                     if (state.googleAccountEmail != null) {
+                         Text("Linked: ${state.googleAccountEmail}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                         
+                         state.driveBackupMetadata?.let { meta ->
+                             val size = formatSize(meta.size)
+                             val date = meta.modifiedTime?.let {
+                                  SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(it.value))
+                             } ?: "Unknown"
+                             Spacer(Modifier.height(4.dp))
+                             Text("Last Backup: $date ($size)", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
+                         }
+                     } else {
+                         Text("Sign in to backup your data to the cloud.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                     }
+                 }
+             }
+
+             Spacer(Modifier.height(20.dp))
+
+             if (state.googleAccountEmail != null) {
+                 Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                     Button(
+                         onClick = onSignInBackup,
+                         modifier = Modifier.weight(1f),
+                         shape = RoundedCornerShape(12.dp)
+                     ) {
+                         if (state.isBackingUp && state.backupResult?.contains("Drive") == true) {
+                             CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                             Spacer(Modifier.width(8.dp))
+                             Text(state.uploadProgress ?: "Backing up...")
+                         } else {
+                             Text("Backup Now")
+                         }
+                     }
+                     if (state.driveBackupExists) {
+                         OutlinedButton(onClick = onRestore, shape = RoundedCornerShape(12.dp)) {
+                             Text("Restore")
+                         }
+                     }
+                 }
+                 Spacer(Modifier.height(8.dp))
+                 TextButton(onClick = onUnlink, modifier = Modifier.align(Alignment.End)) {
+                     Text("Unlink Account", color = MaterialTheme.colorScheme.error)
+                 }
+             } else {
+                 Button(
+                     onClick = onSignInBackup,
+                     modifier = Modifier.fillMaxWidth(),
+                     shape = RoundedCornerShape(12.dp)
+                 ) {
+                     Text("Sign In & Backup")
+                 }
+             }
+         }
+    }
+}
+
+@Composable
+fun ManualLocalBackupCard(
+    state: BackupRestoreState,
+    onBackupToSd: () -> Unit,
+    onSaveToFile: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.SdStorage, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(28.dp))
+                Spacer(Modifier.width(16.dp))
+                Column {
+                    Text("Local Backup", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text("Save to device storage or SD card", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
+            Spacer(Modifier.height(20.dp))
+            
+            // SD Card Action
+            OutlinedButton(
+                onClick = onBackupToSd,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                 if (state.isBackingUp && state.backupResult?.contains("SD Card") == true) {
+                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                     Spacer(Modifier.width(8.dp))
+                     Text("Backing up...")
+                 } else {
+                     Text(if (state.sdCardFolderUri != null) "Backup to Selected Folder" else "Select Folder & Backup")
+                 }
+            }
+            
+            Spacer(Modifier.height(12.dp))
+
+            // Save As Action
+            OutlinedButton(
+                onClick = onSaveToFile,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                 Text("Save as .zip File")
+            }
+            
+            if (state.backupResult != null && (state.backupResult.contains("Local") || state.backupResult.contains("SD Card"))) {
+                 Spacer(Modifier.height(12.dp))
+                 Text(
+                     text = state.backupResult, 
+                     style = MaterialTheme.typography.bodySmall, 
+                     color = if (state.backupResult.contains("failed")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary
+                 )
+            }
+        }
+    }
+}
+
+@Composable
+fun AutoBackupSettingsCard(
+    state: BackupRestoreState,
+    onToggleAutoBackup: (Boolean, String?) -> Unit,
+    onToggleSdBackup: (Boolean) -> Unit,
+    onFrequencyChange: (String) -> Unit,
+    onChangeSdLocation: () -> Unit,
+    context: android.content.Context
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+             Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Schedule, null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(28.dp))
+                Spacer(Modifier.width(16.dp))
+                Text("Automatic Backup", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+            }
+            
+            Spacer(Modifier.height(24.dp))
+
+            // Frequency
+            Text("Frequency", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                listOf("Daily", "Weekly").forEach { freq ->
+                    FilterChip(
+                        selected = state.backupFrequency == freq,
+                        onClick = { onFrequencyChange(freq) },
+                        label = { Text(freq) },
+                        leadingIcon = if (state.backupFrequency == freq) {
+                            { Icon(Icons.Default.Check, null, Modifier.size(16.dp)) }
+                        } else null
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+            Spacer(Modifier.height(16.dp))
+
+            // Google Drive Toggle
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("Google Drive", style = MaterialTheme.typography.bodyLarge)
+                    if (state.googleAccountEmail == null && state.isAutoBackupEnabled) {
+                        Text("Sign in required", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.error)
+                    }
+                }
+                Switch(
+                    checked = state.isAutoBackupEnabled,
+                    onCheckedChange = { 
+                        val account = GoogleSignIn.getLastSignedInAccount(context)
+                        onToggleAutoBackup(it, account?.email)
+                    }
+                )
+            }
+
+            Spacer(Modifier.height(16.dp))
+
+            // SD Card Toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("SD Card / Local Folder", style = MaterialTheme.typography.bodyLarge)
+                    state.sdCardFolderUri?.let { uri ->
+                        val path = try { android.net.Uri.parse(uri).path?.substringAfterLast(":") ?: "Selected" } catch(e:Exception){"Selected"}
+                        Text(path, style = MaterialTheme.typography.labelSmall, maxLines=1, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                Switch(
+                    checked = state.isSdCardAutoBackupEnabled,
+                    onCheckedChange = { onToggleSdBackup(it) }
+                )
+            }
+            
+            if (state.sdCardFolderUri != null || state.isSdCardAutoBackupEnabled) {
+                TextButton(onClick = onChangeSdLocation) {
+                    Text("Change Folder")
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 fun StorageUsageCard(details: BackupDetails) {
@@ -432,7 +562,7 @@ fun StorageUsageCard(details: BackupDetails) {
                         icon = Icons.Default.Label,
                         count = details.labelsCount.toString(),
                         label = stringResource(id = R.string.labels_count),
-                         color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.secondary
                     )
                      Spacer(modifier = Modifier.height(16.dp))
                     UsageStatItem(
@@ -484,81 +614,28 @@ fun UsageStatItem(
     }
 }
 
-
-
 @Composable
-fun BackupActionCard(
-    title: String,
-    subtitle: String,
-    icon: ImageVector,
-    buttonText: String,
+fun DeleteBackupCard(
     isLoading: Boolean,
-    isPrimary: Boolean = false,
-    containerColor: androidx.compose.ui.graphics.Color = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface,
-    contentColor: androidx.compose.ui.graphics.Color = if (isPrimary) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface,
-    onClick: () -> Unit,
-    secondaryAction: (@Composable () -> Unit)? = null,
-    progressText: String? = null
+    onClick: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = containerColor, contentColor = contentColor),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)),
         shape = RoundedCornerShape(16.dp),
-        elevation = if (isPrimary) CardDefaults.cardElevation(defaultElevation = 2.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = if (!isPrimary) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.3f))
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                             if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
-                             RoundedCornerShape(12.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                     Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                         tint = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
-                     )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                    Text(text = subtitle, style = MaterialTheme.typography.bodyMedium.copy(color = contentColor.copy(alpha = 0.8f)))
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                 Button(
-                    onClick = onClick,
-                    enabled = !isLoading,
-                    shape = RoundedCornerShape(12.dp),
-                    colors = if (isPrimary) ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    ) else ButtonDefaults.outlinedButtonColors()
-                ) {
-                    if (isLoading) {
-                         CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = LocalContentColor.current)
-                         Spacer(modifier = Modifier.width(8.dp))
-                         // If progress text is provided via a lambda or simple loading text
-                         Text(progressText ?: "Processing...")
-                    } else {
-                         Text(buttonText)
-                    }
-                }
-                
-                secondaryAction?.invoke()
+        Row(
+            modifier = Modifier.padding(16.dp).fillMaxWidth().clickable { onClick() },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Icon(Icons.Default.DeleteForever, null, tint = MaterialTheme.colorScheme.error)
+            Spacer(Modifier.width(8.dp))
+            if (isLoading) {
+                 CircularProgressIndicator(Modifier.size(16.dp), color = MaterialTheme.colorScheme.error)
+            } else {
+                 Text("Delete Backup from Drive", color = MaterialTheme.colorScheme.error, fontWeight = FontWeight.Bold)
             }
         }
     }
@@ -574,150 +651,5 @@ private fun formatSize(size: Long): String {
         mb >= 1 -> String.format("%.2f MB", mb)
         kb >= 1 -> String.format("%.2f KB", kb)
         else -> "$size B"
-    }
-}
-
-@Composable
-fun AutoBackupCard(
-    isEnabled: Boolean,
-    frequency: String,
-    onToggle: (Boolean) -> Unit,
-    onFrequencyChange: (String) -> Unit,
-    title: String = "Auto Backup"
-) {
-    var expanded by remember { mutableStateOf(false) }
-
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .background(MaterialTheme.colorScheme.tertiaryContainer, RoundedCornerShape(12.dp)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Schedule,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onTertiaryContainer
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    Column {
-                        Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                         AnimatedVisibility(visible = isEnabled) {
-                            Text(
-                                text = "Frequency: $frequency",
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.primary
-                            )
-                        }
-                    }
-                }
-                Switch(checked = isEnabled, onCheckedChange = onToggle)
-            }
-
-            AnimatedVisibility(visible = isEnabled) {
-                Column {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                    Spacer(modifier = Modifier.height(16.dp))
-                    
-                    Text("Backup Frequency", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    Spacer(modifier = Modifier.height(8.dp))
-                    
-                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                        listOf("Daily", "Weekly").forEach { item ->
-                            FilterChip(
-                                selected = frequency == item,
-                                onClick = { onFrequencyChange(item) },
-                                label = { Text(item) },
-                                leadingIcon = if (frequency == item) {
-                                    { Icon(Icons.Default.Check, contentDescription = null, modifier = Modifier.size(16.dp)) }
-                                } else null
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun DeleteBackupCard(
-    isLoading: Boolean,
-    onClick: () -> Unit
-) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        shape = RoundedCornerShape(16.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.5f))
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(12.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.DeleteForever,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error
-                    )
-                }
-                Spacer(modifier = Modifier.width(16.dp))
-                Column {
-                    Text(
-                        text = "Danger Zone",
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                        color = MaterialTheme.colorScheme.error
-                    )
-                    Text(
-                        text = "Permanently delete backup from Drive",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            
-            Button(
-                onClick = onClick,
-                enabled = !isLoading,
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.error,
-                    contentColor = MaterialTheme.colorScheme.onError
-                ),
-                shape = RoundedCornerShape(12.dp)
-            ) {
-                 if (isLoading) {
-                     CircularProgressIndicator(
-                         modifier = Modifier.size(16.dp),
-                         strokeWidth = 2.dp, 
-                         color = MaterialTheme.colorScheme.onError
-                     )
-                     Spacer(modifier = Modifier.width(8.dp))
-                     Text("Deleting...")
-                } else {
-                     Text("Delete Backup")
-                }
-            }
-        }
     }
 }

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.CloudDownload
 import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.*
@@ -59,7 +60,6 @@ fun RestoreScreen(
     }
 
     // Launcher for Selective Restore (Scan first)
-    // We need to store the URI to pass it to restoreSelectedProjects later
     var selectedBackupUri by remember { mutableStateOf<Uri?>(null) }
     val selectiveRestoreLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -78,9 +78,7 @@ fun RestoreScreen(
             try {
                  val account = task.getResult(ApiException::class.java)
                  viewModel.restoreFromDrive(account)
-            } catch (e: ApiException) {
-               // Handle error
-            }
+            } catch (e: ApiException) { }
         }
     }
 
@@ -150,26 +148,28 @@ fun RestoreScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues)
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
+                .padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(bottom = 24.dp)
         ) {
               item {
                 Card(
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer.copy(alpha = 0.3f)
                     ),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
                      Row(
                         modifier = Modifier
                             .padding(16.dp)
                             .fillMaxWidth(),
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.Top
                     ) {
                         Icon(
-                            imageVector = Icons.Default.Restore,
+                            imageVector = Icons.Default.Info,
                             contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSecondaryContainer
+                            tint = MaterialTheme.colorScheme.onTertiaryContainer
                         )
                         Spacer(modifier = Modifier.width(16.dp))
                         Text(
@@ -182,28 +182,13 @@ fun RestoreScreen(
             }
 
             item {
-                Text(
-                    text = "Restore Options",
-                    style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(start = 4.dp, top = 8.dp)
-                )
+                SectionHeader("Restore Sources")
             }
 
+            // Google Drive Restore
             item {
-                RestoreActionCard(
-                    title = "Local Restore",
-                    subtitle = "Restore all data from a local .zip file",
-                    icon = Icons.Default.Archive,
-                    buttonText = "Select File",
-                    isLoading = state.isRestoring && state.restoreResult?.contains("Local") == true,
-                    onClick = { openDocumentLauncher.launch(arrayOf("application/zip")) }
-                )
-            }
-
-            item {
-                RestoreActionCard(
-                    title = "Google Drive Restore",
+                RestoreSourceCard(
+                    title = "Google Drive",
                     subtitle = "Restore all data from Google Drive",
                     icon = Icons.Default.CloudDownload,
                     buttonText = "Restore from Drive",
@@ -212,23 +197,33 @@ fun RestoreScreen(
                     onClick = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestEmail()
-                            .requestScopes(
-                                Scope(DriveScopes.DRIVE_FILE),
-                                Scope(DriveScopes.DRIVE_APPDATA)
-                            )
+                            .requestScopes(Scope(DriveScopes.DRIVE_FILE), Scope(DriveScopes.DRIVE_APPDATA))
                             .build()
                         val client = GoogleSignIn.getClient(context, gso)
                         googleSignInLauncher.launch(client.signInIntent)
                     }
                 )
             }
-            
+
+            // Local Restore
             item {
-                 RestoreActionCard(
+                RestoreSourceCard(
+                    title = "Local File",
+                    subtitle = "Restore all data from a local .zip file",
+                    icon = Icons.Default.Archive,
+                    buttonText = "Select File",
+                    isLoading = state.isRestoring && state.restoreResult?.contains("Local") == true,
+                    onClick = { openDocumentLauncher.launch(arrayOf("application/zip")) }
+                )
+            }
+            
+            // Selective Restore
+            item {
+                 RestoreSourceCard(
                     title = "Selective Restore",
                     subtitle = "Choose specific projects to restore from local backup",
                     icon = Icons.Default.CheckCircle, 
-                    buttonText = "Select File & Choose",
+                    buttonText = "Scan Backup File",
                     isLoading = state.isScanning,
                     onClick = { 
                         selectiveRestoreLauncher.launch(arrayOf("application/zip"))
@@ -238,6 +233,7 @@ fun RestoreScreen(
 
             item {
                  state.restoreResult?.let { result ->
+                     Spacer(Modifier.height(8.dp))
                     Card(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.surfaceVariant
@@ -269,7 +265,7 @@ fun RestoreScreen(
 }
 
 @Composable
-fun RestoreActionCard(
+fun RestoreSourceCard(
     title: String,
     subtitle: String,
     icon: ImageVector,
@@ -281,38 +277,27 @@ fun RestoreActionCard(
      Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-             containerColor = if (isPrimary) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface
+             containerColor = MaterialTheme.colorScheme.surface
         ),
-        shape = RoundedCornerShape(16.dp),
-        elevation = if (isPrimary) CardDefaults.cardElevation(defaultElevation = 2.dp) else CardDefaults.cardElevation(defaultElevation = 0.dp),
-        border = if (!isPrimary) androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(20.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .background(
-                             if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondaryContainer,
-                             RoundedCornerShape(12.dp)
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                     Icon(
-                        imageVector = icon,
-                        contentDescription = null,
-                        modifier = Modifier.size(24.dp),
-                         tint = if (isPrimary) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.onSecondaryContainer
-                     )
-                }
+                Icon(
+                    imageVector = icon,
+                    contentDescription = null,
+                    modifier = Modifier.size(28.dp),
+                     tint = if (isPrimary) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                 )
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                    Text(text = subtitle, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)))
+                    Text(text = subtitle, style = MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurfaceVariant))
                 }
             }
             
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
             Button(
                 onClick = onClick,
@@ -392,6 +377,16 @@ fun ProjectSelectionDialog(
                 Text("Cancel")
             }
         }
+    )
+}
+
+@Composable
+fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(start = 4.dp, top = 8.dp)
     )
 }
 
