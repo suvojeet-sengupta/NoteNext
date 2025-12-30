@@ -98,6 +98,12 @@ class NotesViewModel @Inject constructor(
                 searchQuery = query
             )
         }.launchIn(viewModelScope)
+
+        viewModelScope.launch {
+             NoteSelectionManager.actions.collect { style ->
+                 onEvent(NotesEvent.ApplyStyleToContent(style))
+             }
+        }
     }
 
     fun onEvent(event: NotesEvent) {

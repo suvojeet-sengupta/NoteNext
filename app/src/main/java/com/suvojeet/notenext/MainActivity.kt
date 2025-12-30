@@ -115,4 +115,47 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
+
+    override fun onActionModeStarted(mode: android.view.ActionMode?) {
+        val menu = mode?.menu
+        if (menu != null) {
+            menu.add("Bold").setOnMenuItemClickListener {
+                lifecycleScope.launch {
+                    com.suvojeet.notenext.ui.notes.NoteSelectionManager.onAction(
+                        androidx.compose.ui.text.SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    )
+                }
+                mode.finish() 
+                true
+            }
+            menu.add("Italic").setOnMenuItemClickListener {
+                lifecycleScope.launch {
+                    com.suvojeet.notenext.ui.notes.NoteSelectionManager.onAction(
+                        androidx.compose.ui.text.SpanStyle(fontStyle = androidx.compose.ui.text.font.FontStyle.Italic)
+                    )
+                }
+                mode.finish()
+                true
+            }
+            menu.add("Underline").setOnMenuItemClickListener {
+                lifecycleScope.launch {
+                    com.suvojeet.notenext.ui.notes.NoteSelectionManager.onAction(
+                        androidx.compose.ui.text.SpanStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)
+                    )
+                }
+                mode.finish()
+                true
+            }
+            menu.add("Strike").setOnMenuItemClickListener {
+                lifecycleScope.launch {
+                    com.suvojeet.notenext.ui.notes.NoteSelectionManager.onAction(
+                        androidx.compose.ui.text.SpanStyle(textDecoration = androidx.compose.ui.text.style.TextDecoration.LineThrough)
+                    )
+                }
+                mode.finish()
+                true
+            }
+        }
+        super.onActionModeStarted(mode)
+    }
 }
