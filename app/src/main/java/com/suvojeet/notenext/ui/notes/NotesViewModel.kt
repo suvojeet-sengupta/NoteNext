@@ -373,17 +373,11 @@ class NotesViewModel @Inject constructor(
             }
             is NotesEvent.SwapChecklistItems -> {
                 val list = state.value.editingChecklist.toMutableList()
-                if (event.fromIndex in list.indices && event.toIndex in list.indices) {
-                    val fromItem = list[event.fromIndex]
-                    val toItem = list[event.toIndex]
-                    list[event.fromIndex] = fromItem.copy(position = event.toIndex)
-                    list[event.toIndex] = toItem.copy(position = event.fromIndex)
-                    
-                    // Re-sort just in case, though swapping positions should be enough if we use position for sort
-                    // Actually, we should swap elements in the list AND update their position fields
-                    
-                    java.util.Collections.swap(list, event.fromIndex, event.toIndex)
-                    
+                val fromIndex = list.indexOfFirst { it.id == event.fromId }
+                val toIndex = list.indexOfFirst { it.id == event.toId }
+
+                if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                    java.util.Collections.swap(list, fromIndex, toIndex)
                     // Update all positions to match indices to be safe
                     val updatedList = list.mapIndexed { index, item -> item.copy(position = index) }
                     _state.value = state.value.copy(editingChecklist = updatedList)

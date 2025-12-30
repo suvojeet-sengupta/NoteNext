@@ -22,7 +22,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.CollapseNote -> ProjectNotesEvent.CollapseNote
         is NotesEvent.OnChecklistItemCheckedChange -> ProjectNotesEvent.OnChecklistItemCheckedChange(this.itemId, this.isChecked)
         is NotesEvent.OnChecklistItemTextChange -> ProjectNotesEvent.OnChecklistItemTextChange(this.itemId, this.text)
-        is NotesEvent.SwapChecklistItems -> ProjectNotesEvent.SwapChecklistItems(this.fromIndex, this.toIndex)
+        is NotesEvent.SwapChecklistItems -> ProjectNotesEvent.SwapChecklistItems(this.fromId, this.toId)
         is NotesEvent.AddChecklistItem -> ProjectNotesEvent.AddChecklistItem
         is NotesEvent.DeleteChecklistItem -> ProjectNotesEvent.DeleteChecklistItem(this.itemId)
         is NotesEvent.OnTitleChange -> ProjectNotesEvent.OnTitleChange(this.title)

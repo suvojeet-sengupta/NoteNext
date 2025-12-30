@@ -23,6 +23,14 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.DragHandle
+import androidx.compose.foundation.gestures.detectDragGesturesAfterLongPress
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.zIndex
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.lazy.itemsIndexed
+import kotlin.math.roundToInt
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -72,11 +80,46 @@ fun LazyListScope.ChecklistEditor(
     val checkedItems = state.editingChecklist.filter { it.isChecked }.sortedBy { it.position }
 
     // Unchecked Items
-    items(uncheckedItems, key = { it.id }) { item ->
+    // Unchecked Items
+    itemsIndexed(uncheckedItems, key = { _, item -> item.id }) { index, item ->
+        val dragOffset = remember { mutableStateOf(0f) }
+        val isDragging = dragOffset.value != 0f
+        
+        val dragModifier = Modifier
+            .pointerInput(Unit) {
+                detectDragGesturesAfterLongPress(
+                    onDragStart = { },
+                    onDrag = { change, dragAmount ->
+                        change.consume()
+                        dragOffset.value += dragAmount.y
+                        
+                        // Threshold for swapping (approx item height)
+                        val threshold = 100f 
+                        if (dragOffset.value > threshold) {
+                            if (index < uncheckedItems.lastIndex) {
+                                onEvent(NotesEvent.SwapChecklistItems(item.id, uncheckedItems[index + 1].id))
+                                dragOffset.value -= threshold 
+                            }
+                        } else if (dragOffset.value < -threshold) {
+                            if (index > 0) {
+                                onEvent(NotesEvent.SwapChecklistItems(item.id, uncheckedItems[index - 1].id))
+                                dragOffset.value += threshold
+                            }
+                        }
+                    },
+                    onDragEnd = { dragOffset.value = 0f },
+                    onDragCancel = { dragOffset.value = 0f }
+                )
+            }
+
         ChecklistItemRow(
             item = item,
             onEvent = onEvent,
-            isChecked = false
+            isChecked = false,
+            modifier = Modifier
+                .offset { IntOffset(0, dragOffset.value.roundToInt()) }
+                .zIndex(if (isDragging) 1f else 0f),
+            dragModifier = dragModifier
         )
     }
 
@@ -145,7 +188,9 @@ fun LazyListScope.ChecklistEditor(
 fun ChecklistItemRow(
     item: ChecklistItem,
     onEvent: (NotesEvent) -> Unit,
-    isChecked: Boolean
+    isChecked: Boolean,
+    modifier: Modifier = Modifier,
+    dragModifier: Modifier = Modifier
 ) {
     val focusRequester = remember { FocusRequester() }
     val dismissState = rememberSwipeToDismissBoxState(
@@ -165,6 +210,7 @@ fun ChecklistItemRow(
         exit = shrinkVertically() + fadeOut()
     ) {
         SwipeToDismissBox(
+            modifier = modifier,
             state = dismissState,
             backgroundContent = {
                 val color = Color(0xFFFF5252) // Red color for delete
@@ -191,8 +237,16 @@ fun ChecklistItemRow(
                     .padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Drag Handle (Placeholder/Visual) - Can implement drag logic later if needed
-                // Icon(Icons.Default.DragIndicator, ...) 
+                // Drag Handle
+                Icon(
+                    imageVector = Icons.Default.DragHandle,
+                    contentDescription = "Reorder",
+                    modifier = Modifier
+                        .padding(start = 8.dp, end = 4.dp)
+                        .size(24.dp)
+                        .then(dragModifier),
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                ) 
                 
                 Checkbox(
                     checked = item.isChecked,

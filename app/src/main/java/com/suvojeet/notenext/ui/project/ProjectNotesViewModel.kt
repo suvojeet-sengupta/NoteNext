@@ -322,13 +322,11 @@ class ProjectNotesViewModel @Inject constructor(
             }
             is ProjectNotesEvent.SwapChecklistItems -> {
                 val list = state.value.editingChecklist.toMutableList()
-                if (event.fromIndex in list.indices && event.toIndex in list.indices) {
-                    val fromItem = list[event.fromIndex]
-                    val toItem = list[event.toIndex]
-                    list[event.fromIndex] = fromItem.copy(position = event.toIndex)
-                    list[event.toIndex] = toItem.copy(position = event.fromIndex)
-                    
-                    java.util.Collections.swap(list, event.fromIndex, event.toIndex)
+                val fromIndex = list.indexOfFirst { it.id == event.fromId }
+                val toIndex = list.indexOfFirst { it.id == event.toId }
+
+                if (fromIndex != -1 && toIndex != -1 && fromIndex != toIndex) {
+                    java.util.Collections.swap(list, fromIndex, toIndex)
                     
                     val updatedList = list.mapIndexed { index, item -> item.copy(position = index) }
                     _state.value = state.value.copy(editingChecklist = updatedList)

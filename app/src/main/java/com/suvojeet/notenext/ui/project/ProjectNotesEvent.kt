@@ -29,7 +29,7 @@ sealed class ProjectNotesEvent {
     // Checklist Events
     data class OnChecklistItemCheckedChange(val itemId: String, val isChecked: Boolean) : ProjectNotesEvent()
     data class OnChecklistItemTextChange(val itemId: String, val text: String) : ProjectNotesEvent()
-    data class SwapChecklistItems(val fromIndex: Int, val toIndex: Int) : ProjectNotesEvent()
+    data class SwapChecklistItems(val fromId: String, val toId: String) : ProjectNotesEvent()
     object AddChecklistItem : ProjectNotesEvent()
     data class DeleteChecklistItem(val itemId: String) : ProjectNotesEvent()
 
