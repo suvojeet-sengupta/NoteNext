@@ -57,6 +57,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.MoveSelectedNotesToProject -> throw IllegalArgumentException("MoveSelectedNotesToProject event cannot be converted")
         is NotesEvent.CreateNoteFromSharedText -> throw IllegalArgumentException("CreateNoteFromSharedText event cannot be converted")
         is NotesEvent.OnSearchQueryChange -> throw IllegalArgumentException("OnSearchQueryChange event cannot be converted")
+        is NotesEvent.OnToggleNoteType -> ProjectNotesEvent.OnToggleNoteType
     }
 }
 

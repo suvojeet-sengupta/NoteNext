@@ -839,10 +839,35 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.UpdateProjectDescription -> {
                 viewModelScope.launch {
                     repository.getProjectById(projectId)?.let { project ->
-                        val updatedProject = project.copy(description = event.description)
-                        repository.updateProject(updatedProject)
-                        _state.value = _state.value.copy(projectDescription = event.description)
+                        val updatedDescription = event.description
+                        repository.updateProject(project.copy(description = updatedDescription)) // Assuming updateProject takes a Project object
+                        _state.value = _state.value.copy(projectDescription = updatedDescription)
                     }
+                }
+            }
+            is ProjectNotesEvent.OnToggleNoteType -> {
+                val currentType = state.value.editingNoteType
+                if (currentType == "TEXT") {
+                    // Convert TEXT to CHECKLIST
+                    val lines = state.value.editingContent.text.split("\n")
+                    val checklistItems = lines.filter { it.isNotBlank() }.mapIndexed { index, text ->
+                        com.suvojeet.notenext.data.ChecklistItem(text = text.trim(), isChecked = false, position = index)
+                    }
+                    val finalItems = if (checklistItems.isEmpty()) listOf(com.suvojeet.notenext.data.ChecklistItem(text = "", isChecked = false, position = 0)) else checklistItems
+                    
+                    _state.value = state.value.copy(
+                        editingNoteType = "CHECKLIST",
+                        editingChecklist = finalItems,
+                        editingContent = TextFieldValue("") 
+                    )
+                } else {
+                    // Convert CHECKLIST to TEXT
+                    val textContent = state.value.editingChecklist.joinToString("\n") { it.text }
+                    _state.value = state.value.copy(
+                        editingNoteType = "TEXT",
+                        editingContent = TextFieldValue(textContent),
+                        editingChecklist = emptyList()
+                    )
                 }
             }
         }

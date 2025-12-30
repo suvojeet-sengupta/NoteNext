@@ -63,4 +63,5 @@ sealed class ProjectNotesEvent {
     data class OnRestoreVersion(val version: NoteVersion) : ProjectNotesEvent()
     data class NavigateToNoteByTitle(val title: String) : ProjectNotesEvent()
     data class UpdateProjectDescription(val description: String?) : ProjectNotesEvent()
+    object OnToggleNoteType : ProjectNotesEvent()
 }

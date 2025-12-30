@@ -73,4 +73,5 @@ sealed class NotesEvent {
     data class OnSearchQueryChange(val query: String) : NotesEvent()
     data class OnRestoreVersion(val version: NoteVersion) : NotesEvent()
     data class NavigateToNoteByTitle(val title: String) : NotesEvent()
+    object OnToggleNoteType : NotesEvent()
 }

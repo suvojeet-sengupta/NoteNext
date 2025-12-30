@@ -854,6 +854,32 @@ class NotesViewModel @Inject constructor(
                     _events.emit(NotesUiEvent.ShowToast("${selectedNotes.size} notes moved to project"))
                 }
             }
+            is NotesEvent.OnToggleNoteType -> {
+                val currentType = state.value.editingNoteType
+                if (currentType == "TEXT") {
+                    // Convert TEXT to CHECKLIST
+                    val lines = state.value.editingContent.text.split("\n")
+                    val checklistItems = lines.filter { it.isNotBlank() }.mapIndexed { index, text ->
+                        ChecklistItem(text = text.trim(), isChecked = false, position = index)
+                    }
+                    // If empty, add one empty item
+                    val finalItems = if (checklistItems.isEmpty()) listOf(ChecklistItem(text = "", isChecked = false, position = 0)) else checklistItems
+                    
+                    _state.value = state.value.copy(
+                        editingNoteType = "CHECKLIST",
+                        editingChecklist = finalItems,
+                        editingContent = TextFieldValue("") // Clear text content
+                    )
+                } else {
+                    // Convert CHECKLIST to TEXT
+                    val textContent = state.value.editingChecklist.joinToString("\n") { it.text }
+                    _state.value = state.value.copy(
+                        editingNoteType = "TEXT",
+                        editingContent = TextFieldValue(textContent),
+                        editingChecklist = emptyList()
+                    )
+                }
+            }
             is NotesEvent.CreateNoteFromSharedText -> {
                 undoRedoManager.reset("" to TextFieldValue(event.text))
                 _state.value = state.value.copy(
