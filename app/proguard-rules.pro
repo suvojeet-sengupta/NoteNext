@@ -18,3 +18,6 @@
 -dontwarn org.ietf.jgss.**
 -dontwarn org.apache.http.**
 -dontwarn org.apache.commons.**
+
+# Keep data classes for Gson serialization
+-keep class com.suvojeet.notenext.data.** { *; }
