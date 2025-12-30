@@ -167,7 +167,7 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     
                     TeamMemberCard(
                         name = "Jendermine",
-                        role = stringResource(id = R.string.developer),
+                        role = stringResource(id = R.string.feedback_provider),
                         avatarUrl = "https://avatars.githubusercontent.com/u/92355621",
                         githubUrl = "https://github.com/jendermine",
                         isInternetAvailable = isInternetAvailable,
