@@ -240,17 +240,7 @@ private fun HeroSection() {
     }
 }
 
- @Composable
-private fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium.copy(
-            fontWeight = FontWeight.Bold
-        ),
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 16.dp, bottom = 8.dp)
-    )
-}
+// SectionHeader removed; using shared definition
 
  @Composable
 private fun AboutGroupCard(

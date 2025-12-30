@@ -380,15 +380,7 @@ fun ProjectSelectionDialog(
     )
 }
 
-@Composable
-fun SectionHeader(title: String) {
-    Text(
-        text = title,
-        style = MaterialTheme.typography.titleMedium,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(start = 4.dp, top = 8.dp)
-    )
-}
+// SectionHeader removed; using shared definition
 
 enum class RestoreType {
     LOCAL, DRIVE
