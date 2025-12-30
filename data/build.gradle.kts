@@ -81,4 +81,7 @@ dependencies {
     implementation("com.google.api-client:google-api-client-android:2.8.1")
     implementation("com.google.apis:google-api-services-drive:v3-rev20251210-2.0.0")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.30.1")
+    
+    // DocumentFile
+    implementation("androidx.documentfile:documentfile:1.1.0")
 }

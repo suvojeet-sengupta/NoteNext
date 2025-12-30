@@ -49,7 +49,9 @@ data class BackupRestoreState(
     val foundProjects: List<com.suvojeet.notenext.data.Project> = emptyList(),
     val isScanning: Boolean = false,
     val googleAccountEmail: String? = null,
-    val uploadProgress: String? = null
+    val uploadProgress: String? = null,
+    val isSdCardAutoBackupEnabled: Boolean = false,
+    val sdCardFolderUri: String? = null
 )
 
 @HiltViewModel
@@ -68,7 +70,14 @@ class BackupRestoreViewModel @Inject constructor(
         val enabled = sharedPrefs.getBoolean("auto_backup_enabled", false)
         val frequency = sharedPrefs.getString("backup_frequency", "Daily") ?: "Daily"
         _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
-        _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+        val sdCardEnabled = sharedPrefs.getBoolean("sd_card_backup_enabled", false)
+        val sdCardUri = sharedPrefs.getString("sd_card_folder_uri", null)
+        _state.value = _state.value.copy(
+            isAutoBackupEnabled = enabled, 
+            backupFrequency = frequency,
+            isSdCardAutoBackupEnabled = sdCardEnabled,
+            sdCardFolderUri = sdCardUri
+        )
     }
 
     fun setGoogleAccount(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount?) {
@@ -356,18 +365,80 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    private fun scheduleWorker(email: String, frequency: String) {
+    fun toggleSdCardAutoBackup(enabled: Boolean) {
+        viewModelScope.launch {
+            val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+            sharedPrefs.edit().putBoolean("sd_card_backup_enabled", enabled).apply()
+            
+            _state.value = _state.value.copy(isSdCardAutoBackupEnabled = enabled)
+            
+            refreshWorkerSchedule()
+        }
+    }
+
+    fun setSdCardLocation(uri: Uri) {
+        viewModelScope.launch {
+            // Take persistable permission
+            val contentResolver = application.contentResolver
+            val takeFlags: Int = android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION or
+                    android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
+            try {
+                contentResolver.takePersistableUriPermission(uri, takeFlags)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+            val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+            sharedPrefs.edit().putString("sd_card_folder_uri", uri.toString()).apply()
+            
+            _state.value = _state.value.copy(sdCardFolderUri = uri.toString())
+            refreshWorkerSchedule()
+        }
+    }
+
+    fun backupToSdCard() {
+        val uriString = state.value.sdCardFolderUri ?: return
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isBackingUp = true, backupResult = "Backing up to SD Card...")
+            withContext(Dispatchers.IO) {
+                try {
+                    val result = backupRepository.backupToUri(Uri.parse(uriString))
+                     _state.value = _state.value.copy(isBackingUp = false, backupResult = result)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                     _state.value = _state.value.copy(isBackingUp = false, backupResult = "SD Card Backup failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun refreshWorkerSchedule() {
+        val currentState = state.value
+        val email = currentState.googleAccountEmail
+        val frequency = currentState.backupFrequency
+        
+        if ((currentState.isAutoBackupEnabled && email != null) || (currentState.isSdCardAutoBackupEnabled && currentState.sdCardFolderUri != null)) {
+            scheduleWorker(email, frequency)
+        } else {
+            cancelWorker()
+        }
+    }
+
+    private fun scheduleWorker(email: String?, frequency: String) {
         val workManager = androidx.work.WorkManager.getInstance(application)
         
         val repeatInterval = if (frequency == "Daily") 1L else 7L
         val timeUnit = java.util.concurrent.TimeUnit.DAYS
 
-        val inputData = androidx.work.Data.Builder()
-            .putString("email", email)
-            .build()
+        val inputDataBuilder = androidx.work.Data.Builder()
+        if (email != null) {
+            inputDataBuilder.putString("email", email)
+        }
+        val inputData = inputDataBuilder.build()
 
         val constraints = androidx.work.Constraints.Builder()
-            .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
+            //.setRequiredNetworkType(androidx.work.NetworkType.CONNECTED) // Only needed if Drive backup is active? 
+            // Better to keep it if we might do Drive backup. If only local, network not strictly needed but harmless.
             .setRequiresBatteryNotLow(true)
             .build()
 
@@ -375,10 +446,11 @@ class BackupRestoreViewModel @Inject constructor(
             .setConstraints(constraints)
             .setInputData(inputData)
             .build()
-
+        
+        // Use REPLACE policy to update constraints/data
         workManager.enqueueUniquePeriodicWork(
             "auto_backup",
-            androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+            androidx.work.ExistingPeriodicWorkPolicy.UPDATE, 
             workRequest
         )
     }

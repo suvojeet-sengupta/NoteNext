@@ -13,6 +13,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material.icons.filled.Schedule
+import androidx.compose.material.icons.filled.SdStorage
+import androidx.compose.ui.draw.scale
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -77,6 +79,14 @@ fun BackupScreen(
         }
     }
 
+            val sdCardLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocumentTree()
+    ) { uri ->
+        uri?.let {
+            viewModel.setSdCardLocation(it)
+        }
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -117,10 +127,19 @@ fun BackupScreen(
             
             item {
                  AutoBackupCard(
-                    isEnabled = state.isAutoBackupEnabled,
+                    isEnabled = state.isAutoBackupEnabled || state.isSdCardAutoBackupEnabled,
                     frequency = state.backupFrequency,
                     onToggle = { enabled -> 
-                        if (enabled) {
+                        // This logic is a bit complex now with two toggles.
+                        // Let's simplify: This card now controls the frequency. 
+                        // The individual toggles for Drive and SD Card should probably be in their respective cards or a dedicated section.
+                        // But for now, let's keep it simple: Changing frequency affects both if enabled.
+                        // But the master toggle here is ambiguous.
+                        // Let's change the AutoBackupCard to be just a "Backup Frequency" setting, and move toggles to specific cards.
+                        // OR, we keep this as "Google Drive Auto Backup" and add "SD Card Auto Backup" elsewhere.
+                        
+                        // Current implementation assumes this toggle is for Drive.
+                         if (enabled) {
                              GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
                                  viewModel.toggleAutoBackup(true, email, state.backupFrequency)
                              }
@@ -132,6 +151,47 @@ fun BackupScreen(
                          GoogleSignIn.getLastSignedInAccount(context)?.email?.let { email ->
                             viewModel.toggleAutoBackup(state.isAutoBackupEnabled, email, newFrequency)
                         }
+                        // Also update for SD card if relevant, though toggleSdCardAutoBackup doesn't take frequency (it uses shared prefs)
+                        // Ideally we save frequency globally.
+                         val sharedPrefs = context.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+                         sharedPrefs.edit().putString("backup_frequency", newFrequency).apply()
+                    },
+                    title = "Drive Auto Backup"
+                )
+            }
+
+            item {
+                BackupActionCard(
+                    title = "SD Card / Local Folder",
+                    subtitle = state.sdCardFolderUri?.let { 
+                        try {
+                            // Decode to be readable if possible, though raw URI is okay
+                            android.net.Uri.parse(it).path?.substringAfterLast(":") ?: it
+                        } catch(e: Exception) { it }
+                    } ?: "Select a folder for backups",
+                    icon = Icons.Default.SdStorage,
+                    buttonText = if (state.sdCardFolderUri != null) "Backup Now" else "Select Folder",
+                    isLoading = state.isBackingUp && state.backupResult?.contains("SD Card") == true,
+                    onClick = {
+                        if (state.sdCardFolderUri != null) {
+                            viewModel.backupToSdCard()
+                        } else {
+                            sdCardLauncher.launch(null)
+                        }
+                    },
+                    secondaryAction = {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (state.sdCardFolderUri != null) {
+                                TextButton(onClick = { sdCardLauncher.launch(null) }) {
+                                    Text("Change")
+                                }
+                                Switch(
+                                    checked = state.isSdCardAutoBackupEnabled,
+                                    onCheckedChange = { viewModel.toggleSdCardAutoBackup(it) },
+                                    modifier = Modifier.scale(0.8f)
+                                )
+                            }
+                        }
                     }
                 )
             }
@@ -139,9 +199,9 @@ fun BackupScreen(
             item {
                 BackupActionCard(
                     title = stringResource(id = R.string.create_backup),
-                    subtitle = "Save a .zip file to your device storage",
+                    subtitle = "Save a .zip file to a specific location",
                     icon = Icons.Default.Save,
-                    buttonText = "Create Local Backup",
+                    buttonText = "Save As...",
                     isLoading = state.isBackingUp && state.backupResult?.contains("Local") == true,
                     onClick = {
                         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
@@ -491,13 +551,13 @@ private fun formatSize(size: Long): String {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AutoBackupCard(
     isEnabled: Boolean,
     frequency: String,
     onToggle: (Boolean) -> Unit,
-    onFrequencyChange: (String) -> Unit
+    onFrequencyChange: (String) -> Unit,
+    title: String = "Auto Backup"
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -528,7 +588,7 @@ fun AutoBackupCard(
                     }
                     Spacer(modifier = Modifier.width(16.dp))
                     Column {
-                        Text(text = "Auto Backup", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                        Text(text = title, style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
                          AnimatedVisibility(visible = isEnabled) {
                             Text(
                                 text = "Frequency: $frequency",

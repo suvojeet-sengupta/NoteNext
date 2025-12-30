@@ -42,6 +42,32 @@ class BackupRepository @Inject constructor(
         }
     }
 
+    suspend fun backupToUri(folderUri: Uri): String {
+        return try {
+            val validUri = if (folderUri.toString().endsWith("%3A")) {
+                 // Convert simple tree URIs if needed, though DocumentFile.fromTreeUri handles most.
+                 folderUri
+            } else folderUri
+
+            val dir = androidx.documentfile.provider.DocumentFile.fromTreeUri(context, validUri)
+            if (dir == null || !dir.isDirectory || !dir.canWrite()) {
+                 throw Exception("Cannot write to selected folder. Please select a valid directory.")
+            }
+
+            val fileName = "NoteNext_Backup_${System.currentTimeMillis()}.zip"
+            val file = dir.createFile("application/zip", fileName) 
+                ?: throw Exception("Failed to create file in selected directory.")
+
+            context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
+                createBackupZip(outputStream)
+            }
+            "Backup successful: $fileName"
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Exception("Failed to save backup: ${e.message}")
+        }
+    }
+
     suspend fun backupToDrive(account: GoogleSignInAccount, onProgress: ((Long, Long) -> Unit)? = null): String {
         val dbFile = File(context.cacheDir, "temp_backup.zip")
         createBackupZip(dbFile)

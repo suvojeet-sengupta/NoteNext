@@ -25,18 +25,45 @@ class BackupWorker @AssistedInject constructor(
 ) : CoroutineWorker(appContext, workerParams) {
 
     override suspend fun doWork(): Result = withContext(Dispatchers.IO) {
-        val email = inputData.getString("email") ?: return@withContext Result.failure()
+        val email = inputData.getString("email")
         
+        val sharedPrefs = applicationContext.getSharedPreferences("backup_prefs", Context.MODE_PRIVATE)
+        val isSdCardBackupEnabled = sharedPrefs.getBoolean("sd_card_backup_enabled", false)
+        val sdCardFolderUri = sharedPrefs.getString("sd_card_folder_uri", null)
+
+        if (email == null && !isSdCardBackupEnabled) {
+            return@withContext Result.failure()
+        }
+
         setForeground(createForegroundInfo())
 
+        var success = true
+
         try {
-            val tempFile = File(applicationContext.cacheDir, "auto_backup.zip")
-            backupRepository.createBackupZip(tempFile)
+            // 1. Google Drive Backup
+            if (email != null) {
+                try {
+                    val tempFile = File(applicationContext.cacheDir, "auto_backup.zip")
+                    backupRepository.createBackupZip(tempFile)
+                    googleDriveManager.uploadBackup(applicationContext, email, tempFile)
+                    tempFile.delete()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    success = false // Mark partial failure, but continue
+                }
+            }
+
+            // 2. SD Card Backup
+            if (isSdCardBackupEnabled && sdCardFolderUri != null) {
+                 try {
+                     backupRepository.backupToUri(android.net.Uri.parse(sdCardFolderUri))
+                 } catch (e: Exception) {
+                     e.printStackTrace()
+                     success = false
+                 }
+            }
             
-            googleDriveManager.uploadBackup(applicationContext, email, tempFile)
-            
-            tempFile.delete()
-            Result.success()
+            if (success) Result.success() else Result.retry()
         } catch (e: Exception) {
             e.printStackTrace()
             Result.retry()
