@@ -1140,6 +1140,18 @@ fun PasswordSetDialog(
     var confirmPassword by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     var isPasswordVisible by remember { mutableStateOf(false) }
+    
+    val strength = calculatePasswordStrength(password)
+    val strengthColor = when (strength) {
+        PasswordStrength.WEAK -> androidx.compose.ui.graphics.Color.Red
+        PasswordStrength.MEDIUM -> androidx.compose.ui.graphics.Color(0xFFFFC107) // Amber
+        PasswordStrength.STRONG -> androidx.compose.ui.graphics.Color.Green
+    }
+    val strengthProgress = when (strength) {
+        PasswordStrength.WEAK -> 0.33f
+        PasswordStrength.MEDIUM -> 0.66f
+        PasswordStrength.STRONG -> 1f
+    }
 
     AlertDialog(
         onDismissRequest = onDismiss,
@@ -1162,6 +1174,25 @@ fun PasswordSetDialog(
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                if (password.isNotEmpty()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(
+                            text = "Strength: ${strength.name}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = strengthColor,
+                            modifier = Modifier.weight(1f)
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(4.dp))
+                    LinearProgressIndicator(
+                        progress = strengthProgress,
+                        color = strengthColor,
+                        modifier = Modifier.fillMaxWidth().height(4.dp),
+                        trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+                    )
+                }
                 
                 Spacer(Modifier.height(8.dp))
                 
@@ -1196,6 +1227,25 @@ fun PasswordSetDialog(
             TextButton(onClick = onDismiss) { Text("Cancel") }
         }
     )
+}
+
+enum class PasswordStrength {
+    WEAK, MEDIUM, STRONG
+}
+
+fun calculatePasswordStrength(password: String): PasswordStrength {
+    if (password.length < 6) return PasswordStrength.WEAK
+    var score = 0
+    if (password.length >= 8) score++
+    if (password.any { it.isDigit() }) score++
+    if (password.any { it.isUpperCase() }) score++
+    if (password.any { !it.isLetterOrDigit() }) score++ // Special char
+    
+    return when {
+        score >= 3 -> PasswordStrength.STRONG
+        score >= 1 -> PasswordStrength.MEDIUM
+        else -> PasswordStrength.WEAK
+    }
 }
 
 @Composable
