@@ -20,6 +20,7 @@ sealed class NotesEvent {
     object RestoreNote : NotesEvent()
     data class ToggleNoteSelection(val noteId: Int) : NotesEvent()
     object ClearSelection : NotesEvent()
+    object SelectAllNotes : NotesEvent()
     object TogglePinForSelectedNotes : NotesEvent()
     object DeleteSelectedNotes : NotesEvent()
     object ArchiveSelectedNotes : NotesEvent()

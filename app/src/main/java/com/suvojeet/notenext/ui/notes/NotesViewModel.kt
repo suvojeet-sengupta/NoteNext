@@ -156,6 +156,15 @@ class NotesViewModel @Inject constructor(
             is NotesEvent.ClearSelection -> {
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
+            is NotesEvent.SelectAllNotes -> {
+                val notesToSelect = if (state.value.filteredLabel != null) {
+                    state.value.notes.filter { it.note.label == state.value.filteredLabel }
+                } else {
+                    state.value.notes
+                }
+                val allIds = notesToSelect.map { it.note.id }
+                _state.value = state.value.copy(selectedNoteIds = allIds)
+            }
             is NotesEvent.TogglePinForSelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }

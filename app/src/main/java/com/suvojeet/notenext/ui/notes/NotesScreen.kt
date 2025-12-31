@@ -206,7 +206,8 @@ fun NotesScreen(
                                         onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
                                         onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
                                         onLabelClick = { showLabelDialog = true },
-                                        onMoveToProjectClick = { showMoveToProjectDialog = true }
+                                        onMoveToProjectClick = { showMoveToProjectDialog = true },
+                                        onSelectAllClick = { viewModel.onEvent(NotesEvent.SelectAllNotes) }
                                     )
                                 } else {
                                     TopAppBar(

@@ -83,7 +83,8 @@ fun ContextualTopAppBar(
     onCopyClick: () -> Unit,
     onSendClick: () -> Unit,
     onLabelClick: () -> Unit,
-    onMoveToProjectClick: () -> Unit
+    onMoveToProjectClick: () -> Unit,
+    onSelectAllClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
 
@@ -191,6 +192,13 @@ fun ContextualTopAppBar(
                                 .background(MaterialTheme.colorScheme.surfaceContainer)
                                 .widthIn(min = 180.dp)
                         ) {
+                            AnimatedDropdownItem(
+                                text = "Select All",
+                                onClick = {
+                                    onSelectAllClick()
+                                    showMenu = false
+                                }
+                            )
                             AnimatedDropdownItem(
                                 text = stringResource(id = R.string.archive),
                                 onClick = {
