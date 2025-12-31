@@ -71,6 +71,7 @@ fun BackupScreen(
 
     // State for Encryption
     var isEncryptChecked by remember { mutableStateOf(false) }
+    var isDriveEncryptChecked by remember { mutableStateOf(false) }
     var showPasswordSetDialog by remember { mutableStateOf(false) }
     var backupPassword by remember { mutableStateOf<String?>(null) }
     // Action to execute after password set (e.g. launch explorer or backup to SD)
@@ -121,7 +122,7 @@ fun BackupScreen(
             try {
                 val account = task.getResult(ApiException::class.java)
                 viewModel.setGoogleAccount(account)
-                viewModel.backupToDrive(account)
+                // viewModel.backupToDrive(account) // Removed automatic backup
             } catch (e: ApiException) { }
         }
     }
@@ -246,17 +247,28 @@ fun BackupScreen(
             item {
                 ManualDriveBackupCard(
                     state = state,
-                    onSignInBackup = {
+                    isEncryptionEnabled = isDriveEncryptChecked,
+                    onToggleEncryption = { isDriveEncryptChecked = it },
+                    onSignIn = {
+                        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                            .requestEmail()
+                            .requestScopes(Scope(DriveScopes.DRIVE_FILE), Scope(DriveScopes.DRIVE_APPDATA))
+                            .build()
+                        val client = GoogleSignIn.getClient(context, gso)
+                        googleSignInLauncher.launch(client.signInIntent)
+                    },
+                    onBackup = {
                         val account = GoogleSignIn.getLastSignedInAccount(context)
                         if (account != null) {
-                             viewModel.backupToDrive(account)
-                        } else {
-                            val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                                .requestEmail()
-                                .requestScopes(Scope(DriveScopes.DRIVE_FILE), Scope(DriveScopes.DRIVE_APPDATA))
-                                .build()
-                            val client = GoogleSignIn.getClient(context, gso)
-                            googleSignInLauncher.launch(client.signInIntent)
+                            if (isDriveEncryptChecked) {
+                                pendingPasswordAction = {
+                                    viewModel.backupToDrive(account, backupPassword)
+                                    backupPassword = null
+                                }
+                                showPasswordSetDialog = true
+                            } else {
+                                viewModel.backupToDrive(account, null)
+                            }
                         }
                     },
                     onUnlink = { showUnlinkDialog = true },
@@ -487,7 +499,10 @@ fun BackupScreen(
 @Composable
 fun ManualDriveBackupCard(
     state: BackupRestoreState,
-    onSignInBackup: () -> Unit,
+    isEncryptionEnabled: Boolean,
+    onToggleEncryption: (Boolean) -> Unit,
+    onSignIn: () -> Unit,
+    onBackup: () -> Unit,
     onUnlink: () -> Unit,
     onRestore: (String?) -> Unit,
     onDeleteVersion: (String) -> Unit,
@@ -532,12 +547,30 @@ fun ManualDriveBackupCard(
                      Text("Include Attachments", style = MaterialTheme.typography.bodyMedium)
                  }
 
+                 // Encryption Toggle
+                 Row(
+                     verticalAlignment = Alignment.CenterVertically, 
+                     modifier = Modifier
+                         .fillMaxWidth()
+                         .clickable { onToggleEncryption(!isEncryptionEnabled) }
+                         .padding(vertical = 4.dp)
+                 ) {
+                     Checkbox(checked = isEncryptionEnabled, onCheckedChange = onToggleEncryption)
+                     Spacer(Modifier.width(8.dp))
+                     Column {
+                         Text("Encrypt Backup", style = MaterialTheme.typography.bodyMedium)
+                         if (isEncryptionEnabled) {
+                             Text("Password required to restore", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                         }
+                     }
+                 }
+
                  Spacer(Modifier.height(12.dp))
                  
                  // Primary Actions
                  Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                      BouncingButton(
-                         onClick = onSignInBackup,
+                         onClick = onBackup,
                          modifier = Modifier.weight(1f),
                          shape = RoundedCornerShape(12.dp)
                      ) {
@@ -593,11 +626,11 @@ fun ManualDriveBackupCard(
              } else {
                  Spacer(Modifier.height(20.dp))
                  Button(
-                     onClick = onSignInBackup,
+                     onClick = onSignIn,
                      modifier = Modifier.fillMaxWidth(),
                      shape = RoundedCornerShape(12.dp)
                  ) {
-                     Text("Sign In & Backup")
+                     Text("Sign In")
                  }
              }
          }

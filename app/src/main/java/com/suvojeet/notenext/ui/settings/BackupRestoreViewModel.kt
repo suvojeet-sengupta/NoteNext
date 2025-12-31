@@ -186,7 +186,7 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    fun backupToDrive(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+    fun backupToDrive(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount, password: String? = null) {
         viewModelScope.launch {
             _state.value = _state.value.copy(
                 isBackingUp = true, 
@@ -195,7 +195,7 @@ class BackupRestoreViewModel @Inject constructor(
             )
             withContext(Dispatchers.IO) {
                 try {
-                    backupRepository.backupToDrive(account, null, state.value.includeAttachments) { uploaded, total ->
+                    backupRepository.backupToDrive(account, password, state.value.includeAttachments) { uploaded, total ->
                         val progress = if (total > 0) {
                             val percent = (uploaded * 100) / total
                             val uploadedMb = String.format("%.2f", uploaded / (1024.0 * 1024.0))
