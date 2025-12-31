@@ -25,6 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.outlined.PushPin
@@ -84,6 +85,7 @@ fun ContextualTopAppBar(
     onSendClick: () -> Unit,
     onLabelClick: () -> Unit,
     onMoveToProjectClick: () -> Unit,
+    onLockClick: () -> Unit,
     onSelectAllClick: () -> Unit
 ) {
     var showMenu by remember { mutableStateOf(false) }
@@ -158,6 +160,12 @@ fun ContextualTopAppBar(
                         icon = Icons.Outlined.PushPin,
                         contentDescription = stringResource(id = R.string.pin_note),
                         delay = 50
+                    )
+                    AnimatedIconButton(
+                        onClick = onLockClick,
+                        icon = Icons.Default.Lock, // Using filled lock icon
+                        contentDescription = "Lock/Unlock",
+                        delay = 75
                     )
                     AnimatedIconButton(
                         onClick = onReminderClick,

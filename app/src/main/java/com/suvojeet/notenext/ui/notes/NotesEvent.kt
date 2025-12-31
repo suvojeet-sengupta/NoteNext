@@ -22,6 +22,7 @@ sealed class NotesEvent {
     object ClearSelection : NotesEvent()
     object SelectAllNotes : NotesEvent()
     object TogglePinForSelectedNotes : NotesEvent()
+    object ToggleLockForSelectedNotes : NotesEvent()
     object DeleteSelectedNotes : NotesEvent()
     object ArchiveSelectedNotes : NotesEvent()
     data class ChangeColorForSelectedNotes(val color: Int) : NotesEvent()

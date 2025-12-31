@@ -71,7 +71,8 @@ fun MoreOptionsSheet(
     showDeleteDialog: (Boolean) -> Unit,
     showSaveAsDialog: (Boolean) -> Unit,
     showHistoryDialog: (Boolean) -> Unit,
-    onPrint: () -> Unit
+    onPrint: () -> Unit,
+    onToggleLock: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
     val context = LocalContext.current
@@ -107,7 +108,7 @@ fun MoreOptionsSheet(
 
             val options = mutableListOf<OptionItem>()
             
-            options.add(OptionItem(lockLabel, lockIcon) { onEvent(NotesEvent.OnToggleLockClick) })
+            options.add(OptionItem(lockLabel, lockIcon) { onToggleLock() })
             options.add(OptionItem(convertLabel, convertIcon) { onEvent(NotesEvent.OnToggleNoteType) })
             options.add(OptionItem(stringResource(id = R.string.delete), Icons.Default.Delete) { showDeleteDialog(true) })
             options.add(OptionItem(stringResource(id = R.string.make_a_copy), Icons.Default.ContentCopy) { onEvent(NotesEvent.OnCopyCurrentNoteClick) })

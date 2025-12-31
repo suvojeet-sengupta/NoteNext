@@ -207,6 +207,7 @@ fun NotesScreen(
                                         onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
                                         onLabelClick = { showLabelDialog = true },
                                         onMoveToProjectClick = { showMoveToProjectDialog = true },
+                                        onLockClick = { viewModel.onEvent(NotesEvent.ToggleLockForSelectedNotes) },
                                         onSelectAllClick = { viewModel.onEvent(NotesEvent.SelectAllNotes) }
                                     )
                                 } else {

@@ -63,6 +63,7 @@ import com.suvojeet.notenext.data.MarkdownExporter
 import com.suvojeet.notenext.util.printNote
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
+import com.suvojeet.notenext.util.findActivity
 
 data class ImageViewerData(val uri: Uri, val tempId: String)
 
@@ -547,6 +548,22 @@ fun AddEditNoteScreen(
                 scope.launch {
                     val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
                     printNote(context, html)
+                }
+            },
+            onToggleLock = {
+                if (state.editingIsLocked) {
+                    val activity = context.findActivity() as? androidx.fragment.app.FragmentActivity
+                    if (activity != null) {
+                         val biometricAuthManager = com.suvojeet.notenext.util.BiometricAuthManager(context, activity)
+                         biometricAuthManager.showBiometricPrompt(
+                             onAuthSuccess = { onEvent(NotesEvent.OnToggleLockClick) },
+                             onAuthError = { Toast.makeText(context, "Authentication Failed", Toast.LENGTH_SHORT).show() }
+                         )
+                    } else {
+                        Toast.makeText(context, "Authentication unavailable", Toast.LENGTH_SHORT).show()
+                    }
+                } else {
+                    onEvent(NotesEvent.OnToggleLockClick)
                 }
             }
         )

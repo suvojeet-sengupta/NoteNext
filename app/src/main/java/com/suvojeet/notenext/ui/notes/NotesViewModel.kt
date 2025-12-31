@@ -182,6 +182,23 @@ class NotesViewModel @Inject constructor(
                     updateWidgets()
                 }
             }
+            is NotesEvent.ToggleLockForSelectedNotes -> {
+                viewModelScope.launch {
+                    val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }
+                     val areNotesBeingLocked = selectedNotes.firstOrNull()?.note?.isLocked == false
+                    for (note in selectedNotes) {
+                        repository.insertNote(note.note.copy(isLocked = areNotesBeingLocked))
+                    }
+                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                    val message = if (areNotesBeingLocked) {
+                        if (selectedNotes.size > 1) "${selectedNotes.size} notes locked" else "Note locked"
+                    } else {
+                        if (selectedNotes.size > 1) "${selectedNotes.size} notes unlocked" else "Note unlocked"
+                    }
+                    _events.emit(NotesUiEvent.ShowToast(message))
+                    updateWidgets()
+                }
+            }
             is NotesEvent.DeleteSelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }

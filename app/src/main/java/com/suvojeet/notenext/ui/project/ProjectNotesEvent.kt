@@ -16,6 +16,7 @@ sealed class ProjectNotesEvent {
     object ClearSelection : ProjectNotesEvent()
     object SelectAllNotes : ProjectNotesEvent()
     object TogglePinForSelectedNotes : ProjectNotesEvent()
+    object ToggleLockForSelectedNotes : ProjectNotesEvent()
     object DeleteSelectedNotes : ProjectNotesEvent()
     object ArchiveSelectedNotes : ProjectNotesEvent()
     data class ChangeColorForSelectedNotes(val color: Int) : ProjectNotesEvent()

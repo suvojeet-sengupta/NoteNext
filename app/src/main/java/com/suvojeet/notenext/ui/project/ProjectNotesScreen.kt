@@ -286,6 +286,7 @@ fun ProjectNotesScreen(
                             onLabelClick = { showLabelDialog = true },
 
                             onMoveToProjectClick = { /* Not applicable for project notes */ },
+                            onLockClick = { viewModel.onEvent(ProjectNotesEvent.ToggleLockForSelectedNotes) },
                             onSelectAllClick = { viewModel.onEvent(ProjectNotesEvent.SelectAllNotes) }
 
                         )
