@@ -827,7 +827,11 @@ fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
         dismissButton = {
             Row {
                 TextButton(onClick = onDismiss) { Text("Cancel") }
-                TextButton(onClick = { /* Open Help Link */ }) { Text("Help") }
+                val context = LocalContext.current
+                TextButton(onClick = { 
+                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://support.google.com/keep/answer/10017039"))
+                    context.startActivity(intent)
+                }) { Text("Help") }
             }
         }
     )
