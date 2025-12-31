@@ -59,7 +59,8 @@ data class BackupRestoreState(
     val backupVersions: List<com.suvojeet.notenext.data.backup.GoogleDriveManager.DriveBackupMetadata> = emptyList(),
     val isLoadingVersions: Boolean = false,
     val isPasswordRequired: Boolean = false,
-    val pendingRestoreUri: String? = null
+    val pendingRestoreUri: String? = null,
+    val isAutoBackupEncryptionEnabled: Boolean = false
 )
 
 @HiltViewModel
@@ -87,7 +88,8 @@ class BackupRestoreViewModel @Inject constructor(
             backupFrequency = frequency,
             isSdCardAutoBackupEnabled = sdCardEnabled,
             sdCardFolderUri = sdCardUri,
-            includeAttachments = includeAttachments
+            includeAttachments = includeAttachments,
+            isAutoBackupEncryptionEnabled = sharedPrefs.getBoolean("auto_backup_encryption_enabled", false)
         )
     }
 
@@ -193,7 +195,7 @@ class BackupRestoreViewModel @Inject constructor(
             )
             withContext(Dispatchers.IO) {
                 try {
-                    backupRepository.backupToDrive(account, state.value.includeAttachments) { uploaded, total ->
+                    backupRepository.backupToDrive(account, null, state.value.includeAttachments) { uploaded, total ->
                         val progress = if (total > 0) {
                             val percent = (uploaded * 100) / total
                             val uploadedMb = String.format("%.2f", uploaded / (1024.0 * 1024.0))
@@ -600,6 +602,22 @@ class BackupRestoreViewModel @Inject constructor(
             val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
             sharedPrefs.edit().putBoolean("include_backup_attachments", enabled).apply()
             _state.value = _state.value.copy(includeAttachments = enabled)
+        }
+    }
+
+    fun toggleAutoBackupEncryption(enabled: Boolean, password: String? = null) {
+        viewModelScope.launch {
+            val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+            sharedPrefs.edit().apply {
+                putBoolean("auto_backup_encryption_enabled", enabled)
+                if (enabled && password != null) {
+                    putString("auto_backup_password", password)
+                } else if (!enabled) {
+                    remove("auto_backup_password")
+                }
+                apply()
+            }
+            _state.value = _state.value.copy(isAutoBackupEncryptionEnabled = enabled)
         }
     }
 

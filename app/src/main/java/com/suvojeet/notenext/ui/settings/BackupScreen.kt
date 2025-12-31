@@ -343,6 +343,17 @@ fun BackupScreen(
                         }
                     },
                     onChangeSdLocation = { sdCardLauncher.launch(null) },
+                    onToggleEncryption = { enabled ->
+                         if (enabled) {
+                             pendingPasswordAction = {
+                                 viewModel.toggleAutoBackupEncryption(true, backupPassword)
+                                 backupPassword = null
+                             }
+                             showPasswordSetDialog = true
+                         } else {
+                             viewModel.toggleAutoBackupEncryption(false)
+                         }
+                    },
                     context = context
                 )
             }
@@ -760,6 +771,7 @@ fun AutoBackupSettingsCard(
     onToggleSdBackup: (Boolean) -> Unit,
     onFrequencyChange: (String) -> Unit,
     onChangeSdLocation: () -> Unit,
+    onToggleEncryption: (Boolean) -> Unit,
     context: android.content.Context
 ) {
     Card(
@@ -776,6 +788,23 @@ fun AutoBackupSettingsCard(
             }
             
             Spacer(Modifier.height(24.dp))
+
+            // Encryption Toggle
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Column(Modifier.weight(1f)) {
+                    Text("Encrypt Auto-Backups", style = MaterialTheme.typography.bodyLarge)
+                    Text("Protect background backups with a password", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+                Switch(
+                    checked = state.isAutoBackupEncryptionEnabled,
+                    onCheckedChange = onToggleEncryption
+                )
+            }
+            Spacer(Modifier.height(16.dp))
 
             // Frequency
             Text("Frequency", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)

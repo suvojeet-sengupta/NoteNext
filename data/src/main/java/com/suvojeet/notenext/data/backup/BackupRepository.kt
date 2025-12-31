@@ -177,11 +177,35 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun backupToDrive(account: GoogleSignInAccount, includeAttachments: Boolean = true, onProgress: ((Long, Long) -> Unit)? = null): String {
-        val dbFile = File(context.cacheDir, "temp_backup.zip")
-        createBackupZip(dbFile, includeAttachments)
-        return try {
-            googleDriveManager.uploadBackup(context, account, dbFile, onProgress)
+    suspend fun createEncryptedBackupZip(targetFile: File, password: String, includeAttachments: Boolean = true) {
+        val tempPlainZip = File(context.cacheDir, "temp_plain_intermediate.zip")
+        try {
+            // 1. Create plain zip
+            createBackupZip(tempPlainZip, includeAttachments)
+            
+            // 2. Encrypt to target file
+            FileOutputStream(targetFile).use { fos ->
+                EncryptionUtils.encryptFile(tempPlainZip, fos, password)
+            }
+        } finally {
+            if (tempPlainZip.exists()) tempPlainZip.delete()
+        }
+    }
+
+    suspend fun backupToDrive(
+        account: GoogleSignInAccount, 
+        password: String? = null,
+        includeAttachments: Boolean = true, 
+        onProgress: ((Long, Long) -> Unit)? = null
+    ): String {
+        val dbFile = File(context.cacheDir, "temp_backup.zip") // Google Drive SDK uses this file to upload
+        try {
+            if (password.isNullOrBlank()) {
+                createBackupZip(dbFile, includeAttachments)
+            } else {
+                createEncryptedBackupZip(dbFile, password, includeAttachments)
+            }
+            return googleDriveManager.uploadBackup(context, account, dbFile, onProgress)
         } finally {
             if (dbFile.exists()) {
                 dbFile.delete()

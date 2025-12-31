@@ -31,6 +31,10 @@ class BackupWorker @AssistedInject constructor(
         val isSdCardBackupEnabled = sharedPrefs.getBoolean("sd_card_backup_enabled", false)
         val sdCardFolderUri = sharedPrefs.getString("sd_card_folder_uri", null)
         val includeAttachments = sharedPrefs.getBoolean("include_backup_attachments", true)
+        
+        val isEncryptionEnabled = sharedPrefs.getBoolean("auto_backup_encryption_enabled", false)
+        val encryptionPassword = sharedPrefs.getString("auto_backup_password", null)
+        val backupPassword = if (isEncryptionEnabled && !encryptionPassword.isNullOrBlank()) encryptionPassword else null
 
         if (email == null && !isSdCardBackupEnabled) {
             return@withContext Result.failure()
@@ -45,10 +49,18 @@ class BackupWorker @AssistedInject constructor(
             // 1. Google Drive Backup
             if (email != null) {
                 try {
-                    val tempFile = File(applicationContext.cacheDir, "auto_backup.zip")
-                    backupRepository.createBackupZip(tempFile, includeAttachments) // Respect content selection
-                    googleDriveManager.uploadBackup(applicationContext, email, tempFile)
-                    tempFile.delete()
+                    val account = com.google.android.gms.auth.api.signin.GoogleSignIn.getLastSignedInAccount(applicationContext)
+                    if (account != null) {
+                         backupRepository.backupToDrive(
+                             account = account,
+                             password = backupPassword,
+                             includeAttachments = includeAttachments
+                         )
+                    } else {
+                         // Fallback? If email is in inputData but no account logged in?
+                         // Should not happen if worker is cancelled on logout.
+                         throw Exception("Google Account not signed in")
+                    }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     success = false
@@ -59,7 +71,11 @@ class BackupWorker @AssistedInject constructor(
             // 2. SD Card Backup
             if (isSdCardBackupEnabled && sdCardFolderUri != null) {
                  try {
-                     backupRepository.backupToUri(android.net.Uri.parse(sdCardFolderUri), includeAttachments)
+                     if (backupPassword != null) {
+                         backupRepository.backupToEncryptedFolder(android.net.Uri.parse(sdCardFolderUri), backupPassword, includeAttachments)
+                     } else {
+                         backupRepository.backupToUri(android.net.Uri.parse(sdCardFolderUri), includeAttachments)
+                     }
                  } catch (e: Exception) {
                      e.printStackTrace()
                      success = false
