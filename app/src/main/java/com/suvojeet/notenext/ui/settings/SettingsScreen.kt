@@ -257,18 +257,10 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                     SettingsGroupCard {
                         SettingsItem(
                             icon = Icons.Default.Backup,
-                            title = stringResource(id = R.string.backup),
-                            subtitle = "Save your notes locally",
+                            title = "Backup & Restore",
+                            subtitle = "Manage backups and restore data",
                             iconColor = Color(0xFFFF9800),
                             onClick = { onNavigate("backup") }
-                        )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
-                        SettingsItem(
-                            icon = Icons.Default.Backup, 
-                            title = stringResource(id = R.string.restore),
-                            subtitle = "Restore from local backup",
-                            iconColor = Color(0xFFFFC107),
-                            onClick = { onNavigate("restore") }
                         )
                     }
                 }

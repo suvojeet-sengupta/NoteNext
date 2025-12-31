@@ -77,7 +77,7 @@ import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.repository.SettingsRepository
 import com.suvojeet.notenext.ui.settings.BackupScreen
-import com.suvojeet.notenext.ui.settings.RestoreScreen
+
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.shareIn
@@ -634,15 +634,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                     )
                 }
 
-                composable(
-                    route = "restore",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                ) {
-                    RestoreScreen(
-                        onBackClick = { navController.popBackStack() }
-                    )
-                }
+
 
                 composable(
                     route = "archive",

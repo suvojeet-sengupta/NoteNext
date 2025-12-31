@@ -36,6 +36,12 @@ import com.google.api.services.drive.DriveScopes
 import com.suvojeet.notenext.R
 import java.text.SimpleDateFormat
 import java.util.*
+import android.net.Uri
+import androidx.compose.material.icons.filled.UploadFile
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.filled.Restore
+import androidx.compose.runtime.mutableStateListOf 
+import androidx.compose.foundation.layout.heightIn
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -59,6 +65,31 @@ fun BackupScreen(
         contract = ActivityResultContracts.CreateDocument("application/zip")
     ) { uri ->
         uri?.let { viewModel.createBackup(it) }
+    }
+
+    // -- Restoration Logic Merged from RestoreScreen --
+    var showConfirmDialog by remember { mutableStateOf<Uri?>(null) }
+    var restoreType by remember { mutableStateOf<RestoreType?>(null) }
+    
+    // Launcher for Local Restore (All)
+    val openDocumentLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            restoreType = RestoreType.LOCAL
+            showConfirmDialog = it
+        }
+    }
+
+    // Launcher for Selective Restore (Scan first)
+    var selectedBackupUri by remember { mutableStateOf<Uri?>(null) }
+    val selectiveRestoreLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let {
+            selectedBackupUri = it
+            viewModel.scanBackup(it)
+        }
     }
 
     val googleSignInLauncher = rememberLauncherForActivityResult(
@@ -88,6 +119,64 @@ fun BackupScreen(
         state.backupResult?.let { result ->
             snackbarHostState.showSnackbar(result)
         }
+    }
+    
+    // Listen for Restore Results
+    LaunchedEffect(state.restoreResult) {
+        state.restoreResult?.let { result ->
+            snackbarHostState.showSnackbar(result)
+        }
+    }
+
+    // Selective Restore Dialog
+    if (state.foundProjects.isNotEmpty()) {
+        ProjectSelectionDialog(
+            projects = state.foundProjects,
+            onDismiss = { 
+                viewModel.clearFoundProjects() 
+                selectedBackupUri = null
+            },
+            onConfirm = { selectedIds ->
+                selectedBackupUri?.let { uri ->
+                    viewModel.restoreSelectedProjects(uri, selectedIds)
+                }
+                viewModel.clearFoundProjects()
+                selectedBackupUri = null
+            }
+        )
+    }
+
+    // Confirm Restore Dialog
+    if (showConfirmDialog != null) {
+        AlertDialog(
+            onDismissRequest = { showConfirmDialog = null },
+            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text(stringResource(id = R.string.confirm_restore)) },
+            text = { Text(stringResource(id = R.string.restore_confirmation_message)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showConfirmDialog?.let { uri ->
+                             if (restoreType == RestoreType.LOCAL) {
+                                 viewModel.restoreBackup(uri)
+                             }
+                        }
+                        showConfirmDialog = null
+                        restoreType = null
+                    }
+                ) {
+                    Text(stringResource(id = R.string.restore_title))
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { 
+                    showConfirmDialog = null 
+                    restoreType = null
+                }) {
+                    Text(stringResource(id = R.string.cancel))
+                }
+            }
+        )
     }
 
     Scaffold(
@@ -176,6 +265,12 @@ fun BackupScreen(
                      onSaveToFile = {
                          val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                          createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
+                     },
+                     onRestoreFromFile = {
+                        openDocumentLauncher.launch(arrayOf("application/zip"))
+                     },
+                     onSelectiveRestore = {
+                        selectiveRestoreLauncher.launch(arrayOf("application/zip"))
                      }
                  )
             }
@@ -423,7 +518,9 @@ fun BackupVersionItem(
 fun ManualLocalBackupCard(
     state: BackupRestoreState,
     onBackupToSd: () -> Unit,
-    onSaveToFile: () -> Unit
+    onSaveToFile: () -> Unit,
+    onRestoreFromFile: () -> Unit,
+    onSelectiveRestore: () -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -432,16 +529,24 @@ fun ManualLocalBackupCard(
         border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
     ) {
         Column(modifier = Modifier.padding(20.dp)) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.SdStorage, null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(28.dp))
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    imageVector = Icons.Default.SdStorage,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.secondary,
+                    modifier = Modifier.size(28.dp)
+                )
                 Spacer(Modifier.width(16.dp))
                 Column {
-                    Text("Local Backup", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
-                    Text("Save to device storage or SD card", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    Text("Local Storage", style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold))
+                    Text("Backup to or restore from device storage", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
             Spacer(Modifier.height(20.dp))
             
+            Text("Backup", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+
             // SD Card Action
             OutlinedButton(
                 onClick = onBackupToSd,
@@ -449,23 +554,54 @@ fun ManualLocalBackupCard(
                 shape = RoundedCornerShape(12.dp)
             ) {
                  if (state.isBackingUp && state.backupResult?.contains("SD Card") == true) {
-                     CircularProgressIndicator(Modifier.size(16.dp), strokeWidth = 2.dp)
+                     CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
                      Spacer(Modifier.width(8.dp))
                      Text("Backing up...")
                  } else {
                      Text(if (state.sdCardFolderUri != null) "Backup to Selected Folder" else "Select Folder & Backup")
                  }
             }
-            
-            Spacer(Modifier.height(12.dp))
 
-            // Save As Action
-            OutlinedButton(
-                onClick = onSaveToFile,
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider()
+            Spacer(Modifier.height(16.dp))
+            
+            Text("Restore", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+
+            // Restore From File
+            Button(
+                onClick = onRestoreFromFile,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary)
+            ) {
+                if(state.isRestoring && state.restoreResult?.contains("Local") == true) {
+                    CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp, color = MaterialTheme.colorScheme.onSecondary)
+                     Spacer(Modifier.width(8.dp))
+                     Text("Restoring...")
+                } else {
+                    Icon(Icons.Default.UploadFile, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Restore from File")
+                }
+            }
+
+            Spacer(Modifier.height(8.dp))
+            
+            // Selective Restore
+             TextButton(
+                onClick = onSelectiveRestore,
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                 Text("Save as .zip File")
+                 if (state.isScanning) {
+                      CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                      Spacer(Modifier.width(8.dp))
+                      Text("Scanning...")
+                 } else {
+                     Text("Selective Restore")
+                 }
             }
             
             if (state.backupResult != null && (state.backupResult.contains("Local") || state.backupResult.contains("SD Card"))) {
@@ -736,4 +872,68 @@ private fun formatSize(size: Long): String {
         kb >= 1 -> String.format("%.2f KB", kb)
         else -> "$size B"
     }
+}
+
+enum class RestoreType {
+    LOCAL, DRIVE
+}
+
+@Composable
+fun ProjectSelectionDialog(
+    projects: List<com.suvojeet.notenext.data.Project>,
+    onDismiss: () -> Unit,
+    onConfirm: (List<Int>) -> Unit
+) {
+    val selectedIds = remember { mutableStateListOf<Int>() }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Select Projects to Restore") },
+        text = {
+            LazyColumn(modifier = Modifier.heightIn(max = 300.dp)) {
+                items(projects.size) { index ->
+                    val project = projects[index]
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable {
+                                if (selectedIds.contains(project.id)) {
+                                    selectedIds.remove(project.id)
+                                } else {
+                                    selectedIds.add(project.id)
+                                }
+                            }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = selectedIds.contains(project.id),
+                            onCheckedChange = { checked ->
+                                if (checked) {
+                                    selectedIds.add(project.id)
+                                } else {
+                                    selectedIds.remove(project.id)
+                                }
+                            }
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(text = project.name, style = MaterialTheme.typography.bodyLarge)
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = { onConfirm(selectedIds.toList()) },
+                enabled = selectedIds.isNotEmpty()
+            ) {
+                Text("Restore Selected")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
 }
