@@ -476,20 +476,34 @@ class BackupRestoreViewModel @Inject constructor(
              _state.value = _state.value.copy(isRestoring = true, restoreResult = "Downloading from Drive...")
              val backupName = if (fileId != null) "selected version" else "latest backup"
             withContext(Dispatchers.IO) {
+                val tempFile = File(application.cacheDir, "temp_restore.zip")
+                var shouldDeleteTempFile = true
                 try {
-                     val tempFile = File(application.cacheDir, "temp_restore.zip")
                      googleDriveManager.downloadBackup(application, account, tempFile, fileId)
                      
+                     if (backupRepository.checkIsEncrypted(Uri.fromFile(tempFile))) {
+                         _state.value = _state.value.copy(
+                            isRestoring = false,
+                            isPasswordRequired = true,
+                            pendingRestoreUri = Uri.fromFile(tempFile).toString()
+                         )
+                         shouldDeleteTempFile = false
+                         return@withContext
+                     }
+
                      java.io.FileInputStream(tempFile).use { inputStream ->
                          ZipInputStream(inputStream).use { zis ->
                              readBackupFromZip(zis)
                          }
                      }
-                     tempFile.delete()
                     _state.value = _state.value.copy(isRestoring = false, restoreResult = "Drive Restore ($backupName) successful")
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.value = _state.value.copy(isRestoring = false, restoreResult = "Drive Restore failed: ${e.message}")
+                } finally {
+                    if (shouldDeleteTempFile && tempFile.exists()) {
+                        tempFile.delete()
+                    }
                 }
             }
         }
