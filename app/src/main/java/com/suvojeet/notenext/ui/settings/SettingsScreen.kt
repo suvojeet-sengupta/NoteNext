@@ -38,6 +38,11 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.ImportExport
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.suvojeet.notenext.data.backup.GoogleDriveManager
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -109,6 +114,19 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAppLockInfoDialog by remember { mutableStateOf(false) }
     var showScreenshotInfoDialog by remember { mutableStateOf(false) }
+    
+    // -- Import Logic --
+    // We need BackupRestoreViewModel for import logic
+    val backupRestoreViewModel: BackupRestoreViewModel = hiltViewModel()
+    
+    var showImportSourceDialog by remember { mutableStateOf(false) }
+    var showKeepInstructionsDialog by remember { mutableStateOf(false) }
+
+    val importKeepLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { backupRestoreViewModel.importFromGoogleKeep(it) }
+    }
 
     // -- Scroll Behavior --
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
@@ -262,6 +280,14 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                             iconColor = Color(0xFFFF9800),
                             onClick = { onNavigate("backup") }
                         )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        SettingsItem(
+                            icon = Icons.Default.ImportExport, // or generic import icon
+                            title = "Import Notes",
+                            subtitle = "From Google Keep, etc.",
+                            iconColor = Color(0xFFE91E63),
+                            onClick = { showImportSourceDialog = true }
+                        )
                     }
                 }
             }
@@ -393,6 +419,26 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             title = { Text("Disallow Screenshots") },
             text = { Text("Prevents taking screenshots or screen recordings while using NoteNext to protect sensitive information.") },
             confirmButton = { TextButton(onClick = { showScreenshotInfoDialog = false }) { Text("OK") } }
+        )
+    }
+
+    if (showImportSourceDialog) {
+        ImportSourceDialog(
+            onDismiss = { showImportSourceDialog = false },
+            onSelectKeep = {
+                showImportSourceDialog = false
+                showKeepInstructionsDialog = true
+            }
+        )
+    }
+
+    if (showKeepInstructionsDialog) {
+        KeepInstructionsDialog(
+            onDismiss = { showKeepInstructionsDialog = false },
+            onImport = {
+                showKeepInstructionsDialog = false
+                importKeepLauncher.launch(arrayOf("application/zip"))
+            }
         )
     }
 }
@@ -684,6 +730,102 @@ private fun AutoDeleteDialog(
         dismissButton = {
             TextButton(onClick = onDismiss) {
                 Text(stringResource(id = R.string.cancel))
+            }
+        }
+    )
+}
+
+@Composable
+fun ImportSourceDialog(onDismiss: () -> Unit, onSelectKeep: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose which app to import from") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ImportOptionItem(
+                    text = "Google Keep",
+                    icon = Icons.Default.Description, // Using generic Description icon
+                    color = Color(0xFFFFBB00), // Keep Yellow
+                    onClick = onSelectKeep
+                )
+                ImportOptionItem(
+                    text = "Evernote",
+                    icon = Icons.Default.Description,
+                    color = Color(0xFF00A82D), // Evernote Green
+                    enabled = false
+                )
+                ImportOptionItem(
+                    text = "Markdown/Plain Text Files",
+                    icon = Icons.Default.Description,
+                    enabled = false
+                )
+                ImportOptionItem(
+                    text = "JSON Files",
+                    icon = Icons.Default.Description, // Use Code or DataObject if available
+                    enabled = false
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+fun ImportOptionItem(
+    text: String,
+    icon: ImageVector,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    onClick: () -> Unit = {},
+    enabled: Boolean = true
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (enabled) color else Color.Gray,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (enabled) MaterialTheme.colorScheme.onSurface else Color.Gray
+        )
+    }
+}
+
+@Composable
+fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Import from Google Keep") },
+        text = {
+            Column {
+                Text("In order to import your Notes from Google Keep you must download your Google Takeout ZIP file.")
+                Spacer(Modifier.height(8.dp))
+                // Using Description icon as a placeholder for Info if needed, but text is fine.
+                Text("Only select the \"Keep\" data. Click Help to get more information.")
+                Spacer(Modifier.height(16.dp))
+                Text("If you already have a Takeout ZIP file, click Import and choose the ZIP file.")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onImport) { Text("Import") }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = { /* Open Help Link */ }) { Text("Help") }
             }
         }
     )
