@@ -132,6 +132,10 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.ClearSelection -> {
                 _state.value = state.value.copy(selectedNoteIds = emptyList())
             }
+            is ProjectNotesEvent.SelectAllNotes -> {
+                val allIds = state.value.notes.map { it.note.id }
+                _state.value = state.value.copy(selectedNoteIds = allIds)
+            }
             is ProjectNotesEvent.TogglePinForSelectedNotes -> {
                 viewModelScope.launch {
                     val selectedNotes = state.value.notes.filter { state.value.selectedNoteIds.contains(it.note.id) }

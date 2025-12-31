@@ -11,6 +11,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.ClearSelection -> ProjectNotesEvent.ClearSelection
         is NotesEvent.TogglePinForSelectedNotes -> ProjectNotesEvent.TogglePinForSelectedNotes
         is NotesEvent.DeleteSelectedNotes -> ProjectNotesEvent.DeleteSelectedNotes
+        is NotesEvent.SelectAllNotes -> ProjectNotesEvent.SelectAllNotes
         is NotesEvent.ArchiveSelectedNotes -> ProjectNotesEvent.ArchiveSelectedNotes
         is NotesEvent.ChangeColorForSelectedNotes -> ProjectNotesEvent.ChangeColorForSelectedNotes(this.color)
         is NotesEvent.CopySelectedNotes -> ProjectNotesEvent.CopySelectedNotes

@@ -14,6 +14,7 @@ sealed class ProjectNotesEvent {
     object RestoreNote : ProjectNotesEvent()
     data class ToggleNoteSelection(val noteId: Int) : ProjectNotesEvent()
     object ClearSelection : ProjectNotesEvent()
+    object SelectAllNotes : ProjectNotesEvent()
     object TogglePinForSelectedNotes : ProjectNotesEvent()
     object DeleteSelectedNotes : ProjectNotesEvent()
     object ArchiveSelectedNotes : ProjectNotesEvent()
