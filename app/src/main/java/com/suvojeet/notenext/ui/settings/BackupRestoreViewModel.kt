@@ -57,7 +57,9 @@ data class BackupRestoreState(
     val sdCardFolderUri: String? = null,
     val includeAttachments: Boolean = true,
     val backupVersions: List<com.suvojeet.notenext.data.backup.GoogleDriveManager.DriveBackupMetadata> = emptyList(),
-    val isLoadingVersions: Boolean = false
+    val isLoadingVersions: Boolean = false,
+    val isPasswordRequired: Boolean = false,
+    val pendingRestoreUri: String? = null
 )
 
 @HiltViewModel
@@ -155,15 +157,20 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    fun createBackup(uri: Uri) {
+    fun createBackup(uri: Uri, password: String? = null) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isBackingUp = true, backupResult = null)
             withContext(Dispatchers.IO) {
                 try {
-                    application.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                        backupRepository.createBackupZip(outputStream, state.value.includeAttachments)
+                    if (password.isNullOrBlank()) {
+                        application.contentResolver.openOutputStream(uri)?.use { outputStream ->
+                            backupRepository.createBackupZip(outputStream, state.value.includeAttachments)
+                        }
+                        _state.value = _state.value.copy(isBackingUp = false, backupResult = "Local Backup successful")
+                    } else {
+                        val result = backupRepository.backupToEncryptedUri(uri, password, state.value.includeAttachments)
+                        _state.value = _state.value.copy(isBackingUp = false, backupResult = result)
                     }
-                    _state.value = _state.value.copy(isBackingUp = false, backupResult = "Local Backup successful")
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.value = _state.value.copy(isBackingUp = false, backupResult = "Local Backup failed: ${e.message}")
@@ -218,14 +225,19 @@ class BackupRestoreViewModel @Inject constructor(
         viewModelScope.launch {
             _state.value = _state.value.copy(isRestoring = true, restoreResult = null)
             withContext(Dispatchers.IO) {
+                // Check for encryption first
+                if (backupRepository.checkIsEncrypted(uri)) {
+                    _state.value = _state.value.copy(
+                        isRestoring = false, 
+                        isPasswordRequired = true, 
+                        pendingRestoreUri = uri.toString()
+                    )
+                    return@withContext
+                }
+                
                 try {
                     application.contentResolver.openInputStream(uri)?.use { inputStream ->
                         ZipInputStream(inputStream).use { zis ->
-                            // We need to make readBackupFromZip accessible or copy logic. 
-                            // Since it's private and complex, let's assume it's available or we use a helper.
-                            // For this patch, I will use reflection or moving the function to public/helper if needed,
-                            // OR copy the function logic again here if I can't easily change visibility in this single replace block.
-                            // Actually, readBackupFromZip is already in the file, so it's fine.
                             readBackupFromZip(zis)
                         }
                     }
@@ -236,6 +248,47 @@ class BackupRestoreViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun restoreEncryptedBackup(password: String) {
+        val uriString = state.value.pendingRestoreUri ?: return
+        val uri = Uri.parse(uriString)
+        
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isRestoring = true, restoreResult = null, isPasswordRequired = false) // Clear temp state while working
+            withContext(Dispatchers.IO) {
+                try {
+                    // Decrypt to temp file
+                    val tempZipFile = backupRepository.decryptBackupToTempFile(uri, password)
+                    
+                    try {
+                        // Restore from temp file
+                        java.io.FileInputStream(tempZipFile).use { inputStream ->
+                            ZipInputStream(inputStream).use { zis ->
+                                readBackupFromZip(zis)
+                            }
+                        }
+                        _state.value = _state.value.copy(isRestoring = false, restoreResult = "Encrypted Restore successful", pendingRestoreUri = null)
+                    } finally {
+                        if (tempZipFile.exists()) tempZipFile.delete()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    // Re-show password dialog on failure if it was likely a password error?
+                    // For now just show error.
+                    _state.value = _state.value.copy(
+                        isRestoring = false, 
+                        restoreResult = "Restore failed: ${e.message}"
+                        // Could reset state.isPasswordRequired = true here if we want to let them retry immediately
+                        // But let's let them click again.
+                    )
+                }
+            }
+        }
+    }
+
+    fun cancelPasswordEntry() {
+        _state.value = _state.value.copy(isPasswordRequired = false, pendingRestoreUri = null)
     }
     
     private suspend fun readBackupFromZip(zis: ZipInputStream) {
@@ -565,13 +618,17 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    fun backupToSdCard() {
+    fun backupToSdCard(password: String? = null) {
         val uriString = state.value.sdCardFolderUri ?: return
         viewModelScope.launch {
             _state.value = _state.value.copy(isBackingUp = true, backupResult = "Backing up to SD Card...")
             withContext(Dispatchers.IO) {
                 try {
-                    val result = backupRepository.backupToUri(Uri.parse(uriString), state.value.includeAttachments)
+                    val result = if (password.isNullOrBlank()) {
+                         backupRepository.backupToUri(Uri.parse(uriString), state.value.includeAttachments)
+                    } else {
+                         backupRepository.backupToEncryptedUri(Uri.parse(uriString), password, state.value.includeAttachments)
+                    }
                      _state.value = _state.value.copy(isBackingUp = false, backupResult = result)
                 } catch (e: Exception) {
                     e.printStackTrace()

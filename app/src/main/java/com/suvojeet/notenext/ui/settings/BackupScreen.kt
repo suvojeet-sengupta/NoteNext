@@ -69,11 +69,24 @@ fun BackupScreen(
     var versionToDelete by remember { mutableStateOf<String?>(null) }
     var versionToRestore by remember { mutableStateOf<String?>(null) }
 
+    // State for Encryption
+    var isEncryptChecked by remember { mutableStateOf(false) }
+    var showPasswordSetDialog by remember { mutableStateOf(false) }
+    var backupPassword by remember { mutableStateOf<String?>(null) }
+    // Action to execute after password set (e.g. launch explorer or backup to SD)
+    var pendingPasswordAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     val createDocumentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/zip")
+        contract = ActivityResultContracts.CreateDocument("application/zip") // MIME might differ for encrypted, but zip extension mainly used or .enc
     ) { uri ->
-        uri?.let { viewModel.createBackup(it) }
+        // Use the captured password
+        uri?.let { viewModel.createBackup(it, backupPassword) }
+        // Reset password after use (or keep it? better reset for security)
+        backupPassword = null
     }
+
+    // Determine MIME/Extension based on encryption (Optional Polish: .enc for encrypted?)
+    // But contract is static. We can change name in launch call.
 
     // -- Restoration Logic Merged from RestoreScreen --
     var showConfirmDialog by remember { mutableStateOf<Uri?>(null) }
@@ -268,22 +281,42 @@ fun BackupScreen(
             item {
                  ManualLocalBackupCard(
                      state = state,
+                     isEncryptionEnabled = isEncryptChecked,
+                     onToggleEncryption = { isEncryptChecked = it },
                      onBackupToSd = {
                          if (state.sdCardFolderUri != null) {
-                             viewModel.backupToSdCard()
+                             if (isEncryptChecked) {
+                                 pendingPasswordAction = {
+                                     // For SD card backup, we pass password to VM immediately
+                                     viewModel.backupToSdCard(backupPassword)
+                                     backupPassword = null
+                                 }
+                                 showPasswordSetDialog = true
+                             } else {
+                                 viewModel.backupToSdCard(null)
+                             }
                          } else {
                              sdCardLauncher.launch(null)
                          }
                      },
                      onSaveToFile = {
-                         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                         createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
+                         if (isEncryptChecked) {
+                             pendingPasswordAction = {
+                                 val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                                 createDocumentLauncher.launch("NoteNext_Backup_Encrypted_$timeStamp.enc")
+                             }
+                             showPasswordSetDialog = true
+                         } else {
+                             backupPassword = null
+                             val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                             createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
+                         }
                      },
                      onRestoreFromFile = {
-                        openDocumentLauncher.launch(arrayOf("application/zip"))
+                        openDocumentLauncher.launch(arrayOf("application/zip", "application/octet-stream")) // Allow all types or octet-stream for .enc
                      },
                      onSelectiveRestore = {
-                        selectiveRestoreLauncher.launch(arrayOf("application/zip"))
+                        selectiveRestoreLauncher.launch(arrayOf("application/zip", "application/octet-stream"))
                      }
                  )
             }
@@ -408,6 +441,31 @@ fun BackupScreen(
             },
             dismissButton = {
                 TextButton(onClick = { versionToRestore = null }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (showPasswordSetDialog) {
+        PasswordSetDialog(
+            onDismiss = { 
+                showPasswordSetDialog = false
+                pendingPasswordAction = null
+                backupPassword = null
+            },
+            onConfirm = { password ->
+                backupPassword = password
+                showPasswordSetDialog = false
+                pendingPasswordAction?.invoke()
+                pendingPasswordAction = null
+            }
+        )
+    }
+
+    if (state.isPasswordRequired) {
+        PasswordInputDialog(
+            onDismiss = { viewModel.cancelPasswordEntry() },
+            onConfirm = { password ->
+                viewModel.restoreEncryptedBackup(password)
             }
         )
     }
@@ -575,6 +633,8 @@ fun BackupVersionItem(
 @Composable
 fun ManualLocalBackupCard(
     state: BackupRestoreState,
+    isEncryptionEnabled: Boolean,
+    onToggleEncryption: (Boolean) -> Unit,
     onBackupToSd: () -> Unit,
     onSaveToFile: () -> Unit,
     onRestoreFromFile: () -> Unit,
@@ -603,6 +663,25 @@ fun ManualLocalBackupCard(
             Spacer(Modifier.height(20.dp))
             
             Text("Backup", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(Modifier.height(8.dp))
+            
+            // Encryption Toggle
+            Row(
+                verticalAlignment = Alignment.CenterVertically, 
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onToggleEncryption(!isEncryptionEnabled) }
+                    .padding(vertical = 4.dp)
+            ) {
+                Checkbox(checked = isEncryptionEnabled, onCheckedChange = onToggleEncryption)
+                Spacer(Modifier.width(8.dp))
+                Column {
+                    Text("Encrypt Backup", style = MaterialTheme.typography.bodyMedium)
+                    if (isEncryptionEnabled) {
+                        Text("Password required to restore", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+            }
             Spacer(Modifier.height(8.dp))
 
             // SD Card Action
@@ -1049,5 +1128,112 @@ fun BouncingOutlinedButton(
         shape = shape,
         interactionSource = interactionSource,
         content = content
+    )
+}
+
+@Composable
+fun PasswordSetDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var password by remember { mutableStateOf("") }
+    var confirmPassword by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Set Backup Password") },
+        text = {
+            Column {
+                Text("Enter a password to encrypt your backup. You will need this password to restore it.", style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it; error = null },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = if (isPasswordVisible) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                            Icon(if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                Spacer(Modifier.height(8.dp))
+                
+                OutlinedTextField(
+                    value = confirmPassword,
+                    onValueChange = { confirmPassword = it; error = null },
+                    label = { Text("Confirm Password") },
+                    singleLine = true,
+                    visualTransformation = if (isPasswordVisible) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                if (error != null) {
+                    Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall, modifier = Modifier.padding(top = 4.dp))
+                }
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    if (password.isBlank()) {
+                        error = "Password cannot be empty"
+                    } else if (password != confirmPassword) {
+                        error = "Passwords do not match"
+                    } else {
+                        onConfirm(password)
+                    }
+                }
+            ) { Text("Encrypt & Save") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+fun PasswordInputDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (String) -> Unit
+) {
+    var password by remember { mutableStateOf("") }
+    var isPasswordVisible by remember { mutableStateOf(false) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Enter Password") },
+        text = {
+            Column {
+                Text("This backup is encrypted. Please enter the password to restore.", style = MaterialTheme.typography.bodyMedium)
+                Spacer(Modifier.height(16.dp))
+                
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = if (isPasswordVisible) androidx.compose.ui.text.input.VisualTransformation.None else androidx.compose.ui.text.input.PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { isPasswordVisible = !isPasswordVisible }) {
+                            Icon(if (isPasswordVisible) Icons.Default.Visibility else Icons.Default.VisibilityOff, null)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            Button(onClick = { onConfirm(password) }) { Text("Restore") }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
     )
 }
