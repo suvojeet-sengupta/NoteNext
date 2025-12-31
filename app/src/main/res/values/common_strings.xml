@@ -107,7 +107,8 @@
     <string name="move_to_project">Move to Project</string>
     <string name="none_remove_from_project">None (Remove from project)</string>
     <string name="move">Move</string>
-    <string name="no_projects_yet">No projects yet. Create one from the main screen FAB.</string>
+    <string name="no_projects_yet">No projects yet</string>
+    <string name="create_first_project">Tap the + button to create a new project.</string>
     <string name="pin_setup_title">Set up PIN</string>
     <string name="create_pin_message">Create a PIN to secure your notes</string>
     <string name="enter_pin">Enter PIN (4-8 digits)</string>

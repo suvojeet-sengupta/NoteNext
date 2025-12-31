@@ -90,7 +90,7 @@ fun ProjectScreen(
                 EmptyState(
                     icon = Icons.Default.Create,
                     message = stringResource(id = R.string.no_projects_yet),
-                    description = stringResource(id = R.string.create_new_project)
+                    description = stringResource(id = R.string.create_first_project)
                 )
             } else {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
