@@ -513,8 +513,10 @@ fun AddEditNoteScreen(
             showSaveAsDialog = { showSaveAsDialog = it },
             showHistoryDialog = { showHistoryDialog = it },
             onPrint = {
-                val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
-                printNote(context, html)
+                scope.launch {
+                    val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
+                    printNote(context, html)
+                }
             }
         )
     }
