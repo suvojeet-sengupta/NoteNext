@@ -73,6 +73,7 @@ fun BackupScreen(
     var isEncryptChecked by remember { mutableStateOf(false) }
     var isDriveEncryptChecked by remember { mutableStateOf(false) }
     var showPasswordSetDialog by remember { mutableStateOf(false) }
+    var showEncryptionInfo by remember { mutableStateOf(false) }
     var backupPassword by remember { mutableStateOf<String?>(null) }
     // Action to execute after password set (e.g. launch explorer or backup to SD)
     var pendingPasswordAction by remember { mutableStateOf<(() -> Unit)?>(null) }
@@ -249,6 +250,7 @@ fun BackupScreen(
                     state = state,
                     isEncryptionEnabled = isDriveEncryptChecked,
                     onToggleEncryption = { isDriveEncryptChecked = it },
+                    onShowInfo = { showEncryptionInfo = true },
                     onSignIn = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                             .requestEmail()
@@ -295,6 +297,7 @@ fun BackupScreen(
                      state = state,
                      isEncryptionEnabled = isEncryptChecked,
                      onToggleEncryption = { isEncryptChecked = it },
+                     onShowInfo = { showEncryptionInfo = true },
                      onBackupToSd = {
                          if (state.sdCardFolderUri != null) {
                              if (isEncryptChecked) {
@@ -492,6 +495,10 @@ fun BackupScreen(
             }
         )
     }
+
+    if (showEncryptionInfo) {
+        EncryptionInfoDialog(onDismiss = { showEncryptionInfo = false })
+    }
 }
 
 // SectionHeader removed; using shared definition
@@ -501,6 +508,7 @@ fun ManualDriveBackupCard(
     state: BackupRestoreState,
     isEncryptionEnabled: Boolean,
     onToggleEncryption: (Boolean) -> Unit,
+    onShowInfo: () -> Unit,
     onSignIn: () -> Unit,
     onBackup: () -> Unit,
     onUnlink: () -> Unit,
@@ -557,11 +565,19 @@ fun ManualDriveBackupCard(
                  ) {
                      Checkbox(checked = isEncryptionEnabled, onCheckedChange = onToggleEncryption)
                      Spacer(Modifier.width(8.dp))
-                     Column {
+                     Column(modifier = Modifier.weight(1f)) {
                          Text("Encrypt Backup", style = MaterialTheme.typography.bodyMedium)
                          if (isEncryptionEnabled) {
                              Text("Password required to restore", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                          }
+                     }
+                     IconButton(onClick = onShowInfo) {
+                         Icon(
+                             imageVector = Icons.Default.Info,
+                             contentDescription = "About Encryption",
+                             tint = MaterialTheme.colorScheme.primary,
+                             modifier = Modifier.size(20.dp)
+                         )
                      }
                  }
 
@@ -679,6 +695,7 @@ fun ManualLocalBackupCard(
     state: BackupRestoreState,
     isEncryptionEnabled: Boolean,
     onToggleEncryption: (Boolean) -> Unit,
+    onShowInfo: () -> Unit,
     onBackupToSd: () -> Unit,
     onSaveToFile: () -> Unit,
     onRestoreFromFile: () -> Unit,
@@ -719,11 +736,19 @@ fun ManualLocalBackupCard(
             ) {
                 Checkbox(checked = isEncryptionEnabled, onCheckedChange = onToggleEncryption)
                 Spacer(Modifier.width(8.dp))
-                Column {
+                Column(modifier = Modifier.weight(1f)) {
                     Text("Encrypt Backup", style = MaterialTheme.typography.bodyMedium)
                     if (isEncryptionEnabled) {
                         Text("Password required to restore", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
                     }
+                }
+                IconButton(onClick = onShowInfo) {
+                    Icon(
+                        imageVector = Icons.Default.Info,
+                        contentDescription = "About Encryption",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
             Spacer(Modifier.height(8.dp))
@@ -1349,3 +1374,68 @@ fun PasswordInputDialog(
         }
     )
 }
+
+@Composable
+fun EncryptionInfoDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    Icons.Default.Lock,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
+                )
+                Spacer(Modifier.width(8.dp))
+                Text("About Encrypted Backups")
+            }
+        },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    "Encrypted backups provide an extra layer of security for your data.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                
+                InfoBulletPoint(
+                    title = "How it works",
+                    description = "Your data is encrypted using the AES-256 standard before it leaves your device. This means your notes and attachments are scrambled into an unreadable format."
+                )
+                
+                InfoBulletPoint(
+                    title = "Security",
+                    description = "Even if someone gains access to your backup file (on Google Drive or your SD card), they cannot read your data without the correct password. Only you hold the key."
+                )
+                
+                InfoBulletPoint(
+                    title = "Important",
+                    description = "We do not store your backup password. If you lose it, you will not be able to restore your data from that backup. Please keep your password safe."
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Got it")
+            }
+        }
+    )
+}
+
+@Composable
+fun InfoBulletPoint(title: String, description: String) {
+    Column {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.primary,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = description,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
