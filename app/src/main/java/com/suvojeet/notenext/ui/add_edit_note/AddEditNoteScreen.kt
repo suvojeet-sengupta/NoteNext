@@ -787,13 +787,12 @@ private fun parseInlineMarkdown(text: String): androidx.compose.ui.text.Annotate
                     }
                 }
                 lastIndex = match.range.last + 1
+            }
         }
         
         if (lastIndex < text.length) {
             append(text.substring(lastIndex))
         }
-    }
-}
     }
 }
 
