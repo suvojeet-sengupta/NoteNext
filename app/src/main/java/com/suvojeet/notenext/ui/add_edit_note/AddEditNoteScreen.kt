@@ -60,6 +60,7 @@ import java.util.Locale
 import android.content.Intent
 import com.suvojeet.notenext.util.HtmlConverter
 import com.suvojeet.notenext.data.MarkdownExporter
+import com.suvojeet.notenext.util.printNote
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
 
@@ -510,7 +511,11 @@ fun AddEditNoteScreen(
             onDismiss = { showMoreOptions = false },
             showDeleteDialog = { showDeleteDialog = it },
             showSaveAsDialog = { showSaveAsDialog = it },
-            showHistoryDialog = { showHistoryDialog = it }
+            showHistoryDialog = { showHistoryDialog = it },
+            onPrint = {
+                val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
+                printNote(context, html)
+            }
         )
     }
 
@@ -562,7 +567,7 @@ fun AddEditNoteScreen(
         SaveAsDialog(
             onDismiss = { showSaveAsDialog = false },
             onSaveAsPdf = {
-                saveAsPdf(context, state.editingTitle, state.editingContent.text, state.editingChecklist)
+                saveAsPdf(context, state.editingTitle, state.editingContent.annotatedString, state.editingAttachments, state.editingChecklist)
                 Toast.makeText(context, "Note saved to Documents as PDF", Toast.LENGTH_SHORT).show()
             },
             onSaveAsTxt = {

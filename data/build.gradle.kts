@@ -84,4 +84,7 @@ dependencies {
     
     // DocumentFile
     implementation("androidx.documentfile:documentfile:1.1.0")
+
+    // Kotlinx Serialization (Explicitly added to fix build error with 1.6.3)
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-core:1.9.0")
 }

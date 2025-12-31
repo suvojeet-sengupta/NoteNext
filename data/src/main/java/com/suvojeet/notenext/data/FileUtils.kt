@@ -107,70 +107,209 @@ fun showSaveSuccessNotification(context: Context, title: String, location: Strin
     notificationManager.notify(1, notification)
 }
 
-fun saveAsPdf(context: Context, title: String, content: String, checklist: List<ChecklistItem> = emptyList()) {
+// Helper to map AnnotatedString to Spannable for PDF
+private fun annotatedStringToSpannable(annotatedString: AnnotatedString): android.text.SpannableString {
+    val spannable = android.text.SpannableString(annotatedString.text)
+    annotatedString.spanStyles.forEach { range ->
+        val style = range.item
+        val start = range.start
+        val end = range.end
+        
+        if (style.fontWeight == androidx.compose.ui.text.font.FontWeight.Bold) {
+            spannable.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.BOLD), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        if (style.fontStyle == androidx.compose.ui.text.font.FontStyle.Italic) {
+            spannable.setSpan(android.text.style.StyleSpan(android.graphics.Typeface.ITALIC), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        if (style.textDecoration == androidx.compose.ui.text.style.TextDecoration.Underline) {
+            spannable.setSpan(android.text.style.UnderlineSpan(), start, end, android.text.Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+        }
+        // Add more style mappings as needed
+    }
+    return spannable
+}
+
+fun saveAsPdf(
+    context: Context, 
+    title: String, 
+    content: AnnotatedString,
+    attachments: List<Attachment> = emptyList(),
+    checklist: List<ChecklistItem> = emptyList()
+) {
     val pdfDocument = PdfDocument()
-    val pageInfo = PdfDocument.PageInfo.Builder(595, 842, 1).create() // A4 size
-    val page = pdfDocument.startPage(pageInfo)
-    val canvas: Canvas = page.canvas
+    val pageWidth = 595
+    val pageHeight = 842
+    val margin = 40f
+    val contentWidth = (pageWidth - 2 * margin).toInt()
+    
+    var currentPageNumber = 1
+    var pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, currentPageNumber).create()
+    var page = pdfDocument.startPage(pageInfo)
+    var canvas = page.canvas
+    var yPos = margin
+
     val titlePaint = TextPaint().apply {
-        textSize = 18f
+        textSize = 24f
         isFakeBoldText = true
+        color = android.graphics.Color.BLACK
     }
     val textPaint = TextPaint().apply {
         textSize = 12f
+        color = android.graphics.Color.BLACK
     }
     val checkboxPaint = Paint().apply {
         style = Paint.Style.STROKE
-        strokeWidth = 2f
+        strokeWidth = 1.5f
+        color = android.graphics.Color.BLACK
     }
 
-    var yPosition = 60f
+    fun startNewPage() {
+        pdfDocument.finishPage(page)
+        currentPageNumber++
+        pageInfo = PdfDocument.PageInfo.Builder(pageWidth, pageHeight, currentPageNumber).create()
+        page = pdfDocument.startPage(pageInfo)
+        canvas = page.canvas
+        yPos = margin
+    }
 
-    // Draw title
-    val titleLayout = StaticLayout.Builder.obtain(
-        title, 0, title.length, titlePaint, canvas.width - 80
-    ).build()
+    fun checkSpace(height: Float) {
+        if (yPos + height > pageHeight - margin) {
+            startNewPage()
+        }
+    }
+
+    // Draw Title
+    val titleLayout = StaticLayout.Builder.obtain(title, 0, title.length, titlePaint, contentWidth)
+        .setAlignment(android.text.Layout.Alignment.ALIGN_NORMAL)
+        .setLineSpacing(0f, 1f)
+        .setIncludePad(true)
+        .build()
+
+    checkSpace(titleLayout.height.toFloat())
     canvas.save()
-    canvas.translate(40f, yPosition)
+    canvas.translate(margin, yPos)
     titleLayout.draw(canvas)
     canvas.restore()
-    yPosition += titleLayout.height + 20f
+    yPos += titleLayout.height + 20f
 
-    // Draw content or checklist
+    // Draw Attachments (Images)
+    attachments.filter { it.type == "IMAGE" }.forEach { attachment ->
+        try {
+            val imageUri = android.net.Uri.parse(attachment.uri)
+            val inputStream = context.contentResolver.openInputStream(imageUri)
+            val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
+            inputStream?.close()
+
+            if (bitmap != null) {
+                val aspectRatio = bitmap.height.toFloat() / bitmap.width.toFloat()
+                var targetWidth = contentWidth.toFloat()
+                var targetHeight = targetWidth * aspectRatio
+                
+                // If image is too tall for a single page, scale it down or just let it be (handling multi-page images is complex)
+                // For now, ensure it doesn't exceed page height limit roughly
+                if (targetHeight > (pageHeight - 2 * margin)) {
+                     targetHeight = (pageHeight - 2 * margin).toFloat()
+                     targetWidth = targetHeight / aspectRatio
+                }
+
+                checkSpace(targetHeight + 20f)
+                
+                val destRect = android.graphics.RectF(margin, yPos, margin + targetWidth, yPos + targetHeight)
+                canvas.drawBitmap(bitmap, null, destRect, null)
+                yPos += targetHeight + 20f
+                bitmap.recycle()
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    // Draw Checklist or Content
     if (checklist.isNotEmpty()) {
         checklist.forEach { item ->
-            val checkboxSize = 20f
-            val textIndent = 40f + checkboxSize + 10f
+            val checkboxSize = 16f
+            val textIndent = 24f
+            
+            val itemText = item.text.ifBlank { " " }
+            val textLayout = StaticLayout.Builder.obtain(itemText, 0, itemText.length, textPaint, (contentWidth - textIndent).toInt())
+                .build()
+            
+            checkSpace(textLayout.height.toFloat() + 10f)
 
-            // Draw checkbox
-            canvas.drawRect(40f, yPosition, 40f + checkboxSize, yPosition + checkboxSize, checkboxPaint)
+            // Draw Checkbox
+            canvas.drawRect(margin, yPos, margin + checkboxSize, yPos + checkboxSize, checkboxPaint)
             if (item.isChecked) {
-                canvas.drawLine(45f, yPosition + 10f, 50f, yPosition + 15f, checkboxPaint)
-                canvas.drawLine(50f, yPosition + 15f, 55f, yPosition + 5f, checkboxPaint)
+                canvas.drawLine(margin + 2f, yPos + 8f, margin + 6f, yPos + 14f, checkboxPaint)
+                canvas.drawLine(margin + 6f, yPos + 14f, margin + 14f, yPos + 4f, checkboxPaint)
             }
 
-            // Draw text
-            val itemText = item.text.ifBlank { " " }
-            val textLayout = StaticLayout.Builder.obtain(
-                itemText, 0, itemText.length, textPaint, canvas.width - (textIndent.toInt() + 40)
-            ).build()
-
+            // Draw Text
             canvas.save()
-            canvas.translate(textIndent, yPosition)
+            canvas.translate(margin + textIndent, yPos)
             textLayout.draw(canvas)
             canvas.restore()
 
-            yPosition += textLayout.height + 10f // Add some space between items
+            yPos += textLayout.height + 10f
         }
     } else {
-        val contentToSave = content.ifBlank { " " }
-        val contentLayout = StaticLayout.Builder.obtain(
-            contentToSave, 0, contentToSave.length, textPaint, canvas.width - 80
-        ).build()
-        canvas.save()
-        canvas.translate(40f, yPosition)
-        contentLayout.draw(canvas)
-        canvas.restore()
+        // Draw Rich Text Content
+        val spannable = annotatedStringToSpannable(content)
+        val contentLayout = StaticLayout.Builder.obtain(spannable, 0, spannable.length, textPaint, contentWidth)
+            .setAlignment(android.text.Layout.Alignment.ALIGN_NORMAL)
+            .setLineSpacing(0f, 1.2f)
+            .setIncludePad(true)
+            .build()
+            
+        // StaticLayout doesn't support partial drawing easily across pages for flow.
+        // We will simple-mindedly start a new page if the WHOLE text doesn't fit? 
+        // No, that's bad for long text. 
+        // We need to render line by line?
+        // Or create a Layout and draw it clipped?
+        
+        // Better approach for flowing text:
+        // Iterate lines of the layout
+        
+        var currentLine = 0
+        while (currentLine < contentLayout.lineCount) {
+             val lineTop = contentLayout.getLineTop(currentLine)
+             val lineBottom = contentLayout.getLineBottom(currentLine)
+             val lineHeight = lineBottom - lineTop
+             
+             checkSpace(lineHeight.toFloat())
+             
+             // Draw the specific line
+             // We can translate the canvas to -lineTop + yPos and clip?
+             // Yes
+             
+             // How many lines fit on this page?
+             val remainingHeight = pageHeight - margin - yPos
+             
+             // Calculate how many lines we can draw
+             var linesToDraw = 0
+             var heightToDraw = 0
+             
+             for (i in currentLine until contentLayout.lineCount) {
+                 val h = contentLayout.getLineBottom(i) - contentLayout.getLineTop(i)
+                 if (heightToDraw + h > remainingHeight) break
+                 heightToDraw += h
+                 linesToDraw++
+             }
+             
+             if (linesToDraw == 0) {
+                 startNewPage()
+                 continue
+             }
+             
+             canvas.save()
+             canvas.translate(margin, yPos)
+             canvas.clipRect(0, 0, contentWidth, heightToDraw)
+             canvas.translate(0f, -contentLayout.getLineTop(currentLine).toFloat())
+             contentLayout.draw(canvas)
+             canvas.restore()
+             
+             yPos += heightToDraw
+             currentLine += linesToDraw
+        }
     }
 
     pdfDocument.finishPage(page)

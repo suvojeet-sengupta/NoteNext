@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.Print
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -69,7 +70,8 @@ fun MoreOptionsSheet(
     onDismiss: () -> Unit,
     showDeleteDialog: (Boolean) -> Unit,
     showSaveAsDialog: (Boolean) -> Unit,
-    showHistoryDialog: (Boolean) -> Unit
+    showHistoryDialog: (Boolean) -> Unit,
+    onPrint: () -> Unit
 ) {
     val dateFormat = remember { SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault()) }
     val context = LocalContext.current
@@ -120,6 +122,7 @@ fun MoreOptionsSheet(
                 context.startActivity(shareIntent)
             })
             options.add(OptionItem(stringResource(id = R.string.labels), Icons.AutoMirrored.Filled.Label) { onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) })
+            options.add(OptionItem("Print", Icons.Default.Print) { onPrint() })
             options.add(OptionItem(stringResource(id = R.string.save_as), Icons.Default.Check) { showSaveAsDialog(true) })
             
             if (!state.editingIsNewNote) {
