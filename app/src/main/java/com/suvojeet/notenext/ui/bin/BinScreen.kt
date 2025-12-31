@@ -59,6 +59,7 @@ fun BinScreen(
 ) {
     val state by viewModel.state.collectAsState()
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
+    var showEmptyBinDialog by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(
@@ -76,6 +77,13 @@ fun BinScreen(
                         navigationIcon = {
                             IconButton(onClick = onMenuClick) {
                                 Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
+                            }
+                        },
+                        actions = {
+                            if (state.notes.isNotEmpty()) {
+                                IconButton(onClick = { showEmptyBinDialog = true }) {
+                                    Icon(Icons.Default.DeleteForever, contentDescription = "Empty Bin")
+                                }
                             }
                         }
                     )
@@ -160,6 +168,29 @@ fun BinScreen(
                 onDismiss = { viewModel.onEvent(BinEvent.CollapseNote) }
             )
         }
+    }
+
+    if (showEmptyBinDialog) {
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { showEmptyBinDialog = false },
+            title = { Text("Empty Bin") },
+            text = { Text("Are you sure you want to permanently delete all notes in the bin? This action cannot be undone.") },
+            confirmButton = {
+                androidx.compose.material3.TextButton(
+                    onClick = {
+                        viewModel.onEvent(BinEvent.EmptyBin)
+                        showEmptyBinDialog = false
+                    }
+                ) {
+                    Text("Delete All", color = androidx.compose.material3.MaterialTheme.colorScheme.error)
+                }
+            },
+            dismissButton = {
+                androidx.compose.material3.TextButton(onClick = { showEmptyBinDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
     }
 }
 
