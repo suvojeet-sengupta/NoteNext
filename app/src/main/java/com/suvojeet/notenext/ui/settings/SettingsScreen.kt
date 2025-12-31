@@ -808,12 +808,25 @@ fun ImportOptionItem(
 
 @Composable
 fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
+    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = { Text("Import from Google Keep") },
         text = {
             Column {
                 Text("In order to import your Notes from Google Keep you must download your Google Takeout ZIP file.")
+                Spacer(Modifier.height(8.dp))
+                
+                TextButton(
+                    onClick = {
+                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://takeout.google.com/"))
+                        context.startActivity(intent)
+                    },
+                    modifier = Modifier.align(Alignment.CenterHorizontally)
+                ) {
+                    Text("Open Google Takeout", color = MaterialTheme.colorScheme.primary)
+                }
+
                 Spacer(Modifier.height(8.dp))
                 // Using Description icon as a placeholder for Info if needed, but text is fine.
                 Text("Only select the \"Keep\" data. Click Help to get more information.")
@@ -827,7 +840,6 @@ fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
         dismissButton = {
             Row {
                 TextButton(onClick = onDismiss) { Text("Cancel") }
-                val context = LocalContext.current
                 TextButton(onClick = { 
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://support.google.com/keep/answer/10017039"))
                     context.startActivity(intent)
