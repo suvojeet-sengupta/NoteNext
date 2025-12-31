@@ -60,6 +60,8 @@ fun BackupScreen(
     
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showUnlinkDialog by remember { mutableStateOf(false) }
+    var showImportSourceDialog by remember { mutableStateOf(false) }
+    var showKeepInstructionsDialog by remember { mutableStateOf(false) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
@@ -109,6 +111,12 @@ fun BackupScreen(
         contract = ActivityResultContracts.OpenDocumentTree()
     ) { uri ->
         uri?.let { viewModel.setSdCardLocation(it) }
+    }
+
+    val importKeepLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri?.let { viewModel.importFromGoogleKeep(it) }
     }
 
     // Snackbar Host State
@@ -275,6 +283,13 @@ fun BackupScreen(
                  )
             }
 
+            // Import Section
+            item {
+                ImportCard(
+                    onClick = { showImportSourceDialog = true }
+                )
+            }
+
             // 3. Sections: Settings (Auto Backup)
             item {
                 SectionHeader("Backup Settings")
@@ -353,6 +368,155 @@ fun BackupScreen(
             }
         )
     }
+
+    if (showImportSourceDialog) {
+        ImportSourceDialog(
+            onDismiss = { showImportSourceDialog = false },
+            onSelectKeep = {
+                showImportSourceDialog = false
+                showKeepInstructionsDialog = true
+            }
+        )
+    }
+
+    if (showKeepInstructionsDialog) {
+        KeepInstructionsDialog(
+            onDismiss = { showKeepInstructionsDialog = false },
+            onImport = {
+                showKeepInstructionsDialog = false
+                importKeepLauncher.launch(arrayOf("application/zip"))
+            }
+        )
+    }
+}
+
+@Composable
+fun ImportCard(onClick: () -> Unit) {
+    Card(
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(24.dp),
+        border = androidx.compose.foundation.BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = Icons.Default.ImportExport,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(Modifier.width(16.dp))
+            Column {
+                Text(
+                    text = "Import Notes",
+                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
+                )
+                Text(
+                    text = "Import from Google Keep and other apps",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun ImportSourceDialog(onDismiss: () -> Unit, onSelectKeep: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Choose which app to import from") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                ImportOptionItem(
+                    text = "Google Keep",
+                    icon = Icons.Default.Description,
+                    color = Color(0xFFFFBB00), // Keep Yellow
+                    onClick = onSelectKeep
+                )
+                ImportOptionItem(
+                    text = "Evernote",
+                    icon = Icons.Default.Description,
+                    color = Color(0xFF00A82D), // Evernote Green
+                    enabled = false
+                )
+                ImportOptionItem(
+                    text = "Markdown/Plain Text Files",
+                    icon = Icons.Default.Description,
+                    enabled = false
+                )
+                ImportOptionItem(
+                    text = "JSON Files",
+                    icon = Icons.Default.Description,
+                    enabled = false
+                )
+            }
+        },
+        confirmButton = {},
+        dismissButton = {
+            TextButton(onClick = onDismiss) { Text("Cancel") }
+        }
+    )
+}
+
+@Composable
+fun ImportOptionItem(
+    text: String,
+    icon: ImageVector,
+    color: Color = MaterialTheme.colorScheme.onSurface,
+    onClick: () -> Unit = {},
+    enabled: Boolean = true
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable(enabled = enabled, onClick = onClick)
+            .padding(12.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = if (enabled) color else Color.Gray,
+            modifier = Modifier.size(24.dp)
+        )
+        Spacer(Modifier.width(16.dp))
+        Text(
+            text = text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = if (enabled) MaterialTheme.colorScheme.onSurface else Color.Gray
+        )
+    }
+}
+
+@Composable
+fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Import from Google Keep") },
+        text = {
+            Column {
+                Text("In order to import your Notes from Google Keep you must download your Google Takeout ZIP file.")
+                Spacer(Modifier.height(8.dp))
+                Text("Only select the \"Keep\" data. Click Help to get more information.")
+                Spacer(Modifier.height(16.dp))
+                Text("If you already have a Takeout ZIP file, click Import and choose the ZIP file.")
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onImport) { Text("Import") }
+        },
+        dismissButton = {
+            Row {
+                TextButton(onClick = onDismiss) { Text("Cancel") }
+                TextButton(onClick = { /* Open Help Link */ }) { Text("Help") }
+            }
+        }
+    )
 }
 
 // SectionHeader removed; using shared definition

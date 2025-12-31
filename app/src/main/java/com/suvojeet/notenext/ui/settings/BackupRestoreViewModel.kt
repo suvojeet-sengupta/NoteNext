@@ -8,6 +8,10 @@ import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.suvojeet.notenext.data.*
 import com.suvojeet.notenext.data.backup.GoogleDriveManager
+import com.suvojeet.notenext.data.backup.KeepNote
+import com.suvojeet.notenext.data.backup.KeepLabel
+import com.suvojeet.notenext.data.backup.KeepNote
+import com.suvojeet.notenext.data.backup.KeepLabel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -303,6 +307,115 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
+
+    fun importFromGoogleKeep(uri: Uri) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isRestoring = true, restoreResult = "Importing from Google Keep...")
+            withContext(Dispatchers.IO) {
+                try {
+                    application.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        ZipInputStream(inputStream).use { zis ->
+                            var zipEntry = zis.nextEntry
+                            var importedCount = 0
+                            val gson = Gson()
+                            
+                            while (zipEntry != null) {
+                                if (!zipEntry.isDirectory && zipEntry.name.endsWith(".json")) {
+                                    try {
+                                        // Use helper to read text safely
+                                        val jsonString = readZipEntryText(zis)
+                                        val keepNote = gson.fromJson(jsonString, KeepNote::class.java)
+                                        
+                                        if (keepNote != null && !keepNote.isTrashed) {
+                                            saveKeepNote(keepNote)
+                                            importedCount++
+                                        }
+                                    } catch (e: Exception) {
+                                        e.printStackTrace()
+                                    }
+                                }
+                                zipEntry = zis.nextEntry
+                            }
+                            _state.value = _state.value.copy(
+                                isRestoring = false,
+                                restoreResult = "Imported $importedCount notes from Google Keep"
+                            )
+                        }
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Import failed: ${e.message}")
+                }
+            }
+        }
+    }
+
+    private fun readZipEntryText(zis: ZipInputStream): String {
+        // We cannot close the reader as it would close the stream.
+        // So we read line by line or use a buffer.
+        val sb = StringBuilder()
+        val buffer = ByteArray(1024)
+        var count = 0
+        while (zis.read(buffer).also { count = it } != -1) {
+            sb.append(String(buffer, 0, count))
+        }
+        return sb.toString()
+    }
+
+    private suspend fun saveKeepNote(keepNote: KeepNote) {
+        val color = mapKeepColor(keepNote.color)
+        val noteType = if (!keepNote.listContent.isNullOrEmpty()) "CHECKLIST" else "TEXT"
+        val content = keepNote.textContent ?: ""
+        
+        val newNote = Note(
+            title = keepNote.title ?: "",
+            content = content,
+            createdAt = keepNote.createdTimestampUsec / 1000,
+            lastEdited = keepNote.userEditedTimestampUsec / 1000,
+            color = color,
+            isPinned = keepNote.isPinned,
+            isArchived = keepNote.isArchived,
+            noteType = noteType,
+            label = keepNote.labels?.firstOrNull()?.name 
+        )
+        
+        val noteId = repository.insertNote(newNote).toInt()
+
+        if (!keepNote.listContent.isNullOrEmpty()) {
+            val checklistItems = keepNote.listContent.mapIndexed { index, item ->
+                ChecklistItem(
+                    noteId = noteId,
+                    text = item.text,
+                    isChecked = item.isChecked,
+                    position = index
+                )
+            }
+            repository.insertChecklistItems(checklistItems)
+        }
+        
+        keepNote.labels?.forEach { keepLabel ->
+             try {
+                repository.insertLabel(Label(keepLabel.name))
+             } catch (e: Exception) {}
+        }
+    }
+    
+    private fun mapKeepColor(keepColor: String?): Int {
+        return when (keepColor) {
+            "RED" -> android.graphics.Color.parseColor("#F28B82")
+            "ORANGE" -> android.graphics.Color.parseColor("#FBBC04")
+            "YELLOW" -> android.graphics.Color.parseColor("#FFF475")
+            "GREEN" -> android.graphics.Color.parseColor("#CCFF90")
+            "TEAL" -> android.graphics.Color.parseColor("#A7FFEB")
+            "BLUE" -> android.graphics.Color.parseColor("#CBF0F8")
+            "DARK_BLUE" -> android.graphics.Color.parseColor("#AECBFA")
+            "PURPLE" -> android.graphics.Color.parseColor("#D7AEFB")
+            "PINK" -> android.graphics.Color.parseColor("#FDCFE8")
+            "BROWN" -> android.graphics.Color.parseColor("#E6C9A8")
+            "GRAY" -> android.graphics.Color.parseColor("#E8EAED")
+             else -> 0 
+        }
+    }
 
     fun restoreFromDrive(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount, fileId: String? = null) {
         viewModelScope.launch {
