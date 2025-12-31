@@ -662,21 +662,12 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.OnTogglePinClick -> {
+                val newPinnedState = !state.value.isPinned
+                _state.value = state.value.copy(isPinned = newPinnedState)
                 viewModelScope.launch {
-                    state.value.expandedNoteId?.let { noteId ->
-                        repository.getNoteById(noteId)?.let { note ->
-                            val updatedNote = note.note.copy(isPinned = !note.note.isPinned)
-                            repository.insertNote(updatedNote)
-                            val updatedNotesList = state.value.notes.map { if (it.note.id == updatedNote.id) it.copy(note = updatedNote) else it }
-                            _state.value = state.value.copy(
-                                isPinned = updatedNote.isPinned,
-                                notes = updatedNotesList
-                            )
-                            val message = if (updatedNote.isPinned) "Note pinned" else "Note unpinned"
-                            _events.emit(NotesUiEvent.ShowToast(message))
-                            updateWidgets()
-                        }
-                    }
+                    saveNote(shouldCollapse = false)
+                    val message = if (newPinnedState) "Note pinned" else "Note unpinned"
+                    _events.emit(NotesUiEvent.ShowToast(message))
                 }
             }
             is NotesEvent.OnToggleArchiveClick -> {
@@ -717,137 +708,7 @@ class NotesViewModel @Inject constructor(
             }
             is NotesEvent.OnSaveNoteClick -> {
                 viewModelScope.launch {
-                    val noteId = state.value.expandedNoteId
-                    if (noteId == null) return@launch
-
-                    val title = state.value.editingTitle
-                    val content = if (state.value.editingNoteType == "TEXT") {
-                        HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
-                    } else {
-                        ""
-                    }
-
-                    if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
-                        if (noteId != -1) { // It's an existing note, so delete it
-                            repository.getNoteById(noteId)?.let { repository.updateNote(it.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
-                        }
-                    } else {
-                        val currentTime = System.currentTimeMillis()
-                        val note = if (noteId == -1) { // New note
-                            Note(
-                                title = title,
-                                content = content,
-                                createdAt = currentTime,
-                                lastEdited = currentTime,
-                                color = state.value.editingColor,
-                                isPinned = state.value.isPinned,
-                                isArchived = state.value.isArchived,
-                                label = state.value.editingLabel,
-                                linkPreviews = state.value.linkPreviews,
-                                noteType = state.value.editingNoteType,
-                                isLocked = state.value.editingIsLocked
-                            )
-                        } else { // Existing note
-                            repository.getNoteById(noteId)?.let { existingNote ->
-                                existingNote.note.copy(
-                                    title = title,
-                                    content = content,
-                                    lastEdited = currentTime,
-                                    color = state.value.editingColor,
-                                    isPinned = state.value.isPinned,
-                                    isArchived = state.value.isArchived,
-                                    label = state.value.editingLabel,
-                                    linkPreviews = state.value.linkPreviews,
-                                    noteType = state.value.editingNoteType,
-                                    isLocked = state.value.editingIsLocked
-                                )
-                            }
-                        }
-                        if (note != null) {
-                            val currentNoteId = if (noteId == -1) { // New note
-                                repository.insertNote(note)
-                            } else { // Existing note
-                                // Before updating, save current state as a version if it's not a new note
-                                repository.getNoteById(noteId)?.let { oldNoteWithAttachments ->
-                                    val oldNote = oldNoteWithAttachments.note
-                                    // Only save version if content or title changed
-                                    if (oldNote.title != title || oldNote.content != content) {
-                                        repository.insertNoteVersion(
-                                            NoteVersion(
-                                                noteId = noteId,
-                                                title = oldNote.title,
-                                                content = oldNote.content,
-                                                timestamp = oldNote.lastEdited,
-                                                noteType = oldNote.noteType
-                                            )
-                                        )
-                                        repository.limitNoteVersions(noteId, 10)
-                                    }
-                                }
-                                repository.updateNote(note)
-                                noteId.toLong() // Convert Int to Long for consistency
-                            }
-
-                            // Handle Checklist Items
-                            if (state.value.editingNoteType == "CHECKLIST") {
-                                val checklistItems = state.value.editingChecklist.mapIndexed { index, item ->
-                                    item.copy(noteId = currentNoteId.toInt(), position = index)
-                                }
-                                repository.deleteChecklistForNote(currentNoteId.toInt())
-                                repository.insertChecklistItems(checklistItems)
-                            }
-
-                            // Handle attachments
-                            val existingAttachmentsInDb = if (noteId != -1) {
-                                repository.getNoteById(noteId)?.attachments ?: emptyList()
-                            } else {
-                                emptyList()
-                            }
-
-                            val attachmentsToAdd = state.value.editingAttachments.filter { uiAttachment ->
-                                existingAttachmentsInDb.none { dbAttachment ->
-                                    dbAttachment.uri == uiAttachment.uri && dbAttachment.type == uiAttachment.type
-                                }
-                            }
-
-                            val attachmentsToRemove = existingAttachmentsInDb.filter { dbAttachment ->
-                                state.value.editingAttachments.none { uiAttachment ->
-                                    uiAttachment.uri == dbAttachment.uri && uiAttachment.type == dbAttachment.type
-                                }
-                            }
-
-                            attachmentsToRemove.forEach { attachment ->
-                                repository.deleteAttachment(attachment)
-                            }
-
-                            attachmentsToAdd.forEach { attachment ->
-                                repository.insertAttachment(attachment.copy(noteId = currentNoteId.toInt()))
-                            }
-                        }
-                    }
-
-                    // Reset editing state and collapse
-                    _state.value = state.value.copy(
-                        expandedNoteId = null,
-                        editingTitle = "",
-                        editingContent = TextFieldValue(),
-                        editingColor = 0,
-                        editingIsNewNote = true,
-                        editingLastEdited = 0,
-                        canUndo = false,
-                        canRedo = false,
-                        isPinned = false,
-                        isArchived = false,
-                        editingLabel = null,
-                        isBoldActive = false,
-                        isItalicActive = false,
-                        isUnderlineActive = false,
-                        activeStyles = emptySet(),
-                        linkPreviews = emptyList(),
-                        editingChecklist = emptyList(),
-                        editingAttachments = emptyList()
-                    )
-                    updateWidgets()
+                    saveNote(shouldCollapse = true)
                 }
             }
             is NotesEvent.OnDeleteNoteClick -> {
@@ -1038,6 +899,147 @@ class NotesViewModel @Inject constructor(
 
     suspend fun getNoteIdByTitle(title: String): Int? {
         return repository.getNoteIdByTitle(title)
+    }
+
+    private suspend fun saveNote(shouldCollapse: Boolean) {
+        val noteId = state.value.expandedNoteId
+        if (noteId == null) return
+
+        val title = state.value.editingTitle
+        val content = if (state.value.editingNoteType == "TEXT") {
+            HtmlConverter.annotatedStringToHtml(state.value.editingContent.annotatedString)
+        } else {
+            ""
+        }
+
+        if (title.isBlank() && (state.value.editingNoteType == "TEXT" && content.isBlank() || state.value.editingNoteType == "CHECKLIST" && state.value.editingChecklist.all { it.text.isBlank() })) {
+            if (noteId != -1) { // It's an existing note, so delete it
+                repository.getNoteById(noteId)?.let { repository.updateNote(it.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
+            }
+        } else {
+            val currentTime = System.currentTimeMillis()
+            val note = if (noteId == -1) { // New note
+                Note(
+                    title = title,
+                    content = content,
+                    createdAt = currentTime,
+                    lastEdited = currentTime,
+                    color = state.value.editingColor,
+                    isPinned = state.value.isPinned,
+                    isArchived = state.value.isArchived,
+                    label = state.value.editingLabel,
+                    linkPreviews = state.value.linkPreviews,
+                    noteType = state.value.editingNoteType,
+                    isLocked = state.value.editingIsLocked
+                )
+            } else { // Existing note
+                repository.getNoteById(noteId)?.let { existingNote ->
+                    existingNote.note.copy(
+                        title = title,
+                        content = content,
+                        lastEdited = currentTime,
+                        color = state.value.editingColor,
+                        isPinned = state.value.isPinned,
+                        isArchived = state.value.isArchived,
+                        label = state.value.editingLabel,
+                        linkPreviews = state.value.linkPreviews,
+                        noteType = state.value.editingNoteType,
+                        isLocked = state.value.editingIsLocked
+                    )
+                }
+            }
+            if (note != null) {
+                val currentNoteId = if (noteId == -1) { // New note
+                    repository.insertNote(note)
+                } else { // Existing note
+                    // Before updating, save current state as a version if it's not a new note
+                    repository.getNoteById(noteId)?.let { oldNoteWithAttachments ->
+                        val oldNote = oldNoteWithAttachments.note
+                        // Only save version if content or title changed
+                        if (oldNote.title != title || oldNote.content != content) {
+                            repository.insertNoteVersion(
+                                NoteVersion(
+                                    noteId = noteId,
+                                    title = oldNote.title,
+                                    content = oldNote.content,
+                                    timestamp = oldNote.lastEdited,
+                                    noteType = oldNote.noteType
+                                )
+                            )
+                            repository.limitNoteVersions(noteId, 10)
+                        }
+                    }
+                    repository.updateNote(note)
+                    noteId.toLong() // Convert Int to Long for consistency
+                }
+
+                // Handle Checklist Items
+                if (state.value.editingNoteType == "CHECKLIST") {
+                    val checklistItems = state.value.editingChecklist.mapIndexed { index, item ->
+                        item.copy(noteId = currentNoteId.toInt(), position = index)
+                    }
+                    repository.deleteChecklistForNote(currentNoteId.toInt())
+                    repository.insertChecklistItems(checklistItems)
+                }
+
+                // Handle attachments
+                val existingAttachmentsInDb = if (noteId != -1) {
+                    repository.getNoteById(noteId)?.attachments ?: emptyList()
+                } else {
+                    emptyList()
+                }
+
+                val attachmentsToAdd = state.value.editingAttachments.filter { uiAttachment ->
+                    existingAttachmentsInDb.none { dbAttachment ->
+                        dbAttachment.uri == uiAttachment.uri && dbAttachment.type == uiAttachment.type
+                    }
+                }
+
+                val attachmentsToRemove = existingAttachmentsInDb.filter { dbAttachment ->
+                    state.value.editingAttachments.none { uiAttachment ->
+                        uiAttachment.uri == dbAttachment.uri && uiAttachment.type == dbAttachment.type
+                    }
+                }
+
+                attachmentsToRemove.forEach { attachment ->
+                    repository.deleteAttachment(attachment)
+                }
+
+                attachmentsToAdd.forEach { attachment ->
+                    repository.insertAttachment(attachment.copy(noteId = currentNoteId.toInt()))
+                }
+
+                // Update expandedNoteId if it was a new note
+                if (noteId == -1 && !shouldCollapse) {
+                    _state.value = state.value.copy(expandedNoteId = currentNoteId.toInt())
+                }
+            }
+        }
+
+        if (shouldCollapse) {
+            // Reset editing state and collapse
+            _state.value = state.value.copy(
+                expandedNoteId = null,
+                editingTitle = "",
+                editingContent = TextFieldValue(),
+                editingColor = 0,
+                editingIsNewNote = true,
+                editingLastEdited = 0,
+                canUndo = false,
+                canRedo = false,
+                isPinned = false,
+                isArchived = false,
+                editingLabel = null,
+                isBoldActive = false,
+                isItalicActive = false,
+                isUnderlineActive = false,
+                activeStyles = emptySet(),
+                linkPreviews = emptyList(),
+                editingChecklist = emptyList(),
+                editingAttachments = emptyList()
+            )
+        }
+        updateWidgets()
     }
 }
 
