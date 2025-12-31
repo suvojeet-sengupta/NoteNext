@@ -60,8 +60,6 @@ fun BackupScreen(
     
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showUnlinkDialog by remember { mutableStateOf(false) }
-    var showDeleteDialog by remember { mutableStateOf(false) }
-    var showUnlinkDialog by remember { mutableStateOf(false) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")

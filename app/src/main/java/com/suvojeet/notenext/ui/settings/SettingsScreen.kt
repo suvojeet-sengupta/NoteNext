@@ -38,8 +38,10 @@ import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.compose.foundation.layout.height
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import com.suvojeet.notenext.data.backup.GoogleDriveManager
