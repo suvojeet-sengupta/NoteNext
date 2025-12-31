@@ -168,8 +168,13 @@ class BackupRestoreViewModel @Inject constructor(
                         }
                         _state.value = _state.value.copy(isBackingUp = false, backupResult = "Local Backup successful")
                     } else {
-                        val result = backupRepository.backupToEncryptedUri(uri, password, state.value.includeAttachments)
-                        _state.value = _state.value.copy(isBackingUp = false, backupResult = result)
+                        // For CreateDocument (Save to File), we have a File URI, so we use stream based backup
+                        backupRepository.backupToEncryptedStream(
+                            application.contentResolver.openOutputStream(uri), 
+                            password, 
+                            state.value.includeAttachments
+                        )
+                        _state.value = _state.value.copy(isBackingUp = false, backupResult = "Encrypted Local Backup successful")
                     }
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -627,7 +632,7 @@ class BackupRestoreViewModel @Inject constructor(
                     val result = if (password.isNullOrBlank()) {
                          backupRepository.backupToUri(Uri.parse(uriString), state.value.includeAttachments)
                     } else {
-                         backupRepository.backupToEncryptedUri(Uri.parse(uriString), password, state.value.includeAttachments)
+                         backupRepository.backupToEncryptedFolder(Uri.parse(uriString), password, state.value.includeAttachments)
                     }
                      _state.value = _state.value.copy(isBackingUp = false, backupResult = result)
                 } catch (e: Exception) {

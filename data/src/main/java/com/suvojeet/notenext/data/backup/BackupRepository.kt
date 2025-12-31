@@ -67,7 +67,7 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun backupToEncryptedUri(folderUri: Uri, password: String, includeAttachments: Boolean = true): String {
+    suspend fun backupToEncryptedFolder(folderUri: Uri, password: String, includeAttachments: Boolean = true): String {
         return try {
              val validUri = if (folderUri.toString().endsWith("%3A")) {
                  folderUri
@@ -82,22 +82,30 @@ class BackupRepository @Inject constructor(
             val file = dir.createFile("application/octet-stream", fileName) 
                 ?: throw Exception("Failed to create file in selected directory.")
 
-            // 1. Create temp plain ZIP
-            val tempZipFile = File(context.cacheDir, "temp_plain_backup.zip")
-            createBackupZip(tempZipFile, includeAttachments)
-
-            // 2. Encrypt temp ZIP to target URI
-            context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
-                EncryptionUtils.encryptFile(tempZipFile, outputStream, password)
-            }
-            
-            // 3. Cleanup
-            tempZipFile.delete()
+            backupToEncryptedStream(context.contentResolver.openOutputStream(file.uri), password, includeAttachments)
 
             "Encrypted Backup successful: $fileName"
         } catch (e: Exception) {
             e.printStackTrace()
             throw Exception("Failed to save encrypted backup: ${e.message}")
+        }
+    }
+
+    suspend fun backupToEncryptedStream(outputStream: java.io.OutputStream?, password: String, includeAttachments: Boolean = true) {
+        if (outputStream == null) throw Exception("Output stream is null")
+        
+        val tempZipFile = File(context.cacheDir, "temp_plain_backup.zip")
+        try {
+            // 1. Create temp plain ZIP
+            createBackupZip(tempZipFile, includeAttachments)
+
+            // 2. Encrypt temp ZIP to target Stream
+            outputStream.use { out ->
+                EncryptionUtils.encryptFile(tempZipFile, out, password)
+            }
+        } finally {
+            // 3. Cleanup
+            tempZipFile.delete()
         }
     }
 
