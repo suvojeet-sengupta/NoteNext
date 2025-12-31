@@ -10,8 +10,6 @@ import com.suvojeet.notenext.data.*
 import com.suvojeet.notenext.data.backup.GoogleDriveManager
 import com.suvojeet.notenext.data.backup.KeepNote
 import com.suvojeet.notenext.data.backup.KeepLabel
-import com.suvojeet.notenext.data.backup.KeepNote
-import com.suvojeet.notenext.data.backup.KeepLabel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -381,8 +379,9 @@ class BackupRestoreViewModel @Inject constructor(
         
         val noteId = repository.insertNote(newNote).toInt()
 
-        if (!keepNote.listContent.isNullOrEmpty()) {
-            val checklistItems = keepNote.listContent.mapIndexed { index, item ->
+        val listContent = keepNote.listContent
+        if (!listContent.isNullOrEmpty()) {
+            val checklistItems = listContent.mapIndexed { index, item ->
                 ChecklistItem(
                     noteId = noteId,
                     text = item.text,
