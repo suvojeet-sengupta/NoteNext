@@ -320,15 +320,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                     )
                 }
 
-                composable(
-                    route = "restore",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                ) {
-                    RestoreScreen(
-                        onBackClick = { navController.popBackStack() }
-                    )
-                }
+
 
                 composable(
                     route = "archive",
