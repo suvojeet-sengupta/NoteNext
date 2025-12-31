@@ -794,7 +794,8 @@ private fun parseInlineMarkdown(text: String): androidx.compose.ui.text.Annotate
         }
     }
 }
-
+    }
+}
 
 private fun openUrl(context: Context, url: String) {
     try {
