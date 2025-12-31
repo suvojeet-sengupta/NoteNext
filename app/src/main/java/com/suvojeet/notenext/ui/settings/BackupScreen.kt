@@ -22,6 +22,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -60,6 +64,10 @@ fun BackupScreen(
     
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showUnlinkDialog by remember { mutableStateOf(false) }
+    
+    // State for History Item Dialogs
+    var versionToDelete by remember { mutableStateOf<String?>(null) }
+    var versionToRestore by remember { mutableStateOf<String?>(null) }
 
     val createDocumentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.CreateDocument("application/zip")
@@ -240,12 +248,17 @@ fun BackupScreen(
                     },
                     onUnlink = { showUnlinkDialog = true },
                     onRestore = { versionId ->
-                        val account = GoogleSignIn.getLastSignedInAccount(context)
-                        account?.let { viewModel.restoreFromDrive(it, versionId) }
+                        if (versionId != null) {
+                            versionToRestore = versionId // Trigger history restore dialog
+                        } else {
+                            // "Restore Latest" - No dialog requested for this main button, or maybe bounce only?
+                            // Logic: If onRestore is called with null, it's the main button.
+                            val account = GoogleSignIn.getLastSignedInAccount(context)
+                            account?.let { viewModel.restoreFromDrive(it, null) }
+                        }
                     },
                     onDeleteVersion = { versionId ->
-                         val account = GoogleSignIn.getLastSignedInAccount(context)
-                        account?.let { viewModel.deleteBackupVersion(it, versionId) }
+                         versionToDelete = versionId // Trigger history delete dialog
                     },
                     onToggleAttachments = { viewModel.toggleIncludeAttachments(it) }
                 )
@@ -353,6 +366,51 @@ fun BackupScreen(
             }
         )
     }
+
+    if (versionToDelete != null) {
+        AlertDialog(
+            onDismissRequest = { versionToDelete = null },
+            icon = { Icon(Icons.Default.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text("Delete Backup Version") },
+            text = { Text("Are you sure you want to permanently delete this backup version? This cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        versionToDelete?.let { id ->
+                             GoogleSignIn.getLastSignedInAccount(context)?.let { viewModel.deleteBackupVersion(it, id) }
+                        }
+                        versionToDelete = null
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text("Delete") }
+            },
+            dismissButton = {
+                TextButton(onClick = { versionToDelete = null }) { Text("Cancel") }
+            }
+        )
+    }
+
+    if (versionToRestore != null) {
+        AlertDialog(
+            onDismissRequest = { versionToRestore = null },
+            icon = { Icon(Icons.Default.Restore, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+            title = { Text("Restore this Version?") },
+            text = { Text("Restoring this version will overwrite your current data. This action cannot be undone.") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        versionToRestore?.let { id ->
+                             GoogleSignIn.getLastSignedInAccount(context)?.let { viewModel.restoreFromDrive(it, id) }
+                        }
+                        versionToRestore = null
+                    }
+                ) { Text("Restore") }
+            },
+            dismissButton = {
+                TextButton(onClick = { versionToRestore = null }) { Text("Cancel") }
+            }
+        )
+    }
 }
 
 // SectionHeader removed; using shared definition
@@ -409,7 +467,7 @@ fun ManualDriveBackupCard(
                  
                  // Primary Actions
                  Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                     Button(
+                     BouncingButton(
                          onClick = onSignInBackup,
                          modifier = Modifier.weight(1f),
                          shape = RoundedCornerShape(12.dp)
@@ -424,7 +482,7 @@ fun ManualDriveBackupCard(
                      }
                       // Latest Restore Button (if versions exist)
                      if (state.backupVersions.isNotEmpty()) {
-                         OutlinedButton(
+                         BouncingOutlinedButton(
                              onClick = { onRestore(null) }, // Null implies latest
                              shape = RoundedCornerShape(12.dp)
                          ) {
@@ -935,5 +993,61 @@ fun ProjectSelectionDialog(
                 Text("Cancel")
             }
         }
+    )
+}
+
+@Composable
+fun BouncingButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: androidx.compose.ui.graphics.Shape = ButtonDefaults.shape,
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        label = "button_bounce"
+    )
+
+    Button(
+        onClick = onClick,
+        modifier = modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
+        enabled = enabled,
+        shape = shape,
+        interactionSource = interactionSource,
+        content = content
+    )
+}
+
+@Composable
+fun BouncingOutlinedButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    shape: androidx.compose.ui.graphics.Shape = ButtonDefaults.shape,
+    content: @Composable RowScope.() -> Unit
+) {
+    val interactionSource = remember { MutableInteractionSource() }
+    val isPressed by interactionSource.collectIsPressedAsState()
+    val scale by animateFloatAsState(
+        targetValue = if (isPressed) 0.95f else 1f,
+        label = "button_bounce"
+    )
+
+    OutlinedButton(
+        onClick = onClick,
+        modifier = modifier.graphicsLayer {
+            scaleX = scale
+            scaleY = scale
+        },
+        enabled = enabled,
+        shape = shape,
+        interactionSource = interactionSource,
+        content = content
     )
 }
