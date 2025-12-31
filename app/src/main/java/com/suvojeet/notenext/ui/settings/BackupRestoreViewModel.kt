@@ -349,15 +349,10 @@ class BackupRestoreViewModel @Inject constructor(
     }
 
     private fun readZipEntryText(zis: ZipInputStream): String {
-        // We cannot close the reader as it would close the stream.
-        // So we read line by line or use a buffer.
-        val sb = StringBuilder()
-        val buffer = ByteArray(1024)
-        var count = 0
-        while (zis.read(buffer).also { count = it } != -1) {
-            sb.append(String(buffer, 0, count))
-        }
-        return sb.toString()
+        // Read all bytes of the current entry and convert to String using UTF-8
+        // This avoids splitting multi-byte characters (like Hindi/Emoji) across buffer chunks
+        val text = zis.readBytes().toString(Charsets.UTF_8)
+        return text
     }
 
     private suspend fun saveKeepNote(keepNote: KeepNote) {
