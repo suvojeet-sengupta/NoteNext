@@ -52,7 +52,10 @@ data class BackupRestoreState(
     val uploadProgress: String? = null,
     val driveBackupMetadata: com.suvojeet.notenext.data.backup.GoogleDriveManager.DriveBackupMetadata? = null,
     val isSdCardAutoBackupEnabled: Boolean = false,
-    val sdCardFolderUri: String? = null
+    val sdCardFolderUri: String? = null,
+    val includeAttachments: Boolean = true,
+    val backupVersions: List<com.suvojeet.notenext.data.backup.GoogleDriveManager.DriveBackupMetadata> = emptyList(),
+    val isLoadingVersions: Boolean = false
 )
 
 @HiltViewModel
@@ -70,14 +73,17 @@ class BackupRestoreViewModel @Inject constructor(
         val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
         val enabled = sharedPrefs.getBoolean("auto_backup_enabled", false)
         val frequency = sharedPrefs.getString("backup_frequency", "Daily") ?: "Daily"
-        _state.value = _state.value.copy(isAutoBackupEnabled = enabled, backupFrequency = frequency)
+        val includeAttachments = sharedPrefs.getBoolean("include_backup_attachments", true)
+        
         val sdCardEnabled = sharedPrefs.getBoolean("sd_card_backup_enabled", false)
         val sdCardUri = sharedPrefs.getString("sd_card_folder_uri", null)
+        
         _state.value = _state.value.copy(
             isAutoBackupEnabled = enabled, 
             backupFrequency = frequency,
             isSdCardAutoBackupEnabled = sdCardEnabled,
-            sdCardFolderUri = sdCardUri
+            sdCardFolderUri = sdCardUri,
+            includeAttachments = includeAttachments
         )
     }
 
@@ -85,8 +91,9 @@ class BackupRestoreViewModel @Inject constructor(
         _state.value = _state.value.copy(googleAccountEmail = account?.email)
         if (account != null) {
             checkDriveBackupStatus(account)
+            refreshBackupVersions(account)
         } else {
-            _state.value = _state.value.copy(driveBackupExists = false)
+            _state.value = _state.value.copy(driveBackupExists = false, backupVersions = emptyList())
         }
     }
 
@@ -95,13 +102,14 @@ class BackupRestoreViewModel @Inject constructor(
             context,
             com.google.android.gms.auth.api.signin.GoogleSignInOptions.DEFAULT_SIGN_IN
         ).signOut().addOnCompleteListener {
-             _state.value = _state.value.copy(googleAccountEmail = null, driveBackupExists = false)
+             _state.value = _state.value.copy(googleAccountEmail = null, driveBackupExists = false, backupVersions = emptyList())
         }
     }
 
     fun getBackupDetails() {
         viewModelScope.launch {
             withContext(Dispatchers.IO) {
+                // ... (Existing implementation for calculating size) ...
                 val notes = repository.getNotes().first()
                 val labels = repository.getLabels().first()
                 val projects = repository.getProjects().first()
@@ -151,7 +159,7 @@ class BackupRestoreViewModel @Inject constructor(
             withContext(Dispatchers.IO) {
                 try {
                     application.contentResolver.openOutputStream(uri)?.use { outputStream ->
-                        backupRepository.createBackupZip(outputStream)
+                        backupRepository.createBackupZip(outputStream, state.value.includeAttachments)
                     }
                     _state.value = _state.value.copy(isBackingUp = false, backupResult = "Local Backup successful")
                 } catch (e: Exception) {
@@ -171,7 +179,7 @@ class BackupRestoreViewModel @Inject constructor(
             )
             withContext(Dispatchers.IO) {
                 try {
-                    backupRepository.backupToDrive(account) { uploaded, total ->
+                    backupRepository.backupToDrive(account, state.value.includeAttachments) { uploaded, total ->
                         val progress = if (total > 0) {
                             val percent = (uploaded * 100) / total
                             val uploadedMb = String.format("%.2f", uploaded / (1024.0 * 1024.0))
@@ -189,6 +197,7 @@ class BackupRestoreViewModel @Inject constructor(
                         driveBackupExists = true,
                         uploadProgress = null
                     )
+                    refreshBackupVersions(account)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.value = _state.value.copy(
@@ -201,6 +210,32 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
+    // ... (readBackupFromZip remains the same) ...
+
+    fun restoreBackup(uri: Uri) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isRestoring = true, restoreResult = null)
+            withContext(Dispatchers.IO) {
+                try {
+                    application.contentResolver.openInputStream(uri)?.use { inputStream ->
+                        ZipInputStream(inputStream).use { zis ->
+                            // We need to make readBackupFromZip accessible or copy logic. 
+                            // Since it's private and complex, let's assume it's available or we use a helper.
+                            // For this patch, I will use reflection or moving the function to public/helper if needed,
+                            // OR copy the function logic again here if I can't easily change visibility in this single replace block.
+                            // Actually, readBackupFromZip is already in the file, so it's fine.
+                            readBackupFromZip(zis)
+                        }
+                    }
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Local Restore successful")
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Local Restore failed: ${e.message}")
+                }
+            }
+        }
+    }
+    
     private suspend fun readBackupFromZip(zis: ZipInputStream) {
          // Clear existing data
         repository.getNotes().first().flatMap { it.attachments }.forEach { repository.deleteAttachment(it) }
@@ -268,32 +303,15 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    fun restoreBackup(uri: Uri) {
-        viewModelScope.launch {
-            _state.value = _state.value.copy(isRestoring = true, restoreResult = null)
-            withContext(Dispatchers.IO) {
-                try {
-                    application.contentResolver.openInputStream(uri)?.use { inputStream ->
-                        ZipInputStream(inputStream).use { zis ->
-                            readBackupFromZip(zis)
-                        }
-                    }
-                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Local Restore successful")
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Local Restore failed: ${e.message}")
-                }
-            }
-        }
-    }
 
-    fun restoreFromDrive(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+    fun restoreFromDrive(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount, fileId: String? = null) {
         viewModelScope.launch {
              _state.value = _state.value.copy(isRestoring = true, restoreResult = "Downloading from Drive...")
+             val backupName = if (fileId != null) "selected version" else "latest backup"
             withContext(Dispatchers.IO) {
                 try {
                      val tempFile = File(application.cacheDir, "temp_restore.zip")
-                     googleDriveManager.downloadBackup(application, account, tempFile)
+                     googleDriveManager.downloadBackup(application, account, tempFile, fileId)
                      
                      java.io.FileInputStream(tempFile).use { inputStream ->
                          ZipInputStream(inputStream).use { zis ->
@@ -301,7 +319,7 @@ class BackupRestoreViewModel @Inject constructor(
                          }
                      }
                      tempFile.delete()
-                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Drive Restore successful")
+                    _state.value = _state.value.copy(isRestoring = false, restoreResult = "Drive Restore ($backupName) successful")
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.value = _state.value.copy(isRestoring = false, restoreResult = "Drive Restore failed: ${e.message}")
@@ -332,16 +350,50 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
-    fun deleteDriveBackup(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+    fun refreshBackupVersions(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
         viewModelScope.launch {
-             _state.value = _state.value.copy(isDeleting = true, backupResult = "Deleting Drive Backup...")
+            _state.value = _state.value.copy(isLoadingVersions = true)
+            withContext(Dispatchers.IO) {
+                try {
+                    val versions = googleDriveManager.getBackups(application, account)
+                    _state.value = _state.value.copy(isLoadingVersions = false, backupVersions = versions)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isLoadingVersions = false)
+                }
+            }
+        }
+    }
+
+    fun deleteBackupVersion(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount, fileId: String) {
+        viewModelScope.launch {
+            _state.value = _state.value.copy(isDeleting = true)
+            withContext(Dispatchers.IO) {
+                try {
+                    googleDriveManager.deleteBackupFile(application, account, fileId)
+                    refreshBackupVersions(account) // Refresh list
+                    checkDriveBackupStatus(account) // Refresh latest status
+                    _state.value = _state.value.copy(isDeleting = false)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    _state.value = _state.value.copy(isDeleting = false, backupResult = "Failed to delete: ${e.message}")
+                }
+            }
+        }
+    }
+
+    fun deleteDriveBackup(account: com.google.android.gms.auth.api.signin.GoogleSignInAccount) {
+        // Keeps legacy behavior of deleting ALL backups
+        viewModelScope.launch {
+             _state.value = _state.value.copy(isDeleting = true, backupResult = "Deleting Drive Backups...")
             withContext(Dispatchers.IO) {
                 try {
                      googleDriveManager.deleteBackup(application, account)
                     _state.value = _state.value.copy(
                         isDeleting = false, 
-                        backupResult = "Drive Backup deleted successfully",
-                        driveBackupExists = false
+                        backupResult = "Drive Backups deleted successfully",
+                        driveBackupExists = false,
+                        backupVersions = emptyList()
                     )
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -378,6 +430,14 @@ class BackupRestoreViewModel @Inject constructor(
         }
     }
 
+    fun toggleIncludeAttachments(enabled: Boolean) {
+         viewModelScope.launch {
+            val sharedPrefs = application.getSharedPreferences("backup_prefs", android.content.Context.MODE_PRIVATE)
+            sharedPrefs.edit().putBoolean("include_backup_attachments", enabled).apply()
+            _state.value = _state.value.copy(includeAttachments = enabled)
+        }
+    }
+
     fun setSdCardLocation(uri: Uri) {
         viewModelScope.launch {
             // Take persistable permission
@@ -404,7 +464,7 @@ class BackupRestoreViewModel @Inject constructor(
             _state.value = _state.value.copy(isBackingUp = true, backupResult = "Backing up to SD Card...")
             withContext(Dispatchers.IO) {
                 try {
-                    val result = backupRepository.backupToUri(Uri.parse(uriString))
+                    val result = backupRepository.backupToUri(Uri.parse(uriString), state.value.includeAttachments)
                      _state.value = _state.value.copy(isBackingUp = false, backupResult = result)
                 } catch (e: Exception) {
                     e.printStackTrace()
@@ -415,6 +475,7 @@ class BackupRestoreViewModel @Inject constructor(
     }
 
     private fun refreshWorkerSchedule() {
+        // ... (No changes needed) ...
         val currentState = state.value
         val email = currentState.googleAccountEmail
         val frequency = currentState.backupFrequency
@@ -427,6 +488,7 @@ class BackupRestoreViewModel @Inject constructor(
     }
 
     private fun scheduleWorker(email: String?, frequency: String) {
+        // ... (No changes needed) ...
         val workManager = androidx.work.WorkManager.getInstance(application)
         
         val repeatInterval = if (frequency == "Daily") 1L else 7L
@@ -443,7 +505,7 @@ class BackupRestoreViewModel @Inject constructor(
             // Better to keep it if we might do Drive backup. If only local, network not strictly needed but harmless.
             .setRequiresBatteryNotLow(true)
             .build()
-
+        
         val workRequest = androidx.work.PeriodicWorkRequestBuilder<com.suvojeet.notenext.data.backup.BackupWorker>(repeatInterval, timeUnit)
             .setConstraints(constraints)
             .setInputData(inputData)
@@ -458,10 +520,12 @@ class BackupRestoreViewModel @Inject constructor(
     }
 
     private fun cancelWorker() {
+        // ... (No changes included in replace for brevity if unchanged logic, but here I must provide full replacement or matching context.
         androidx.work.WorkManager.getInstance(application).cancelUniqueWork("auto_backup")
     }
 
-    fun scanBackup(uri: Uri) {
+    // ... (rest of the file like scanBackup, restoreSelectedProjects etc. which I will include to keep file valid) ...
+     fun scanBackup(uri: Uri) {
         viewModelScope.launch {
             _state.value = _state.value.copy(isScanning = true, restoreResult = null, foundProjects = emptyList())
             withContext(Dispatchers.IO) {

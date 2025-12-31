@@ -150,10 +150,15 @@ fun BackupScreen(
                         }
                     },
                     onUnlink = { showUnlinkDialog = true },
-                    onRestore = {
+                    onRestore = { versionId ->
                         val account = GoogleSignIn.getLastSignedInAccount(context)
-                        account?.let { viewModel.restoreFromDrive(it) }
-                    }
+                        account?.let { viewModel.restoreFromDrive(it, versionId) }
+                    },
+                    onDeleteVersion = { versionId ->
+                         val account = GoogleSignIn.getLastSignedInAccount(context)
+                        account?.let { viewModel.deleteBackupVersion(it, versionId) }
+                    },
+                    onToggleAttachments = { viewModel.toggleIncludeAttachments(it) }
                 )
             }
 
@@ -262,7 +267,9 @@ fun ManualDriveBackupCard(
     state: BackupRestoreState,
     onSignInBackup: () -> Unit,
     onUnlink: () -> Unit,
-    onRestore: () -> Unit
+    onRestore: (String?) -> Unit,
+    onDeleteVersion: (String) -> Unit,
+    onToggleAttachments: (Boolean) -> Unit
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -284,24 +291,28 @@ fun ManualDriveBackupCard(
                      Spacer(Modifier.height(4.dp))
                      if (state.googleAccountEmail != null) {
                          Text("Linked: ${state.googleAccountEmail}", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                         
-                         state.driveBackupMetadata?.let { meta ->
-                             val size = formatSize(meta.size)
-                             val date = meta.modifiedTime?.let {
-                                  SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(it.value))
-                             } ?: "Unknown"
-                             Spacer(Modifier.height(4.dp))
-                             Text("Last Backup: $date ($size)", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.SemiBold, color = MaterialTheme.colorScheme.primary)
-                         }
                      } else {
                          Text("Sign in to backup your data to the cloud.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                      }
                  }
              }
 
-             Spacer(Modifier.height(20.dp))
-
              if (state.googleAccountEmail != null) {
+                 Spacer(Modifier.height(12.dp))
+                 
+                 // Include Attachments Config
+                 Row(
+                     verticalAlignment = Alignment.CenterVertically, 
+                     modifier = Modifier.fillMaxWidth().clickable { onToggleAttachments(!state.includeAttachments) }
+                 ) {
+                     Checkbox(checked = state.includeAttachments, onCheckedChange = onToggleAttachments)
+                     Spacer(Modifier.width(8.dp))
+                     Text("Include Attachments", style = MaterialTheme.typography.bodyMedium)
+                 }
+
+                 Spacer(Modifier.height(12.dp))
+                 
+                 // Primary Actions
                  Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
                      Button(
                          onClick = onSignInBackup,
@@ -316,17 +327,49 @@ fun ManualDriveBackupCard(
                              Text("Backup Now")
                          }
                      }
-                     if (state.driveBackupExists) {
-                         OutlinedButton(onClick = onRestore, shape = RoundedCornerShape(12.dp)) {
-                             Text("Restore")
+                      // Latest Restore Button (if versions exist)
+                     if (state.backupVersions.isNotEmpty()) {
+                         OutlinedButton(
+                             onClick = { onRestore(null) }, // Null implies latest
+                             shape = RoundedCornerShape(12.dp)
+                         ) {
+                            if (state.isRestoring && state.restoreResult?.contains("latest") == true) {
+                                 CircularProgressIndicator(modifier = Modifier.size(16.dp), strokeWidth = 2.dp)
+                            } else {
+                                 Text("Restore Latest")
+                            }
                          }
                      }
                  }
+                 
+                 // Versions List
+                 if (state.backupVersions.isNotEmpty()) {
+                     Spacer(Modifier.height(16.dp))
+                     Text("Backup History", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                     Spacer(Modifier.height(8.dp))
+                     
+                     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                         state.backupVersions.forEach { version ->
+                             BackupVersionItem(
+                                 version = version,
+                                 isRestoring = state.isRestoring, // Ideally check if *this* version is restoring, but simplified
+                                 isDeleting = state.isDeleting,
+                                 onRestore = { onRestore(version.id) },
+                                 onDelete = { onDeleteVersion(version.id) }
+                             )
+                         }
+                     }
+                 } else if (state.isLoadingVersions) {
+                      Spacer(Modifier.height(16.dp))
+                      LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+                 }
+
                  Spacer(Modifier.height(8.dp))
                  TextButton(onClick = onUnlink, modifier = Modifier.align(Alignment.End)) {
                      Text("Unlink Account", color = MaterialTheme.colorScheme.error)
                  }
              } else {
+                 Spacer(Modifier.height(20.dp))
                  Button(
                      onClick = onSignInBackup,
                      modifier = Modifier.fillMaxWidth(),
@@ -334,6 +377,43 @@ fun ManualDriveBackupCard(
                  ) {
                      Text("Sign In & Backup")
                  }
+             }
+         }
+    }
+}
+
+@Composable
+fun BackupVersionItem(
+    version: com.suvojeet.notenext.data.backup.GoogleDriveManager.DriveBackupMetadata,
+    isRestoring: Boolean,
+    isDeleting: Boolean,
+    onRestore: () -> Unit,
+    onDelete: () -> Unit
+) {
+    val size = formatSize(version.size)
+    val date = version.modifiedTime?.let {
+        SimpleDateFormat("MMM dd, HH:mm", Locale.getDefault()).format(Date(it.value))
+    } ?: "Unknown Date"
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f), RoundedCornerShape(8.dp))
+            .padding(8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+         Column {
+             Text(date, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+             Text(size, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+         }
+         
+         Row {
+             IconButton(onClick = onRestore, enabled = !isRestoring && !isDeleting) {
+                 Icon(Icons.Default.Restore, "Restore", tint = MaterialTheme.colorScheme.primary)
+             }
+             IconButton(onClick = onDelete, enabled = !isRestoring && !isDeleting) {
+                  Icon(Icons.Default.Delete, "Delete", tint = MaterialTheme.colorScheme.error)
              }
          }
     }

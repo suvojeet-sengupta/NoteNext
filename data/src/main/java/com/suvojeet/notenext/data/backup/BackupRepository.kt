@@ -28,21 +28,21 @@ class BackupRepository @Inject constructor(
     private val googleDriveManager: GoogleDriveManager
 ) {
 
-    suspend fun createBackupZip(targetFile: File) {
+    suspend fun createBackupZip(targetFile: File, includeAttachments: Boolean = true) {
         FileOutputStream(targetFile).use { fos ->
             ZipOutputStream(fos).use { zos ->
-                writeBackupToZip(zos)
+                writeBackupToZip(zos, includeAttachments)
             }
         }
     }
     
-    suspend fun createBackupZip(outputStream: java.io.OutputStream) {
+    suspend fun createBackupZip(outputStream: java.io.OutputStream, includeAttachments: Boolean = true) {
          ZipOutputStream(outputStream).use { zos ->
-            writeBackupToZip(zos)
+            writeBackupToZip(zos, includeAttachments)
         }
     }
 
-    suspend fun backupToUri(folderUri: Uri): String {
+    suspend fun backupToUri(folderUri: Uri, includeAttachments: Boolean = true): String {
         return try {
             val validUri = if (folderUri.toString().endsWith("%3A")) {
                  // Convert simple tree URIs if needed, though DocumentFile.fromTreeUri handles most.
@@ -59,7 +59,7 @@ class BackupRepository @Inject constructor(
                 ?: throw Exception("Failed to create file in selected directory.")
 
             context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
-                createBackupZip(outputStream)
+                createBackupZip(outputStream, includeAttachments)
             }
             "Backup successful: $fileName"
         } catch (e: Exception) {
@@ -68,9 +68,9 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun backupToDrive(account: GoogleSignInAccount, onProgress: ((Long, Long) -> Unit)? = null): String {
+    suspend fun backupToDrive(account: GoogleSignInAccount, includeAttachments: Boolean = true, onProgress: ((Long, Long) -> Unit)? = null): String {
         val dbFile = File(context.cacheDir, "temp_backup.zip")
-        createBackupZip(dbFile)
+        createBackupZip(dbFile, includeAttachments)
         return try {
             googleDriveManager.uploadBackup(context, account, dbFile, onProgress)
         } finally {
@@ -80,7 +80,7 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    private suspend fun writeBackupToZip(zos: ZipOutputStream) {
+    private suspend fun writeBackupToZip(zos: ZipOutputStream, includeAttachments: Boolean) {
         // Backup notes
         val notes = repository.getNotes().first()
         val notesJson = Gson().toJson(notes)
@@ -103,18 +103,20 @@ class BackupRepository @Inject constructor(
         zos.closeEntry()
 
         // Backup attachments
-        val attachments = notes.flatMap { it.attachments }
-        attachments.forEach { attachment ->
-            try {
-                val attachmentUri = Uri.parse(attachment.uri)
-                context.contentResolver.openInputStream(attachmentUri)?.use { inputStream ->
-                    val fileName = File(attachmentUri.path!!).name
-                    zos.putNextEntry(ZipEntry("attachments/$fileName"))
-                    inputStream.copyTo(zos)
-                    zos.closeEntry()
+        if (includeAttachments) {
+            val attachments = notes.flatMap { it.attachments }
+            attachments.forEach { attachment ->
+                try {
+                    val attachmentUri = Uri.parse(attachment.uri)
+                    context.contentResolver.openInputStream(attachmentUri)?.use { inputStream ->
+                        val fileName = File(attachmentUri.path!!).name
+                        zos.putNextEntry(ZipEntry("attachments/$fileName"))
+                        inputStream.copyTo(zos)
+                        zos.closeEntry()
+                    }
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
             }
         }
     }

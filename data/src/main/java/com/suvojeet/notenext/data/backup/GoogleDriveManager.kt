@@ -60,137 +60,202 @@ class GoogleDriveManager @Inject constructor() {
     }
 
     private fun uploadToDrive(driveService: Drive, dbFile: File, onProgress: ((Long, Long) -> Unit)? = null): String {
-        // 1. Search for existing backup folder/file
+        // Filename: notenext_backup_yyyyMMdd_HHmmss.zip
+        val timeStamp = java.text.SimpleDateFormat("yyyyMMdd_HHmmss", java.util.Locale.US).format(java.util.Date())
+        val fileName = "notenext_backup_$timeStamp.zip"
+
         val fileMetadata = com.google.api.services.drive.model.File()
-        fileMetadata.name = "notenext_backup.zip"
+        fileMetadata.name = fileName
         fileMetadata.parents = listOf("appDataFolder")
 
         val mediaContent = FileContent("application/zip", dbFile)
 
-        // Check if file exists
-        val query = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
-        val fileList = driveService.files().list()
-            .setQ(query)
-            .setSpaces("appDataFolder")
-            .setFields("files(id)")
-            .execute()
+        // Create new file (Always new file for versioning)
+        val createRequest = driveService.files().create(fileMetadata, mediaContent)
+            .setFields("id")
+        
+        createRequest.mediaHttpUploader.isDirectUploadEnabled = false
+        createRequest.mediaHttpUploader.chunkSize = 1 * 1024 * 1024
 
-        val fileId: String
-        if (fileList.files.isNotEmpty()) {
-            // Update existing file
-            fileId = fileList.files[0].id
-            val updateRequest = driveService.files().update(fileId, null, mediaContent)
-            updateRequest.mediaHttpUploader.isDirectUploadEnabled = false
-            updateRequest.mediaHttpUploader.chunkSize = 1 * 1024 * 1024
-            
-            if (onProgress != null) {
-                updateRequest.mediaHttpUploader.setProgressListener { uploader ->
-                     when (uploader.uploadState) {
-                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS -> {
-                             onProgress(uploader.numBytesUploaded, dbFile.length())
-                         }
-                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
-                             onProgress(dbFile.length(), dbFile.length())
-                         }
-                         else -> {}
-                     }
-                }
+        if (onProgress != null) {
+            createRequest.mediaHttpUploader.setProgressListener { uploader ->
+                    when (uploader.uploadState) {
+                        com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS -> {
+                            onProgress(uploader.numBytesUploaded, dbFile.length())
+                        }
+                        com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
+                            onProgress(dbFile.length(), dbFile.length())
+                        }
+                        else -> {}
+                    }
             }
-            updateRequest.execute()
-        } else {
-            // Create new file
-            val createRequest = driveService.files().create(fileMetadata, mediaContent)
-                .setFields("id")
-            
-            createRequest.mediaHttpUploader.isDirectUploadEnabled = false
-            createRequest.mediaHttpUploader.chunkSize = 1 * 1024 * 1024
-
-            if (onProgress != null) {
-                createRequest.mediaHttpUploader.setProgressListener { uploader ->
-                     when (uploader.uploadState) {
-                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_IN_PROGRESS -> {
-                             onProgress(uploader.numBytesUploaded, dbFile.length())
-                         }
-                         com.google.api.client.googleapis.media.MediaHttpUploader.UploadState.MEDIA_COMPLETE -> {
-                             onProgress(dbFile.length(), dbFile.length())
-                         }
-                         else -> {}
-                     }
-                }
-            }
-            
-            val file = createRequest.execute()
-            fileId = file.id
         }
-        return fileId
+        
+        val file = createRequest.execute()
+        
+        // Prune old backups
+        pruneOldBackups(driveService)
+        
+        return file.id
     }
 
-    suspend fun downloadBackup(context: Context, account: GoogleSignInAccount, targetFile: File) = withContext(Dispatchers.IO) {
-        val driveService = getDriveService(context, account)
+    private fun pruneOldBackups(driveService: Drive, maxBackups: Int = 7) {
+        try {
+            val query = "name contains 'notenext_backup_' and 'appDataFolder' in parents and trashed = false"
+            val fileList = driveService.files().list()
+                .setQ(query)
+                .setSpaces("appDataFolder")
+                .setFields("files(id, name, createdTime)")
+                .execute()
 
-        val query = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
+            if (fileList.files.size > maxBackups) {
+                // Sort by createdTime ascending (oldest first)
+                val sortedFiles = fileList.files.sortedBy { it.createdTime.value }
+                val filesToDelete = sortedFiles.take(fileList.files.size - maxBackups)
+
+                filesToDelete.forEach { file ->
+                    try {
+                        driveService.files().delete(file.id).execute()
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+    }
+
+    suspend fun getBackups(context: Context, account: GoogleSignInAccount): List<DriveBackupMetadata> = withContext(Dispatchers.IO) {
+        val driveService = getDriveService(context, account)
+        val query = "name contains 'notenext_backup_' and 'appDataFolder' in parents and trashed = false"
         val fileList = driveService.files().list()
             .setQ(query)
             .setSpaces("appDataFolder")
-            .setFields("files(id)")
+            .setFields("files(id, name, size, createdTime)")
             .execute()
 
-        if (fileList.files.isEmpty()) {
-            throw Exception("Backup not found in Drive")
+        fileList.files.map { file ->
+            DriveBackupMetadata(
+                id = file.id,
+                name = file.name,
+                size = file.getSize() ?: 0L,
+                modifiedTime = file.createdTime  // Use createdTime as essential timestamp
+            )
+        }.sortedByDescending { it.modifiedTime?.value ?: 0L }
+    }
+
+     suspend fun deleteBackupFile(context: Context, account: GoogleSignInAccount, fileId: String) = withContext(Dispatchers.IO) {
+        val driveService = getDriveService(context, account)
+        driveService.files().delete(fileId).execute()
+    }
+
+    suspend fun downloadBackup(context: Context, account: GoogleSignInAccount, targetFile: File, fileId: String? = null) = withContext(Dispatchers.IO) {
+        val driveService = getDriveService(context, account)
+
+        val targetFileId = if (fileId != null) {
+            fileId
+        } else {
+             // Find latest
+            val query = "name contains 'notenext_backup_' and 'appDataFolder' in parents and trashed = false"
+            val fileList = driveService.files().list()
+                .setQ(query)
+                .setSpaces("appDataFolder")
+                .setFields("files(id, createdTime)")
+                .execute()
+            
+             val latest = fileList.files.maxByOrNull { it.createdTime.value }
+             latest?.id ?: run {
+                 // Fallback to legacy
+                 val legacyQuery = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
+                 val legacyList = driveService.files().list()
+                    .setQ(legacyQuery)
+                    .setSpaces("appDataFolder")
+                    .setFields("files(id)")
+                    .execute()
+                 if(legacyList.files.isEmpty()) throw Exception("No backup found")
+                 legacyList.files[0].id
+             }
         }
 
-        val fileId = fileList.files[0].id
         val outputStream = FileOutputStream(targetFile)
-        driveService.files().get(fileId).executeMediaAndDownloadTo(outputStream)
+        driveService.files().get(targetFileId).executeMediaAndDownloadTo(outputStream)
         outputStream.close()
     }
 
     data class DriveBackupMetadata(
+        val id: String,
+        val name: String,
         val size: Long,
         val modifiedTime: com.google.api.client.util.DateTime?
     )
 
     suspend fun getBackupMetadata(context: Context, account: GoogleSignInAccount): DriveBackupMetadata? = withContext(Dispatchers.IO) {
         val driveService = getDriveService(context, account)
-        val query = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
+        val query = "name contains 'notenext_backup_' and 'appDataFolder' in parents and trashed = false"
         val fileList = driveService.files().list()
             .setQ(query)
             .setSpaces("appDataFolder")
-            .setFields("files(id, size, modifiedTime)")
+            .setFields("files(id, name, size, createdTime)")
             .execute()
         
-        if (fileList.files.isNotEmpty()) {
-            val file = fileList.files[0]
+        // Find latest by createdTime
+        val latestFile = fileList.files.maxByOrNull { it.createdTime.value }
+        
+        if (latestFile != null) {
             DriveBackupMetadata(
-                size = file.getSize() ?: 0L,
-                modifiedTime = file.modifiedTime
+                id = latestFile.id,
+                name = latestFile.name,
+                size = latestFile.getSize() ?: 0L,
+                modifiedTime = latestFile.createdTime
             )
         } else {
-            null
+             // Fallback check for legacy non-timestamped file
+             val legacyQuery = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
+             val legacyList = driveService.files().list()
+                .setQ(legacyQuery)
+                .setSpaces("appDataFolder")
+                .setFields("files(id, name, size, modifiedTime)")
+                .execute()
+             
+             if(legacyList.files.isNotEmpty()) {
+                 val file = legacyList.files[0]
+                 DriveBackupMetadata(
+                    id = file.id,
+                    name = file.name,
+                    size = file.getSize() ?: 0L,
+                    modifiedTime = file.modifiedTime
+                 )
+             } else {
+                 null
+             }
         }
     }
 
     suspend fun checkForBackup(context: Context, account: GoogleSignInAccount): Boolean = withContext(Dispatchers.IO) {
-        // Keep existing method for simple checks, or could deprecate.
-        // For now, let's just reuse logic or re-query. Re-query is simpler.
         try {
              getBackupMetadata(context, account) != null
         } catch(e: Exception) {
             false
         }
     }
+
     suspend fun deleteBackup(context: Context, account: GoogleSignInAccount) = withContext(Dispatchers.IO) {
         val driveService = getDriveService(context, account)
-        val query = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
+        // Delete ALL backups
+        val query = "name contains 'notenext_backup' and 'appDataFolder' in parents and trashed = false"
         val fileList = driveService.files().list()
             .setQ(query)
             .setSpaces("appDataFolder")
             .setFields("files(id)")
             .execute()
 
-        if (fileList.files.isNotEmpty()) {
-            val fileId = fileList.files[0].id
-            driveService.files().delete(fileId).execute()
+        fileList.files.forEach { file ->
+             try {
+                driveService.files().delete(file.id).execute()
+             } catch(e: Exception) {
+                 e.printStackTrace()
+             }
         }
     }
 }
