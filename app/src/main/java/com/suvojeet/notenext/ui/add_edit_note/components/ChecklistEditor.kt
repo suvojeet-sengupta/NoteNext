@@ -58,6 +58,8 @@ import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.suvojeet.notenext.R
@@ -121,6 +123,7 @@ fun LazyListScope.ChecklistEditor(
 
         ChecklistItemRow(
             item = item,
+            inputValue = state.checklistInputValues[item.id],
             onEvent = onEvent,
             isChecked = false,
             modifier = Modifier
@@ -182,6 +185,7 @@ fun LazyListScope.ChecklistEditor(
             items(checkedItems, key = { it.id }) { item ->
                     ChecklistItemRow(
                     item = item,
+                    inputValue = state.checklistInputValues[item.id],
                     onEvent = onEvent,
                     isChecked = true
                 )
@@ -194,6 +198,7 @@ fun LazyListScope.ChecklistEditor(
 @Composable
 fun ChecklistItemRow(
     item: ChecklistItem,
+    inputValue: TextFieldValue?,
     onEvent: (NotesEvent) -> Unit,
     isChecked: Boolean,
     modifier: Modifier = Modifier,
@@ -268,21 +273,26 @@ fun ChecklistItemRow(
                 
                 // Transparent BasicTextField
                 BasicTextField(
-                    value = item.text,
-                    onValueChange = { text ->
-                        onEvent(NotesEvent.OnChecklistItemTextChange(item.id, text))
+                    value = inputValue ?: TextFieldValue(item.text),
+                    onValueChange = { textFieldValue: TextFieldValue ->
+                         onEvent(NotesEvent.OnChecklistItemValueChange(item.id, textFieldValue))
                     },
                     modifier = Modifier
                         .weight(1f)
                         .focusRequester(focusRequester)
-                        .padding(start = 8.dp),
+                        .padding(start = 8.dp)
+                        .onFocusChanged { focusState ->
+                            if (focusState.isFocused) {
+                                onEvent(NotesEvent.OnChecklistItemFocus(item.id))
+                            }
+                        },
                     textStyle = TextStyle(
                         fontSize = 16.sp,
                         color = if (isChecked) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.onSurface,
                         textDecoration = if (isChecked) TextDecoration.LineThrough else TextDecoration.None
                     ),
                     cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                    singleLine = false // Allow multiline for notes? Usually checklist items can wrap.
+                    singleLine = false 
                 )
                 
                 // Remove individual delete button as we have Swipe to Delete

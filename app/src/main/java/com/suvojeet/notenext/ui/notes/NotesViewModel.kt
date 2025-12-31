@@ -322,7 +322,10 @@ class NotesViewModel @Inject constructor(
                                 editingNoteType = note.noteType,
                                 editingChecklist = checklist,
                                 editingAttachments = noteWithAttachments.attachments.map { it.copy(tempId = java.util.UUID.randomUUID().toString()) },
-                                editingIsLocked = note.isLocked
+                                editingIsLocked = note.isLocked,
+                                checklistInputValues = checklist.associate { item ->
+                                    item.id to TextFieldValue(richTextController.parseMarkdownToAnnotatedString(item.text))
+                                }
                             )
                         }
                     } else {
@@ -339,7 +342,14 @@ class NotesViewModel @Inject constructor(
                             editingLabel = null,
                             linkPreviews = emptyList(),
                             editingNoteType = event.noteType,
-                            editingChecklist = if (event.noteType == "CHECKLIST") listOf(ChecklistItem(text = "", isChecked = false)) else emptyList(),
+                            editingChecklist = if (event.noteType == "CHECKLIST") {
+                                val newItem = ChecklistItem(text = "", isChecked = false)
+                                listOf(newItem)
+                            } else emptyList(),
+                            checklistInputValues = if (event.noteType == "CHECKLIST") {
+                                val newItem = ChecklistItem(text = "", isChecked = false)
+                                mapOf(newItem.id to TextFieldValue(""))
+                            } else emptyMap(),
                             editingAttachments = emptyList(),
                             editingIsLocked = false,
                             editingNoteVersions = emptyList()
@@ -374,7 +384,8 @@ class NotesViewModel @Inject constructor(
                 val updatedChecklist = state.value.editingChecklist + newItem
                 _state.value = state.value.copy(
                     editingChecklist = updatedChecklist,
-                    newlyAddedChecklistItemId = newItem.id
+                    newlyAddedChecklistItemId = newItem.id,
+                    checklistInputValues = state.value.checklistInputValues + (newItem.id to TextFieldValue(""))
                 )
             }
             is NotesEvent.SwapChecklistItems -> {
@@ -391,7 +402,10 @@ class NotesViewModel @Inject constructor(
             }
             is NotesEvent.DeleteChecklistItem -> {
                 val updatedChecklist = state.value.editingChecklist.filterNot { it.id == event.itemId }
-                _state.value = state.value.copy(editingChecklist = updatedChecklist)
+                _state.value = state.value.copy(
+                    editingChecklist = updatedChecklist,
+                    checklistInputValues = state.value.checklistInputValues - event.itemId
+                )
             }
             is NotesEvent.OnChecklistItemCheckedChange -> {
                 val updatedChecklist = state.value.editingChecklist.toMutableList()
@@ -482,8 +496,82 @@ class NotesViewModel @Inject constructor(
                     }
                 }
             }
+            is NotesEvent.OnChecklistItemValueChange -> {
+                val updatedInputValues = state.value.checklistInputValues.toMutableMap()
+                updatedInputValues[event.itemId] = event.value
+
+                // Check for styles at selection to update toolbar state
+                 val selection = event.value.selection
+                 val styles = if (selection.collapsed) {
+                    if (selection.start > 0) {
+                        event.value.annotatedString.spanStyles.filter {
+                            it.start <= selection.start - 1 && it.end >= selection.start
+                        }
+                    } else {
+                        emptyList()
+                    }
+                } else {
+                    event.value.annotatedString.spanStyles.filter {
+                        maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+                    }
+                }
+
+                _state.value = state.value.copy(
+                    checklistInputValues = updatedInputValues,
+                     isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
+                     isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
+                     isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
+                )
+                
+                // Async update for persistence model
+                viewModelScope.launch {
+                    val updatedText = HtmlConverter.annotatedStringToHtml(event.value.annotatedString).let {
+                        com.suvojeet.notenext.data.MarkdownExporter.convertHtmlToMarkdown(it)
+                    }
+
+                    val updatedChecklist = _state.value.editingChecklist.map {
+                        if (it.id == event.itemId) it.copy(text = updatedText) else it
+                    }
+                    _state.value = _state.value.copy(editingChecklist = updatedChecklist)
+                }
+            }
+            is NotesEvent.OnChecklistItemFocus -> {
+                _state.value = state.value.copy(focusedChecklistItemId = event.itemId)
+                // Update active styles based on the focused item's cursor position handled in ValueChange or just reset/check here
+                val value = state.value.checklistInputValues[event.itemId]
+                if (value != null) {
+                     val selection = value.selection
+                     val styles = value.annotatedString.spanStyles.filter {
+                        maxOf(selection.start, it.start) < minOf(selection.end, it.end)
+                    }
+                     _state.value = state.value.copy(
+                         isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
+                         isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
+                         isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
+                     )
+                }
+            }
             is NotesEvent.ApplyStyleToContent -> {
-                val result = richTextController.toggleStyle(
+                if (state.value.editingNoteType == "CHECKLIST") {
+                    val focusedId = state.value.focusedChecklistItemId
+                    if (focusedId != null) {
+                        val currentValue = state.value.checklistInputValues[focusedId]
+                        if (currentValue != null) {
+                             val result = richTextController.toggleStyle(
+                                currentValue,
+                                event.style,
+                                emptySet(), // We don't track activeStyles per item easily yet, relies on result
+                                state.value.isBoldActive,
+                                state.value.isItalicActive,
+                                state.value.isUnderlineActive
+                            )
+                            if (result.updatedContent != null) {
+                                onEvent(NotesEvent.OnChecklistItemValueChange(focusedId, result.updatedContent))
+                            }
+                        }
+                    }
+                } else {
+                    val result = richTextController.toggleStyle(
                     state.value.editingContent,
                     event.style,
                     state.value.activeStyles,
@@ -507,6 +595,7 @@ class NotesViewModel @Inject constructor(
                         canUndo = undoRedoManager.canUndo.value,
                         canRedo = undoRedoManager.canRedo.value
                     )
+                }
                 }
             }
             is NotesEvent.ApplyHeadingStyle -> {

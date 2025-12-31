@@ -478,7 +478,7 @@ fun AddEditNoteScreen(
         
         // Floating Toolbar
         AnimatedVisibility(
-            visible = showFormatBar && state.editingNoteType == "TEXT",
+            visible = showFormatBar && (state.editingNoteType == "TEXT" || state.editingNoteType == "CHECKLIST"),
             enter = slideInVertically(initialOffsetY = { it }) + fadeIn(),
             exit = slideOutVertically(targetOffsetY = { it }) + fadeOut(),
             modifier = Modifier
@@ -701,6 +701,7 @@ fun MarkdownPreview(content: String) {
     }
 }
 
+@Composable
 private fun parseInlineMarkdown(text: String): androidx.compose.ui.text.AnnotatedString {
     return androidx.compose.ui.text.buildAnnotatedString {
         var currentText = text
@@ -741,7 +742,7 @@ private fun parseInlineMarkdown(text: String): androidx.compose.ui.text.Annotate
                         val linkText = match.groupValues[1]
                         val url = match.groupValues[2]
                         pushStringAnnotation(tag = "URL", annotation = url)
-                        withStyle(androidx.compose.ui.text.SpanStyle(color = Color.Blue, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)) {
+                        withStyle(androidx.compose.ui.text.SpanStyle(color = MaterialTheme.colorScheme.primary, textDecoration = androidx.compose.ui.text.style.TextDecoration.Underline)) {
                             append(linkText)
                         }
                         pop()
@@ -756,3 +757,4 @@ private fun parseInlineMarkdown(text: String): androidx.compose.ui.text.Annotate
         }
     }
 }
+

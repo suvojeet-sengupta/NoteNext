@@ -348,6 +348,14 @@ class ProjectNotesViewModel @Inject constructor(
                 }
                 _state.value = state.value.copy(editingChecklist = updatedChecklist)
             }
+            is ProjectNotesEvent.OnChecklistItemValueChange -> {
+                 // Simplified handling for Project notes. 
+                 // ProjectNotesState currently doesn't support rich text input values (checklistInputValues).
+                 // TODO: Implement rich text support for project notes.
+            }
+            is ProjectNotesEvent.OnChecklistItemFocus -> {
+                // Empty implementation for now to satisfy exhaustiveness
+            }
             is ProjectNotesEvent.OnTitleChange -> {
                 val newHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (event.title to state.value.editingContent)
                 _state.value = state.value.copy(
