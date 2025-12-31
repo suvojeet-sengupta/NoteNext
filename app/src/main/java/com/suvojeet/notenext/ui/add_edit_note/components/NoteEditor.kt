@@ -42,7 +42,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 @Composable
 fun NoteEditor(
     state: NotesState,
-    onEvent: (NotesEvent) -> Unit
+    onEvent: (NotesEvent) -> Unit,
+    onUrlClick: (String) -> Unit = {}
 ) {
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -100,13 +101,22 @@ fun NoteEditor(
                 .fillMaxWidth()
                 .pointerInput(state.editingContent) {
                     detectTapGestures { offset ->
-                        textLayoutResult?.let { layoutResult ->
-                            val position = layoutResult.getOffsetForPosition(offset)
-                            state.editingContent.annotatedString.getStringAnnotations("NOTE_LINK", position, position)
-                                .firstOrNull()?.let { annotation ->
-                                    onEvent(NotesEvent.NavigateToNoteByTitle(annotation.item))
+                            textLayoutResult?.let { layoutResult ->
+                                val position = layoutResult.getOffsetForPosition(offset)
+                                
+                                val urlAnnotation = state.editingContent.annotatedString.getStringAnnotations("URL", position, position).firstOrNull()
+                                    ?: state.editingContent.annotatedString.getStringAnnotations("EMAIL", position, position).firstOrNull()
+                                    ?: state.editingContent.annotatedString.getStringAnnotations("PHONE", position, position).firstOrNull()
+
+                                if (urlAnnotation != null) {
+                                    onUrlClick(urlAnnotation.item)
+                                } else {
+                                    state.editingContent.annotatedString.getStringAnnotations("NOTE_LINK", position, position)
+                                        .firstOrNull()?.let { annotation ->
+                                            onEvent(NotesEvent.NavigateToNoteByTitle(annotation.item))
+                                        }
                                 }
-                        }
+                            }
                     }
                 },
             onTextLayout = { textLayoutResult = it },

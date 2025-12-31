@@ -326,6 +326,8 @@ fun AddEditNoteScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
 
+                            var clickedUrl by remember { mutableStateOf<String?>(null) }
+                            
                             if (showMarkdownPreview) {
                                 val markdownContent = produceState(initialValue = "") {
                                     val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
@@ -333,7 +335,36 @@ fun AddEditNoteScreen(
                                 }
                                 MarkdownPreview(content = markdownContent.value)
                             } else {
-                                NoteEditor(state = state, onEvent = onEvent)
+                                NoteEditor(
+                                    state = state, 
+                                    onEvent = onEvent,
+                                    onUrlClick = { url ->
+                                        clickedUrl = url
+                                    }
+                                )
+                            }
+                            
+                            if (clickedUrl != null) {
+                                AlertDialog(
+                                    onDismissRequest = { clickedUrl = null },
+                                    title = { Text("Open Link") },
+                                    text = { Text("Do you want to open this link?\n\n$clickedUrl") },
+                                    confirmButton = {
+                                        TextButton(
+                                            onClick = {
+                                                openUrl(context, clickedUrl!!)
+                                                clickedUrl = null
+                                            }
+                                        ) {
+                                            Text("Open")
+                                        }
+                                    },
+                                    dismissButton = {
+                                        TextButton(onClick = { clickedUrl = null }) {
+                                            Text("Cancel")
+                                        }
+                                    }
+                                )
                             }
 
                             if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
@@ -756,12 +787,22 @@ private fun parseInlineMarkdown(text: String): androidx.compose.ui.text.Annotate
                     }
                 }
                 lastIndex = match.range.last + 1
-            }
         }
         
         if (lastIndex < text.length) {
             append(text.substring(lastIndex))
         }
+    }
+}
+
+
+private fun openUrl(context: Context, url: String) {
+    try {
+        val finalUrl = if (url.startsWith("www.")) "https://$url" else url
+        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(finalUrl))
+        context.startActivity(intent)
+    } catch (e: Exception) {
+        Toast.makeText(context, "Could not open link", Toast.LENGTH_SHORT).show()
     }
 }
 

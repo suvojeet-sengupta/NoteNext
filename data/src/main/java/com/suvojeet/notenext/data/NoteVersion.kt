@@ -14,7 +14,8 @@ import androidx.room.ForeignKey
             childColumns = ["noteId"],
             onDelete = ForeignKey.CASCADE
         )
-    ]
+    ],
+    indices = [androidx.room.Index(value = ["noteId"])]
 )
 data class NoteVersion(
     @PrimaryKey(autoGenerate = true)
