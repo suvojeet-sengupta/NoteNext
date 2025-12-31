@@ -27,6 +27,9 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material.icons.filled.Storage
+import androidx.compose.material.icons.filled.CloudSync
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -123,9 +126,16 @@ fun AboutScreen(onBackClick: () -> Unit) {
                     )
                     HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     FeatureItem(
-                        icon = Icons.Default.Shield,
-                        title = stringResource(id = R.string.privacy_first_title),
-                        description = stringResource(id = R.string.privacy_first_description),
+                        icon = Icons.Default.CloudSync, // Or Backup
+                        title = "Cloud Backup",
+                        description = "Securely backup your notes to Google Drive. Your data, your control.",
+                        iconColor = Color(0xFF7E57C2) // Deep Purple
+                    )
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    FeatureItem(
+                        icon = Icons.Default.Lock, // Was Shield
+                        title = "Secure & Private",
+                        description = "Biometric App Lock and strict privacy. No tracking, no ads.",
                         iconColor = Color(0xFF66BB6A) // Green
                     )
                     HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -200,7 +210,7 @@ private fun HeroSection() {
         modifier = Modifier.fillMaxWidth(),
         shape = RoundedCornerShape(32.dp),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.6f)
+            containerColor = MaterialTheme.colorScheme.primary // Bolder look
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
@@ -228,12 +238,12 @@ private fun HeroSection() {
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontWeight = FontWeight.Bold
                 ),
-                color = MaterialTheme.colorScheme.onPrimaryContainer
+                color = MaterialTheme.colorScheme.onPrimary // Adjusted for Primary background
             )
             Text(
                 stringResource(id = R.string.about_subtitle),
                 style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.7f),
+                color = MaterialTheme.colorScheme.onPrimary.copy(alpha = 0.8f), // Adjusted transparency and color
                 textAlign = TextAlign.Center
             )
         }
@@ -392,11 +402,10 @@ fun TeamMemberCard(
             
             // External Link Indicator
             Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowBack, // Using back arrow rotated 180 effectively (or specialized external link icon if available)
+                imageVector = Icons.Default.ChevronRight,
                 contentDescription = null,
                 modifier = Modifier
-                    .scale(scaleX = -1f, scaleY = 1f) // Flipping arrow to point right/out
-                    .size(20.dp),
+                    .size(24.dp), // Standard size
                 tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f)
             )
         }
