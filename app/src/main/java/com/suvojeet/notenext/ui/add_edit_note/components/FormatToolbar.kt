@@ -5,8 +5,11 @@ import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.material3.Surface
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FormatBold
 import androidx.compose.material.icons.filled.FormatItalic
@@ -61,126 +64,158 @@ fun FormatToolbar(
     modifier: Modifier = Modifier
 ) {
     val systemInDarkTheme = isSystemInDarkTheme()
-    // Determine if dark theme is active based on themeMode and system settings.
     val useDarkTheme = when (themeMode) {
         ThemeMode.DARK -> true
         ThemeMode.LIGHT -> false
         ThemeMode.SYSTEM -> systemInDarkTheme
         ThemeMode.AMOLED -> true
     }
-    // Choose button and icon colors based on the active theme.
-    val buttonColor = if (useDarkTheme) dark_button_color else button_color
-    val iconColor = if (useDarkTheme) Color.White else MaterialTheme.colorScheme.onSurface
 
     var showHeadingPicker by remember { mutableStateOf(false) }
 
-    LazyRow(
+    Surface(
         modifier = modifier
             .fillMaxWidth()
-            .background(MaterialTheme.colorScheme.surface)
-            .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+        color = MaterialTheme.colorScheme.surfaceContainer,
+        tonalElevation = 2.dp
     ) {
-        if (state.editingNoteType == "CHECKLIST") {
+        LazyRow(
+            modifier = Modifier.padding(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Checklist Group
+            if (state.editingNoteType == "CHECKLIST") {
+                item {
+                    FormatToggleButton(
+                        onClick = { state.focusedChecklistItemId?.let { onEvent(NotesEvent.OutdentChecklistItem(it)) } },
+                        icon = Icons.AutoMirrored.Filled.FormatIndentDecrease,
+                        description = "Outdent",
+                        isActive = false, // Stateless action
+                        useDarkTheme = useDarkTheme
+                    )
+                }
+                item {
+                    FormatToggleButton(
+                        onClick = { state.focusedChecklistItemId?.let { onEvent(NotesEvent.IndentChecklistItem(it)) } },
+                        icon = Icons.AutoMirrored.Filled.FormatIndentIncrease,
+                        description = "Indent",
+                        isActive = false, // Stateless action
+                        useDarkTheme = useDarkTheme
+                    )
+                }
+                item {
+                    // Separator
+                     Box(
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .width(1.dp)
+                            .height(24.dp)
+                            .background(MaterialTheme.colorScheme.outlineVariant)
+                    )
+                }
+            }
+
+            // Style Group
             item {
-                IconButton(
-                    onClick = { state.focusedChecklistItemId?.let { onEvent(NotesEvent.OutdentChecklistItem(it)) } },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = buttonColor,
-                        contentColor = iconColor
-                    )
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.FormatIndentDecrease, contentDescription = "Outdent", tint = iconColor)
-                }
+                FormatToggleButton(
+                    onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
+                    icon = Icons.Default.FormatBold,
+                    description = stringResource(id = R.string.bold_description),
+                    isActive = state.isBoldActive,
+                    useDarkTheme = useDarkTheme
+                )
             }
             item {
-                IconButton(
-                    onClick = { state.focusedChecklistItemId?.let { onEvent(NotesEvent.IndentChecklistItem(it)) } },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = buttonColor,
-                        contentColor = iconColor
+                FormatToggleButton(
+                    onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
+                    icon = Icons.Default.FormatItalic,
+                    description = stringResource(id = R.string.italic_description),
+                    isActive = state.isItalicActive,
+                    useDarkTheme = useDarkTheme
+                )
+            }
+            item {
+                FormatToggleButton(
+                    onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
+                    icon = Icons.Default.FormatUnderlined,
+                    description = stringResource(id = R.string.underline_description),
+                    isActive = state.isUnderlineActive,
+                    useDarkTheme = useDarkTheme
+                )
+            }
+
+            item {
+                 Box(
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .width(1.dp)
+                        .height(24.dp)
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+                )
+            }
+
+            // Structure Group
+            item {
+                Box {
+                    FormatToggleButton(
+                        onClick = { showHeadingPicker = true },
+                        icon = Icons.Default.FormatSize,
+                        description = stringResource(id = R.string.heading_style_description),
+                        isActive = state.activeHeadingStyle != 0,
+                        useDarkTheme = useDarkTheme
                     )
-                ) {
-                    Icon(Icons.AutoMirrored.Filled.FormatIndentIncrease, contentDescription = "Indent", tint = iconColor)
-                }
-            }
-        }
-        // Bold formatting button.
-        item {
-            IconButton(
-                onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontWeight = FontWeight.Bold))) },
-                colors = IconButtonDefaults.iconButtonColors(
-                    // Highlight if bold is active.
-                    containerColor = if (state.isBoldActive) MaterialTheme.colorScheme.primaryContainer else buttonColor,
-                    contentColor = iconColor
-                )
-            ) {
-                Icon(Icons.Default.FormatBold, contentDescription = stringResource(id = R.string.bold_description), tint = iconColor)
-            }
-        }
-        // Italic formatting button.
-        item {
-            IconButton(
-                onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(fontStyle = FontStyle.Italic))) },
-                colors = IconButtonDefaults.iconButtonColors(
-                    // Highlight if italic is active.
-                    containerColor = if (state.isItalicActive) MaterialTheme.colorScheme.primaryContainer else buttonColor,
-                    contentColor = iconColor
-                )
-            ) {
-                Icon(Icons.Default.FormatItalic, contentDescription = stringResource(id = R.string.italic_description), tint = iconColor)
-            }
-        }
-        // Underline formatting button.
-        item {
-            IconButton(
-                onClick = { onEvent(NotesEvent.ApplyStyleToContent(SpanStyle(textDecoration = TextDecoration.Underline))) },
-                colors = IconButtonDefaults.iconButtonColors(
-                    // Highlight if underline is active.
-                    containerColor = if (state.isUnderlineActive) MaterialTheme.colorScheme.primaryContainer else buttonColor,
-                    contentColor = iconColor
-                )
-            ) {
-                Icon(Icons.Default.FormatUnderlined, contentDescription = stringResource(id = R.string.underline_description), tint = iconColor)
-            }
-        }
-        // Heading style picker button and dropdown menu.
-        item {
-            Box {
-                IconButton(
-                    onClick = { showHeadingPicker = true },
-                    colors = IconButtonDefaults.iconButtonColors(
-                        // Highlight if any heading style is active.
-                        containerColor = if (state.activeHeadingStyle != 0) MaterialTheme.colorScheme.primaryContainer else buttonColor,
-                        contentColor = iconColor
-                    )
-                ) {
-                    Icon(Icons.Default.FormatSize, contentDescription = stringResource(id = R.string.heading_style_description), tint = iconColor)
-                }
-                DropdownMenu(
-                    expanded = showHeadingPicker,
-                    onDismissRequest = { showHeadingPicker = false },
-                    offset = DpOffset(x = 16.dp, y = 0.dp) // Adjust offset for dropdown positioning.
-                ) {
-                    HeadingStylePickerContent(
+                    DropdownMenu(
+                        expanded = showHeadingPicker,
                         onDismissRequest = { showHeadingPicker = false },
-                        onEvent = onEvent
-                    )
+                        offset = DpOffset(x = 0.dp, y = 8.dp)
+                    ) {
+                        HeadingStylePickerContent(
+                            onDismissRequest = { showHeadingPicker = false },
+                            onEvent = onEvent
+                        )
+                    }
                 }
             }
-        }
-        // Insert link button.
-        item {
-            IconButton(
-                onClick = onInsertLinkClick,
-                colors = IconButtonDefaults.iconButtonColors(
-                    containerColor = buttonColor,
-                    contentColor = iconColor
+
+            // Insert Group
+            item {
+                FormatToggleButton(
+                    onClick = onInsertLinkClick,
+                    icon = Icons.Default.AddLink,
+                    description = stringResource(id = R.string.insert_link_description),
+                    isActive = false, // Stateless action
+                    useDarkTheme = useDarkTheme
                 )
-            ) {
-                Icon(Icons.Default.AddLink, contentDescription = stringResource(id = R.string.insert_link_description), tint = iconColor)
             }
         }
+    }
+}
+
+@Composable
+private fun FormatToggleButton(
+    onClick: () -> Unit,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    description: String,
+    isActive: Boolean,
+    useDarkTheme: Boolean
+) {
+    val containerColor = if (isActive) MaterialTheme.colorScheme.primaryContainer else Color.Transparent
+    val contentColor = if (isActive) {
+         MaterialTheme.colorScheme.onPrimaryContainer
+    } else {
+         if (useDarkTheme) Color.White else MaterialTheme.colorScheme.onSurface
+    }
+
+    IconButton(
+        onClick = onClick,
+        colors = IconButtonDefaults.iconButtonColors(
+            containerColor = containerColor,
+            contentColor = contentColor
+        )
+    ) {
+        Icon(icon, contentDescription = description)
     }
 }
