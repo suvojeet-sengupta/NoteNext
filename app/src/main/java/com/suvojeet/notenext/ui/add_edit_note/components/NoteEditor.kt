@@ -130,7 +130,7 @@ fun NoteEditor(
                     singleLine = false,
                     visualTransformation = VisualTransformation.None,
                     interactionSource = interactionSource,
-                    placeholder = { Text(stringResource(id = R.string.content), color = MaterialTheme.colorScheme.onSurface) },
+                    placeholder = { Text(stringResource(id = R.string.note), color = MaterialTheme.colorScheme.onSurface) },
                     colors = TextFieldDefaults.colors(
                         focusedContainerColor = Color.Transparent,
                         unfocusedContainerColor = Color.Transparent,
@@ -143,7 +143,7 @@ fun NoteEditor(
                             backgroundColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
                     ),
-                    contentPadding = PaddingValues(0.dp)
+                    contentPadding = PaddingValues(horizontal = 16.dp)
                 )
             }
         )
