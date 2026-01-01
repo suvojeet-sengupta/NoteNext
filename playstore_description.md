@@ -1,50 +1,73 @@
-**NoteNext: Your Private, Offline Notebook**
+NoteNext: Secure Notes & AI
 
-Tired of note-taking apps that harvest your data? NoteNext is a simple, beautiful, and powerful note-taking application designed for Android with your privacy at its core. All your notes, checklists, and ideas are stored securely and exclusively on your device. No clouds, no subscriptions, no data collection.
+Short Description:
+Secure, offline notebook with instant AI summaries and military-grade AES-256 encrypted backups.
 
-Capture your thoughts, manage your tasks, and organize your life without compromising your privacy.
+Full Description:
 
----
+NoteNext is the ultimate private workspace for your thoughts. We have reimagined the digital notebook by combining a strictly offline-first architecture with cutting-edge AI tools and military-grade encryption.
 
-**Key Features:**
+TIRED OF APPS THAT SPY ON YOU?
+Most note-taking apps store your data on their servers, scan your notes for ads, or lock features behind subscriptions. NoteNext is different. We believe your personal thoughts should remain exactly that—personal.
 
-📝 **Powerful Note Editor:**
-Go beyond plain text. With our rich text editor, you can format your notes with **bold**, *italics*, and <u>underline</u>, or structure them with different heading styles. Create checklists to keep track of your tasks and to-dos.
+PRIVACY MEETS INTELLIGENCE
+Experience the best of both worlds: the uncompromised privacy of an offline vault and the productivity boost of modern AI. With NoteNext, you get a beautiful, powerful, and secure note-taking experience without tracking, ads, or hidden agendas.
 
-🎨 **Personalize & Organize:**
-- **Color Your Notes:** Assign colors to your notes for quick visual identification.
-- **Labels:** Use labels to categorize your notes and find them easily.
-- **Projects:** Group related notes into projects for a new level of organization.
-- **Pinning:** Keep your most important notes at the top of the list.
+KEY FEATURES
 
-⏰ **Reminders:**
-Never miss a deadline or an important event. Set one-time or recurring reminders (daily, weekly, monthly) for your notes, and NoteNext will notify you right on time.
+INSTANT AI SUMMARIZATION
+Turn long notes into concise summaries in seconds. Powered by the advanced Groq AI engine, our summarization tool works on-demand to help you digest meeting minutes, lecture notes, and articles instantly. Your data is sent to the AI only when you click "Summarize".
 
-🔒 **Privacy First (App Lock):**
-Your privacy is non-negotiable. NoteNext stores all your data locally on your device. For an extra layer of security, you can enable App Lock to protect your notes with a secure PIN or your device's biometric (fingerprint) authentication.
+MILITARY-GRADE SECURITY
+* AES-256 Encryption: When you back up notes to Google Drive, they are encrypted with AES-256—the same standard used by banks and governments. Only you hold the password.
+* App Lock: Secure your notebook with your device's fingerprint sensor or a custom PIN. Keep prying eyes away.
 
-🔗 **Rich Link Previews:**
-Add links to your notes and see them come to life with automatic, rich previews that show the title, description, and a thumbnail image. This feature is optional and can be disabled in the settings.
+100% OFFLINE & PRIVATE
+NoteNext works entirely offline. We have no servers, no database of your notes, and we never sell your data. You are the sole owner of your content.
 
-🖼️ **Attachments:**
-A picture is worth a thousand words. Add images directly to your notes to capture visual ideas, memories, or information.
+POWERFUL RICH TEXT EDITOR
+Write exactly the way you want.
+* Formatting: Bold, Italic, Underline, Strikethrough, and Headings (H1-H6).
+* Checklists: Create interactive to-do lists for tasks and goals.
+* Quote Blocks: Highlight important ideas.
+* Auto-Save: Never lose a word.
 
-📤 **Export & Share:**
-Your notes are yours to take anywhere. Export them as TXT or PDF files to your device's "Documents" folder, or share them instantly with friends, family, or other apps using the native Android share functionality.
+ADVANCED ORGANIZATION
+* Projects: Group related notes into Projects (e.g., Work, Journal).
+* Labels: Tag notes with colour-coded labels.
+* Pinning: Keep critical notes at the top.
+* Search: Find anything instantly.
 
-🌗 **Customizable Experience:**
-- **Themes:** Choose between a Light, Dark, or System default theme to match your style.
-- **Shape Styles:** Customize the look and feel of the app with different component shape families.
+SECURE CLOUD BACKUP
+Seamlessly sync to your own Google Drive.
+* Your Cloud: Backups are stored in your personal Google Drive, not our servers.
+* Encrypted Restore: Restore data to any device using your unique decryption password.
 
----
+SMART REMINDERS
+* Recurring Alarms: Set Daily, Weekly, or Monthly reminders.
+* Precision: Get notified exactly when you need to be.
 
-**Built for Privacy:**
+RICH MEDIA
+* Images: Embed photos directly into your notes.
+* Smart Links: Paste a URL to generate a rich preview card automatically.
 
-We believe your personal notes should be just that: personal.
-- **100% Offline:** All your data lives and dies on your device.
-- **No Accounts, No Sign-ups:** Just open the app and start writing.
-- **Minimal Permissions:** We only ask for permissions that are essential for app features, like setting alarms for reminders or accessing storage for attachments. The `INTERNET` permission is used *only* to fetch optional link previews and download fonts for better typography. It is never used to upload your data.
+CUSTOMIZABLE DESIGN
+* Material You: Adapts to your wallpaper's colors (Android 12+).
+* Light & Dark Mode: Eye-friendly themes for any time of day.
+* Shape Styles: Customize button shapes to match your style.
 
-Whether you're jotting down a quick idea, creating a detailed checklist for a project, or saving important information, NoteNext is the perfect companion for a focused and private note-taking experience.
+WHY CHOOSE NOTENEXT?
 
-**Download NoteNext today and reclaim your digital privacy!**
+* NO Account Required: Download and start writing. No sign-ups.
+* NO Ads: A completely distraction-free environment.
+* Minimal Permissions: We only ask for what is strictly necessary. INTERNET permission is used only for optional AI features and link previews.
+
+PERFECT FOR EVERYONE
+* Students: Summarize lectures and organize assignments.
+* Professionals: Securely store meeting minutes and ideas.
+* Writers: Draft stories in a private space.
+* Everyone: From grocery lists to daily journaling.
+
+Your thoughts are your most valuable asset. Protect them with a notebook that respects you.
+
+Download NoteNext today and experience the future of private, intelligent note-taking.
