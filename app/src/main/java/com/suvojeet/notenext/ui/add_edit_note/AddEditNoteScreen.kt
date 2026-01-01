@@ -628,7 +628,7 @@ fun AddEditNoteScreen(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        if (state.isSummarizing) "Groq AI is Thinking..." else "AI Summary",
+                        if (state.isSummarizing) "NoteNext AI is Thinking..." else "NoteNext AI Summary",
                         style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
                     )
                 }
