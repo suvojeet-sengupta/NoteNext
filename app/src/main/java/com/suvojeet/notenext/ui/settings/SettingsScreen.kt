@@ -83,7 +83,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
-import com.suvojeet.notenext.ui.theme.ShapeFamily
+
 import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -104,14 +104,14 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     val autoDeleteDays by settingsRepository.autoDeleteDays.collectAsState(initial = 7)
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
     val enableAppLock by settingsRepository.enableAppLock.collectAsState(initial = false)
-    val selectedShapeFamily by settingsRepository.shapeFamily.collectAsState(initial = ShapeFamily.EXPRESSIVE)
+
     val selectedLanguage by settingsRepository.language.collectAsState(initial = "en")
     val disallowScreenshots by settingsRepository.disallowScreenshots.collectAsState(initial = false)
 
     // -- Dialog States --
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
-    var showShapeFamilyDialog by remember { mutableStateOf(false) }
+
 
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAppLockInfoDialog by remember { mutableStateOf(false) }
@@ -192,14 +192,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                         )
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
 
-                        SettingsItem(
-                            icon = Icons.Default.Category,
-                            title = stringResource(id = R.string.shape_family),
-                            subtitle = selectedShapeFamily.name.lowercase().replaceFirstChar { it.uppercase() },
-                            iconColor = Color(0xFF00BCD4),
-                            onClick = { showShapeFamilyDialog = true }
-                        )
-                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
 
                         SettingsItem(
                             icon = Icons.Default.Language,
@@ -378,18 +371,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
         )
     }
 
-    if (showShapeFamilyDialog) {
-        ShapeFamilyChooserDialog(
-            selectedShapeFamily = selectedShapeFamily,
-            onShapeFamilySelected = { shapeFamily ->
-                scope.launch {
-                    settingsRepository.saveShapeFamily(shapeFamily)
-                    showShapeFamilyDialog = false
-                }
-            },
-            onDismiss = { showShapeFamilyDialog = false }
-        )
-    }
+
 
     if (showLanguageDialog) {
         LanguageChooserDialog(
@@ -620,38 +602,7 @@ private fun LanguageChooserDialog(
     )
 }
 
-@Composable
-private fun ShapeFamilyChooserDialog(
-    selectedShapeFamily: ShapeFamily,
-    onShapeFamilySelected: (ShapeFamily) -> Unit,
-    onDismiss: () -> Unit
-) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(stringResource(id = R.string.choose_shape_family)) },
-        text = {
-            Column {
-                ShapeFamily.values().forEach { shapeFamily ->
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .clip(RoundedCornerShape(8.dp))
-                            .clickable { onShapeFamilySelected(shapeFamily) }
-                            .padding(vertical = 12.dp, horizontal = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = (shapeFamily == selectedShapeFamily), onClick = null)
-                        Spacer(modifier = Modifier.width(16.dp))
-                        Text(shapeFamily.name.lowercase().replaceFirstChar { it.uppercase() })
-                    }
-                }
-            }
-        },
-        confirmButton = {
-            TextButton(onClick = onDismiss) { Text(stringResource(id = R.string.cancel)) }
-        }
-    )
-}
+
 
 @Composable
 private fun ThemeChooserDialog(
