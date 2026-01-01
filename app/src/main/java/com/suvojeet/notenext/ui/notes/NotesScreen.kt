@@ -8,6 +8,8 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
@@ -185,7 +187,13 @@ fun NotesScreen(
             targetState = state.expandedNoteId,
             label = "NoteTransition",
             transitionSpec = {
-                fadeIn(tween(300)) togetherWith fadeOut(tween(300))
+                if (targetState != null) {
+                    (fadeIn(tween(300)) + scaleIn(initialScale = 0.8f, animationSpec = tween(300)))
+                        .togetherWith(fadeOut(tween(300)))
+                } else {
+                    fadeIn(tween(300))
+                        .togetherWith(fadeOut(tween(300)) + scaleOut(targetScale = 0.8f, animationSpec = tween(300)))
+                }
             }
         ) { expandedId ->
             if (expandedId == null) {
