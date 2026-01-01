@@ -42,6 +42,7 @@ import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import com.suvojeet.notenext.ui.add_edit_note.components.*
+import com.suvojeet.notenext.ui.add_edit_note.components.ReminderDisplay
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import com.suvojeet.notenext.ui.notes.NotesUiEvent

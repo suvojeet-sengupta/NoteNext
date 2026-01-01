@@ -57,6 +57,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.NavigateToNoteByTitle -> ProjectNotesEvent.NavigateToNoteByTitle(this.title)
         is NotesEvent.CreateProject -> throw IllegalArgumentException("CreateProject event cannot be converted")
         is NotesEvent.FilterByLabel -> throw IllegalArgumentException("FilterByLabel event cannot be converted")
+        is NotesEvent.OnReminderChange -> throw IllegalArgumentException("OnReminderChange event cannot be converted")
         is NotesEvent.MoveSelectedNotesToProject -> throw IllegalArgumentException("MoveSelectedNotesToProject event cannot be converted")
         is NotesEvent.ToggleLockForSelectedNotes -> ProjectNotesEvent.ToggleLockForSelectedNotes
         is NotesEvent.CreateNoteFromSharedText -> throw IllegalArgumentException("CreateNoteFromSharedText event cannot be converted")

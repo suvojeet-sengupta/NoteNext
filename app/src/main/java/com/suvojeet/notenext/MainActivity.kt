@@ -129,7 +129,6 @@ class MainActivity : FragmentActivity() {
                     } else if (enableAppLockLoaded!! && !unlocked) {
                         LockScreen(onUnlock = { unlocked = true })
                     } else {
-                    } else {
                         val startNoteId by _startNoteIdFlow.collectAsState()
                         NavGraph(themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, startAddNote = startAddNote, sharedText = sharedText)
                     }

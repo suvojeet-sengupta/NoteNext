@@ -378,7 +378,12 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                 ) {
                     ReminderScreen(
                         onBackClick = { navController.popBackStack() },
-                        onAddReminderClick = { navController.navigate("add_edit_reminder") }
+                        onNoteClick = { note ->
+                             navController.navigate("notes?noteId=${note.id}") {
+                                popUpTo("notes") { inclusive = true }
+                                launchSingleTop = true
+                            }
+                        }
                     )
                 }
                 composable(
@@ -466,7 +471,8 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                             scope.launch { drawerState.close() }
                             if (currentRoute != "notes" || notesState.filteredLabel != null) {
                                 notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
-                                navigate("notes") {
+                                notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
+                                navController.navigate("notes") {
                                     popUpTo(navController.graph.startDestinationId) { inclusive = true }
                                     launchSingleTop = true
                                 }

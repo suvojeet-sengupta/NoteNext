@@ -31,6 +31,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.VisualTransformation
 
+import androidx.compose.material.icons.filled.Alarm
+
 /**
  * Composable for editing the title and content of a note.
  * The content text style dynamically adjusts based on the active heading style.
@@ -154,5 +156,32 @@ fun NoteEditor(
                 )
             }
         )
+    }
+}
+
+
+
+@Composable
+fun ReminderDisplay(
+    reminderTime: Long?,
+    repeatOption: String?,
+    onClick: () -> Unit
+) {
+    if (reminderTime != null) {
+        val dateTime = java.time.Instant.ofEpochMilli(reminderTime).atZone(java.time.ZoneId.systemDefault())
+        val formatter = java.time.format.DateTimeFormatter.ofPattern("MMM d, HH:mm")
+        val formattedTime = formatter.format(dateTime)
+        val repeatText = if (repeatOption != null && repeatOption != "DOES_NOT_REPEAT") ", $repeatOption" else ""
+
+        androidx.compose.material3.AssistChip(
+            onClick = onClick,
+            label = { Text(text = "$formattedTime$repeatText") },
+            leadingIcon = { androidx.compose.material3.Icon(androidx.compose.material.icons.Icons.Default.Alarm, contentDescription = "Reminder") },
+            colors = androidx.compose.material3.AssistChipDefaults.assistChipColors(
+                labelColor = MaterialTheme.colorScheme.primary,
+                leadingIconContentColor = MaterialTheme.colorScheme.primary
+            )
+        )
+        Spacer(modifier = androidx.compose.ui.Modifier.height(8.dp))
     }
 }
