@@ -18,48 +18,36 @@ class AlarmSchedulerImpl(private val context: Context) : AlarmScheduler {
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     override fun schedule(note: Note) {
-        note.reminderTime?.let { reminderTimeMillis ->
-            val intent = Intent().apply {
-                component = ComponentName(context, "com.suvojeet.notenext.util.ReminderBroadcastReceiver")
-                putExtra("NOTE_ID", note.id)
-                putExtra("NOTE_TITLE", note.title)
-                putExtra("NOTE_CONTENT", note.content)
-            }
-            val pendingIntent = PendingIntent.getBroadcast(
-                context,
-                note.id,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
+        val reminderTime = note.reminderTime ?: return
+        if (reminderTime <= System.currentTimeMillis()) return
 
-            val calendar = Calendar.getInstance().apply {
-                timeInMillis = reminderTimeMillis
-            }
+        val intent = Intent().apply {
+            component = ComponentName(context, "com.suvojeet.notenext.util.ReminderBroadcastReceiver")
+            putExtra("NOTE_ID", note.id)
+            putExtra("NOTE_TITLE", note.title)
+            putExtra("NOTE_CONTENT", note.content)
+        }
+        val pendingIntent = PendingIntent.getBroadcast(
+            context,
+            note.id,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
-            // Using enum directly now that it is in data module
-            val repeatOption = try {
-                RepeatOption.valueOf(note.repeatOption ?: RepeatOption.NEVER.name)
-            } catch (e: IllegalArgumentException) {
-                RepeatOption.NEVER
-            }
-
-            when (repeatOption) {
-                RepeatOption.NEVER -> {
-                    alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, pendingIntent)
-                }
-                RepeatOption.DAILY -> {
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY, pendingIntent)
-                }
-                RepeatOption.WEEKLY -> {
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY * 7, pendingIntent)
-                }
-                RepeatOption.MONTHLY -> {
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY * 30, pendingIntent)
-                }
-                RepeatOption.YEARLY -> {
-                    alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.timeInMillis, AlarmManager.INTERVAL_DAY * 365, pendingIntent)
+        // Always use exact alarm for precision
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+            if (alarmManager.canScheduleExactAlarms()) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent)
+            } else {
+                // Fallback or just try anyway (will crash if permission revoked, but we handle permission in UI now)
+                try {
+                     alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent)
+                } catch (e: SecurityException) {
+                    e.printStackTrace()
                 }
             }
+        } else {
+             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, reminderTime, pendingIntent)
         }
     }
 

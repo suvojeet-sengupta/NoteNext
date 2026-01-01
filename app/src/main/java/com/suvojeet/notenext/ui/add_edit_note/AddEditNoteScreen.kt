@@ -8,8 +8,9 @@ import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
+
+
+
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -108,6 +109,87 @@ fun AddEditNoteScreen(
     var isFocusMode by remember { mutableStateOf(false) }
     var showMarkdownPreview by remember { mutableStateOf(false) }
     var clickedUrl by remember { mutableStateOf<String?>(null) }
+
+    // --- Permission Logic Start ---
+    var showExactAlarmDialog by remember { mutableStateOf(false) }
+
+    val notificationPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+             if (isGranted) {
+                 // Check exact alarm next
+                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                     if (alarmManager.canScheduleExactAlarms()) {
+                         showReminderDialog = true
+                     } else {
+                         showExactAlarmDialog = true
+                     }
+                 } else {
+                     showReminderDialog = true
+                 }
+             } else {
+                 Toast.makeText(context, "Notifications are required for reminders", Toast.LENGTH_LONG).show()
+             }
+        }
+    )
+
+    val checkAndRequestReminderPermissions: () -> Unit = {
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+             if (androidx.core.content.ContextCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                 // Notification granted, check alarm
+                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                     val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                     if (alarmManager.canScheduleExactAlarms()) {
+                         showReminderDialog = true
+                     } else {
+                         showExactAlarmDialog = true
+                     }
+                 } else {
+                     showReminderDialog = true
+                 }
+             } else {
+                 notificationPermissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+             }
+        } else {
+             // For older Android versions, we might verify exact alarm if S+
+             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                 val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as android.app.AlarmManager
+                 if (alarmManager.canScheduleExactAlarms()) {
+                     showReminderDialog = true
+                 } else {
+                     showExactAlarmDialog = true
+                 }
+             } else {
+                 showReminderDialog = true
+             }
+        }
+    }
+ 
+    if (showExactAlarmDialog) {
+        AlertDialog(
+            onDismissRequest = { showExactAlarmDialog = false },
+            title = { Text("Exact Alarm Permission Needed") },
+            text = { Text("To ensure reminders fire at the exact time, please allow 'Alarms & reminders' permission in Settings.") },
+            confirmButton = {
+                TextButton(onClick = {
+                    showExactAlarmDialog = false
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                         val intent = Intent(android.provider.Settings.ACTION_REQUEST_SCHEDULE_EXACT_ALARM)
+                         context.startActivity(intent)
+                    }
+                }) {
+                    Text("Go to Settings")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showExactAlarmDialog = false }) {
+                    Text("Cancel")
+                }
+            }
+        )
+    }
+    // --- Permission Logic End ---
 
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         scope.launch {
@@ -251,7 +333,9 @@ fun AddEditNoteScreen(
                         onEvent = onEvent,
                         showColorPicker = { showColorPicker = !showColorPicker },
                         showFormatBar = { showFormatBar = !showFormatBar },
-                        showReminderDialog = { showReminderDialog = it },
+                        showReminderDialog = { 
+                            if (it) checkAndRequestReminderPermissions() else showReminderDialog = false 
+                        },
                         showMoreOptions = { showMoreOptions = it },
                         onImageClick = {
                             getContent.launch("image/*")
@@ -356,7 +440,7 @@ fun AddEditNoteScreen(
                                 NoteTitleEditor(
                                     state = state,
                                     onEvent = onEvent,
-                                    onReminderClick = { showReminderDialog = true }
+                                    onReminderClick = { checkAndRequestReminderPermissions() }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                                 
@@ -401,7 +485,7 @@ fun AddEditNoteScreen(
                                 NoteTitleEditor(
                                     state = state,
                                     onEvent = onEvent,
-                                    onReminderClick = { showReminderDialog = true }
+                                    onReminderClick = { checkAndRequestReminderPermissions() }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
