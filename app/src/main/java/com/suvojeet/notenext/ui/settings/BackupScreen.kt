@@ -47,6 +47,7 @@ import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.runtime.mutableStateListOf 
 import androidx.compose.foundation.layout.heightIn
+import com.suvojeet.notenext.ui.components.WavyProgressIndicator
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -603,9 +604,14 @@ fun ManualDriveBackupCard(
                          modifier = Modifier.weight(1f),
                          shape = RoundedCornerShape(12.dp)
                      ) {
-                         if (state.isBackingUp && state.backupResult?.contains("Drive") == true) {
-                             CircularProgressIndicator(modifier = Modifier.size(16.dp), color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
-                             Spacer(Modifier.width(8.dp))
+                        if (state.isBackingUp && state.backupResult?.contains("Drive") == true) {
+                            WavyProgressIndicator(
+                                modifier = Modifier.width(48.dp).height(16.dp),
+                                color = MaterialTheme.colorScheme.onPrimary,
+                                strokeWidth = 2.dp,
+                                amplitude = 3.dp
+                            )
+                            Spacer(Modifier.width(8.dp))
                              Text(state.uploadProgress ?: "Backing up...")
                          } else {
                              Text("Backup Now")
