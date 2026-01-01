@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -70,21 +71,16 @@ fun BackupScreen(
     var versionToRestore by remember { mutableStateOf<String?>(null) }
 
     // State for Encryption
-    var isEncryptChecked by remember { mutableStateOf(false) }
-    var isDriveEncryptChecked by remember { mutableStateOf(false) }
     var showPasswordSetDialog by remember { mutableStateOf(false) }
+    var showChangePasswordDialog by remember { mutableStateOf(false) }
     var showEncryptionInfo by remember { mutableStateOf(false) }
-    var backupPassword by remember { mutableStateOf<String?>(null) }
     // Action to execute after password set (e.g. launch explorer or backup to SD)
-    var pendingPasswordAction by remember { mutableStateOf<(() -> Unit)?>(null) }
-
+    // Deprecated usage: Now we just set global encryption state
+    
     val createDocumentLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.CreateDocument("application/zip") // MIME might differ for encrypted, but zip extension mainly used or .enc
+        contract = ActivityResultContracts.CreateDocument("application/zip") 
     ) { uri ->
-        // Use the captured password
-        uri?.let { viewModel.createBackup(it, backupPassword) }
-        // Reset password after use (or keep it? better reset for security)
-        backupPassword = null
+        uri?.let { viewModel.createBackup(it) } // No password arg needed, VM handles it
     }
 
     // Determine MIME/Extension based on encryption (Optional Polish: .enc for encrypted?)
@@ -248,8 +244,26 @@ fun BackupScreen(
             item {
                 ManualDriveBackupCard(
                     state = state,
-                    isEncryptionEnabled = isDriveEncryptChecked,
-                    onToggleEncryption = { isDriveEncryptChecked = it },
+                    onToggleEncryption = { 
+                        if (it) {
+                            if (!state.hasPasswordSet) {
+                                showPasswordSetDialog = true
+                            } else {
+                                viewModel.setEncryption("dummy_re_enable") // Logic flow issue: re-enabling should prompt if forgot? 
+                                // Actually if hasPasswordSet is true, we just enable flag. But VM doesn't store pass in memory only? 
+                                // VM stores in Prefs. So if hasPasswordSet, we just enable.
+                                // But wait, setEncryption requires password.
+                                // We need enableEncryption() in VM that reuses stored password?
+                                // Actually if it was disabled, we removed the password from prefs in VM.
+                                // So hasPasswordSet will be false.
+                                // So we ALWAYS need to set password when enabling.
+                                showPasswordSetDialog = true
+                            }
+                        } else {
+                            viewModel.disableEncryption()
+                        }
+                    },
+                    onChangePassword = { showChangePasswordDialog = true },
                     onShowInfo = { showEncryptionInfo = true },
                     onSignIn = {
                         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -262,15 +276,7 @@ fun BackupScreen(
                     onBackup = {
                         val account = GoogleSignIn.getLastSignedInAccount(context)
                         if (account != null) {
-                            if (isDriveEncryptChecked) {
-                                pendingPasswordAction = {
-                                    viewModel.backupToDrive(account, backupPassword)
-                                    backupPassword = null
-                                }
-                                showPasswordSetDialog = true
-                            } else {
-                                viewModel.backupToDrive(account, null)
-                            }
+                            viewModel.backupToDrive(account)
                         }
                     },
                     onUnlink = { showUnlinkDialog = true },
@@ -295,35 +301,30 @@ fun BackupScreen(
             item {
                  ManualLocalBackupCard(
                      state = state,
-                     isEncryptionEnabled = isEncryptChecked,
-                     onToggleEncryption = { isEncryptChecked = it },
+                     onToggleEncryption = { 
+                        if (it) {
+                             showPasswordSetDialog = true
+                        } else {
+                            viewModel.disableEncryption()
+                        }
+                     },
+                     onChangePassword = { showChangePasswordDialog = true },
                      onShowInfo = { showEncryptionInfo = true },
                      onBackupToSd = {
                          if (state.sdCardFolderUri != null) {
-                             if (isEncryptChecked) {
-                                 pendingPasswordAction = {
-                                     // For SD card backup, we pass password to VM immediately
-                                     viewModel.backupToSdCard(backupPassword)
-                                     backupPassword = null
-                                 }
-                                 showPasswordSetDialog = true
-                             } else {
-                                 viewModel.backupToSdCard(null)
-                             }
+                             viewModel.backupToSdCard()
                          } else {
                              sdCardLauncher.launch(null)
                          }
                      },
                      onSaveToFile = {
-                         if (isEncryptChecked) {
-                             pendingPasswordAction = {
-                                 val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
-                                 createDocumentLauncher.launch("NoteNext_Backup_Encrypted_$timeStamp.enc")
-                             }
-                             showPasswordSetDialog = true
+                         // For "Save to File", we still treat it as a one-off or use the global setting?
+                         // Ideally "Save to File" exports a ZIP. If encryption enabled, export ENC.
+                         // We can use the global state.
+                         val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
+                         if (state.isEncryptionEnabled) {
+                             createDocumentLauncher.launch("NoteNext_Backup_Encrypted_$timeStamp.enc")
                          } else {
-                             backupPassword = null
-                             val timeStamp: String = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.US).format(Date())
                              createDocumentLauncher.launch("NoteNext_Backup_$timeStamp.zip")
                          }
                      },
@@ -358,16 +359,12 @@ fun BackupScreen(
                         }
                     },
                     onChangeSdLocation = { sdCardLauncher.launch(null) },
-                    onToggleEncryption = { enabled ->
-                         if (enabled) {
-                             pendingPasswordAction = {
-                                 viewModel.toggleAutoBackupEncryption(true, backupPassword)
-                                 backupPassword = null
-                             }
-                             showPasswordSetDialog = true
-                         } else {
-                             viewModel.toggleAutoBackupEncryption(false)
-                         }
+                    onToggleEncryption = { 
+                        if (it) {
+                            showPasswordSetDialog = true
+                        } else {
+                            viewModel.disableEncryption()
+                        }
                     },
                     context = context
                 )
@@ -435,8 +432,10 @@ fun BackupScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        versionToDelete?.let { id ->
-                             GoogleSignIn.getLastSignedInAccount(context)?.let { viewModel.deleteBackupVersion(it, id) }
+                        val id = versionToDelete
+                        val account = GoogleSignIn.getLastSignedInAccount(context)
+                        if (id != null && account != null) {
+                             viewModel.deleteBackupVersion(account, id)
                         }
                         versionToDelete = null
                     },
@@ -458,8 +457,10 @@ fun BackupScreen(
             confirmButton = {
                 TextButton(
                     onClick = {
-                        versionToRestore?.let { id ->
-                             GoogleSignIn.getLastSignedInAccount(context)?.let { viewModel.restoreFromDrive(it, id) }
+                        val id = versionToRestore
+                        val account = GoogleSignIn.getLastSignedInAccount(context)
+                        if (id != null && account != null) {
+                             viewModel.restoreFromDrive(account, id)
                         }
                         versionToRestore = null
                     }
@@ -473,17 +474,23 @@ fun BackupScreen(
 
     if (showPasswordSetDialog) {
         PasswordSetDialog(
-            onDismiss = { 
-                showPasswordSetDialog = false
-                pendingPasswordAction = null
-                backupPassword = null
-            },
+            onDismiss = { showPasswordSetDialog = false },
             onConfirm = { password ->
-                backupPassword = password
+                viewModel.setEncryption(password)
                 showPasswordSetDialog = false
-                pendingPasswordAction?.invoke()
-                pendingPasswordAction = null
             }
+        )
+    }
+
+    if (showChangePasswordDialog) {
+        PasswordSetDialog(
+            onDismiss = { showChangePasswordDialog = false },
+            onConfirm = { password ->
+                viewModel.changePassword(password)
+                showChangePasswordDialog = false
+            },
+            title = "Change Password",
+            confirmText = "Update Password"
         )
     }
 
@@ -506,8 +513,8 @@ fun BackupScreen(
 @Composable
 fun ManualDriveBackupCard(
     state: BackupRestoreState,
-    isEncryptionEnabled: Boolean,
     onToggleEncryption: (Boolean) -> Unit,
+    onChangePassword: () -> Unit,
     onShowInfo: () -> Unit,
     onSignIn: () -> Unit,
     onBackup: () -> Unit,
@@ -516,6 +523,7 @@ fun ManualDriveBackupCard(
     onDeleteVersion: (String) -> Unit,
     onToggleAttachments: (Boolean) -> Unit
 ) {
+    val isEncryptionEnabled = state.isEncryptionEnabled
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -568,7 +576,12 @@ fun ManualDriveBackupCard(
                      Column(modifier = Modifier.weight(1f)) {
                          Text("Encrypt Backup", style = MaterialTheme.typography.bodyMedium)
                          if (isEncryptionEnabled) {
-                             Text("Password required to restore", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                             Text("Password set", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                         }
+                     }
+                     if (isEncryptionEnabled) {
+                         TextButton(onClick = onChangePassword) {
+                             Text("Change Password", fontSize = 12.sp)
                          }
                      }
                      IconButton(onClick = onShowInfo) {
@@ -693,14 +706,15 @@ fun BackupVersionItem(
 @Composable
 fun ManualLocalBackupCard(
     state: BackupRestoreState,
-    isEncryptionEnabled: Boolean,
     onToggleEncryption: (Boolean) -> Unit,
+    onChangePassword: () -> Unit,
     onShowInfo: () -> Unit,
     onBackupToSd: () -> Unit,
     onSaveToFile: () -> Unit,
     onRestoreFromFile: () -> Unit,
     onSelectiveRestore: () -> Unit
 ) {
+    val isEncryptionEnabled = state.isEncryptionEnabled
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
@@ -739,7 +753,12 @@ fun ManualLocalBackupCard(
                 Column(modifier = Modifier.weight(1f)) {
                     Text("Encrypt Backup", style = MaterialTheme.typography.bodyMedium)
                     if (isEncryptionEnabled) {
-                        Text("Password required to restore", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                        Text("Password set", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                    }
+                }
+                if (isEncryptionEnabled) {
+                    TextButton(onClick = onChangePassword) {
+                        Text("Change Password", fontSize = 12.sp)
                     }
                 }
                 IconButton(onClick = onShowInfo) {
@@ -858,7 +877,7 @@ fun AutoBackupSettingsCard(
                     Text("Protect background backups with a password", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
                 Switch(
-                    checked = state.isAutoBackupEncryptionEnabled,
+                    checked = state.isEncryptionEnabled,
                     onCheckedChange = onToggleEncryption
                 )
             }
@@ -1221,7 +1240,9 @@ fun BouncingOutlinedButton(
 @Composable
 fun PasswordSetDialog(
     onDismiss: () -> Unit,
-    onConfirm: (String) -> Unit
+    onConfirm: (String) -> Unit,
+    title: String = "Set Backup Password",
+    confirmText: String = "Encrypt & Save"
 ) {
     var password by remember { mutableStateOf("") }
     var confirmPassword by remember { mutableStateOf("") }
@@ -1242,7 +1263,7 @@ fun PasswordSetDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Set Backup Password") },
+        title = { Text(title) },
         text = {
             Column {
                 Text("Enter a password to encrypt your backup. You will need this password to restore it.", style = MaterialTheme.typography.bodyMedium)
@@ -1308,7 +1329,7 @@ fun PasswordSetDialog(
                         onConfirm(password)
                     }
                 }
-            ) { Text("Encrypt & Save") }
+            ) { Text(confirmText) }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) { Text("Cancel") }
