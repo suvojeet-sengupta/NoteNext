@@ -12,6 +12,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -84,6 +85,15 @@ fun AddEditNoteTopAppBar(
                         tint = if (isMarkdownPreviewVisible) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                     )
                 }
+
+            // Summarize Note
+            IconButton(onClick = { onEvent(NotesEvent.SummarizeNote) }) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = "Summarize Note",
+                    tint = MaterialTheme.colorScheme.onSurface
+                )
+            }
             }
             
             // Focus Mode Toggle
