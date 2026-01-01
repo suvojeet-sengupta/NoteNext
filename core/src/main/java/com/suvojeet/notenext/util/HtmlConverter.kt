@@ -73,7 +73,7 @@ object HtmlConverter {
                 val title = matchResult.groupValues[1]
                 addStyle(
                     SpanStyle(
-                        color = androidx.compose.ui.graphics.Color(0xFF6200EE),
+                        color = androidx.compose.ui.graphics.Color(0xFFD0BCFF), // Light Purple for Note Links
                         textDecoration = TextDecoration.Underline,
                         fontWeight = FontWeight.Medium
                     ),
@@ -96,7 +96,7 @@ object HtmlConverter {
                 val url = matchResult.value
                 addStyle(
                     SpanStyle(
-                        color = androidx.compose.ui.graphics.Color(0xFF0000EE), // Standard Link Blue
+                        color = androidx.compose.ui.graphics.Color(0xFF64B5F6), // Light Blue for URLs
                         textDecoration = TextDecoration.Underline
                     ),
                     start,
@@ -118,7 +118,7 @@ object HtmlConverter {
                 val email = matchResult.value
                 addStyle(
                     SpanStyle(
-                        color = androidx.compose.ui.graphics.Color(0xFF0000EE),
+                        color = androidx.compose.ui.graphics.Color(0xFF64B5F6),
                         textDecoration = TextDecoration.Underline
                     ),
                     start,
@@ -141,7 +141,7 @@ object HtmlConverter {
                 val phone = matchResult.value
                 addStyle(
                     SpanStyle(
-                        color = androidx.compose.ui.graphics.Color(0xFF0000EE),
+                        color = androidx.compose.ui.graphics.Color(0xFF64B5F6),
                         textDecoration = TextDecoration.Underline
                     ),
                     start,
