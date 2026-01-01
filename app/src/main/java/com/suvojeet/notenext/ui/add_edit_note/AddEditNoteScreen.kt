@@ -41,12 +41,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 import com.suvojeet.notenext.ui.add_edit_note.components.*
 import com.suvojeet.notenext.ui.add_edit_note.components.ReminderDisplay
 import com.suvojeet.notenext.ui.components.WavyProgressIndicator
+import com.suvojeet.notenext.ui.components.AiThinkingIndicator
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesState
 import com.suvojeet.notenext.ui.notes.NotesUiEvent
@@ -607,39 +609,82 @@ fun AddEditNoteScreen(
         )
     }
     
-    // AI Summary Dialog
+    // Awesome AI Summary Dialog
     if (state.isSummarizing || state.summaryResult != null) {
         AlertDialog(
             onDismissRequest = { 
                 if (!state.isSummarizing) onEvent(NotesEvent.ClearSummary) 
             },
+            containerColor = MaterialTheme.colorScheme.surface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            textContentColor = MaterialTheme.colorScheme.onSurface,
             title = { 
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-                    Spacer(Modifier.width(8.dp))
-                    Text(if (state.isSummarizing) "Summarizing..." else "Note Summary")
+                    Icon(
+                        Icons.Default.AutoAwesome, 
+                        contentDescription = null, 
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(28.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        if (state.isSummarizing) "Groq AI is Thinking..." else "AI Summary",
+                        style = MaterialTheme.typography.headlineSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)
+                    )
                 }
             },
             text = {
-                if (state.isSummarizing) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
-                        WavyProgressIndicator(
-                             modifier = Modifier.fillMaxWidth().height(40.dp),
-                             color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        Text("Reading your note...", style = MaterialTheme.typography.bodySmall)
-                    }
-                } else {
-                    SelectionContainer {
-                        Text(state.summaryResult ?: "")
+                Box(
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 150.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    if (state.isSummarizing) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                            AiThinkingIndicator(
+                                size = 80.dp,
+                                primaryColor = MaterialTheme.colorScheme.primary,
+                                secondaryColor = MaterialTheme.colorScheme.tertiary
+                            )
+                            Spacer(Modifier.height(16.dp))
+                            Text(
+                                "Analyzing your note...", 
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    } else {
+                        // Typing Effect Logic
+                        var visibleText by remember { mutableStateOf("") }
+                        val fullText = state.summaryResult ?: ""
+                        
+                        LaunchedEffect(fullText) {
+                            visibleText = ""
+                            fullText.forEachIndexed { index, char ->
+                                visibleText += char
+                                kotlinx.coroutines.delay(10) // Type speed
+                            }
+                        }
+
+                        SelectionContainer {
+                            Column {
+                                Text(
+                                    text = visibleText,
+                                    style = MaterialTheme.typography.bodyLarge,
+                                    lineHeight = 24.sp
+                                )
+                                // Cursor if typing not complete? (Optional, kept simple for now)
+                            }
+                        }
                     }
                 }
             },
             confirmButton = {
                 if (!state.isSummarizing) {
-                    TextButton(onClick = { onEvent(NotesEvent.ClearSummary) }) {
-                        Text("Close")
+                    Button(
+                        onClick = { onEvent(NotesEvent.ClearSummary) },
+                        colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary)
+                    ) {
+                        Text("Done")
                     }
                 }
             },
@@ -649,7 +694,7 @@ fun AddEditNoteScreen(
                          val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                          val clip = android.content.ClipData.newPlainText("Note Summary", state.summaryResult)
                          clipboardManager.setPrimaryClip(clip)
-                         Toast.makeText(context, "Summary copied to clipboard", Toast.LENGTH_SHORT).show()
+                         Toast.makeText(context, "Copy Summary", Toast.LENGTH_SHORT).show()
                      }) {
                          Text("Copy")
                      }

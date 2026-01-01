@@ -13,12 +13,25 @@ class GroqRepository @Inject constructor(
     private val apiService: GroqApiService
 ) {
     fun summarizeNote(content: String): Flow<Result<String>> = flow {
-        // Word count logic to select model
+        // Word count logic to select model list
         val wordCount = content.split("\\s+".toRegex()).size
-        val model = if (wordCount < 1000) {
-            "llama-3.1-8b-instant"
+        
+        val models = if (wordCount < 1000) {
+            listOf(
+                "llama-3.1-8b-instant",
+                "gemma2-9b-it",
+                "mixtral-8x7b-32768",
+                "llama-3.3-70b-versatile",
+                "llama-3.1-70b-versatile"
+            )
         } else {
-            "llama-3.3-70b-versatile"
+            listOf(
+                "llama-3.3-70b-versatile",
+                "llama-3.1-70b-versatile",
+                "mixtral-8x7b-32768",
+                "gemma2-9b-it",
+                "llama-3.1-8b-instant"
+            )
         }
 
         val messages = listOf(
@@ -26,21 +39,34 @@ class GroqRepository @Inject constructor(
             Message(role = "user", content = "Summarize the following note:\n\n$content")
         )
 
-        val request = ChatCompletionRequest(
-            model = model,
-            messages = messages
-        )
+        var lastException: Exception? = null
+        var success = false
 
-        try {
-            val response = apiService.getChatCompletion(request)
-            val summary = response.choices.firstOrNull()?.message?.content
-            if (summary != null) {
-                emit(Result.success(summary))
-            } else {
-                emit(Result.failure(Exception("Empty response from AI")))
+        for (model in models) {
+            try {
+                // Log attempting model? (Optional)
+                val request = ChatCompletionRequest(
+                    model = model,
+                    messages = messages
+                )
+                val response = apiService.getChatCompletion(request)
+                val summary = response.choices.firstOrNull()?.message?.content
+                
+                if (summary != null) {
+                    emit(Result.success(summary))
+                    success = true
+                    break // Exit loop on success
+                } else {
+                    lastException = Exception("Empty response from $model")
+                }
+            } catch (e: Exception) {
+                lastException = e
+                // Continue to next model
             }
-        } catch (e: Exception) {
-            emit(Result.failure(e))
+        }
+
+        if (!success) {
+            emit(Result.failure(lastException ?: Exception("Unknown error during summarization")))
         }
     }
 }
