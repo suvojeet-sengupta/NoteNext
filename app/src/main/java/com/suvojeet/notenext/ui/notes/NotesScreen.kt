@@ -247,6 +247,11 @@ fun NotesScreen(
                             }
                         },
                         floatingActionButton = {
+                            val isFabScrollExpanded = when (state.layoutType) {
+                                LayoutType.GRID -> gridState.firstVisibleItemIndex == 0
+                                LayoutType.LIST -> listState.firstVisibleItemIndex == 0
+                            }
+
                             MultiActionFab(
                                 isExpanded = isFabExpanded,
                                 onExpandedChange = { isFabExpanded = it },
@@ -262,7 +267,8 @@ fun NotesScreen(
                                     showCreateProjectDialog = true
                                     isFabExpanded = false
                                 },
-                                themeMode = themeMode
+                                themeMode = themeMode,
+                                isScrollExpanded = isFabScrollExpanded
                             )
                         }
                     ) { padding ->

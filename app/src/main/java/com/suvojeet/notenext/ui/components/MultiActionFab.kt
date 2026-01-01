@@ -66,7 +66,8 @@ fun MultiActionFab(
     onChecklistClick: () -> Unit,
     onProjectClick: () -> Unit,
     showProjectButton: Boolean = true,
-    themeMode: ThemeMode
+    themeMode: ThemeMode,
+    isScrollExpanded: Boolean = true // New parameter for scroll awareness
 ) {
     // Animate the rotation of the main FAB icon (Add/Close).
     val rotation by animateFloatAsState(
@@ -164,21 +165,28 @@ fun MultiActionFab(
             )
         }
 
-        // Main Floating Action Button.
-        FloatingActionButton(
+        // Main Floating Action Button (Extended or Regular)
+        androidx.compose.material3.ExtendedFloatingActionButton(
+            text = { 
+                 AnimatedVisibility(visible = isScrollExpanded && !isExpanded) {
+                     Text(text = stringResource(id = R.string.add))
+                 }
+            },
+            icon = {
+                Icon(
+                    imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Add,
+                    contentDescription = stringResource(id = R.string.add),
+                    modifier = Modifier.rotate(rotation) // Apply rotation animation.
+                )
+            },
             onClick = {
                 pressed = true
                 onExpandedChange(!isExpanded)
             },
+            expanded = isScrollExpanded && !isExpanded, // Only expand if scrolled up AND menu is closed
             containerColor = MaterialTheme.colorScheme.primary,
             modifier = Modifier.scale(pressScale) // Apply press animation.
-        ) {
-            Icon(
-                imageVector = if (isExpanded) Icons.Default.Close else Icons.Default.Add,
-                contentDescription = stringResource(id = R.string.add),
-                modifier = Modifier.rotate(rotation) // Apply rotation animation.
-            )
-        }
+        )
     }
 
     // Reset the press state after a short delay to create a 'pop' effect.

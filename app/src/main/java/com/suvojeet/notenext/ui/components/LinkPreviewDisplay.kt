@@ -86,20 +86,33 @@ fun LinkPreviewDisplay(
 
             // Image
             linkPreview.imageUrl?.let { imageUrl ->
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(imageUrl)
-                        .crossfade(true)
-                        .diskCachePolicy(CachePolicy.ENABLED)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier
+                Box(
+                     modifier = Modifier
                         .fillMaxWidth()
                         .height(100.dp)
                         .clip(MaterialTheme.shapes.small)
                         .background(MaterialTheme.colorScheme.secondaryContainer)
-                )
+                ) {
+                     AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(imageUrl)
+                            .crossfade(true)
+                            .diskCachePolicy(CachePolicy.ENABLED)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    
+                    // Overlay Wavy Progress if needed, or put it below as a "fetching more info" style
+                    // For now, let's just show it at the bottom of the card for effect if there is no description
+                    if (linkPreview.description.isNullOrEmpty()) {
+                         WavyProgressIndicator(
+                            modifier = Modifier.align(Alignment.BottomCenter).height(10.dp),
+                            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
+                         )
+                    }
+                }
                 Spacer(modifier = Modifier.height(8.dp))
             }
 
