@@ -54,5 +54,7 @@ data class NotesState(
     val editingRepeatOption: String? = null,
 
     val projects: List<Project> = emptyList(),
-    val searchQuery: String = ""
+    val searchQuery: String = "",
+    val isSummarizing: Boolean = false,
+    val summaryResult: String? = null
 )

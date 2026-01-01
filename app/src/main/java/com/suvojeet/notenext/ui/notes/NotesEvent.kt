@@ -83,4 +83,6 @@ sealed class NotesEvent {
     object OnToggleNoteType : NotesEvent()
     object DeleteAllCheckedItems : NotesEvent()
     object ToggleCheckedItemsExpanded : NotesEvent()
+    object SummarizeNote : NotesEvent()
+    object ClearSummary : NotesEvent()
 }

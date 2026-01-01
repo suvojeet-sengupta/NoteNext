@@ -30,6 +30,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CloseFullscreen
+import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -602,7 +605,57 @@ fun AddEditNoteScreen(
             }
         )
     }
-
+    
+    // AI Summary Dialog
+    if (state.isSummarizing || state.summaryResult != null) {
+        AlertDialog(
+            onDismissRequest = { 
+                if (!state.isSummarizing) onEvent(NotesEvent.ClearSummary) 
+            },
+            title = { 
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(8.dp))
+                    Text(if (state.isSummarizing) "Summarizing..." else "Note Summary")
+                }
+            },
+            text = {
+                if (state.isSummarizing) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+                        WavyProgressIndicator(
+                             modifier = Modifier.fillMaxWidth().height(40.dp),
+                             color = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        Text("Reading your note...", style = MaterialTheme.typography.bodySmall)
+                    }
+                } else {
+                    SelectionContainer {
+                        Text(state.summaryResult ?: "")
+                    }
+                }
+            },
+            confirmButton = {
+                if (!state.isSummarizing) {
+                    TextButton(onClick = { onEvent(NotesEvent.ClearSummary) }) {
+                        Text("Close")
+                    }
+                }
+            },
+            dismissButton = {
+                if (!state.isSummarizing && state.summaryResult != null) {
+                     TextButton(onClick = {
+                         val clipboardManager = context.getSystemService(Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
+                         val clip = android.content.ClipData.newPlainText("Note Summary", state.summaryResult)
+                         clipboardManager.setPrimaryClip(clip)
+                         Toast.makeText(context, "Summary copied to clipboard", Toast.LENGTH_SHORT).show()
+                     }) {
+                         Text("Copy")
+                     }
+                }
+            }
+        )
+    }
     if (showInsertLinkDialog) {
         InsertLinkDialog(
             onDismiss = { showInsertLinkDialog = false },

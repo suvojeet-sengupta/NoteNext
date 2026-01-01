@@ -61,6 +61,7 @@ class NotesViewModel @Inject constructor(
     private val linkPreviewRepository: LinkPreviewRepository,
     private val alarmScheduler: AlarmScheduler,
     private val richTextController: RichTextController,
+    private val groqRepository: com.suvojeet.notenext.data.repository.GroqRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -875,6 +876,32 @@ class NotesViewModel @Inject constructor(
                 _state.value = state.value.copy(
                     isCheckedItemsExpanded = !state.value.isCheckedItemsExpanded
                 )
+            }
+            is NotesEvent.SummarizeNote -> {
+                val content = if (state.value.editingNoteType == "CHECKLIST") {
+                    state.value.editingChecklist.joinToString("\n") { it.text }
+                } else {
+                    state.value.editingContent.text
+                }
+
+                if (content.isNotBlank()) {
+                    _state.value = _state.value.copy(isSummarizing = true, summaryResult = null)
+                    viewModelScope.launch {
+                        groqRepository.summarizeNote(content).collect { result ->
+                            result.onSuccess { summary ->
+                                _state.value = _state.value.copy(isSummarizing = false, summaryResult = summary)
+                            }.onFailure {
+                                _state.value = _state.value.copy(
+                                    isSummarizing = false,
+                                    summaryResult = "Error: " + it.localizedMessage
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            is NotesEvent.ClearSummary -> {
+                _state.value = _state.value.copy(summaryResult = null)
             }
             is NotesEvent.DeleteAllCheckedItems -> {
                 val updatedChecklist = state.value.editingChecklist.filter { !it.isChecked }

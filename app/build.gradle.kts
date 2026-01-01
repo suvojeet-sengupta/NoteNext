@@ -148,5 +148,20 @@ dependencies {
     implementation("com.google.api-client:google-api-client-android:2.8.1")
     implementation("com.google.apis:google-api-services-drive:v3-rev20251210-2.0.0")
     implementation("com.google.auth:google-auth-library-oauth2-http:1.30.1")
+
+    // Retrofit & OkHttp
+    implementation("com.squareup.retrofit2:retrofit:3.0.0")
+    implementation("com.squareup.retrofit2:converter-gson:3.0.0")
+    implementation("com.squareup.okhttp3:okhttp:5.3.2")
+    implementation("com.squareup.okhttp3:logging-interceptor:5.3.2")
+}
+
+android {
+    buildFeatures {
+        buildConfig = true
+    }
+    defaultConfig {
+        buildConfigField("String", "GROQ_API_KEY", "\"${System.getenv("GROQ_API_1") ?: ""}\"")
+    }
 }
 
