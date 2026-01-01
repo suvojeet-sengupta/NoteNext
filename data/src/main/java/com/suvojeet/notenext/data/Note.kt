@@ -25,5 +25,6 @@ data class Note(
     val noteType: String = "TEXT",
     val projectId: Int? = null,
     val isLocked: Boolean = false,
-    val position: Int = 0
+    val position: Int = 0,
+    val aiSummary: String? = null
 )

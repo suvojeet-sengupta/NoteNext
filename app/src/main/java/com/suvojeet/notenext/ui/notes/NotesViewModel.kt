@@ -354,7 +354,9 @@ class NotesViewModel @Inject constructor(
                                     item.id to TextFieldValue(richTextController.parseMarkdownToAnnotatedString(item.text))
                                 },
                                 editingReminderTime = note.reminderTime,
-                                editingRepeatOption = note.repeatOption
+                                editingRepeatOption = note.repeatOption,
+                                summaryResult = note.aiSummary,
+                                showSummaryDialog = false
                             )
                         }
                     } else {
@@ -381,7 +383,9 @@ class NotesViewModel @Inject constructor(
                             } else emptyMap(),
                             editingAttachments = emptyList(),
                             editingIsLocked = false,
-                            editingNoteVersions = emptyList()
+                            editingNoteVersions = emptyList(),
+                            summaryResult = null,
+                            showSummaryDialog = false
                         )
                     }
                 }
@@ -479,7 +483,8 @@ class NotesViewModel @Inject constructor(
                 _state.value = state.value.copy(
                     editingTitle = event.title,
                     canUndo = undoRedoManager.canUndo.value,
-                    canRedo = undoRedoManager.canRedo.value
+                    canRedo = undoRedoManager.canRedo.value,
+                    summaryResult = null // Invalidate cache on title change
                 )
             }
             is NotesEvent.OnContentChange -> {
@@ -517,7 +522,8 @@ class NotesViewModel @Inject constructor(
                         canRedo = undoRedoManager.canRedo.value,
                         isBoldActive = styles.any { style -> style.item.fontWeight == FontWeight.Bold },
                         isItalicActive = styles.any { style -> style.item.fontStyle == FontStyle.Italic },
-                        isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline }
+                        isUnderlineActive = styles.any { style -> style.item.textDecoration == TextDecoration.Underline },
+                        summaryResult = null // Invalidate cache on content change
                     )
 
                     // Link detection
@@ -885,23 +891,29 @@ class NotesViewModel @Inject constructor(
                 }
 
                 if (content.isNotBlank()) {
-                    _state.value = _state.value.copy(isSummarizing = true, summaryResult = null)
-                    viewModelScope.launch {
-                        groqRepository.summarizeNote(content).collect { result ->
-                            result.onSuccess { summary ->
-                                _state.value = _state.value.copy(isSummarizing = false, summaryResult = summary)
-                            }.onFailure {
-                                _state.value = _state.value.copy(
-                                    isSummarizing = false,
-                                    summaryResult = "Error: " + it.localizedMessage
-                                )
+                    if (state.value.summaryResult != null) {
+                         // Cache hit - just show dialog
+                         _state.value = _state.value.copy(showSummaryDialog = true)
+                    } else {
+                         // Cache miss - fetch
+                        _state.value = _state.value.copy(isSummarizing = true, showSummaryDialog = true)
+                        viewModelScope.launch {
+                            groqRepository.summarizeNote(content).collect { result ->
+                                result.onSuccess { summary ->
+                                    _state.value = _state.value.copy(isSummarizing = false, summaryResult = summary)
+                                }.onFailure {
+                                    _state.value = _state.value.copy(
+                                        isSummarizing = false,
+                                        summaryResult = "Error: " + it.localizedMessage
+                                    )
+                                }
                             }
                         }
                     }
                 }
             }
             is NotesEvent.ClearSummary -> {
-                _state.value = _state.value.copy(summaryResult = null)
+                _state.value = _state.value.copy(showSummaryDialog = false)
             }
             is NotesEvent.DeleteAllCheckedItems -> {
                 val updatedChecklist = state.value.editingChecklist.filter { !it.isChecked }
@@ -996,7 +1008,8 @@ class NotesViewModel @Inject constructor(
                         noteType = state.value.editingNoteType,
                         isLocked = state.value.editingIsLocked,
                         reminderTime = state.value.editingReminderTime,
-                        repeatOption = state.value.editingRepeatOption
+                        repeatOption = state.value.editingRepeatOption,
+                        aiSummary = state.value.summaryResult
                     )
                 }
             }

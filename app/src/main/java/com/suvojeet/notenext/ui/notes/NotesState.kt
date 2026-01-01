@@ -56,5 +56,6 @@ data class NotesState(
     val projects: List<Project> = emptyList(),
     val searchQuery: String = "",
     val isSummarizing: Boolean = false,
-    val summaryResult: String? = null
+    val summaryResult: String? = null,
+    val showSummaryDialog: Boolean = false
 )

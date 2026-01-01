@@ -610,7 +610,7 @@ fun AddEditNoteScreen(
     }
     
     // Awesome AI Summary Dialog
-    if (state.isSummarizing || state.summaryResult != null) {
+    if (state.showSummaryDialog) {
         AlertDialog(
             onDismissRequest = { 
                 if (!state.isSummarizing) onEvent(NotesEvent.ClearSummary) 
