@@ -101,6 +101,7 @@ fun AddEditNoteScreen(
     val enableRichLinkPreview by settingsRepository.enableRichLinkPreview.collectAsState(initial = false)
     var isFocusMode by remember { mutableStateOf(false) }
     var showMarkdownPreview by remember { mutableStateOf(false) }
+    var clickedUrl by remember { mutableStateOf<String?>(null) }
 
     val getContent = rememberLauncherForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
         scope.launch {
@@ -336,7 +337,7 @@ fun AddEditNoteScreen(
                                 Spacer(modifier = Modifier.height(16.dp))
                             }
 
-                            var clickedUrl by remember { mutableStateOf<String?>(null) }
+
                             
                             if (showMarkdownPreview) {
                                 val markdownContent = produceState(initialValue = "") {
@@ -345,38 +346,36 @@ fun AddEditNoteScreen(
                                 }
                                 MarkdownPreview(content = markdownContent.value)
                             } else {
-                                NoteEditor(
-                                    state = state, 
+                                // Landscape Mode Editor
+                                NoteTitleEditor(
+                                    state = state,
                                     onEvent = onEvent,
-                                    onUrlClick = { url ->
-                                        clickedUrl = url
-                                    },
                                     onReminderClick = { showReminderDialog = true }
                                 )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                
+                                if (state.editingNoteType == "CHECKLIST") {
+                                    LazyColumn(modifier = Modifier.weight(1f)) {
+                                         ChecklistEditor(
+                                             state = state,
+                                             onEvent = onEvent,
+                                             isCheckedItemsExpanded = state.isCheckedItemsExpanded,
+                                             onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) }
+                                         )
+                                    }
+                                } else {
+                                    // Wrap text editor in a box/column to ensure layout
+                                    Column(modifier = Modifier.weight(1f).verticalScroll(rememberScrollState())) {
+                                        NoteContentEditor(
+                                            state = state,
+                                            onEvent = onEvent,
+                                            onUrlClick = { url -> clickedUrl = url }
+                                        )
+                                    }
+                                }
                             }
                             
-                            if (clickedUrl != null) {
-                                AlertDialog(
-                                    onDismissRequest = { clickedUrl = null },
-                                    title = { Text("Open Link") },
-                                    text = { Text("Do you want to open this link?\n\n$clickedUrl") },
-                                    confirmButton = {
-                                        TextButton(
-                                            onClick = {
-                                                openUrl(context, clickedUrl!!)
-                                                clickedUrl = null
-                                            }
-                                        ) {
-                                            Text("Open")
-                                        }
-                                    },
-                                    dismissButton = {
-                                        TextButton(onClick = { clickedUrl = null }) {
-                                            Text("Cancel")
-                                        }
-                                    }
-                                )
-                            }
+
 
                             if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
                                 Spacer(modifier = Modifier.height(16.dp))
@@ -393,35 +392,10 @@ fun AddEditNoteScreen(
                                 .background(backgroundColor)
                         ) {
                             item {
-                                val titleTextColor = contentColorFor(backgroundColor = backgroundColor)
-                                TextField(
-                                    value = state.editingTitle,
-                                    onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
-                                    placeholder = { Text("Title", color = contentColorFor(backgroundColor = backgroundColor)) },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp),
-                                    colors = TextFieldDefaults.colors(
-                                        focusedContainerColor = Color.Transparent,
-                                        unfocusedContainerColor = Color.Transparent,
-                                        disabledContainerColor = Color.Transparent,
-                                        focusedIndicatorColor = Color.Transparent,
-                                        unfocusedIndicatorColor = Color.Transparent,
-                                        cursorColor = contentColorFor(backgroundColor = backgroundColor),
-                                        selectionColors = TextSelectionColors(
-                                            handleColor = contentColorFor(backgroundColor = backgroundColor),
-                                            backgroundColor = contentColorFor(backgroundColor = backgroundColor).copy(alpha = 0.4f)
-                                        )
-                                    ),
-                                    textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
-                                    singleLine = true,
-                                    maxLines = 1
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                ReminderDisplay(
-                                    reminderTime = state.editingReminderTime,
-                                    repeatOption = state.editingRepeatOption,
-                                    onClick = { showReminderDialog = true }
+                                NoteTitleEditor(
+                                    state = state,
+                                    onEvent = onEvent,
+                                    onReminderClick = { showReminderDialog = true }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -489,13 +463,23 @@ fun AddEditNoteScreen(
                                 }
                             }
 
-                            // ChecklistEditor usage
-                            ChecklistEditor(
-                                state = state,
-                                onEvent = onEvent,
-                                isCheckedItemsExpanded = state.isCheckedItemsExpanded,
-                                onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) }
-                            )
+                            // Content: Text or Checklist
+                            if (state.editingNoteType == "CHECKLIST") {
+                                ChecklistEditor(
+                                    state = state,
+                                    onEvent = onEvent,
+                                    isCheckedItemsExpanded = state.isCheckedItemsExpanded,
+                                    onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) }
+                                )
+                            } else {
+                                item { 
+                                     NoteContentEditor(
+                                        state = state,
+                                        onEvent = onEvent,
+                                        onUrlClick = { url -> clickedUrl = url }
+                                     )
+                                }
+                            }
 
                             if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
                                 item {
@@ -580,6 +564,30 @@ fun AddEditNoteScreen(
                     }
                 } else {
                     onEvent(NotesEvent.OnToggleLockClick)
+                }
+            }
+        )
+    }
+
+
+    if (clickedUrl != null) {
+        AlertDialog(
+            onDismissRequest = { clickedUrl = null },
+            title = { Text("Open Link") },
+            text = { Text("Do you want to open this link?\n\n$clickedUrl") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        openUrl(context, clickedUrl!!)
+                        clickedUrl = null
+                    }
+                ) {
+                    Text("Open")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { clickedUrl = null }) {
+                    Text("Cancel")
                 }
             }
         )

@@ -34,30 +34,20 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.material.icons.filled.Alarm
 
 /**
- * Composable for editing the title and content of a note.
- * The content text style dynamically adjusts based on the active heading style.
- *
- * @param state The current [NotesState] containing the note's title, content, and active heading style.
- * @param onEvent Lambda to dispatch [NotesEvent]s for title and content changes.
+ * Composable for editing the title and note options.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NoteEditor(
+fun NoteTitleEditor(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
-    onUrlClick: (String) -> Unit = {},
     onReminderClick: () -> Unit
 ) {
-    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
-    val interactionSource = remember { MutableInteractionSource() }
-    
     Column(
         modifier = Modifier.padding(horizontal = 16.dp)
     ) {
-        // Determine text color for the title based on the note's background color.
         val titleTextColor = MaterialTheme.colorScheme.onSurface
 
-        // TextField for editing the note's title.
         TextField(
             value = state.editingTitle,
             onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
@@ -85,13 +75,26 @@ fun NoteEditor(
             repeatOption = state.editingRepeatOption,
             onClick = onReminderClick
         )
+    }
+}
 
-        Spacer(modifier = Modifier.height(8.dp))
+/**
+ * Composable for editing the text content of a note.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun NoteContentEditor(
+    state: NotesState,
+    onEvent: (NotesEvent) -> Unit,
+    onUrlClick: (String) -> Unit
+) {
+    var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
+    val interactionSource = remember { MutableInteractionSource() }
 
-        // Determine text color for the content based on the note's background color.
+    Column(
+        modifier = Modifier.padding(horizontal = 16.dp)
+    ) {
         val contentTextColor = MaterialTheme.colorScheme.onSurface
-
-        // Dynamically determine the text style for the content based on the active heading style.
         val contentTextStyle = when (state.activeHeadingStyle) {
             1 -> MaterialTheme.typography.headlineLarge.copy(color = contentTextColor)
             2 -> MaterialTheme.typography.headlineMedium.copy(color = contentTextColor)
@@ -101,8 +104,7 @@ fun NoteEditor(
             6 -> MaterialTheme.typography.titleSmall.copy(color = contentTextColor)
             else -> MaterialTheme.typography.bodyLarge.copy(color = contentTextColor)
         }
-        
-        // Use BasicTextField to get access to onTextLayout for link detection
+
         BasicTextField(
             value = state.editingContent,
             onValueChange = { onEvent(NotesEvent.OnContentChange(it)) },
@@ -152,14 +154,12 @@ fun NoteEditor(
                             backgroundColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
                     ),
-                    contentPadding = PaddingValues(horizontal = 16.dp)
+                    contentPadding = PaddingValues(horizontal = 0.dp) 
                 )
             }
         )
     }
 }
-
-
 
 @Composable
 fun ReminderDisplay(
