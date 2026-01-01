@@ -1,6 +1,7 @@
 
 package com.suvojeet.notenext.ui.project
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -28,7 +29,7 @@ import com.suvojeet.notenext.data.repository.SettingsRepository
 import com.suvojeet.notenext.ui.components.EmptyState
 import com.suvojeet.notenext.ui.theme.ThemeMode
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
 fun ProjectScreen(
     onMenuClick: () -> Unit,
@@ -93,8 +94,12 @@ fun ProjectScreen(
                     description = stringResource(id = R.string.create_first_project)
                 )
             } else {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    items(state.projects) { project ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    contentPadding = PaddingValues(bottom = 80.dp), // Add padding for FAB
+                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                ) {
+                    items(state.projects, key = { it.id }) { project ->
                         ProjectItem(
                             project = project,
                             onClick = { onProjectClick(project.id) }
@@ -116,7 +121,13 @@ private fun CreateProjectDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text(stringResource(id = R.string.create_new_project)) },
+        title = {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.Create, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(stringResource(id = R.string.create_new_project))
+            }
+        },
         text = {
             Column {
                 OutlinedTextField(
@@ -124,16 +135,18 @@ private fun CreateProjectDialog(
                     onValueChange = { projectName = it },
                     label = { Text(stringResource(id = R.string.project_name)) },
                     singleLine = true,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(16.dp))
                 OutlinedTextField(
                     value = projectDescription,
                     onValueChange = { projectDescription = it },
                     label = { Text(stringResource(id = R.string.project_description)) },
                     singleLine = false,
                     maxLines = 3,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.medium
                 )
             }
         },
