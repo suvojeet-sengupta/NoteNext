@@ -17,4 +17,6 @@
     <string name="insert_link_description">Insert link</string>
     <string name="image_content_description">Image</string>
     <string name="history">History</string>
+    <string name="unlock_with_biometrics">Unlock with Biometrics</string>
+    <string name="biometric_setup_required">Biometric setup is required to use App Lock</string>
 </resources>
