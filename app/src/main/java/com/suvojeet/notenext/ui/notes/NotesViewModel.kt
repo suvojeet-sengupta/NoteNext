@@ -435,6 +435,19 @@ class NotesViewModel @Inject constructor(
                     checklistInputValues = state.value.checklistInputValues - event.itemId
                 )
             }
+            is NotesEvent.IndentChecklistItem -> {
+                val updatedChecklist = state.value.editingChecklist.map {
+                    if (it.id == event.itemId) it.copy(level = kotlin.math.min(it.level + 1, 5)) else it
+                }
+                _state.value = state.value.copy(editingChecklist = updatedChecklist)
+            }
+            is NotesEvent.OutdentChecklistItem -> {
+                val updatedChecklist = state.value.editingChecklist.map {
+                    if (it.id == event.itemId) it.copy(level = kotlin.math.max(it.level - 1, 0)) else it
+                }
+                _state.value = state.value.copy(editingChecklist = updatedChecklist)
+            }
+
             is NotesEvent.OnChecklistItemCheckedChange -> {
                 val updatedChecklist = state.value.editingChecklist.toMutableList()
                 val index = updatedChecklist.indexOfFirst { it.id == event.itemId }

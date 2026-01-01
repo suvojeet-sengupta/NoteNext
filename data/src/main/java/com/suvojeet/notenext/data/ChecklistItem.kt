@@ -24,5 +24,6 @@ data class ChecklistItem(
     val noteId: Int = 0,
     val text: String,
     val isChecked: Boolean,
-    val position: Int = 0
+    val position: Int = 0,
+    val level: Int = 0
 )

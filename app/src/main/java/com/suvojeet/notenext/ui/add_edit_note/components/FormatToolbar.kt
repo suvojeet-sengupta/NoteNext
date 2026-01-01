@@ -13,6 +13,8 @@ import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
+import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -80,6 +82,30 @@ fun FormatToolbar(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        if (state.editingNoteType == "CHECKLIST") {
+            item {
+                IconButton(
+                    onClick = { state.focusedChecklistItemId?.let { onEvent(NotesEvent.OutdentChecklistItem(it)) } },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = buttonColor,
+                        contentColor = iconColor
+                    )
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.FormatIndentDecrease, contentDescription = "Outdent", tint = iconColor)
+                }
+            }
+            item {
+                IconButton(
+                    onClick = { state.focusedChecklistItemId?.let { onEvent(NotesEvent.IndentChecklistItem(it)) } },
+                    colors = IconButtonDefaults.iconButtonColors(
+                        containerColor = buttonColor,
+                        contentColor = iconColor
+                    )
+                ) {
+                    Icon(Icons.AutoMirrored.Filled.FormatIndentIncrease, contentDescription = "Indent", tint = iconColor)
+                }
+            }
+        }
         // Bold formatting button.
         item {
             IconButton(

@@ -246,7 +246,8 @@ fun ChecklistItemRow(
                 modifier = Modifier
                     .fillMaxWidth()
                     .background(MaterialTheme.colorScheme.surface) // Ensure background covers dismiss background
-                    .padding(vertical = 4.dp),
+                    .padding(vertical = 4.dp)
+                    .padding(start = (item.level * 32).dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Drag Handle

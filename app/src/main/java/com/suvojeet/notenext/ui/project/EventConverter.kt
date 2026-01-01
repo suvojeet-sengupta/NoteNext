@@ -28,6 +28,8 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.SwapChecklistItems -> ProjectNotesEvent.SwapChecklistItems(this.fromId, this.toId)
         is NotesEvent.AddChecklistItem -> ProjectNotesEvent.AddChecklistItem
         is NotesEvent.DeleteChecklistItem -> ProjectNotesEvent.DeleteChecklistItem(this.itemId)
+        is NotesEvent.IndentChecklistItem -> ProjectNotesEvent.IndentChecklistItem(this.itemId)
+        is NotesEvent.OutdentChecklistItem -> ProjectNotesEvent.OutdentChecklistItem(this.itemId)
         is NotesEvent.OnTitleChange -> ProjectNotesEvent.OnTitleChange(this.title)
         is NotesEvent.OnContentChange -> ProjectNotesEvent.OnContentChange(this.content)
         is NotesEvent.ApplyStyleToContent -> ProjectNotesEvent.ApplyStyleToContent(this.style)

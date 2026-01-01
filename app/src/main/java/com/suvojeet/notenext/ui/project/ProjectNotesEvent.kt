@@ -36,6 +36,8 @@ sealed class ProjectNotesEvent {
     data class SwapChecklistItems(val fromId: String, val toId: String) : ProjectNotesEvent()
     object AddChecklistItem : ProjectNotesEvent()
     data class DeleteChecklistItem(val itemId: String) : ProjectNotesEvent()
+    data class IndentChecklistItem(val itemId: String) : ProjectNotesEvent()
+    data class OutdentChecklistItem(val itemId: String) : ProjectNotesEvent()
 
     // Events from AddEditNoteEvent
     data class OnTitleChange(val title: String) : ProjectNotesEvent()

@@ -356,6 +356,18 @@ class ProjectNotesViewModel @Inject constructor(
                 val updatedChecklist = state.value.editingChecklist.filterNot { it.id == event.itemId }
                 _state.value = state.value.copy(editingChecklist = updatedChecklist)
             }
+            is ProjectNotesEvent.IndentChecklistItem -> {
+                val updatedChecklist = state.value.editingChecklist.map {
+                    if (it.id == event.itemId) it.copy(level = kotlin.math.min(it.level + 1, 5)) else it
+                }
+                _state.value = state.value.copy(editingChecklist = updatedChecklist)
+            }
+            is ProjectNotesEvent.OutdentChecklistItem -> {
+                val updatedChecklist = state.value.editingChecklist.map {
+                    if (it.id == event.itemId) it.copy(level = kotlin.math.max(it.level - 1, 0)) else it
+                }
+                _state.value = state.value.copy(editingChecklist = updatedChecklist)
+            }
             is ProjectNotesEvent.OnChecklistItemCheckedChange -> {
                 val updatedChecklist = state.value.editingChecklist.map {
                     if (it.id == event.itemId) it.copy(isChecked = event.isChecked) else it
