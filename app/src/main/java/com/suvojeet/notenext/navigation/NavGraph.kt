@@ -114,6 +114,10 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                 biometricAuthManager?.showBiometricPrompt(
                     onAuthSuccess = {
                         notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+                        navController.navigate("notes") {
+                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                            launchSingleTop = true
+                        }
                     },
                     onAuthError = {
                         Toast.makeText(context, "Authentication Failed", Toast.LENGTH_SHORT).show()
@@ -121,6 +125,10 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                 ) ?: Toast.makeText(context, "Biometrics not available", Toast.LENGTH_SHORT).show()
             } else {
                 notesViewModel.onEvent(NotesEvent.ExpandNote(startNoteId))
+                navController.navigate("notes") {
+                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
+                    launchSingleTop = true
+                }
             }
         }
     }

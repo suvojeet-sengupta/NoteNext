@@ -18,6 +18,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.lifecycle.Lifecycle
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.MutableStateFlow
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import com.suvojeet.notenext.data.repository.SettingsRepository
@@ -35,6 +36,9 @@ import android.content.Intent
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {
+
+    private val _startNoteIdFlow = MutableStateFlow(-1)
+
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         enableEdgeToEdge()
@@ -42,7 +46,9 @@ class MainActivity : FragmentActivity() {
 
         val settingsRepository = SettingsRepository(this)
 
-        val startNoteId = intent.getIntExtra("NOTE_ID", -1)
+        val initialNoteId = intent.getIntExtra("NOTE_ID", -1)
+        _startNoteIdFlow.value = initialNoteId
+
         val startAddNote = intent.getBooleanExtra("START_ADD_NOTE", false)
         val sharedText = when {
             intent.action == Intent.ACTION_SEND && "text/plain" == intent.type -> {
@@ -64,6 +70,20 @@ class MainActivity : FragmentActivity() {
                         window.clearFlags(android.view.WindowManager.LayoutParams.FLAG_SECURE)
                     }
                 }
+            }
+        }
+
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            val permissionCheck = androidx.core.content.ContextCompat.checkSelfPermission(
+                this,
+                android.Manifest.permission.POST_NOTIFICATIONS
+            )
+            if (permissionCheck != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+                androidx.core.app.ActivityCompat.requestPermissions(
+                    this,
+                    arrayOf(android.Manifest.permission.POST_NOTIFICATIONS),
+                    1
+                )
             }
         }
 
@@ -109,12 +129,25 @@ class MainActivity : FragmentActivity() {
                     } else if (enableAppLockLoaded!! && !unlocked) {
                         LockScreen(onUnlock = { unlocked = true })
                     } else {
+                    } else {
+                        val startNoteId by _startNoteIdFlow.collectAsState()
                         NavGraph(themeMode = themeMode, windowSizeClass = windowSizeClass, startNoteId = startNoteId, startAddNote = startAddNote, sharedText = sharedText)
                     }
                 }
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        setIntent(intent)
+        val noteId = intent.getIntExtra("NOTE_ID", -1)
+        if (noteId != -1) {
+             _startNoteIdFlow.value = noteId
+        }
+    }
+
+    // Removed manual state variable
 
     override fun onActionModeStarted(mode: android.view.ActionMode?) {
         val menu = mode?.menu
