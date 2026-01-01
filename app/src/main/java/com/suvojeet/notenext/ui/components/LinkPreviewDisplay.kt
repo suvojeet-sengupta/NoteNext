@@ -3,8 +3,12 @@ package com.suvojeet.notenext.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,11 +20,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import coil.request.CachePolicy
@@ -37,33 +37,52 @@ fun LinkPreviewDisplay(
     val uriHandler = LocalUriHandler.current
 
     Card(
-        modifier = modifier
-            .fillMaxWidth()
-            .clickable { 
-                onLinkClick(linkPreview.url)
-                try {
-                    uriHandler.openUri(linkPreview.url)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                }
-            },
+        modifier = modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Column(modifier = Modifier.padding(8.dp)) {
-            // Title
-            linkPreview.title?.let { title ->
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.onSurface,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+            // Header: Title and Open Link Button
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
+                // Title
+                linkPreview.title?.let { title ->
+                    Text(
+                        text = title,
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f).padding(top = 4.dp)
+                    )
+                } ?: Spacer(modifier = Modifier.weight(1f))
+
+                IconButton(
+                    onClick = {
+                        onLinkClick(linkPreview.url)
+                        try {
+                            uriHandler.openUri(linkPreview.url)
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    },
+                    modifier = Modifier.size(24.dp) // Compact button
+                ) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = "Open Link",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
+            
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Image
             linkPreview.imageUrl?.let { imageUrl ->
