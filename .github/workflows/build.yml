@@ -50,6 +50,7 @@ jobs:
         KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
         KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
         KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        GROQ_API_1: ${{ secrets.GROQ_API_1 }}
 
     - name: Find APK files
       run: find app/build/outputs/apk/release -name "*.apk"
