@@ -22,11 +22,15 @@ import androidx.compose.foundation.lazy.staggeredgrid.rememberLazyStaggeredGridS
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -106,7 +110,7 @@ fun NotesScreen(
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(Unit) {
-        val currentVersion = 10 // Matches app/build.gradle.kts versionCode
+        val currentVersion = 13 // Matches app/build.gradle.kts versionCode
         settingsRepository.lastSeenVersion.collect { lastSeen ->
             if (currentVersion > lastSeen) {
                 showWhatsNewDialog = true
@@ -683,51 +687,103 @@ private fun WhatsNewDialog(onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
-            Text(
-                text = stringResource(id = R.string.whats_new),
-                style = MaterialTheme.typography.headlineSmall,
-                fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
-            )
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = Icons.Default.AutoAwesome,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(28.dp)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = stringResource(id = R.string.whats_new_title),
+                    style = MaterialTheme.typography.titleLarge,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.Bold
+                )
+            }
         },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .verticalScroll(androidx.compose.foundation.rememberScrollState()),
+                verticalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
                 Text(
                     text = stringResource(id = R.string.whats_new_description),
-                    style = MaterialTheme.typography.bodyMedium
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
-                val features = listOf(
-                    R.string.whats_new_feature_1,
-                    R.string.whats_new_feature_2,
-                    R.string.whats_new_feature_3
+                WhatsNewItem(
+                    icon = Icons.Default.AutoAwesome,
+                    title = stringResource(id = R.string.whats_new_feature_1_title),
+                    description = stringResource(id = R.string.whats_new_feature_1_desc),
+                    color = MaterialTheme.colorScheme.tertiary
                 )
-                
-                features.forEach { featureRes ->
-                    val fullText = stringResource(id = featureRes)
-                    val annotatedString = androidx.compose.ui.text.buildAnnotatedString {
-                        // Very simple parser for <b>...</b> in these specific strings
-                        val parts = fullText.split("<b>", "</b>")
-                        parts.forEachIndexed { index, part ->
-                            if (index % 2 == 1) {
-                                withStyle(style = androidx.compose.ui.text.SpanStyle(fontWeight = androidx.compose.ui.text.font.FontWeight.Bold)) {
-                                    append(part)
-                                }
-                            } else {
-                                append(part)
-                            }
-                        }
-                    }
-                    Text(
-                        text = annotatedString,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
+
+                WhatsNewItem(
+                    icon = Icons.Default.CloudUpload,
+                    title = stringResource(id = R.string.whats_new_feature_2_title),
+                    description = stringResource(id = R.string.whats_new_feature_2_desc),
+                    color = MaterialTheme.colorScheme.secondary
+                )
+
+                WhatsNewItem(
+                    icon = Icons.Default.Security,
+                    title = stringResource(id = R.string.whats_new_feature_3_title),
+                    description = stringResource(id = R.string.whats_new_feature_3_desc),
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         },
         confirmButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.fillMaxWidth()
+            ) {
                 Text(stringResource(id = R.string.dismiss))
             }
         }
     )
+}
+
+@Composable
+private fun WhatsNewItem(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    title: String,
+    description: String,
+    color: Color
+) {
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Box(
+            modifier = Modifier
+                .size(40.dp)
+                .background(color.copy(alpha = 0.1f), androidx.compose.foundation.shape.CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = color,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(16.dp))
+        Column {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                lineHeight = androidx.compose.ui.unit.sp * 20
+            )
+        }
+    }
 }
