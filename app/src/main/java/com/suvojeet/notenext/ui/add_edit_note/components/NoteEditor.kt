@@ -43,7 +43,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 fun NoteEditor(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
-    onUrlClick: (String) -> Unit = {}
+    onUrlClick: (String) -> Unit = {},
+    onReminderClick: () -> Unit
 ) {
     var textLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }
     val interactionSource = remember { MutableInteractionSource() }
@@ -75,6 +76,12 @@ fun NoteEditor(
             textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
             singleLine = true,
             maxLines = 1
+        )
+
+        ReminderDisplay(
+            reminderTime = state.editingReminderTime,
+            repeatOption = state.editingRepeatOption,
+            onClick = onReminderClick
         )
 
         Spacer(modifier = Modifier.height(8.dp))

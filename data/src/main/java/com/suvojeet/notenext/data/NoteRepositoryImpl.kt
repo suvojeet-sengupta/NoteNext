@@ -87,6 +87,8 @@ class NoteRepositoryImpl @Inject constructor(
     override fun getNotesWithReminders(currentTime: Long): Flow<List<Note>> = 
         noteDao.getNotesWithReminders(currentTime)
 
+    override fun getAllReminders(): Flow<List<Note>> = noteDao.getAllReminders()
+
     override suspend fun insertChecklistItems(items: List<ChecklistItem>) = checklistItemDao.insertChecklistItems(items)
 
     override suspend fun updateChecklistItem(item: ChecklistItem) = checklistItemDao.updateChecklistItem(item)

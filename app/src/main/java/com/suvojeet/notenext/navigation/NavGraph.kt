@@ -458,8 +458,8 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                             scope.launch { drawerState.close() }
                             if (currentRoute != "notes" || notesState.filteredLabel != null) {
                                 notesViewModel.onEvent(NotesEvent.FilterByLabel(null))
-                                navController.navigate("notes") {
-                                    popUpTo("notes") { inclusive = true }
+                                navigate("notes") {
+                                    popUpTo(navController.graph.startDestinationId) { inclusive = true }
                                     launchSingleTop = true
                                 }
                             }
@@ -575,7 +575,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                                     notesViewModel.onEvent(NotesEvent.FilterByLabel(label))
                                     if (currentRoute != "notes" || notesState.filteredLabel != label) {
                                         navController.navigate("notes") {
-                                            popUpTo("notes") { inclusive = true }
+                                            popUpTo(navController.graph.startDestinationId) { inclusive = true }
                                             launchSingleTop = true
                                         }
                                     }
@@ -589,10 +589,22 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
         ) {
             NavHost(navController = navController, startDestination = "notes", modifier = Modifier.background(MaterialTheme.colorScheme.background)) {
                 composable(
-                    route = "notes",
+                    route = "notes?noteId={noteId}",
+                    arguments = listOf(
+                        androidx.navigation.navArgument("noteId") {
+                            type = androidx.navigation.NavType.IntType
+                            defaultValue = -1
+                        }
+                    ),
                     enterTransition = { fadeIn(animationSpec = tween(300)) },
                     exitTransition = { fadeOut(animationSpec = tween(300)) }
-                ) {
+                ) { backStackEntry ->
+                    val noteId = backStackEntry.arguments?.getInt("noteId") ?: -1
+                    LaunchedEffect(noteId) {
+                        if (noteId != -1) {
+                            notesViewModel.onEvent(NotesEvent.ExpandNote(noteId))
+                        }
+                    }
                     NotesScreen(
                         viewModel = notesViewModel,
                         onSettingsClick = { navController.navigate("settings") },
@@ -676,7 +688,50 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                 ) {
                     ReminderScreen(
                         onBackClick = { navController.popBackStack() },
-                        onAddReminderClick = { navController.navigate("add_edit_reminder") }
+                        onNoteClick = { note ->
+                            // Navigate to notes screen and request expansion (simulated via viewmodel event if possible or navigating with ID)
+                            // Since NotesScreen is the home, we can navigate there.
+                            // However, NotesScreen logic to expand a note relies on NotesViewModel.
+                            // We can use the viewModel from this scope since it's hiltViewModel() and scoped to graph, 
+                            // but NotesViewModel is scoped to its composable block above.
+                            // We need to trigger expansion in NotesViewModel.
+                            // Option: Navigate to "notes" and let NotesScreen handle it if we pass an argument,
+                            // OR, since we are in the same NavGraph, we can just pop back to notes and expand.
+                            // But "ReminderScreen" is a separate route.
+                            // We should probably instantiate NotesViewModel at a higher level or use hiltViewModel() which gives a scoped instance.
+                            // Wait, hiltViewModel() in different composables gives different instances unless scoped to a navigation graph route.
+                            // Here implementation uses simple hiltViewModel() at composable level.
+                            
+                            // Let's assume we can navigate to "notes" and pass noteId as argument if we modify "notes" route,
+                            // OR we can rely on shared ViewModel if we scope it to NavGraph (nesting).
+                            // Currently, standard Hilt nav isn't scoped to entire graph unless we make a nested graph.
+                            
+                            // Workaround: We will use the 'notes' route but we need to trigger the event.
+                            // Ideally, `notesViewModel` should be lifted if we want to share it, or we use a deep link.
+                            
+                            // Let's modify the "notes" route to accept an optional noteId for expansion.
+                            // But first, let's just fix the compilation error by matching the signature.
+                            // For now we will just pop back to notes (home) and maybe try to expand? 
+                            // Actually, I can navigate to "notes" and set a side effect? No.
+                            
+                            // Let's use the `add_edit_note` route that ProjectNotes uses?
+                            // That route is: "add_edit_note?projectId={projectId}&noteType={noteType}"
+                            // It uses ProjectNotesViewModel, which might not be what we want for main notes.
+                            // Main notes are handled in NotesScreen with a bottom sheet or similar overlay (ExpandedNote).
+                            
+                            // Let's simply navigate to "notes" for now, and I will fix the expansion logic by passing a global argument or using a shared view model later if needed.
+                            // But wait, the previous code had `startNoteId` in NavGraph.
+                            // I can't easily change `startNoteId` of the composable itself.
+                            
+                            // Alternative: Modify NotesScreen route to accept `noteId`.
+                            // route = "notes?noteId={noteId}"
+                            // And in NotesScreen, `val noteId = backStackEntry.arguments?.getInt("noteId")`
+                            // if noteId != -1, trigger ExpandNote.
+                            
+                            navController.navigate("notes?noteId=${note.id}") {
+                                popUpTo("notes") { inclusive = true }
+                            }
+                        }
                     )
                 }
                 composable(

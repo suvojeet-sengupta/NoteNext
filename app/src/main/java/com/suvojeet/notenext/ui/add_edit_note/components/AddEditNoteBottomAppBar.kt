@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -76,6 +77,7 @@ fun AddEditNoteBottomAppBar(
     onEvent: (NotesEvent) -> Unit,
     showColorPicker: (Boolean) -> Unit,
     showFormatBar: (Boolean) -> Unit,
+    showReminderDialog: (Boolean) -> Unit,
     showMoreOptions: (Boolean) -> Unit,
     onImageClick: () -> Unit,
     onTakePhotoClick: () -> Unit,
@@ -154,6 +156,16 @@ fun AddEditNoteBottomAppBar(
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
                     Icon(Icons.Default.TextFields, contentDescription = stringResource(id = R.string.toggle_format_bar))
+                }
+                // Reminder FAB.
+                FloatingActionButton(
+                    onClick = { showReminderDialog(true) },
+                    shape = CircleShape,
+                    modifier = Modifier.size(40.dp),
+                    containerColor = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.9f),
+                    contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                ) {
+                    Icon(Icons.Default.Alarm, contentDescription = "Set Reminder")
                 }
             }
             // Right-aligned action buttons: Undo, Redo, More Options.

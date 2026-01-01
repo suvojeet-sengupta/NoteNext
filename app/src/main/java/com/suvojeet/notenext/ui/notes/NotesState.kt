@@ -50,6 +50,8 @@ data class NotesState(
     val editingAttachments: List<Attachment> = emptyList(),
     val editingIsLocked: Boolean = false,
     val editingNoteVersions: List<NoteVersion> = emptyList(),
+    val editingReminderTime: Long? = null,
+    val editingRepeatOption: String? = null,
 
     val projects: List<Project> = emptyList(),
     val searchQuery: String = ""

@@ -63,7 +63,13 @@ import com.suvojeet.notenext.data.MarkdownExporter
 import com.suvojeet.notenext.util.printNote
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.text.withStyle
 import com.suvojeet.notenext.util.findActivity
+import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
+import com.suvojeet.notenext.data.RepeatOption
+import java.time.LocalDate
+import java.time.LocalTime
+import java.time.ZoneId
 
 data class ImageViewerData(val uri: Uri, val tempId: String)
 
@@ -81,6 +87,7 @@ fun AddEditNoteScreen(
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showColorPicker by remember { mutableStateOf(false) }
     var showFormatBar by remember { mutableStateOf(false) }
+    var showReminderDialog by remember { mutableStateOf(false) }
     var showMoreOptions by remember { mutableStateOf(false) }
     var showSaveAsDialog by remember { mutableStateOf(false) }
     var showInsertLinkDialog by remember { mutableStateOf(false) }
@@ -236,6 +243,7 @@ fun AddEditNoteScreen(
                         onEvent = onEvent,
                         showColorPicker = { showColorPicker = !showColorPicker },
                         showFormatBar = { showFormatBar = !showFormatBar },
+                        showReminderDialog = { showReminderDialog = it },
                         showMoreOptions = { showMoreOptions = it },
                         onImageClick = {
                             getContent.launch("image/*")
@@ -341,7 +349,8 @@ fun AddEditNoteScreen(
                                     onEvent = onEvent,
                                     onUrlClick = { url ->
                                         clickedUrl = url
-                                    }
+                                    },
+                                    onReminderClick = { showReminderDialog = true }
                                 )
                             }
                             
@@ -406,6 +415,12 @@ fun AddEditNoteScreen(
                                     textStyle = MaterialTheme.typography.headlineMedium.copy(color = titleTextColor),
                                     singleLine = true,
                                     maxLines = 1
+                                )
+                                Spacer(modifier = Modifier.height(8.dp))
+                                ReminderDisplay(
+                                    reminderTime = state.editingReminderTime,
+                                    repeatOption = state.editingRepeatOption,
+                                    onClick = { showReminderDialog = true }
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
                             }
@@ -640,6 +655,31 @@ fun AddEditNoteScreen(
             onConfirm = { label ->
                 onEvent(NotesEvent.OnLabelChange(label))
                 onEvent(NotesEvent.DismissLabelDialog)
+            }
+        )
+    }
+
+    if (showReminderDialog) {
+        val initialDate = state.editingReminderTime?.let {
+            java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        }
+        val initialTime = state.editingReminderTime?.let {
+            java.time.Instant.ofEpochMilli(it).atZone(java.time.ZoneId.systemDefault()).toLocalTime()
+        }
+        val initialRepeatOption = state.editingRepeatOption?.let {
+            try { RepeatOption.valueOf(it) } catch (e: Exception) { null }
+        }
+
+        ReminderSetDialog(
+            initialDate = initialDate,
+            initialTime = initialTime,
+            initialRepeatOption = initialRepeatOption,
+            onDismissRequest = { showReminderDialog = false },
+            onConfirm = { date, time, repeatOption ->
+                val reminderDateTime = java.time.LocalDateTime.of(date, time)
+                val reminderMillis = reminderDateTime.atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                onEvent(NotesEvent.OnReminderChange(reminderMillis, repeatOption.name))
+                showReminderDialog = false
             }
         )
     }

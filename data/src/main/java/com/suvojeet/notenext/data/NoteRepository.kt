@@ -39,6 +39,7 @@ interface NoteRepository {
 
     // Reminder operations
     fun getNotesWithReminders(currentTime: Long): Flow<List<Note>>
+    fun getAllReminders(): Flow<List<Note>>
 
     // Checklist operations
     suspend fun insertChecklistItems(items: List<ChecklistItem>)

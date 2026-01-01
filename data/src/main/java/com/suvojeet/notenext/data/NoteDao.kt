@@ -58,6 +58,9 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE reminderTime IS NOT NULL AND reminderTime > :currentTime ORDER BY reminderTime ASC")
     fun getNotesWithReminders(currentTime: Long): Flow<List<Note>>
 
+    @Query("SELECT * FROM notes WHERE reminderTime IS NOT NULL ORDER BY reminderTime DESC")
+    fun getAllReminders(): Flow<List<Note>>
+
     @Transaction
     @Query("SELECT * FROM notes WHERE projectId = :projectId AND isBinned = 0 ORDER BY isPinned DESC, lastEdited DESC")
     fun getNotesByProjectId(projectId: Int): Flow<List<NoteWithAttachments>>

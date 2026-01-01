@@ -18,15 +18,18 @@ import com.suvojeet.notenext.data.RepeatOption
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReminderSetDialog(
+    initialDate: LocalDate? = null,
+    initialTime: LocalTime? = null,
+    initialRepeatOption: RepeatOption? = null,
     onDismissRequest: () -> Unit,
     onConfirm: (LocalDate, LocalTime, RepeatOption) -> Unit
 ) {
-    var selectedDate by remember { mutableStateOf(LocalDate.now()) }
-    var selectedTime by remember { mutableStateOf(LocalTime.now()) }
+    var selectedDate by remember { mutableStateOf(initialDate ?: LocalDate.now()) }
+    var selectedTime by remember { mutableStateOf(initialTime ?: LocalTime.now()) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
     var expandedRepeatMenu by remember { mutableStateOf(false) }
-    var selectedRepeatOption by remember { mutableStateOf(RepeatOption.NEVER) }
+    var selectedRepeatOption by remember { mutableStateOf(initialRepeatOption ?: RepeatOption.NEVER) }
 
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()

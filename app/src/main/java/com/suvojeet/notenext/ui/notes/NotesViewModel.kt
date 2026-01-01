@@ -351,7 +351,9 @@ class NotesViewModel @Inject constructor(
                                 editingIsLocked = note.isLocked,
                                 checklistInputValues = checklist.associate { item ->
                                     item.id to TextFieldValue(richTextController.parseMarkdownToAnnotatedString(item.text))
-                                }
+                                },
+                                editingReminderTime = note.reminderTime,
+                                editingRepeatOption = note.repeatOption
                             )
                         }
                     } else {
@@ -883,6 +885,12 @@ class NotesViewModel @Inject constructor(
                     editingAttachments = emptyList()
                 )
             }
+            is NotesEvent.OnReminderChange -> {
+                _state.value = state.value.copy(
+                    editingReminderTime = event.time,
+                    editingRepeatOption = event.repeatOption
+                )
+            }
         }
     }
 
@@ -930,7 +938,9 @@ class NotesViewModel @Inject constructor(
                     label = state.value.editingLabel,
                     linkPreviews = state.value.linkPreviews,
                     noteType = state.value.editingNoteType,
-                    isLocked = state.value.editingIsLocked
+                    isLocked = state.value.editingIsLocked,
+                    reminderTime = state.value.editingReminderTime,
+                    repeatOption = state.value.editingRepeatOption
                 )
             } else { // Existing note
                 repository.getNoteById(noteId)?.let { existingNote ->
@@ -944,7 +954,9 @@ class NotesViewModel @Inject constructor(
                         label = state.value.editingLabel,
                         linkPreviews = state.value.linkPreviews,
                         noteType = state.value.editingNoteType,
-                        isLocked = state.value.editingIsLocked
+                        isLocked = state.value.editingIsLocked,
+                        reminderTime = state.value.editingReminderTime,
+                        repeatOption = state.value.editingRepeatOption
                     )
                 }
             }
@@ -971,6 +983,12 @@ class NotesViewModel @Inject constructor(
                     }
                     repository.updateNote(note)
                     noteId.toLong() // Convert Int to Long for consistency
+                }
+
+                if (state.value.editingReminderTime != null) {
+                    alarmScheduler.schedule(note.copy(id = currentNoteId.toInt()))
+                } else if (noteId != -1) {
+                    alarmScheduler.cancel(note.copy(id = currentNoteId.toInt()))
                 }
 
                 // Handle Checklist Items
@@ -1036,7 +1054,9 @@ class NotesViewModel @Inject constructor(
                 activeStyles = emptySet(),
                 linkPreviews = emptyList(),
                 editingChecklist = emptyList(),
-                editingAttachments = emptyList()
+                editingAttachments = emptyList(),
+                editingReminderTime = null,
+                editingRepeatOption = null
             )
         }
         updateWidgets()

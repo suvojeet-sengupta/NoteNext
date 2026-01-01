@@ -295,7 +295,15 @@ fun ChecklistItemRow(
                     singleLine = false 
                 )
                 
-                // Remove individual delete button as we have Swipe to Delete
+                // Delete Button matching screenshot
+                IconButton(onClick = { onEvent(NotesEvent.DeleteChecklistItem(item.id)) }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Item",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                }
             }
         }
     }
