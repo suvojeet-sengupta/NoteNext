@@ -61,7 +61,7 @@ import com.suvojeet.notenext.ui.labels.EditLabelsScreen
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesScreen
 import com.suvojeet.notenext.ui.notes.NotesViewModel
-import com.suvojeet.notenext.ui.lock.PinSetupScreen
+
 import com.suvojeet.notenext.ui.settings.SettingsScreen
 import com.suvojeet.notenext.ui.reminder.ReminderScreen
 import com.suvojeet.notenext.ui.reminder.AddEditReminderScreen
@@ -362,15 +362,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                     )
                 }
 
-                composable(
-                    route = "pin_setup",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                ) {
-                    PinSetupScreen(
-                        onPinSet = { navController.popBackStack() }
-                    )
-                }
+
                 composable(
                     route = "reminder",
                     enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
@@ -686,15 +678,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                     )
                 }
 
-                composable(
-                    route = "pin_setup",
-                    enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
-                    exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
-                ) {
-                    PinSetupScreen(
-                        onPinSet = { navController.popBackStack() }
-                    )
-                }
+
                 composable(
                     route = "reminder",
                     enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },

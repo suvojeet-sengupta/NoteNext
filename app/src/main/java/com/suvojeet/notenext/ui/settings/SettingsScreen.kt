@@ -237,9 +237,22 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                             hasSwitch = true,
                             checked = enableAppLock,
                             iconColor = Color(0xFF4CAF50),
-                            onCheckedChange = {
-                                if (it) {
-                                    onNavigate("pin_setup")
+                            onCheckedChange = { isChecked ->
+                                if (isChecked) {
+                                    val biometricManager = androidx.biometric.BiometricManager.from(context)
+                                    val canAuthenticate = biometricManager.canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG or androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL)
+                                    if (canAuthenticate == androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS) {
+                                        scope.launch { settingsRepository.saveEnableAppLock(true) }
+                                    } else {
+                                        android.widget.Toast.makeText(context, context.getString(R.string.biometric_setup_required), android.widget.Toast.LENGTH_LONG).show()
+                                        // Optionally open security settings
+                                        try {
+                                            val intent = Intent(android.provider.Settings.ACTION_SECURITY_SETTINGS)
+                                            context.startActivity(intent)
+                                        } catch (e: Exception) {
+                                            // Fallback if security settings intent fails
+                                        }
+                                    }
                                 } else {
                                     scope.launch { settingsRepository.saveEnableAppLock(false) }
                                 }

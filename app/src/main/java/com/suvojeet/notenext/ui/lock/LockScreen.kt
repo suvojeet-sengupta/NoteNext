@@ -57,15 +57,10 @@ import androidx.compose.ui.res.stringResource
 @Composable
 fun LockScreen(onUnlock: () -> Unit) {
     val context = LocalContext.current
-    val settingsRepository = remember { SettingsRepository(context) }
     val scope = rememberCoroutineScope()
-    var pin by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
-    val coroutineScope = rememberCoroutineScope()
-    val offsetX = remember { Animatable(0f) }
-
+    
     val activity = context.findActivity() as? FragmentActivity
-
     val biometricAuthFailedString = stringResource(id = R.string.biometric_auth_failed)
 
     val biometricAuthManager = if (activity != null) {
@@ -81,6 +76,7 @@ fun LockScreen(onUnlock: () -> Unit) {
 
     val canAuthenticateResult = biometricAuthManager?.canAuthenticate()
 
+    // Auto-trigger biometric prompt on start
     LaunchedEffect(biometricAuthManager) {
         if (canAuthenticateResult == BiometricManager.BIOMETRIC_SUCCESS) {
             biometricAuthManager?.showBiometricPrompt(
@@ -92,30 +88,10 @@ fun LockScreen(onUnlock: () -> Unit) {
                 },
                 onAuthFailed = { error = biometricAuthFailedString }
             )
+        } else {
+             error = "Biometric authentication not available"
         }
     }
-
-    fun triggerShake() {
-        coroutineScope.launch {
-            offsetX.animateTo(
-                targetValue = 0f,
-                animationSpec = keyframes {
-                    durationMillis = 500
-                    -20f at 50
-                    20f at 100
-                    -20f at 150
-                    20f at 200
-                    -10f at 250
-                    10f at 300
-                    -5f at 350
-                    5f at 400
-                    0f at 450
-                }
-            )
-        }
-    }
-
-    val incorrectPinString = stringResource(id = R.string.incorrect_pin)
 
     Scaffold { paddingValues ->
         Column(
@@ -124,156 +100,59 @@ fun LockScreen(onUnlock: () -> Unit) {
                 .padding(paddingValues)
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            Spacer(modifier = Modifier.weight(0.2f))
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                Icon(
-                    painter = painterResource(id = R.mipmap.ic_launcher_foreground),
-                    contentDescription = stringResource(id = R.string.app_name),
-                    modifier = Modifier.size(96.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(24.dp))
-                Text(stringResource(id = R.string.enter_pin_lock_screen), style = MaterialTheme.typography.titleLarge)
-                Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.weight(0.3f))
+            
+            Icon(
+                painter = painterResource(id = R.mipmap.ic_launcher_foreground),
+                contentDescription = stringResource(id = R.string.app_name),
+                modifier = Modifier.size(96.dp),
+                tint = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Text(stringResource(id = R.string.app_name), style = MaterialTheme.typography.headlineMedium)
+            
+            Spacer(modifier = Modifier.height(32.dp))
 
-                Row(
-                    modifier = Modifier.offset(x = offsetX.value.dp, y = 0.dp),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    val maxPinLength = 8
-                    repeat(maxPinLength) { index ->
-                        PinDot(isFilled = index < pin.length, isError = error != null)
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                AnimatedVisibility(visible = error != null, enter = fadeIn(), exit = fadeOut()) {
-                    Text(
-                        error ?: "",
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.weight(1f))
-
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(16.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    NumberButton("1") { if (pin.length < 8) pin += "1"; error = null }
-                    NumberButton("2") { if (pin.length < 8) pin += "2"; error = null }
-                    NumberButton("3") { if (pin.length < 8) pin += "3"; error = null }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    NumberButton("4") { if (pin.length < 8) pin += "4"; error = null }
-                    NumberButton("5") { if (pin.length < 8) pin += "5"; error = null }
-                    NumberButton("6") { if (pin.length < 8) pin += "6"; error = null }
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    NumberButton("7") { if (pin.length < 8) pin += "7"; error = null }
-                    NumberButton("8") { if (pin.length < 8) pin += "8"; error = null }
-                    NumberButton("9") { if (pin.length < 8) pin += "9"; error = null }
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(modifier = Modifier.size(72.dp)) {
-                        if (canAuthenticateResult == BiometricManager.BIOMETRIC_SUCCESS) {
-                            FilledTonalIconButton(
-                                onClick = {
-                                    biometricAuthManager?.showBiometricPrompt(
-                                        onAuthSuccess = onUnlock,
-                                        onAuthError = {
-                                            if (it != "Authentication error: User Canceled") {
-                                                error = it
-                                            }
-                                        },
-                                        onAuthFailed = { error = biometricAuthFailedString }
-                                    )
-                                },
-                                modifier = Modifier.size(72.dp)
-                            ) {
-                                Icon(
-                                    Icons.Default.Fingerprint,
-                                    contentDescription = stringResource(id = R.string.use_biometrics),
-                                    modifier = Modifier.size(32.dp)
-                                )
-                            }
-                        }
-                    }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    NumberButton("0") { if (pin.length < 8) pin += "0"; error = null }
-                    Spacer(modifier = Modifier.width(16.dp))
-                    FilledTonalIconButton(
-                        onClick = { pin = pin.dropLast(1); error = null },
-                        modifier = Modifier.size(72.dp),
-                        enabled = pin.isNotEmpty()
-                    ) {
-                        Icon(
-                            Icons.Default.Backspace,
-                            contentDescription = stringResource(id = R.string.back),
-                            modifier = Modifier.size(32.dp)
+            if (canAuthenticateResult == BiometricManager.BIOMETRIC_SUCCESS) {
+                // Unlock Button
+                 FilledTonalButton(
+                    onClick = {
+                        biometricAuthManager?.showBiometricPrompt(
+                            onAuthSuccess = onUnlock,
+                            onAuthError = {
+                                if (it != "Authentication error: User Canceled") {
+                                    error = it
+                                }
+                            },
+                            onAuthFailed = { error = biometricAuthFailedString }
                         )
-                    }
+                    },
+                    modifier = Modifier.height(56.dp)
+                ) {
+                    Icon(Icons.Default.Fingerprint, contentDescription = null)
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(id = R.string.unlock_with_biometrics))
                 }
+            } else {
+                Text(
+                     "Biometric authentication is not available on this device", 
+                     color = MaterialTheme.colorScheme.error
+                )
             }
-            Spacer(modifier = Modifier.weight(0.2f))
-            Button(
-                onClick = {
-                    scope.launch {
-                        val storedPin = settingsRepository.appLockPin.first()
-                        if (pin == storedPin) {
-                            onUnlock()
-                        } else {
-                            error = incorrectPinString
-                            triggerShake()
-                            pin = ""
-                        }
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 32.dp)
-            ) {
-                Text(stringResource(id = R.string.unlock))
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            AnimatedVisibility(visible = error != null, enter = fadeIn(), exit = fadeOut()) {
+                Text(
+                    error ?: "",
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodyMedium
+                )
             }
-            Spacer(modifier = Modifier.weight(0.1f))
+            
+            Spacer(modifier = Modifier.weight(0.7f))
         }
-    }
-}
-
-@Composable
-private fun PinDot(isFilled: Boolean, isError: Boolean) {
-    val color = when {
-        isError -> MaterialTheme.colorScheme.error
-        isFilled -> MaterialTheme.colorScheme.primary
-        else -> MaterialTheme.colorScheme.surfaceVariant
-    }
-    Box(
-        modifier = Modifier
-            .size(16.dp)
-            .clip(CircleShape)
-            .background(color)
-    )
-}
-
-@Composable
-private fun NumberButton(number: String, onClick: () -> Unit) {
-    FilledTonalButton(
-        onClick = onClick,
-        modifier = Modifier.size(72.dp),
-        shape = CircleShape
-    ) {
-        Text(number, style = MaterialTheme.typography.headlineLarge)
     }
 }
