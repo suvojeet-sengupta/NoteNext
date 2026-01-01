@@ -81,9 +81,9 @@ fun NoteItem(
     val borderStroke = if (isSelected) {
         BorderStroke(3.dp, MaterialTheme.colorScheme.primary) // Thick primary border when selected
     } else if (isDefaultColor) {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)) // Default thin border for uncolored notes
+        BorderStroke(3.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.2f)) // Thicker but lighter border for uncolored notes to match size
     } else {
-        BorderStroke(0.dp, Color.Transparent) // No border for colored/gradient notes
+        BorderStroke(3.dp, Color.Transparent) // Transparent thick border to maintain size
     }
 
     Card(
