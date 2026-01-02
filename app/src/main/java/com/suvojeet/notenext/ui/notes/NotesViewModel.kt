@@ -658,7 +658,11 @@ class NotesViewModel @Inject constructor(
                         }
                     }
                     
-                    undoRedoManager.addState(state.value.editingTitle to finalContent)
+                    // Only add to undo history if text actually changed (not just selection)
+                    val textChanged = oldContent.text != finalContent.text
+                    if (textChanged) {
+                        undoRedoManager.addState(state.value.editingTitle to finalContent)
+                    }
                     
                     _state.value = state.value.copy(
                         editingContent = finalContent,
