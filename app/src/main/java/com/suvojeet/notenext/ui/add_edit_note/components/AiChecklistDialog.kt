@@ -4,18 +4,22 @@ import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
@@ -27,11 +31,21 @@ fun AiChecklistSheet(
     generatedItems: List<String>,
     onDismiss: () -> Unit,
     onGenerate: (String) -> Unit,
-    onInsert: () -> Unit,
+    onInsert: (List<String>) -> Unit,  // Changed to pass edited items
     onRegenerate: (String) -> Unit
 ) {
     var topic by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    
+    // Local state for editable items
+    var editableItems by remember { mutableStateOf(listOf<String>()) }
+    
+    // Sync editableItems with generatedItems when new items arrive
+    LaunchedEffect(generatedItems) {
+        if (generatedItems.isNotEmpty()) {
+            editableItems = generatedItems.toList()
+        }
+    }
     
     if (isVisible) {
         ModalBottomSheet(
@@ -103,7 +117,7 @@ fun AiChecklistSheet(
                             maxLines = 3
                         )
                         
-                        if (generatedItems.isNotEmpty()) {
+                        if (editableItems.isNotEmpty()) {
                             IconButton(
                                 onClick = { onRegenerate(topic) },
                                 enabled = topic.isNotBlank() && !isGenerating
@@ -120,16 +134,27 @@ fun AiChecklistSheet(
                 
                 // Show preview if items are generated
                 AnimatedContent(
-                    targetState = generatedItems.isNotEmpty(),
+                    targetState = editableItems.isNotEmpty(),
                     label = "preview"
                 ) { hasItems ->
                     if (hasItems) {
                         Column(modifier = Modifier.padding(top = 16.dp)) {
-                            Text(
-                                text = "Generated list",
-                                style = MaterialTheme.typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = "Generated list",
+                                    style = MaterialTheme.typography.labelLarge,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                                Text(
+                                    text = "Tap to edit",
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                            }
                             Spacer(modifier = Modifier.height(8.dp))
                             
                             Surface(
@@ -139,31 +164,31 @@ fun AiChecklistSheet(
                             ) {
                                 LazyColumn(
                                     modifier = Modifier
-                                        .heightIn(max = 200.dp)
-                                        .padding(12.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                        .heightIn(max = 250.dp)
+                                        .padding(8.dp),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    items(generatedItems) { item ->
-                                        Row(verticalAlignment = Alignment.CenterVertically) {
-                                            Box(
-                                                modifier = Modifier
-                                                    .size(8.dp)
-                                                    .clip(CircleShape)
-                                                    .background(MaterialTheme.colorScheme.primary)
-                                            )
-                                            Spacer(modifier = Modifier.width(12.dp))
-                                            Text(
-                                                text = item,
-                                                style = MaterialTheme.typography.bodyMedium
-                                            )
-                                        }
+                                    itemsIndexed(editableItems) { index, item ->
+                                        EditableItemRow(
+                                            text = item,
+                                            onTextChange = { newText ->
+                                                editableItems = editableItems.toMutableList().apply {
+                                                    this[index] = newText
+                                                }
+                                            },
+                                            onDelete = {
+                                                editableItems = editableItems.toMutableList().apply {
+                                                    removeAt(index)
+                                                }
+                                            }
+                                        )
                                     }
                                 }
                             }
                             
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
-                                text = "NoteNext may display inaccurate information, including about people, so double-check its responses.",
+                                text = "NoteNext may display inaccurate information, so double-check its responses.",
                                 style = MaterialTheme.typography.bodySmall,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
                             )
@@ -178,7 +203,7 @@ fun AiChecklistSheet(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End
                 ) {
-                    if (generatedItems.isEmpty()) {
+                    if (editableItems.isEmpty()) {
                         // Create button
                         Button(
                             onClick = { onGenerate(topic) },
@@ -204,20 +229,67 @@ fun AiChecklistSheet(
                         // Insert button
                         Button(
                             onClick = {
-                                onInsert()
+                                onInsert(editableItems.filter { it.isNotBlank() })
                                 onDismiss()
                             },
+                            enabled = editableItems.any { it.isNotBlank() },
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = MaterialTheme.colorScheme.primaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                             )
                         ) {
-                            Text("Insert")
+                            Text("Insert ${editableItems.count { it.isNotBlank() }} items")
                         }
                     }
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun EditableItemRow(
+    text: String,
+    onTextChange: (String) -> Unit,
+    onDelete: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier
+                .size(8.dp)
+                .clip(CircleShape)
+                .background(MaterialTheme.colorScheme.primary)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        
+        BasicTextField(
+            value = text,
+            onValueChange = onTextChange,
+            modifier = Modifier.weight(1f),
+            textStyle = TextStyle(
+                color = MaterialTheme.colorScheme.onSurface,
+                fontSize = MaterialTheme.typography.bodyMedium.fontSize
+            ),
+            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
+            singleLine = true
+        )
+        
+        IconButton(
+            onClick = onDelete,
+            modifier = Modifier.size(32.dp)
+        ) {
+            Icon(
+                Icons.Default.Delete,
+                contentDescription = "Remove item",
+                modifier = Modifier.size(18.dp),
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }

@@ -657,7 +657,7 @@ fun AddEditNoteScreen(
                 onEvent(NotesEvent.ClearGeneratedChecklist)
             },
             onGenerate = { topic -> onEvent(NotesEvent.GenerateChecklist(topic)) },
-            onInsert = { onEvent(NotesEvent.InsertGeneratedChecklist) },
+            onInsert = { editedItems -> onEvent(NotesEvent.InsertGeneratedChecklist(editedItems)) },
             onRegenerate = { topic -> onEvent(NotesEvent.GenerateChecklist(topic)) }
         )
     } // Closes Box

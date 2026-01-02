@@ -127,9 +127,9 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.InsertGeneratedChecklist -> {
-                val previewItems = state.value.generatedChecklistPreview
-                if (previewItems.isNotEmpty()) {
-                    val checklistItems = previewItems.mapIndexed { index, text -> 
+                val items = event.items
+                if (items.isNotEmpty()) {
+                    val checklistItems = items.mapIndexed { index, text -> 
                         ChecklistItem(
                             id = java.util.UUID.randomUUID().toString(),
                             text = text, 
