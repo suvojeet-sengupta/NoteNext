@@ -1,10 +1,14 @@
 package com.suvojeet.notenext.ui.add_edit_note.components
 
+import android.content.Context
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
@@ -12,6 +16,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -19,9 +24,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+
+private const val PREFS_NAME = "ai_checklist_prefs"
+private const val KEY_PROMPT_HISTORY = "prompt_history"
+private const val MAX_HISTORY_SIZE = 5
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -31,19 +42,31 @@ fun AiChecklistSheet(
     generatedItems: List<String>,
     onDismiss: () -> Unit,
     onGenerate: (String) -> Unit,
-    onInsert: (List<String>) -> Unit,  // Changed to pass edited items
+    onInsert: (List<String>) -> Unit,
     onRegenerate: (String) -> Unit
 ) {
+    val context = LocalContext.current
     var topic by remember { mutableStateOf("") }
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
     // Local state for editable items
     var editableItems by remember { mutableStateOf(listOf<String>()) }
     
+    // Prompt history
+    var promptHistory by remember { mutableStateOf(loadPromptHistory(context)) }
+    
     // Sync editableItems with generatedItems when new items arrive
     LaunchedEffect(generatedItems) {
         if (generatedItems.isNotEmpty()) {
             editableItems = generatedItems.toList()
+        }
+    }
+    
+    // Save prompt to history when generating
+    fun saveAndGenerate(prompt: String) {
+        if (prompt.isNotBlank()) {
+            promptHistory = savePromptToHistory(context, prompt, promptHistory)
+            onGenerate(prompt)
         }
     }
     
@@ -92,7 +115,47 @@ fun AiChecklistSheet(
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                // Prompt History Chips (only show if no items generated yet)
+                if (promptHistory.isNotEmpty() && editableItems.isEmpty()) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Default.History,
+                            contentDescription = null,
+                            modifier = Modifier.size(16.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Row(
+                            modifier = Modifier
+                                .weight(1f)
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            promptHistory.forEach { prompt ->
+                                SuggestionChip(
+                                    onClick = { 
+                                        topic = prompt
+                                        saveAndGenerate(prompt)
+                                    },
+                                    label = { 
+                                        Text(
+                                            text = prompt,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        ) 
+                                    },
+                                    modifier = Modifier.widthIn(max = 150.dp)
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
                 
                 // Input field with optional regenerate button
                 Surface(
@@ -119,7 +182,10 @@ fun AiChecklistSheet(
                         
                         if (editableItems.isNotEmpty()) {
                             IconButton(
-                                onClick = { onRegenerate(topic) },
+                                onClick = { 
+                                    editableItems = emptyList()
+                                    saveAndGenerate(topic) 
+                                },
                                 enabled = topic.isNotBlank() && !isGenerating
                             ) {
                                 Icon(
@@ -206,7 +272,7 @@ fun AiChecklistSheet(
                     if (editableItems.isEmpty()) {
                         // Create button
                         Button(
-                            onClick = { onGenerate(topic) },
+                            onClick = { saveAndGenerate(topic) },
                             enabled = topic.isNotBlank() && !isGenerating,
                             shape = RoundedCornerShape(24.dp),
                             colors = ButtonDefaults.buttonColors(
@@ -292,4 +358,21 @@ private fun EditableItemRow(
             )
         }
     }
+}
+
+// Helper functions for SharedPreferences
+private fun loadPromptHistory(context: Context): List<String> {
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    val historyString = prefs.getString(KEY_PROMPT_HISTORY, "") ?: ""
+    return if (historyString.isBlank()) emptyList() else historyString.split("|||")
+}
+
+private fun savePromptToHistory(context: Context, prompt: String, currentHistory: List<String>): List<String> {
+    // Remove duplicate if exists, add to front, limit to MAX_HISTORY_SIZE
+    val newHistory = (listOf(prompt) + currentHistory.filter { it != prompt }).take(MAX_HISTORY_SIZE)
+    
+    val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    prefs.edit().putString(KEY_PROMPT_HISTORY, newHistory.joinToString("|||")).apply()
+    
+    return newHistory
 }
