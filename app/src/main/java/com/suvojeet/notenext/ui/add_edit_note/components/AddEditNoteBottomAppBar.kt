@@ -93,7 +93,8 @@ fun AddEditNoteBottomAppBar(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp), // Add extra bottom padding to avoid navigation pill overlap
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
