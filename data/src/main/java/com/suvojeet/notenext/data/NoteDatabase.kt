@@ -134,7 +134,7 @@ abstract class NoteDatabase : RoomDatabase() {
                                 val isChecked = (itemMap["isChecked"] as? Boolean) == true
                                 
                                 db.execSQL("INSERT INTO checklist_items (id, noteId, text, isChecked, position) VALUES (?, ?, ?, ?, ?)",
-                                    arrayOf(id, noteId, text, if (isChecked) 1 else 0, index))
+                                    arrayOf<Any>(id, noteId, text, if (isChecked) 1 else 0, index))
                             }
                         } catch (e: Exception) {
                             e.printStackTrace()
