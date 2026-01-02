@@ -35,6 +35,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.CloseFullscreen
 import androidx.compose.material.icons.filled.OpenInFull
 import androidx.compose.material3.*
@@ -651,48 +653,29 @@ fun AddEditNoteScreen(
         }
 
         // Grammar Fix Result Dialog
-        if (state.fixedContentPreview != null) {
-            AlertDialog(
-                onDismissRequest = { onEvent(NotesEvent.ClearGrammarFix) },
-                icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
-                title = { Text("Grammar Fix Suggestion") },
-                text = {
-                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
-                         Text("Review Changes:", style = MaterialTheme.typography.labelMedium)
-                         Spacer(modifier = Modifier.height(8.dp))
-                         
-                         val diffs = remember(state.editingContent.text, state.fixedContentPreview) {
-                             SimpleDiffUtils.computeDiff(state.editingContent.text, state.fixedContentPreview!!)
-                         }
-                         val annotatedString = remember(diffs) {
-                             SimpleDiffUtils.generateDiffString(diffs)
-                         }
-                         
-                         Text(
-                             text = annotatedString, 
-                             style = MaterialTheme.typography.bodyMedium,
-                             color = MaterialTheme.colorScheme.onSurface
-                         )
-                         
-                         Spacer(modifier = Modifier.height(8.dp))
-                         Text(
-                             "Legenda: Red = Removed, Green = Added", 
-                             style = MaterialTheme.typography.labelSmall, 
-                             color = MaterialTheme.colorScheme.onSurfaceVariant
-                         )
-                     }
-                },
-                confirmButton = {
-                    TextButton(onClick = { onEvent(NotesEvent.ApplyGrammarFix) }) {
-                        Text("Apply Fix")
+        // Grammar Review Controls (Inline)
+        AnimatedVisibility(
+            visible = state.fixedContentPreview != null,
+            enter = androidx.compose.animation.scaleIn() + fadeIn(),
+            exit = androidx.compose.animation.scaleOut() + fadeOut(),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(bottom = 100.dp, end = 16.dp)
+        ) {
+            androidx.compose.material3.Surface(
+                shape = androidx.compose.foundation.shape.CircleShape,
+                color = MaterialTheme.colorScheme.surfaceContainerHigh,
+                tonalElevation = 6.dp
+            ) {
+                Row(modifier = Modifier.padding(4.dp)) {
+                    IconButton(onClick = { onEvent(NotesEvent.ApplyGrammarFix) }) {
+                        Icon(androidx.compose.material.icons.Icons.Filled.Check, contentDescription = "Accept", tint = androidx.compose.ui.graphics.Color(0xFF4CAF50))
                     }
-                },
-                dismissButton = {
-                    TextButton(onClick = { onEvent(NotesEvent.ClearGrammarFix) }) {
-                        Text("Discard")
+                    IconButton(onClick = { onEvent(NotesEvent.ClearGrammarFix) }) {
+                        Icon(androidx.compose.material.icons.Icons.Filled.Close, contentDescription = "Discard", tint = androidx.compose.ui.graphics.Color(0xFFE57373))
                     }
                 }
-            )
+            }
         }
 
         // AI Checklist Sheet (ModalBottomSheet)

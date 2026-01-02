@@ -166,29 +166,64 @@ class NotesViewModel @Inject constructor(
                 _state.value = state.value.copy(generatedChecklistPreview = emptyList(), isGeneratingChecklist = false)
             }
             is NotesEvent.FixGrammar -> {
-                val content = state.value.editingContent.text
-                if (content.isBlank()) {
-                    viewModelScope.launch {
-                        _events.emit(NotesUiEvent.ShowToast("No content to fix"))
-                    }
+                val currentTextFieldValue = state.value.editingContent
+                val selection = currentTextFieldValue.selection
+                val fullText = currentTextFieldValue.text
+
+                // Determine target text (selection or full)
+                val targetText = if (selection.start != selection.end) {
+                    fullText.substring(selection.start, selection.end)
+                } else {
+                    fullText
+                }
+
+                if (targetText.isBlank()) {
+                    viewModelScope.launch { _events.emit(NotesUiEvent.ShowToast("No content to fix")) }
                     return
                 }
+
                 viewModelScope.launch {
-                    _state.value = state.value.copy(isFixingGrammar = true, fixedContentPreview = null)
-                    groqRepository.fixGrammar(content).collect { result ->
-                        result.onSuccess { fixedText ->
+                    _state.value = state.value.copy(
+                        isFixingGrammar = true, 
+                        fixedContentPreview = null,
+                        originalContentBackup = currentTextFieldValue // Backup for Undo
+                    )
+                    
+                    groqRepository.fixGrammar(targetText).collect { result ->
+                        result.onSuccess { fixedFragment ->
+                            // Calculate global clean text (what it will be if accepted)
+                            val finalCleanText = if (selection.start != selection.end) {
+                                fullText.replaceRange(selection.start, selection.end, fixedFragment)
+                            } else {
+                                fixedFragment
+                            }
+
+                            // Calculate Diff just for the changed part
+                            val diffs = com.suvojeet.notenext.util.SimpleDiffUtils.computeDiff(targetText, fixedFragment)
+                            val diffAnnotated = com.suvojeet.notenext.util.SimpleDiffUtils.generateDiffString(diffs)
+
+                            // Construct Inline Preview (Original Before + Diff + Original After)
+                            val inlinePreviewBuilder = androidx.compose.ui.text.AnnotatedString.Builder()
+                            if (selection.start != selection.end) {
+                                inlinePreviewBuilder.append(fullText.substring(0, selection.start))
+                                inlinePreviewBuilder.append(diffAnnotated)
+                                inlinePreviewBuilder.append(fullText.substring(selection.end))
+                            } else {
+                                inlinePreviewBuilder.append(diffAnnotated)
+                            }
+                            val inlinePreview = inlinePreviewBuilder.toAnnotatedString()
+
                             _state.value = state.value.copy(
                                 isFixingGrammar = false,
-                                fixedContentPreview = fixedText
+                                fixedContentPreview = finalCleanText, // Clean text for Apply
+                                editingContent = TextFieldValue(inlinePreview, selection) // Show Diff Inline
                             )
                         }.onFailure { error ->
-                            _state.value = state.value.copy(isFixingGrammar = false, fixedContentPreview = null)
+                            _state.value = state.value.copy(isFixingGrammar = false, fixedContentPreview = null, originalContentBackup = null)
                             val errorMessage = when {
-                                error.message?.contains("429") == true ->
-                                    "Too many requests. Please wait a moment."
-                                error.message?.contains("timeout", ignoreCase = true) == true ->
-                                    "Request timed out. Try again."
-                                else -> "Failed to fix grammar: ${error.message}"
+                                error.message?.contains("429") == true -> "Too many requests. Please wait."
+                                error.message?.contains("timeout", ignoreCase = true) == true -> "Request timed out."
+                                else -> "Failed: ${error.message}"
                             }
                             _events.emit(NotesUiEvent.ShowToast(errorMessage))
                         }
@@ -199,16 +234,24 @@ class NotesViewModel @Inject constructor(
                 val fixedContent = state.value.fixedContentPreview
                 if (fixedContent != null) {
                     _state.value = state.value.copy(
-                        editingContent = TextFieldValue(fixedContent),
-                        fixedContentPreview = null
+                        editingContent = TextFieldValue(fixedContent), // Apply clean text
+                        fixedContentPreview = null,
+                        originalContentBackup = null
                     )
-                    viewModelScope.launch {
-                        _events.emit(NotesUiEvent.ShowToast("Grammar fixed!"))
-                    }
+                    viewModelScope.launch { _events.emit(NotesUiEvent.ShowToast("Fixed!")) }
                 }
             }
             is NotesEvent.ClearGrammarFix -> {
-                _state.value = state.value.copy(fixedContentPreview = null, isFixingGrammar = false)
+                // Revert to backup
+                state.value.originalContentBackup?.let { backup ->
+                    _state.value = state.value.copy(
+                        editingContent = backup,
+                        fixedContentPreview = null,
+                        originalContentBackup = null
+                    )
+                } ?: run {
+                     _state.value = state.value.copy(fixedContentPreview = null, isFixingGrammar = false)
+                }
             }
             is NotesEvent.OnSearchQueryChange -> {
                 _searchQuery.value = event.query

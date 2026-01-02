@@ -65,5 +65,6 @@ data class NotesState(
     
     // AI Grammar Fix
     val isFixingGrammar: Boolean = false,
-    val fixedContentPreview: String? = null
+    val fixedContentPreview: String? = null,
+    val originalContentBackup: TextFieldValue? = null
 )
