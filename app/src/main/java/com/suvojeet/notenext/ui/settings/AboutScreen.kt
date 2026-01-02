@@ -23,6 +23,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Shield
@@ -137,6 +138,13 @@ fun AboutScreen(onBackClick: () -> Unit) {
                         title = "Secure & Private",
                         description = "Biometric App Lock and strict privacy. No tracking, no ads.",
                         iconColor = Color(0xFF66BB6A) // Green
+                    )
+                    HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    FeatureItem(
+                        icon = androidx.compose.material.icons.Icons.Filled.AutoAwesome,
+                        title = "Powered by AI",
+                        description = "Smart summarization and grammar correction powered by Groq API service.",
+                        iconColor = Color(0xFFE91E63) // Pink
                     )
                     HorizontalDivider(thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
                     FeatureItem(
