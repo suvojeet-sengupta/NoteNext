@@ -117,8 +117,9 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAppLockInfoDialog by remember { mutableStateOf(false) }
     var showScreenshotInfoDialog by remember { mutableStateOf(false) }
-    var showRateDialog by remember { mutableStateOf(false) } // Moved up
-    var showContactUsDialog by remember { mutableStateOf(false) } // Moved up
+    var showHistoryDialog by remember { mutableStateOf(false) }
+    var showRateDialog by remember { mutableStateOf(false) }
+    var showContactUsDialog by remember { mutableStateOf(false) }
     
     // -- Import Logic --
     // We need BackupRestoreViewModel for import logic
