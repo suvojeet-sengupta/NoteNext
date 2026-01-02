@@ -635,9 +635,9 @@ fun AddEditNoteScreen(
         // AI Checklist Entry Point
         var showAiChecklistSheet by remember { mutableStateOf(false) }
         
-        // Show AI Button: for empty text notes OR for checklist notes (to add more items)
+        // Show AI Button: for empty text notes OR for empty checklist notes
         val showAiButton = (state.editingNoteType == "TEXT" && state.editingContent.text.isEmpty()) || 
-                           state.editingNoteType == "CHECKLIST"
+                           (state.editingNoteType == "CHECKLIST" && state.editingChecklist.isEmpty())
                            
         AnimatedVisibility(
             visible = showAiButton && !isFocusMode,
