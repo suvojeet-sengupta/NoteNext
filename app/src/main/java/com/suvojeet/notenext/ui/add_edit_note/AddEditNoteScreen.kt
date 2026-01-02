@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import com.suvojeet.notenext.util.SimpleDiffUtils
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -656,12 +657,29 @@ fun AddEditNoteScreen(
                 icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
                 title = { Text("Grammar Fix Suggestion") },
                 text = {
-                     Column {
-                         Text("Original:", style = MaterialTheme.typography.labelMedium)
-                         Text(state.editingContent.text, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                     Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+                         Text("Review Changes:", style = MaterialTheme.typography.labelMedium)
                          Spacer(modifier = Modifier.height(8.dp))
-                         Text("Fixed:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
-                         Text(state.fixedContentPreview!!, style = MaterialTheme.typography.bodyMedium)
+                         
+                         val diffs = remember(state.editingContent.text, state.fixedContentPreview) {
+                             SimpleDiffUtils.computeDiff(state.editingContent.text, state.fixedContentPreview!!)
+                         }
+                         val annotatedString = remember(diffs) {
+                             SimpleDiffUtils.generateDiffString(diffs)
+                         }
+                         
+                         Text(
+                             text = annotatedString, 
+                             style = MaterialTheme.typography.bodyMedium,
+                             color = MaterialTheme.colorScheme.onSurface
+                         )
+                         
+                         Spacer(modifier = Modifier.height(8.dp))
+                         Text(
+                             "Legenda: Red = Removed, Green = Added", 
+                             style = MaterialTheme.typography.labelSmall, 
+                             color = MaterialTheme.colorScheme.onSurfaceVariant
+                         )
                      }
                 },
                 confirmButton = {
