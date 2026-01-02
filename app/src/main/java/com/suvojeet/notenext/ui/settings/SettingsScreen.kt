@@ -42,6 +42,7 @@ import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.compose.material.icons.filled.SentimentDissatisfied
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.layout.height
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -113,11 +114,11 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     // -- Dialog States --
     var showThemeDialog by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
-
-
     var showLanguageDialog by remember { mutableStateOf(false) }
     var showAppLockInfoDialog by remember { mutableStateOf(false) }
     var showScreenshotInfoDialog by remember { mutableStateOf(false) }
+    var showRateDialog by remember { mutableStateOf(false) } // Moved up
+    var showContactUsDialog by remember { mutableStateOf(false) } // Moved up
     
     // -- Import Logic --
     // We need BackupRestoreViewModel for import logic
@@ -439,9 +440,6 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             }
         )
     }
-
-    var showRateDialog by remember { mutableStateOf(false) }
-    var showContactUsDialog by remember { mutableStateOf(false) }
 
     if (showRateDialog) {
         AlertDialog(

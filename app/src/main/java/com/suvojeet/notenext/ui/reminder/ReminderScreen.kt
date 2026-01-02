@@ -7,6 +7,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.outlined.Notifications
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -125,7 +126,11 @@ fun ReminderScreen(
                     contentPadding = PaddingValues(bottom = 16.dp)
                 ) {
                     items(currentList) { note ->
-                        ReminderItem(note = note, onClick = { onNoteClick(note) })
+                        ReminderItem(
+                            note = note, 
+                            onClick = { onNoteClick(note) },
+                            onDeleteClick = { reminderViewModel.deleteReminder(note) }
+                        )
                         HorizontalDivider(
                             modifier = Modifier.padding(horizontal = 16.dp),
                             color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
@@ -140,7 +145,8 @@ fun ReminderScreen(
 @Composable
 fun ReminderItem(
     note: Note,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onDeleteClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -186,14 +192,16 @@ fun ReminderItem(
             )
         }
         
-        Spacer(modifier = Modifier.width(16.dp))
+        Spacer(modifier = Modifier.width(8.dp))
 
-        // Document Icon
-        Icon(
-            imageVector = Icons.Default.Description, // Using Description as Document generic icon
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(24.dp)
-        )
+        // Delete Reminder Icon
+        IconButton(onClick = onDeleteClick) {
+            Icon(
+                imageVector = Icons.Default.Delete,
+                contentDescription = "Delete Reminder",
+                tint = MaterialTheme.colorScheme.error,
+                modifier = Modifier.size(24.dp)
+            )
+        }
     }
 }

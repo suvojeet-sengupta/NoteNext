@@ -10,11 +10,13 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class ReminderViewModel @Inject constructor(
-    private val repository: NoteRepository
+    private val repository: NoteRepository,
+    private val alarmScheduler: com.suvojeet.notenext.data.AlarmScheduler
 ) : ViewModel() {
 
     private val _allReminders = repository.getAllReminders()
@@ -34,4 +36,11 @@ class ReminderViewModel @Inject constructor(
             .sortedByDescending { it.reminderTime }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
+    fun deleteReminder(note: Note) {
+        viewModelScope.launch {
+            alarmScheduler.cancel(note)
+            val updatedNote = note.copy(reminderTime = null, repeatOption = null)
+            repository.updateNote(updatedNote)
+        }
+    }
 }
