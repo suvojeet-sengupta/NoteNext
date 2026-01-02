@@ -109,6 +109,39 @@ class NotesViewModel @Inject constructor(
 
     fun onEvent(event: NotesEvent) {
         when (event) {
+            is NotesEvent.GenerateChecklist -> {
+                viewModelScope.launch {
+                    _state.value = state.value.copy(isSummarizing = true) // Reuse summarizing flag for loading indicator
+                    groqRepository.generateChecklist(event.topic).collect { result ->
+                        result.onSuccess { items ->
+                            val checklistItems = items.mapIndexed { index, text -> 
+                                ChecklistItem(
+                                    id = java.util.UUID.randomUUID().toString(),
+                                    text = text, 
+                                    isChecked = false, 
+                                    position = index,
+                                    noteId = state.value.expandedNoteId ?: 0
+                                ) 
+                            }
+                            
+                            // Initialize text fields map for the new items
+                            val newInputValues = checklistItems.associate { item ->
+                                item.id to TextFieldValue(item.text)
+                            }
+
+                            _state.value = state.value.copy(
+                                isSummarizing = false,
+                                editingNoteType = "CHECKLIST",
+                                editingChecklist = checklistItems,
+                                checklistInputValues = newInputValues
+                            )
+                        }.onFailure {
+                            _state.value = state.value.copy(isSummarizing = false)
+                            _events.emit(NotesUiEvent.ShowToast("Failed to generate checklist: ${it.message}"))
+                        }
+                    }
+                }
+            }
             is NotesEvent.OnSearchQueryChange -> {
                 _searchQuery.value = event.query
             }

@@ -69,4 +69,38 @@ class GroqRepository @Inject constructor(
             emit(Result.failure(lastException ?: Exception("Unknown error during summarization")))
         }
     }
+    fun generateChecklist(topic: String): Flow<Result<List<String>>> = flow {
+        val model = "llama-3.3-70b-versatile"
+        val messages = listOf(
+            Message(role = "system", content = "You are a helpful assistant that generates checklists. Return ONLY a pure JSON array of strings, e.g. [\"Item 1\", \"Item 2\"]. Do not include markdown code blocks or any other text."),
+            Message(role = "user", content = "Create a checklist for: $topic")
+        )
+
+        try {
+            val request = ChatCompletionRequest(
+                model = model,
+                messages = messages
+            )
+            val response = apiService.getChatCompletion(request)
+            val content = response.choices.firstOrNull()?.message?.content
+            
+            if (content != null) {
+                // Try to parse JSON array manually or via Gson if available
+                // Simplistic parsing for now: remove brackets and split
+                val cleaned = content.replace("```json", "").replace("```", "").trim()
+                if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+                    val items = com.google.gson.Gson().fromJson(cleaned, Array<String>::class.java).toList()
+                    emit(Result.success(items))
+                } else {
+                    // Fallback if not JSON: split by newlines
+                    val items = content.lines().filter { it.isNotBlank() }.map { it.trim().removePrefix("- ").removePrefix("* ") }
+                    emit(Result.success(items))
+                }
+            } else {
+                emit(Result.failure(Exception("Empty response from $model")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
 }

@@ -626,7 +626,37 @@ fun AddEditNoteScreen(
                 )
             }
         }
-    }
+        
+        // AI Checklist Entry Point
+        var showAiChecklistDialog by remember { mutableStateOf(false) }
+        
+        // Show AI Button if: Note is new/empty text or specifically in Checklist mode with few items
+        val showAiButton = state.editingNoteType == "TEXT" && state.editingContent.text.isEmpty() || 
+                           state.editingNoteType == "CHECKLIST" && state.editingChecklist.isEmpty()
+                           
+        AnimatedVisibility(
+            visible = showAiButton && !isFocusMode,
+            enter = fadeIn() + slideInVertically { it },
+            exit = fadeOut() + slideOutVertically { it },
+            modifier = Modifier
+                .align(Alignment.BottomEnd) // Works because we are now inside Box
+                .padding(bottom = 140.dp, end = 16.dp) 
+        ) {
+            AiAssistantButton(
+                onClick = { showAiChecklistDialog = true }
+            )
+        }
+
+        if (showAiChecklistDialog) {
+            AiChecklistDialog(
+                onDismiss = { showAiChecklistDialog = false },
+                onConfirm = { topic ->
+                    onEvent(NotesEvent.GenerateChecklist(topic))
+                    showAiChecklistDialog = false
+                }
+            )
+        }
+    } // Closes Box
 
     if (showMoreOptions) {
         MoreOptionsSheet(
@@ -661,6 +691,8 @@ fun AddEditNoteScreen(
             }
         )
     }
+
+
 
 
     if (clickedUrl != null) {

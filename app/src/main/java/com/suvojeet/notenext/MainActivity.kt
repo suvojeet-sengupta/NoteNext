@@ -115,7 +115,8 @@ class MainActivity : FragmentActivity() {
 
             var unlocked by remember { mutableStateOf(false) }
 
-            }
+
+
 
             // In-App Update Logic
             var showUpdateDialog by remember { mutableStateOf(false) }

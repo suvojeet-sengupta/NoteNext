@@ -84,5 +84,6 @@ sealed class NotesEvent {
     object DeleteAllCheckedItems : NotesEvent()
     object ToggleCheckedItemsExpanded : NotesEvent()
     object SummarizeNote : NotesEvent()
+    data class GenerateChecklist(val topic: String) : NotesEvent()
     object ClearSummary : NotesEvent()
 }
