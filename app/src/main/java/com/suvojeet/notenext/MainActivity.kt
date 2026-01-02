@@ -115,6 +115,52 @@ class MainActivity : FragmentActivity() {
 
             var unlocked by remember { mutableStateOf(false) }
 
+            }
+
+            // In-App Update Logic
+            var showUpdateDialog by remember { mutableStateOf(false) }
+            val appUpdateManager = com.google.android.play.core.appupdate.AppUpdateManagerFactory.create(this)
+            
+            // Check for update
+            LaunchedEffect(Unit) {
+                val appUpdateInfoTask = appUpdateManager.appUpdateInfo
+                appUpdateInfoTask.addOnSuccessListener { appUpdateInfo ->
+                    if (appUpdateInfo.updateAvailability() == com.google.android.play.core.install.model.UpdateAvailability.UPDATE_AVAILABLE) {
+                         // Check for Flexible update (or Immediate if preferred, but Flexible allows background download)
+                         if (appUpdateInfo.isUpdateTypeAllowed(com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE)) {
+                             showUpdateDialog = true
+                         }
+                    }
+                }
+            }
+
+            if (showUpdateDialog) {
+                com.suvojeet.notenext.ui.components.UpdateAvailableDialog(
+                    onUpdateClick = {
+                        showUpdateDialog = false // Dismiss our dialog
+                        try {
+                            appUpdateManager.startUpdateFlowForResult(
+                                appUpdateInfoTask.result,
+                                com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE,
+                                this,
+                                500 // Result code constant
+                            )
+                        } catch (e: Exception) {
+                            // Verify if result is ready
+                            appUpdateManager.appUpdateInfo.addOnSuccessListener { info ->
+                                appUpdateManager.startUpdateFlowForResult(
+                                    info,
+                                    com.google.android.play.core.install.model.AppUpdateType.FLEXIBLE,
+                                    this,
+                                    500
+                                )
+                            }
+                        }
+                    },
+                    onDismiss = { showUpdateDialog = false }
+                )
+            }
+
             NoteNextTheme(themeMode = themeMode, shapeFamily = shapeFamily) {
                 // A surface container using the 'background' color from the theme
                 Surface(
@@ -135,6 +181,11 @@ class MainActivity : FragmentActivity() {
                 }
             }
         }
+    }
+
+    // Need to declare this locally or use the property if captured
+    private val appUpdateInfoTask by lazy { 
+        com.google.android.play.core.appupdate.AppUpdateManagerFactory.create(this).appUpdateInfo 
     }
 
     override fun onNewIntent(intent: Intent) {
