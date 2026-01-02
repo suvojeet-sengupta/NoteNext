@@ -234,20 +234,38 @@ fun AiChecklistSheet(
                                         .padding(8.dp),
                                     verticalArrangement = Arrangement.spacedBy(4.dp)
                                 ) {
-                                    itemsIndexed(editableItems) { index, item ->
-                                        EditableItemRow(
-                                            text = item,
-                                            onTextChange = { newText ->
-                                                editableItems = editableItems.toMutableList().apply {
-                                                    this[index] = newText
+                                    itemsIndexed(editableItems, key = { index, _ -> index }) { index, item ->
+                                        // Staggered animation for each item
+                                        var isItemVisible by remember { mutableStateOf(false) }
+                                        LaunchedEffect(Unit) {
+                                            kotlinx.coroutines.delay(index * 50L) // Stagger delay
+                                            isItemVisible = true
+                                        }
+                                        
+                                        androidx.compose.animation.AnimatedVisibility(
+                                            visible = isItemVisible,
+                                            enter = androidx.compose.animation.slideInHorizontally(
+                                                initialOffsetX = { 100 },
+                                                animationSpec = androidx.compose.animation.core.spring(
+                                                    dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+                                                    stiffness = androidx.compose.animation.core.Spring.StiffnessLow
+                                                )
+                                            ) + androidx.compose.animation.fadeIn()
+                                        ) {
+                                            EditableItemRow(
+                                                text = item,
+                                                onTextChange = { newText ->
+                                                    editableItems = editableItems.toMutableList().apply {
+                                                        this[index] = newText
+                                                    }
+                                                },
+                                                onDelete = {
+                                                    editableItems = editableItems.toMutableList().apply {
+                                                        removeAt(index)
+                                                    }
                                                 }
-                                            },
-                                            onDelete = {
-                                                editableItems = editableItems.toMutableList().apply {
-                                                    removeAt(index)
-                                                }
-                                            }
-                                        )
+                                            )
+                                        }
                                     }
                                 }
                             }
