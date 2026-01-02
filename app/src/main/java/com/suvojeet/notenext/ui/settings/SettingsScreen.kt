@@ -41,6 +41,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.SentimentDissatisfied
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.layout.height
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -314,13 +315,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                             subtitle = "Rate us on Play Store",
                             iconColor = Color(0xFF9C27B0),
                             onClick = {
-                                try {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
-                                    context.startActivity(intent)
-                                } catch (e: Exception) {
-                                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
-                                    context.startActivity(intent)
-                                }
+                                showRateDialog = true
                             }
                         )
                         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
@@ -441,6 +436,92 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
             onSelectKeep = {
                 showImportSourceDialog = false
                 showKeepInstructionsDialog = true
+            }
+        )
+    }
+
+    var showRateDialog by remember { mutableStateOf(false) }
+    var showContactUsDialog by remember { mutableStateOf(false) }
+
+    if (showRateDialog) {
+        AlertDialog(
+            onDismissRequest = { showRateDialog = false },
+            title = { Text(text = "Rate NoteNext") },
+            text = { Text("Are you satisfied with NoteNext?") },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        showRateDialog = false
+                        try {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))
+                            context.startActivity(intent)
+                        } catch (e: Exception) {
+                            val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))
+                            context.startActivity(intent)
+                        }
+                    }
+                ) {
+                    Text("Yes")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = {
+                        showRateDialog = false
+                        showContactUsDialog = true
+                    }
+                ) {
+                    Text("No")
+                }
+            }
+        )
+    }
+
+    if (showContactUsDialog) {
+        AlertDialog(
+            onDismissRequest = { showContactUsDialog = false },
+            icon = { Icon(Icons.Default.SentimentDissatisfied, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
+            title = { Text("We are sad to hear that") },
+            text = {
+                Column {
+                    Text("Please let us know how we can improve. Contact us at:")
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SelectionContainer {
+                        Column {
+                            Text(
+                                text = "suvojitsengupta21@gmail.com",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clickable {
+                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                            data = Uri.parse("mailto:suvojitsengupta21@gmail.com")
+                                            putExtra(Intent.EXTRA_SUBJECT, "Feedback for NoteNext")
+                                        }
+                                        try { context.startActivity(intent) } catch (e: Exception) {}
+                                    }
+                                    .padding(vertical = 4.dp)
+                            )
+                            Text(
+                                text = "suvojeetsengupta@zohomail.in",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier
+                                    .clickable {
+                                        val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                            data = Uri.parse("mailto:suvojeetsengupta@zohomail.in")
+                                            putExtra(Intent.EXTRA_SUBJECT, "Feedback for NoteNext")
+                                        }
+                                        try { context.startActivity(intent) } catch (e: Exception) {}
+                                    }
+                                    .padding(vertical = 4.dp)
+                            )
+                        }
+                    }
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = { showContactUsDialog = false }) {
+                    Text("Close")
+                }
             }
         )
     }
