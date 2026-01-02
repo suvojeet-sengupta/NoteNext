@@ -132,9 +132,9 @@ object HtmlConverter {
                 )
             }
 
-            // Detect Phone Numbers (Simple regex)
-            // Matches: +1-555-555-5555, 555-555-5555, 5555555555
-            val phoneRegex = "(\\+\\d{1,3}[- ]?)?\\d{10}".toRegex()
+            // Detect Phone Numbers - ONLY 10 consecutive digits (Indian phone numbers)
+            // Matches: 9876543210, +919876543210 (not shorter or longer numbers)
+            val phoneRegex = "(?<!\\d)(\\+91)?\\d{10}(?!\\d)".toRegex()
             phoneRegex.findAll(text).forEach { matchResult ->
                 val start = matchResult.range.first
                 val end = matchResult.range.last + 1
