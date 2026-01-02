@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.material3.Surface
 import androidx.compose.material.icons.Icons
@@ -85,7 +86,7 @@ fun FormatToolbar(
         tonalElevation = 2.dp
     ) {
         LazyRow(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(4.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -224,11 +225,12 @@ private fun FormatToggleButton(
 
     IconButton(
         onClick = onClick,
+        modifier = Modifier.size(36.dp),
         colors = IconButtonDefaults.iconButtonColors(
             containerColor = containerColor,
             contentColor = contentColor
         )
     ) {
-        Icon(icon, contentDescription = description)
+        Icon(icon, contentDescription = description, modifier = Modifier.size(20.dp))
     }
 }
