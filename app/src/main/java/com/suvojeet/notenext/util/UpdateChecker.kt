@@ -6,7 +6,8 @@ import com.google.android.play.core.appupdate.AppUpdateInfo
 import com.google.android.play.core.appupdate.AppUpdateManager
 import com.google.android.play.core.appupdate.AppUpdateManagerFactory
 import com.google.android.play.core.install.model.UpdateAvailability
-import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlin.coroutines.resume
 
 /**
  * Utility class for checking app updates from Play Store.
@@ -26,23 +27,25 @@ class UpdateChecker(context: Context) {
      * Check if an update is available on Play Store.
      * Returns UpdateResult with update availability info.
      */
-    suspend fun checkForUpdate(): Result<UpdateResult> {
-        return try {
-            val appUpdateInfo: AppUpdateInfo = appUpdateManager.appUpdateInfo.await()
-            
-            val isUpdateAvailable = appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
-            
-            Result.success(
-                UpdateResult(
-                    isUpdateAvailable = isUpdateAvailable,
-                    availableVersionCode = if (isUpdateAvailable) appUpdateInfo.availableVersionCode() else 0,
-                    currentVersionCode = appUpdateInfo.availableVersionCode(), 
-                    stalenessDays = appUpdateInfo.clientVersionStalenessDays()
+    suspend fun checkForUpdate(): Result<UpdateResult> = suspendCancellableCoroutine { continuation ->
+        appUpdateManager.appUpdateInfo
+            .addOnSuccessListener { appUpdateInfo: AppUpdateInfo ->
+                val isUpdateAvailable = appUpdateInfo.updateAvailability() == UpdateAvailability.UPDATE_AVAILABLE
+                
+                continuation.resume(
+                    Result.success(
+                        UpdateResult(
+                            isUpdateAvailable = isUpdateAvailable,
+                            availableVersionCode = if (isUpdateAvailable) appUpdateInfo.availableVersionCode() else 0,
+                            currentVersionCode = appUpdateInfo.availableVersionCode(), 
+                            stalenessDays = appUpdateInfo.clientVersionStalenessDays()
+                        )
+                    )
                 )
-            )
-        } catch (e: Exception) {
-            Result.failure(e)
-        }
+            }
+            .addOnFailureListener { exception ->
+                continuation.resume(Result.failure(exception))
+            }
     }
     
     /**

@@ -960,7 +960,7 @@ private fun CheckForUpdateItem(context: android.content.Context) {
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = androidx.compose.material.icons.Icons.Default.SystemUpdate,
+                    imageVector = Icons.Default.Info,
                     contentDescription = null,
                     tint = Color(0xFF2196F3),
                     modifier = Modifier.size(22.dp)
@@ -994,9 +994,9 @@ private fun CheckForUpdateItem(context: android.content.Context) {
             icon = {
                 Icon(
                     imageVector = if (result.isUpdateAvailable) 
-                        androidx.compose.material.icons.Icons.Default.SystemUpdate 
+                        Icons.Default.Info 
                     else 
-                        androidx.compose.material.icons.Icons.Default.CheckCircle,
+                        Icons.Default.Star,
                     contentDescription = null,
                     tint = if (result.isUpdateAvailable) 
                         MaterialTheme.colorScheme.primary 
