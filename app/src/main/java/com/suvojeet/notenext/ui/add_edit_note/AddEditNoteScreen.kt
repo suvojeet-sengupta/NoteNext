@@ -621,6 +621,8 @@ fun AddEditNoteScreen(
                     state = state, 
                     onEvent = onEvent, 
                     onInsertLinkClick = { showInsertLinkDialog = true }, 
+                    onGrammarFixClick = { onEvent(NotesEvent.FixGrammar) },
+                    isFixingGrammar = state.isFixingGrammar,
                     themeMode = themeMode,
                     modifier = Modifier.padding(8.dp)
                 )
@@ -644,6 +646,34 @@ fun AddEditNoteScreen(
         ) {
             AiAssistantButton(
                 onClick = { showAiChecklistSheet = true }
+            )
+        }
+
+        // Grammar Fix Result Dialog
+        if (state.fixedContentPreview != null) {
+            AlertDialog(
+                onDismissRequest = { onEvent(NotesEvent.ClearGrammarFix) },
+                icon = { Icon(Icons.Default.AutoAwesome, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
+                title = { Text("Grammar Fix Suggestion") },
+                text = {
+                     Column {
+                         Text("Original:", style = MaterialTheme.typography.labelMedium)
+                         Text(state.editingContent.text, maxLines = 3, overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                         Spacer(modifier = Modifier.height(8.dp))
+                         Text("Fixed:", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.primary)
+                         Text(state.fixedContentPreview!!, style = MaterialTheme.typography.bodyMedium)
+                     }
+                },
+                confirmButton = {
+                    TextButton(onClick = { onEvent(NotesEvent.ApplyGrammarFix) }) {
+                        Text("Apply Fix")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { onEvent(NotesEvent.ClearGrammarFix) }) {
+                        Text("Discard")
+                    }
+                }
             )
         }
 

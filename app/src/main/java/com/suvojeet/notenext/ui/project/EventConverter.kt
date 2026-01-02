@@ -72,6 +72,9 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.InsertGeneratedChecklist -> throw IllegalArgumentException("InsertGeneratedChecklist event cannot be converted")
         is NotesEvent.ClearGeneratedChecklist -> throw IllegalArgumentException("ClearGeneratedChecklist event cannot be converted")
         is NotesEvent.ClearSummary -> throw IllegalArgumentException("ClearSummary event cannot be converted")
+        is NotesEvent.FixGrammar -> throw IllegalArgumentException("FixGrammar event cannot be converted")
+        is NotesEvent.ApplyGrammarFix -> throw IllegalArgumentException("ApplyGrammarFix event cannot be converted")
+        is NotesEvent.ClearGrammarFix -> throw IllegalArgumentException("ClearGrammarFix event cannot be converted")
     }
 }
 

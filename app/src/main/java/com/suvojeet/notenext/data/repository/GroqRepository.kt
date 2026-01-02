@@ -103,4 +103,36 @@ class GroqRepository @Inject constructor(
             emit(Result.failure(e))
         }
     }
+
+    /**
+     * Fixes grammar, typos, and punctuation in the given text.
+     * Preserves original meaning and formatting.
+     */
+    fun fixGrammar(text: String): Flow<Result<String>> = flow {
+        val model = "llama-3.1-8b-instant" // Fast model for quick fixes
+        val messages = listOf(
+            Message(
+                role = "system", 
+                content = "You are a grammar and spelling correction assistant. Fix typos, grammar errors, and improve punctuation. Keep the original meaning and tone intact. Return ONLY the corrected text without any explanations or additional comments."
+            ),
+            Message(role = "user", content = text)
+        )
+
+        try {
+            val request = ChatCompletionRequest(
+                model = model,
+                messages = messages
+            )
+            val response = apiService.getChatCompletion(request)
+            val correctedText = response.choices.firstOrNull()?.message?.content
+            
+            if (correctedText != null) {
+                emit(Result.success(correctedText.trim()))
+            } else {
+                emit(Result.failure(Exception("Empty response from grammar fix")))
+            }
+        } catch (e: Exception) {
+            emit(Result.failure(e))
+        }
+    }
 }

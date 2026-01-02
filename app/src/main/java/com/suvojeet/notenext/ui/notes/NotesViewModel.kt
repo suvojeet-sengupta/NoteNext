@@ -165,6 +165,51 @@ class NotesViewModel @Inject constructor(
             is NotesEvent.ClearGeneratedChecklist -> {
                 _state.value = state.value.copy(generatedChecklistPreview = emptyList(), isGeneratingChecklist = false)
             }
+            is NotesEvent.FixGrammar -> {
+                val content = state.value.editingContent.text
+                if (content.isBlank()) {
+                    viewModelScope.launch {
+                        _events.emit(NotesUiEvent.ShowToast("No content to fix"))
+                    }
+                    return
+                }
+                viewModelScope.launch {
+                    _state.value = state.value.copy(isFixingGrammar = true, fixedContentPreview = null)
+                    groqRepository.fixGrammar(content).collect { result ->
+                        result.onSuccess { fixedText ->
+                            _state.value = state.value.copy(
+                                isFixingGrammar = false,
+                                fixedContentPreview = fixedText
+                            )
+                        }.onFailure { error ->
+                            _state.value = state.value.copy(isFixingGrammar = false, fixedContentPreview = null)
+                            val errorMessage = when {
+                                error.message?.contains("429") == true ->
+                                    "Too many requests. Please wait a moment."
+                                error.message?.contains("timeout", ignoreCase = true) == true ->
+                                    "Request timed out. Try again."
+                                else -> "Failed to fix grammar: ${error.message}"
+                            }
+                            _events.emit(NotesUiEvent.ShowToast(errorMessage))
+                        }
+                    }
+                }
+            }
+            is NotesEvent.ApplyGrammarFix -> {
+                val fixedContent = state.value.fixedContentPreview
+                if (fixedContent != null) {
+                    _state.value = state.value.copy(
+                        editingContent = TextFieldValue(fixedContent),
+                        fixedContentPreview = null
+                    )
+                    viewModelScope.launch {
+                        _events.emit(NotesUiEvent.ShowToast("Grammar fixed!"))
+                    }
+                }
+            }
+            is NotesEvent.ClearGrammarFix -> {
+                _state.value = state.value.copy(fixedContentPreview = null, isFixingGrammar = false)
+            }
             is NotesEvent.OnSearchQueryChange -> {
                 _searchQuery.value = event.query
             }

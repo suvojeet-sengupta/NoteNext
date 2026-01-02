@@ -61,5 +61,9 @@ data class NotesState(
     
     // AI Checklist Generation
     val isGeneratingChecklist: Boolean = false,
-    val generatedChecklistPreview: List<String> = emptyList()
+    val generatedChecklistPreview: List<String> = emptyList(),
+    
+    // AI Grammar Fix
+    val isFixingGrammar: Boolean = false,
+    val fixedContentPreview: String? = null
 )

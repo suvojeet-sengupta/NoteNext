@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.FormatItalic
 import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.FormatSize
+import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
 import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
 import androidx.compose.material3.DropdownMenu
@@ -60,6 +61,8 @@ fun FormatToolbar(
     state: NotesState,
     onEvent: (NotesEvent) -> Unit,
     onInsertLinkClick: () -> Unit,
+    onGrammarFixClick: () -> Unit,
+    isFixingGrammar: Boolean,
     themeMode: ThemeMode,
     modifier: Modifier = Modifier
 ) {
@@ -186,7 +189,28 @@ fun FormatToolbar(
                     onClick = onInsertLinkClick,
                     icon = Icons.Default.AddLink,
                     description = stringResource(id = R.string.insert_link_description),
-                    isActive = false, // Stateless action
+                    isActive = false,
+                    useDarkTheme = useDarkTheme
+                )
+            }
+            
+            item {
+                Box(
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .width(1.dp)
+                        .height(24.dp)
+                        .background(MaterialTheme.colorScheme.outlineVariant)
+                )
+            }
+            
+            // AI Grammar Fix
+            item {
+                FormatToggleButton(
+                    onClick = onGrammarFixClick,
+                    icon = Icons.Default.AutoAwesome,
+                    description = "Fix Grammar",
+                    isActive = isFixingGrammar,
                     useDarkTheme = useDarkTheme
                 )
             }

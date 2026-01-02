@@ -88,4 +88,7 @@ sealed class NotesEvent {
     data class InsertGeneratedChecklist(val items: List<String>) : NotesEvent()
     object ClearGeneratedChecklist : NotesEvent()
     object ClearSummary : NotesEvent()
+    object FixGrammar : NotesEvent()
+    object ApplyGrammarFix : NotesEvent()
+    object ClearGrammarFix : NotesEvent()
 }
