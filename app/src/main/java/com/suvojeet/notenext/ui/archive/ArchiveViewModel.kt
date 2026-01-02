@@ -15,7 +15,6 @@ import javax.inject.Inject
 class ArchiveViewModel @Inject constructor(private val repository: com.suvojeet.notenext.data.NoteRepository) : ViewModel() {
 
     val state: StateFlow<ArchiveState> = repository.getArchivedNotes()
-        .map { list -> list.map { it.note } }
         .map { ArchiveState(notes = it) }
         .stateIn(
             scope = viewModelScope,

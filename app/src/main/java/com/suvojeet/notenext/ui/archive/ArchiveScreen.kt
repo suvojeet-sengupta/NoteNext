@@ -1,32 +1,22 @@
 package com.suvojeet.notenext.ui.archive
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
+import androidx.compose.foundation.lazy.staggeredgrid.StaggeredGridCells
+import androidx.compose.foundation.lazy.staggeredgrid.items
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Archive
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.suvojeet.notenext.data.Note
-import com.suvojeet.notenext.ui.components.NoteItem
-import com.suvojeet.notenext.ui.archive.ArchiveEvent
-import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
-
-import androidx.compose.material.icons.filled.Menu
-
-import com.suvojeet.notenext.data.NoteWithAttachments
+import com.suvojeet.notenext.data.Note
+import com.suvojeet.notenext.ui.components.EmptyState
+import com.suvojeet.notenext.ui.components.NoteItem
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -46,48 +36,35 @@ fun ArchiveScreen(
                     IconButton(onClick = onMenuClick) {
                         Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = androidx.compose.ui.graphics.Color.Transparent
+                )
             )
         }
     ) { padding ->
         if (state.notes.isEmpty()) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(padding),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Icon(
-                        imageVector = Icons.Default.Archive,
-                        contentDescription = null,
-                        modifier = Modifier.size(96.dp),
-                        tint = MaterialTheme.colorScheme.onBackground
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Text(
-                        text = stringResource(id = R.string.no_archived_notes),
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onBackground,
-                        modifier = Modifier.padding(horizontal = 32.dp)
-                    )
-                }
-            }
+            EmptyState(
+                icon = Icons.Default.Archive,
+                message = stringResource(id = R.string.no_archived_notes),
+                modifier = Modifier.padding(padding)
+            )
         } else {
-            LazyColumn(
+            LazyVerticalStaggeredGrid(
+                columns = StaggeredGridCells.Fixed(2),
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(padding),
                 contentPadding = PaddingValues(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalItemSpacing = 8.dp
             ) {
-                items(state.notes) { note ->
+                items(state.notes) { noteWithAttachments ->
                     NoteItem(
-                        note = NoteWithAttachments(note, emptyList(), emptyList()),
-                        isSelected = false, // Not selectable in archive
+                        note = noteWithAttachments,
+                        isSelected = false,
                         onNoteClick = {
-                            noteToRestore = note
+                            noteToRestore = noteWithAttachments.note
                             showRestoreDialog = true
                         },
                         onNoteLongClick = { /* TODO: Handle long click if needed */ }
