@@ -183,17 +183,6 @@ fun FormatToolbar(
                 }
             }
 
-            // Insert Group
-            item {
-                FormatToggleButton(
-                    onClick = onInsertLinkClick,
-                    icon = Icons.Default.AddLink,
-                    description = stringResource(id = R.string.insert_link_description),
-                    isActive = false,
-                    useDarkTheme = useDarkTheme
-                )
-            }
-            
             item {
                 Box(
                     modifier = Modifier
