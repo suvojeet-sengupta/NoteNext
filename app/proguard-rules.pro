@@ -21,3 +21,8 @@
 
 # Keep data classes for Gson serialization
 -keep class com.suvojeet.notenext.data.** { *; }
+
+# Suppress R8/Kotlin metadata warnings (Kotlin 2.3.0 vs AGP 8.13.0)
+-keep class kotlin.Metadata { *; }
+-dontwarn kotlin.Metadata
+-ignorewarnings
