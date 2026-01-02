@@ -111,36 +111,48 @@ class NotesViewModel @Inject constructor(
         when (event) {
             is NotesEvent.GenerateChecklist -> {
                 viewModelScope.launch {
-                    _state.value = state.value.copy(isSummarizing = true) // Reuse summarizing flag for loading indicator
+                    _state.value = state.value.copy(isGeneratingChecklist = true, generatedChecklistPreview = emptyList())
                     groqRepository.generateChecklist(event.topic).collect { result ->
                         result.onSuccess { items ->
-                            val checklistItems = items.mapIndexed { index, text -> 
-                                ChecklistItem(
-                                    id = java.util.UUID.randomUUID().toString(),
-                                    text = text, 
-                                    isChecked = false, 
-                                    position = index,
-                                    noteId = state.value.expandedNoteId ?: 0
-                                ) 
-                            }
-                            
-                            // Initialize text fields map for the new items
-                            val newInputValues = checklistItems.associate { item ->
-                                item.id to TextFieldValue(item.text)
-                            }
-
+                            // Store preview instead of inserting directly
                             _state.value = state.value.copy(
-                                isSummarizing = false,
-                                editingNoteType = "CHECKLIST",
-                                editingChecklist = checklistItems,
-                                checklistInputValues = newInputValues
+                                isGeneratingChecklist = false,
+                                generatedChecklistPreview = items
                             )
                         }.onFailure {
-                            _state.value = state.value.copy(isSummarizing = false)
+                            _state.value = state.value.copy(isGeneratingChecklist = false, generatedChecklistPreview = emptyList())
                             _events.emit(NotesUiEvent.ShowToast("Failed to generate checklist: ${it.message}"))
                         }
                     }
                 }
+            }
+            is NotesEvent.InsertGeneratedChecklist -> {
+                val previewItems = state.value.generatedChecklistPreview
+                if (previewItems.isNotEmpty()) {
+                    val checklistItems = previewItems.mapIndexed { index, text -> 
+                        ChecklistItem(
+                            id = java.util.UUID.randomUUID().toString(),
+                            text = text, 
+                            isChecked = false, 
+                            position = state.value.editingChecklist.size + index,
+                            noteId = state.value.expandedNoteId ?: 0
+                        ) 
+                    }
+                    
+                    val newInputValues = checklistItems.associate { item ->
+                        item.id to TextFieldValue(item.text)
+                    }
+
+                    _state.value = state.value.copy(
+                        editingNoteType = "CHECKLIST",
+                        editingChecklist = state.value.editingChecklist + checklistItems,
+                        checklistInputValues = state.value.checklistInputValues + newInputValues,
+                        generatedChecklistPreview = emptyList()
+                    )
+                }
+            }
+            is NotesEvent.ClearGeneratedChecklist -> {
+                _state.value = state.value.copy(generatedChecklistPreview = emptyList(), isGeneratingChecklist = false)
             }
             is NotesEvent.OnSearchQueryChange -> {
                 _searchQuery.value = event.query

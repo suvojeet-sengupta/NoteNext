@@ -628,34 +628,38 @@ fun AddEditNoteScreen(
         }
         
         // AI Checklist Entry Point
-        var showAiChecklistDialog by remember { mutableStateOf(false) }
+        var showAiChecklistSheet by remember { mutableStateOf(false) }
         
-        // Show AI Button if: Note is new/empty text or specifically in Checklist mode with few items
-        val showAiButton = state.editingNoteType == "TEXT" && state.editingContent.text.isEmpty() || 
-                           state.editingNoteType == "CHECKLIST" && state.editingChecklist.isEmpty()
+        // Show AI Button: for empty text notes OR for checklist notes (to add more items)
+        val showAiButton = (state.editingNoteType == "TEXT" && state.editingContent.text.isEmpty()) || 
+                           state.editingNoteType == "CHECKLIST"
                            
         AnimatedVisibility(
             visible = showAiButton && !isFocusMode,
             enter = fadeIn() + slideInVertically { it },
             exit = fadeOut() + slideOutVertically { it },
             modifier = Modifier
-                .align(Alignment.BottomEnd) // Works because we are now inside Box
+                .align(Alignment.BottomEnd)
                 .padding(bottom = 140.dp, end = 16.dp) 
         ) {
             AiAssistantButton(
-                onClick = { showAiChecklistDialog = true }
+                onClick = { showAiChecklistSheet = true }
             )
         }
 
-        if (showAiChecklistDialog) {
-            AiChecklistDialog(
-                onDismiss = { showAiChecklistDialog = false },
-                onConfirm = { topic ->
-                    onEvent(NotesEvent.GenerateChecklist(topic))
-                    showAiChecklistDialog = false
-                }
-            )
-        }
+        // AI Checklist Sheet (ModalBottomSheet)
+        AiChecklistSheet(
+            isVisible = showAiChecklistSheet,
+            isGenerating = state.isGeneratingChecklist,
+            generatedItems = state.generatedChecklistPreview,
+            onDismiss = { 
+                showAiChecklistSheet = false
+                onEvent(NotesEvent.ClearGeneratedChecklist)
+            },
+            onGenerate = { topic -> onEvent(NotesEvent.GenerateChecklist(topic)) },
+            onInsert = { onEvent(NotesEvent.InsertGeneratedChecklist) },
+            onRegenerate = { topic -> onEvent(NotesEvent.GenerateChecklist(topic)) }
+        )
     } // Closes Box
 
     if (showMoreOptions) {

@@ -57,5 +57,9 @@ data class NotesState(
     val searchQuery: String = "",
     val isSummarizing: Boolean = false,
     val summaryResult: String? = null,
-    val showSummaryDialog: Boolean = false
+    val showSummaryDialog: Boolean = false,
+    
+    // AI Checklist Generation
+    val isGeneratingChecklist: Boolean = false,
+    val generatedChecklistPreview: List<String> = emptyList()
 )

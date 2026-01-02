@@ -69,6 +69,8 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.ToggleCheckedItemsExpanded -> ProjectNotesEvent.ToggleCheckedItemsExpanded
         is NotesEvent.SummarizeNote -> throw IllegalArgumentException("SummarizeNote event cannot be converted")
         is NotesEvent.GenerateChecklist -> throw IllegalArgumentException("GenerateChecklist event cannot be converted")
+        is NotesEvent.InsertGeneratedChecklist -> throw IllegalArgumentException("InsertGeneratedChecklist event cannot be converted")
+        is NotesEvent.ClearGeneratedChecklist -> throw IllegalArgumentException("ClearGeneratedChecklist event cannot be converted")
         is NotesEvent.ClearSummary -> throw IllegalArgumentException("ClearSummary event cannot be converted")
     }
 }
