@@ -645,7 +645,7 @@ fun AddEditNoteScreen(
             exit = fadeOut() + slideOutVertically { it },
             modifier = Modifier
                 .align(Alignment.BottomEnd)
-                .padding(bottom = 140.dp, end = 16.dp) 
+                .padding(bottom = 85.dp, end = 16.dp) 
         ) {
             AiAssistantButton(
                 onClick = { showAiChecklistSheet = true }
