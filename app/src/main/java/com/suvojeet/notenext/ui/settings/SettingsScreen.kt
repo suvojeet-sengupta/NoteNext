@@ -40,6 +40,7 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ImportExport
+import androidx.compose.material.icons.filled.PrivacyTip
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.compose.foundation.layout.height
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -350,6 +351,21 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                         subtitle = "Version, License & Credits",
                         iconColor = MaterialTheme.colorScheme.onSurfaceVariant, // Neutral color for about
                         onClick = { onNavigate("about") }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    SettingsItem(
+                        icon = androidx.compose.material.icons.Icons.Filled.PrivacyTip,
+                        title = "Privacy Policy",
+                        subtitle = "Read our privacy policy",
+                        iconColor = MaterialTheme.colorScheme.onSurfaceVariant,
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://suvojeet-sengupta.github.io/NoteNext/"))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                // Handle case where no browser is installed
+                            }
+                        }
                     )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
