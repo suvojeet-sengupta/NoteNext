@@ -638,8 +638,9 @@ fun AddEditNoteScreen(
             showHistoryDialog = { showHistoryDialog = it },
             onPrint = {
                 scope.launch {
-                    val html = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
-                    printNote(context, html)
+                    val htmlContent = HtmlConverter.annotatedStringToHtml(state.editingContent.annotatedString)
+                    val fullHtml = "<h1>${state.editingTitle}</h1><br>$htmlContent"
+                    printNote(context, fullHtml)
                 }
             },
             onToggleLock = {
