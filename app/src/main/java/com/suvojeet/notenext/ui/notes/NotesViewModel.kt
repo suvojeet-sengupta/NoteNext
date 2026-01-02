@@ -119,9 +119,20 @@ class NotesViewModel @Inject constructor(
                                 isGeneratingChecklist = false,
                                 generatedChecklistPreview = items
                             )
-                        }.onFailure {
+                        }.onFailure { error ->
                             _state.value = state.value.copy(isGeneratingChecklist = false, generatedChecklistPreview = emptyList())
-                            _events.emit(NotesUiEvent.ShowToast("Failed to generate checklist: ${it.message}"))
+                            val errorMessage = when {
+                                error.message?.contains("429") == true || 
+                                error.message?.contains("rate limit", ignoreCase = true) == true ->
+                                    "Too many requests. Please wait a moment and try again."
+                                error.message?.contains("401") == true ||
+                                error.message?.contains("unauthorized", ignoreCase = true) == true ->
+                                    "API authentication failed. Please check your API key."
+                                error.message?.contains("timeout", ignoreCase = true) == true ->
+                                    "Request timed out. Please try again."
+                                else -> "Failed to generate checklist: ${error.message}"
+                            }
+                            _events.emit(NotesUiEvent.ShowToast(errorMessage))
                         }
                     }
                 }

@@ -1,6 +1,9 @@
 package com.suvojeet.notenext.ui.add_edit_note.components
 
 import android.content.Context
+import android.net.ConnectivityManager
+import android.net.NetworkCapabilities
+import android.widget.Toast
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -62,9 +65,21 @@ fun AiChecklistSheet(
         }
     }
     
+    // Check network connectivity
+    fun isNetworkAvailable(): Boolean {
+        val connectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+        val network = connectivityManager.activeNetwork ?: return false
+        val capabilities = connectivityManager.getNetworkCapabilities(network) ?: return false
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    }
+    
     // Save prompt to history when generating
     fun saveAndGenerate(prompt: String) {
         if (prompt.isNotBlank()) {
+            if (!isNetworkAvailable()) {
+                Toast.makeText(context, "No internet connection. Please check your network.", Toast.LENGTH_SHORT).show()
+                return
+            }
             promptHistory = savePromptToHistory(context, prompt, promptHistory)
             onGenerate(prompt)
         }
@@ -361,7 +376,8 @@ private fun EditableItemRow(
                 fontSize = MaterialTheme.typography.bodyMedium.fontSize
             ),
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            singleLine = true
+            singleLine = false,
+            maxLines = 3  // Prevent overflow for long items
         )
         
         IconButton(
