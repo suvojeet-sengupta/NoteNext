@@ -335,6 +335,10 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                                 context.startActivity(Intent.createChooser(intent, "Share via"))
                             }
                         )
+                        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                        
+                        // Check for Update Item
+                        CheckForUpdateItem(context = context)
                     }
                 }
             }
@@ -907,4 +911,163 @@ fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
             }
         }
     )
+}
+
+@Composable
+private fun CheckForUpdateItem(context: android.content.Context) {
+    var isChecking by remember { mutableStateOf(false) }
+    var showResultDialog by remember { mutableStateOf(false) }
+    var updateResult by remember { mutableStateOf<com.suvojeet.notenext.util.UpdateChecker.UpdateResult?>(null) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    
+    val updateChecker = remember { com.suvojeet.notenext.util.UpdateChecker(context) }
+    val scope = rememberCoroutineScope()
+    
+    // Get current version  
+    val currentVersionName = remember {
+        try {
+            context.packageManager.getPackageInfo(context.packageName, 0).versionName ?: "Unknown"
+        } catch (e: Exception) {
+            "Unknown"
+        }
+    }
+
+    ListItem(
+        headlineContent = { 
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text("Check for Updates")
+                if (isChecking) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    androidx.compose.material3.CircularProgressIndicator(
+                        modifier = Modifier.size(16.dp),
+                        strokeWidth = 2.dp
+                    )
+                }
+            }
+        },
+        supportingContent = { 
+            Text(
+                if (errorMessage != null) errorMessage!! 
+                else "Current: v$currentVersionName"
+            )
+        },
+        leadingContent = {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(Color(0xFF2196F3).copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = androidx.compose.material.icons.Icons.Default.SystemUpdate,
+                    contentDescription = null,
+                    tint = Color(0xFF2196F3),
+                    modifier = Modifier.size(22.dp)
+                )
+            }
+        },
+        modifier = Modifier.clickable(enabled = !isChecking) {
+            isChecking = true
+            errorMessage = null
+            scope.launch {
+                updateChecker.checkForUpdate()
+                    .onSuccess { result ->
+                        updateResult = result
+                        showResultDialog = true
+                        isChecking = false
+                    }
+                    .onFailure { error ->
+                        errorMessage = error.message ?: "Check failed"
+                        isChecking = false
+                    }
+            }
+        },
+        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+    )
+    
+    // Result Dialog
+    if (showResultDialog && updateResult != null) {
+        val result = updateResult!!
+        AlertDialog(
+            onDismissRequest = { showResultDialog = false },
+            icon = {
+                Icon(
+                    imageVector = if (result.isUpdateAvailable) 
+                        androidx.compose.material.icons.Icons.Default.SystemUpdate 
+                    else 
+                        androidx.compose.material.icons.Icons.Default.CheckCircle,
+                    contentDescription = null,
+                    tint = if (result.isUpdateAvailable) 
+                        MaterialTheme.colorScheme.primary 
+                    else 
+                        Color(0xFF4CAF50),
+                    modifier = Modifier.size(48.dp)
+                )
+            },
+            title = {
+                Text(
+                    text = if (result.isUpdateAvailable) "Update Available!" else "You're Up to Date!",
+                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                )
+            },
+            text = {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    if (result.isUpdateAvailable) {
+                        Text(
+                            text = "A new version is available on the Play Store.",
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "New version code: ${result.availableVersionCode}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        result.stalenessDays?.let { days ->
+                            if (days > 0) {
+                                Spacer(modifier = Modifier.height(4.dp))
+                                Text(
+                                    text = "Released $days days ago",
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    } else {
+                        Text(
+                            text = "You're running the latest version of NoteNext!",
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            },
+            confirmButton = {
+                if (result.isUpdateAvailable) {
+                    androidx.compose.material3.Button(
+                        onClick = {
+                            showResultDialog = false
+                            val activity = context as? android.app.Activity
+                            activity?.let { updateChecker.openPlayStore(it) }
+                        }
+                    ) {
+                        Text("Update Now")
+                    }
+                } else {
+                    TextButton(onClick = { showResultDialog = false }) {
+                        Text("OK")
+                    }
+                }
+            },
+            dismissButton = {
+                if (result.isUpdateAvailable) {
+                    TextButton(onClick = { showResultDialog = false }) {
+                        Text("Later")
+                    }
+                }
+            }
+        )
+    }
 }
