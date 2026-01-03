@@ -193,10 +193,10 @@ fun NoteItem(
                     // Note Content Preview (Dynamic Sizing)
                     if ((note.note.noteType == "TEXT" && note.note.content.isNotEmpty()) || (note.note.noteType == "CHECKLIST" && note.checklistItems.isNotEmpty())) {
                         if (note.note.noteType == "TEXT") {
-                            val plainTextState = androidx.compose.runtime.produceState(initialValue = "", note.note.content) {
-                                value = HtmlConverter.htmlToPlainText(note.note.content)
+                            // Use remember instead of produceState to ensure stable height calculation
+                            val plainText = remember(note.note.content) {
+                                HtmlConverter.htmlToPlainText(note.note.content)
                             }
-                            val plainText = plainTextState.value
                             val contentLength = plainText.length
                             
                             val (fontSize, lineHeight, maxLines) = when {
@@ -207,10 +207,10 @@ fun NoteItem(
     
                             val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
     
-                            val annotatedContentState = androidx.compose.runtime.produceState(initialValue = androidx.compose.ui.text.AnnotatedString(""), note.note.content) {
-                                value = HtmlConverter.htmlToAnnotatedString(note.note.content)
+                            // Use remember instead of produceState for stable annotated content
+                            val annotatedContent = remember(note.note.content) {
+                                HtmlConverter.htmlToAnnotatedString(note.note.content)
                             }
-                            val annotatedContent = annotatedContentState.value
                             val highlightedContent = if (searchQuery.isNotEmpty()) {
                                 buildAnnotatedString {
                                     append(annotatedContent)
