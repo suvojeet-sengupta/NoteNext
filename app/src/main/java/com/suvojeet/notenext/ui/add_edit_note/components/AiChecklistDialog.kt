@@ -50,7 +50,13 @@ fun AiChecklistSheet(
 ) {
     val context = LocalContext.current
     var topic by remember { mutableStateOf("") }
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val sheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true,
+        confirmValueChange = { sheetValue ->
+            // Only allow dismissing from expanded state, prevents accidental swipe
+            sheetValue != SheetValue.Hidden
+        }
+    )
     
     // Local state for editable items
     var editableItems by remember { mutableStateOf(listOf<String>()) }
