@@ -193,24 +193,26 @@ fun NoteItem(
                     // Note Content Preview (Dynamic Sizing)
                     if ((note.note.noteType == "TEXT" && note.note.content.isNotEmpty()) || (note.note.noteType == "CHECKLIST" && note.checklistItems.isNotEmpty())) {
                         if (note.note.noteType == "TEXT") {
-                            // Use remember instead of produceState to ensure stable height calculation
-                            val plainText = remember(note.note.content) {
-                                HtmlConverter.htmlToPlainText(note.note.content)
-                            }
-                            val contentLength = plainText.length
+                            // Use raw content length for stable sizing (prevents height jumping)
+                            val rawContentLength = note.note.content.length
                             
+                            // Stable sizing based on raw HTML length (approximate)
                             val (fontSize, lineHeight, maxLines) = when {
-                                contentLength < 50 -> Triple(22.sp, 28.sp, 6)
-                                contentLength < 120 -> Triple(16.sp, 22.sp, 8)
+                                rawContentLength < 100 -> Triple(22.sp, 28.sp, 6)
+                                rawContentLength < 250 -> Triple(16.sp, 22.sp, 8)
                                 else -> Triple(14.sp, 20.sp, 10)
                             }
     
-                            val fontWeight = if (note.note.title.isEmpty() && contentLength < 50) FontWeight.SemiBold else FontWeight.Normal
+                            val fontWeight = if (note.note.title.isEmpty() && rawContentLength < 100) FontWeight.SemiBold else FontWeight.Normal
     
-                            // Use remember instead of produceState for stable annotated content
-                            val annotatedContent = remember(note.note.content) {
-                                HtmlConverter.htmlToAnnotatedString(note.note.content)
+                            // Use produceState for async conversion with stable initial value
+                            val annotatedContentState = androidx.compose.runtime.produceState(
+                                initialValue = androidx.compose.ui.text.AnnotatedString(note.note.content.take(500)),
+                                note.note.content
+                            ) {
+                                value = HtmlConverter.htmlToAnnotatedString(note.note.content)
                             }
+                            val annotatedContent = annotatedContentState.value
                             val highlightedContent = if (searchQuery.isNotEmpty()) {
                                 buildAnnotatedString {
                                     append(annotatedContent)
