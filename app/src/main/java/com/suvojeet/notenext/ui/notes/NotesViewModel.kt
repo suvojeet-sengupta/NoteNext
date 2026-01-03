@@ -380,7 +380,18 @@ class NotesViewModel @Inject constructor(
                     for (note in selectedNotes) {
                         repository.updateNote(note.note.copy(color = event.color))
                     }
-                    _state.value = state.value.copy(selectedNoteIds = emptyList())
+                    // Update local state immediately so UI reflects the change
+                    val updatedNotesList = state.value.notes.map { noteWithAttachments ->
+                        if (state.value.selectedNoteIds.contains(noteWithAttachments.note.id)) {
+                            noteWithAttachments.copy(note = noteWithAttachments.note.copy(color = event.color))
+                        } else {
+                            noteWithAttachments
+                        }
+                    }
+                    _state.value = state.value.copy(
+                        notes = updatedNotesList,
+                        selectedNoteIds = emptyList()
+                    )
                     _events.emit(NotesUiEvent.ShowToast("Color updated"))
                 }
             }

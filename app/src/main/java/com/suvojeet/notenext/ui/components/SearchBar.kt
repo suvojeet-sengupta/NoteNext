@@ -291,6 +291,7 @@ fun SearchBar(
                                     onSortMenuDismissRequest()
                                 }
                             )
+                        }
                     }
                 }
             }
