@@ -108,7 +108,7 @@ fun NoteItem(
                 .fillMaxSize()
                 .then(
                     if (!isDefaultColor) {
-                        Modifier.background(brush = NoteGradients.getGradientBrush(note.note.color))
+                        Modifier.background(brush = NoteGradients.getColorBrush(note.note.color))
                     } else {
                         Modifier
                     }

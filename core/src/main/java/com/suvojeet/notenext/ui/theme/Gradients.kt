@@ -2,6 +2,7 @@ package com.suvojeet.notenext.ui.theme
 
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.toArgb
 
 object NoteGradients {
@@ -40,96 +41,9 @@ object NoteGradients {
         return if (isDarkTheme) darkNoteColors else lightNoteColors
     }
 
-    fun getGradientBrush(colorInt: Int): Brush {
-        val color = Color(colorInt)
-        
-        return when {
-            // Blue/Purple Aesthetic
-            isSimilar(color, Color(0xFFD7AEFB)) || isSimilar(color, Color(0xFF7986CB)) || isSimilar(color, Color(0xFF9FA8DA)) || isSimilar(color, Color(0xFF4A148C)) || isSimilar(color, Color(0xFF1A237E)) -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFA9C9FF),
-                        Color(0xFF99A3FF),
-                        Color(0xFFBFA3FF)
-                    )
-                )
-            }
-            // Green/Yellow Aesthetic
-            isSimilar(color, Color(0xFFCCFF90)) || isSimilar(color, Color(0xFFE6C9A8)) || isSimilar(color, Color(0xFFFFF475)) || isSimilar(color, Color(0xFF2E7D32)) || isSimilar(color, Color(0xFFF57F17)) -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFDFFAE),
-                        Color(0xFFDBF3A6),
-                        Color(0xFFA7E2A8)
-                    )
-                )
-            }
-            // Pink/Red Aesthetic
-            isSimilar(color, Color(0xFFF28B82)) || isSimilar(color, Color(0xFFFDCFE8)) || isSimilar(color, Color(0xFFB71C1C)) || isSimilar(color, Color(0xFF880E4F)) -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFFD1D1),
-                        Color(0xFFFF9E9E),
-                        Color(0xFFF48FB1)
-                    )
-                )
-            }
-            // Orange Aesthetic
-            isSimilar(color, Color(0xFFFCBC05)) || isSimilar(color, Color(0xFFE65100)) -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFFFE0B2),
-                        Color(0xFFFFCC80),
-                        Color(0xFFFFB74D)
-                    )
-                )
-            }
-            // Teal/Blue Aesthetic
-            isSimilar(color, Color(0xFFA7FFEB)) || isSimilar(color, Color(0xFFCBF0F8)) || isSimilar(color, Color(0xFF006064)) || isSimilar(color, Color(0xFF01579B)) -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFE0F7FA),
-                        Color(0xFF80DEEA),
-                        Color(0xFF4DD0E1)
-                    )
-                )
-            }
-            // Dark Gradient (If note color is dark gray/black/brown)
-            color.red < 0.35f && color.green < 0.35f && color.blue < 0.35f && color.alpha > 0.5f -> {
-                 Brush.verticalGradient(
-                    colors = listOf(
-                        Color(0xFF3D3D3D),
-                        Color(0xFF2B2B2B)
-                    )
-                )
-            }
-            // Gray Aesthetic
-            isSimilar(color, Color(0xFFE8EAED)) || isSimilar(color, Color(0xFF424242)) -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        Color(0xFFF5F5F5),
-                        Color(0xFFE0E0E0),
-                        Color(0xFFBDBDBD)
-                    )
-                )
-            }
-            // Fallback for other custom colors
-            else -> {
-                Brush.linearGradient(
-                    colors = listOf(
-                        color.copy(alpha = 0.7f),
-                        color
-                    )
-                )
-            }
-        }
-    }
-
-    private fun isSimilar(c1: Color, c2: Color, threshold: Double = 0.15): Boolean {
-        val r = c1.red - c2.red
-        val g = c1.green - c2.green
-        val b = c1.blue - c2.blue
-        return (r*r + g*g + b*b) < threshold
+    // Simple solid color brush instead of gradient
+    fun getColorBrush(colorInt: Int): Brush {
+        return SolidColor(Color(colorInt))
     }
 
     fun getContentColor(colorInt: Int): Color {
@@ -147,5 +61,3 @@ object NoteGradients {
         }
     }
 }
-
-
