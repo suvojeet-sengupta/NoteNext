@@ -517,14 +517,8 @@ class NotesViewModel @Inject constructor(
                             editingLabel = null,
                             linkPreviews = emptyList(),
                             editingNoteType = event.noteType,
-                            editingChecklist = if (event.noteType == "CHECKLIST") {
-                                val newItem = ChecklistItem(text = "", isChecked = false)
-                                listOf(newItem)
-                            } else emptyList(),
-                            checklistInputValues = if (event.noteType == "CHECKLIST") {
-                                val newItem = ChecklistItem(text = "", isChecked = false)
-                                mapOf(newItem.id to TextFieldValue(""))
-                            } else emptyMap(),
+                            editingChecklist = emptyList(),
+                            checklistInputValues = emptyMap(),
                             editingAttachments = emptyList(),
                             editingIsLocked = false,
                             editingNoteVersions = emptyList(),
