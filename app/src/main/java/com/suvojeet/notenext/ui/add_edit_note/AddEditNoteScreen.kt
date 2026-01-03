@@ -294,6 +294,7 @@ fun AddEditNoteScreen(
     Box(modifier = modifier.fillMaxSize()) {
         Scaffold(
             modifier = Modifier.imePadding(),
+            containerColor = backgroundColor, // Full screen note color like Google Keep
             topBar = {
                 AnimatedVisibility(
                     visible = !isFocusMode,
@@ -309,7 +310,9 @@ fun AddEditNoteScreen(
                         onToggleFocusMode = { isFocusMode = !isFocusMode },
                         isFocusMode = isFocusMode,
                         onToggleMarkdownPreview = { showMarkdownPreview = !showMarkdownPreview },
-                        isMarkdownPreviewVisible = showMarkdownPreview
+                        isMarkdownPreviewVisible = showMarkdownPreview,
+                        backgroundColor = backgroundColor,
+                        contentColor = contentColor
                     )
                 }
             },
@@ -339,7 +342,8 @@ fun AddEditNoteScreen(
                         onAudioClick = {
                             Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
                         },
-                        themeMode = themeMode
+                        themeMode = themeMode,
+                        backgroundColor = backgroundColor
                     )
                 }
             }

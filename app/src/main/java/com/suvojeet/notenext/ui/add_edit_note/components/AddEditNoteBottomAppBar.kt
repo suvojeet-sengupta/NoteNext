@@ -82,13 +82,14 @@ fun AddEditNoteBottomAppBar(
     onImageClick: () -> Unit,
     onTakePhotoClick: () -> Unit,
     onAudioClick: () -> Unit,
-    themeMode: ThemeMode
+    themeMode: ThemeMode,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface
 ) {
     var showAttachmentMenu by remember { mutableStateOf(false) }
 
     BottomAppBar(
-        containerColor = MaterialTheme.colorScheme.surface, // Background color matches the note's editing color.
-        windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp) // Remove default window insets for full-bleed.
+        containerColor = backgroundColor, // Background color matches the note's color
+        windowInsets = WindowInsets(0.dp, 0.dp, 0.dp, 0.dp) // Remove default window insets for full-bleed
     ) {
         Row(
             modifier = Modifier

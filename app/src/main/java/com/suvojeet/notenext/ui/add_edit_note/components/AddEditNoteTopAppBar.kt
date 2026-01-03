@@ -56,7 +56,9 @@ fun AddEditNoteTopAppBar(
     onToggleFocusMode: () -> Unit,
     isFocusMode: Boolean,
     onToggleMarkdownPreview: () -> Unit,
-    isMarkdownPreviewVisible: Boolean
+    isMarkdownPreviewVisible: Boolean,
+    backgroundColor: Color = MaterialTheme.colorScheme.surface,
+    contentColor: Color = MaterialTheme.colorScheme.onSurface
 ) {
     TopAppBar(
         title = {
@@ -68,12 +70,13 @@ fun AddEditNoteTopAppBar(
         navigationIcon = {
             // Back button to dismiss the screen.
             IconButton(onClick = onDismiss) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back), tint = contentColor)
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
-            containerColor = MaterialTheme.colorScheme.surface, // Background color matches the note's editing color.
-            titleContentColor = MaterialTheme.colorScheme.onSurface, // Content color adapts to background.
+            containerColor = backgroundColor, // Background color matches the note's color
+            titleContentColor = contentColor, // Content color adapts to background
+            actionIconContentColor = contentColor
         ),
         actions = {
             // Markdown Preview Toggle
