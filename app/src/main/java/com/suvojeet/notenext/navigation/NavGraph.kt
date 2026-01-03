@@ -305,6 +305,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                         themeMode = themeMode,
                         settingsRepository = settingsRepository,
                         onMenuClick = { scope.launch { drawerState.open() } },
+                        onScanQrClick = { navController.navigate("qr_scanner") },
                         events = notesViewModel.events
                     )
                 }
@@ -634,6 +635,7 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                         themeMode = themeMode,
                         settingsRepository = settingsRepository,
                         onMenuClick = { scope.launch { drawerState.open() } },
+                        onScanQrClick = { navController.navigate("qr_scanner") },
                         events = notesViewModel.events
                     )
                 }

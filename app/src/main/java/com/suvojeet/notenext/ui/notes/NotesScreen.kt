@@ -94,6 +94,7 @@ fun NotesScreen(
     themeMode: ThemeMode,
     settingsRepository: SettingsRepository,
     onMenuClick: () -> Unit,
+    onScanQrClick: () -> Unit = {},
     events: SharedFlow<NotesUiEvent>
 ) {
     val state by viewModel.state.collectAsState()
@@ -286,6 +287,10 @@ fun NotesScreen(
                                 },
                                 onProjectClick = {
                                     showCreateProjectDialog = true
+                                    isFabExpanded = false
+                                },
+                                onScanQrClick = {
+                                    onScanQrClick()
                                     isFabExpanded = false
                                 },
                                 themeMode = themeMode,

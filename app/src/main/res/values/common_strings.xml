@@ -24,6 +24,7 @@
     <string name="others">OTHERS</string>
     <string name="note">Note</string>
     <string name="checklist">Checklist</string>
+    <string name="scan_qr">Scan QR</string>
     <string name="add_note">Add Note</string>
     <string name="add_checklist">Add Checklist</string>
     <string name="move_to_bin_question">Move note to bin?</string>

@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Note
+import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FloatingActionButton
@@ -65,6 +66,7 @@ fun MultiActionFab(
     onNoteClick: () -> Unit,
     onChecklistClick: () -> Unit,
     onProjectClick: () -> Unit,
+    onScanQrClick: () -> Unit = {},
     showProjectButton: Boolean = true,
     themeMode: ThemeMode,
     isScrollExpanded: Boolean = true // New parameter for scroll awareness
@@ -77,6 +79,7 @@ fun MultiActionFab(
 
     // State variables to control the staggered visibility of action items.
     var showProject by remember { mutableStateOf(false) }
+    var showScanQr by remember { mutableStateOf(false) }
     var showChecklist by remember { mutableStateOf(false) }
     var showNote by remember { mutableStateOf(false) }
 
@@ -88,10 +91,14 @@ fun MultiActionFab(
             kotlinx.coroutines.delay(50)
             showChecklist = true
             kotlinx.coroutines.delay(50)
+            showScanQr = true
+            kotlinx.coroutines.delay(50)
             showProject = true
         } else {
             // When collapsing, hide items with a slight delay in reverse order.
             showProject = false
+            kotlinx.coroutines.delay(50)
+            showScanQr = false
             kotlinx.coroutines.delay(50)
             showChecklist = false
             kotlinx.coroutines.delay(50)
@@ -125,6 +132,23 @@ fun MultiActionFab(
                 label = stringResource(id = R.string.projects),
                 onClick = {
                     onProjectClick()
+                    onExpandedChange(false) // Collapse FAB after action.
+                },
+                themeMode = themeMode
+            )
+        }
+
+        // Scan QR action item.
+        AnimatedVisibility(
+            visible = showScanQr,
+            enter = fadeIn() + slideInVertically(initialOffsetY = { it }),
+            exit = fadeOut() + slideOutVertically(targetOffsetY = { it })
+        ) {
+            FabItem(
+                icon = Icons.Default.QrCodeScanner,
+                label = stringResource(id = R.string.scan_qr),
+                onClick = {
+                    onScanQrClick()
                     onExpandedChange(false) // Collapse FAB after action.
                 },
                 themeMode = themeMode
