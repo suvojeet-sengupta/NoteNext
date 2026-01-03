@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -57,18 +58,20 @@ fun NoteItem(
     searchQuery: String = "",
     onNoteClick: () -> Unit,
     onNoteLongClick: () -> Unit,
-    binnedDaysRemaining: Int? = null
+    binnedDaysRemaining: Int? = null,
+    isDarkTheme: Boolean = isSystemInDarkTheme()
 ) {
+    // Get theme-adaptive color (maps dark colors to light equivalents when in light mode, etc.)
+    val adaptiveColor = NoteGradients.getAdaptiveColor(note.note.color, isDarkTheme)
+    
     // Check if the note has a custom color or is using the default (0)
-    val isDefaultColor = note.note.color == 0
-
-    // ... (rest of the color logic)
+    val isDefaultColor = adaptiveColor == 0
 
     // Determine colors based on whether it's default or custom
     val contentColor = if (isDefaultColor) {
         MaterialTheme.colorScheme.onSurface // Default Theme Text Color
     } else {
-        NoteGradients.getContentColor(note.note.color) // Dynamic Text Color for Gradient
+        NoteGradients.getContentColor(adaptiveColor) // Dynamic Text Color based on adaptive color
     }
     
     val tintColor = if (isDefaultColor) {
@@ -108,7 +111,7 @@ fun NoteItem(
                 .fillMaxSize()
                 .then(
                     if (!isDefaultColor) {
-                        Modifier.background(brush = NoteGradients.getColorBrush(note.note.color))
+                        Modifier.background(brush = NoteGradients.getColorBrush(adaptiveColor))
                     } else {
                         Modifier
                     }

@@ -274,19 +274,22 @@ fun AddEditNoteScreen(
         else -> false
     }
     
-    // Use unified colors from NoteGradients
+    // Use unified colors from NoteGradients for color picker
     val colors = NoteGradients.getNoteColors(isDarkTheme)
+    
+    // Get theme-adaptive color (maps dark colors to light equivalents when in light mode, etc.)
+    val adaptiveColor = NoteGradients.getAdaptiveColor(state.editingColor, isDarkTheme)
 
-    // Use note's color if set, otherwise use theme surface color
-    val backgroundColor = if (state.editingColor != 0) {
-        Color(state.editingColor)
+    // Use note's adaptive color if set, otherwise use theme surface color
+    val backgroundColor = if (adaptiveColor != 0) {
+        Color(adaptiveColor)
     } else {
         MaterialTheme.colorScheme.surface
     }
     
-    // Get content color based on background for text visibility
-    val contentColor = if (state.editingColor != 0) {
-        NoteGradients.getContentColor(state.editingColor)
+    // Get content color based on adaptive background for text visibility
+    val contentColor = if (adaptiveColor != 0) {
+        NoteGradients.getContentColor(adaptiveColor)
     } else {
         MaterialTheme.colorScheme.onSurface
     }
