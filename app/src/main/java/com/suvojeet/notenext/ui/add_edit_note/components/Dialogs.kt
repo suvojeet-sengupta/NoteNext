@@ -1,23 +1,37 @@
 package com.suvojeet.notenext.ui.add_edit_note.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Description
+import androidx.compose.material.icons.filled.PictureAsPdf
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
 /**
- * A dialog that allows the user to choose a format (PDF or TXT) to save the current note.
+ * A redesigned dialog that allows the user to choose a format (PDF, TXT, or Markdown) to export the current note.
+ * Features a modern card-based design with icons and format descriptions.
  *
- * @param onDismiss Lambda to be invoked when the dialog is dismissed (e.g., by clicking cancel or outside).
+ * @param onDismiss Lambda to be invoked when the dialog is dismissed.
  * @param onSaveAsPdf Lambda to be invoked when the "PDF" save option is selected.
  * @param onSaveAsTxt Lambda to be invoked when the "TXT" save option is selected.
+ * @param onSaveAsMd Lambda to be invoked when the "Markdown" save option is selected.
  */
 @Composable
 fun SaveAsDialog(
@@ -26,45 +40,131 @@ fun SaveAsDialog(
     onSaveAsTxt: () -> Unit,
     onSaveAsMd: () -> Unit
 ) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        title = { Text(text = stringResource(id = R.string.save_note_as)) },
-        text = {
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                // Header
+                Text(
+                    text = stringResource(id = R.string.save_note_as),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(id = R.string.select_format_to_save_note),
-                    modifier = Modifier.padding(bottom = 8.dp)
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                OutlinedButton(
-                    onClick = { onSaveAsPdf(); onDismiss() },
-                    modifier = Modifier.fillMaxWidth()
+                
+                Spacer(modifier = Modifier.height(24.dp))
+                
+                // Format Options
+                SaveFormatOption(
+                    icon = Icons.Default.PictureAsPdf,
+                    title = "PDF Document",
+                    description = "Best for printing & sharing with formatting",
+                    iconColor = Color(0xFFE53935), // Red
+                    onClick = { onSaveAsPdf(); onDismiss() }
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                SaveFormatOption(
+                    icon = Icons.Default.Description,
+                    title = "Plain Text (.txt)",
+                    description = "Simple text, works everywhere",
+                    iconColor = Color(0xFF43A047), // Green
+                    onClick = { onSaveAsTxt(); onDismiss() }
+                )
+                
+                Spacer(modifier = Modifier.height(12.dp))
+                
+                SaveFormatOption(
+                    icon = Icons.Default.Code,
+                    title = "Markdown (.md)",
+                    description = "For developers & note-taking apps",
+                    iconColor = Color(0xFF1E88E5), // Blue
+                    onClick = { onSaveAsMd(); onDismiss() }
+                )
+                
+                Spacer(modifier = Modifier.height(16.dp))
+                
+                // Cancel Button
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
                 ) {
-                    Text(stringResource(id = R.string.pdf))
+                    Text(stringResource(id = R.string.cancel))
                 }
-                OutlinedButton(
-                    onClick = { onSaveAsTxt(); onDismiss() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(stringResource(id = R.string.txt))
-                }
-                OutlinedButton(
-                    onClick = { onSaveAsMd(); onDismiss() },
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text("Markdown (.md)")
-                }
-            }
-        },
-        confirmButton = {},
-        dismissButton = {
-            TextButton(onClick = onDismiss) {
-                Text(stringResource(id = R.string.cancel))
             }
         }
-    )
+    }
+}
+
+@Composable
+private fun SaveFormatOption(
+    icon: ImageVector,
+    title: String,
+    description: String,
+    iconColor: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        ),
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onClick)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            // Icon
+            Box(
+                modifier = Modifier
+                    .size(48.dp)
+                    .clip(CircleShape)
+                    .background(iconColor.copy(alpha = 0.1f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = icon,
+                    contentDescription = title,
+                    tint = iconColor,
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
+            
+            // Text
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
 }
 
 /**
