@@ -163,11 +163,21 @@ fun SearchBar(
                 }
             }
             // Search TextField
+            val focusRequester = remember { FocusRequester() }
+            
+            // Request focus when search becomes active
+            LaunchedEffect(isSearchActive) {
+                if (isSearchActive) {
+                    focusRequester.requestFocus()
+                }
+            }
+            
             BasicTextField(
                 value = searchQuery,
                 onValueChange = onSearchQueryChange,
                 modifier = Modifier
                     .weight(1f)
+                    .focusRequester(focusRequester)
                     .onFocusChanged { focusState ->
                         isSearchFocused = focusState.isFocused
                         if (focusState.isFocused) onSearchActiveChange(true)
@@ -179,7 +189,18 @@ fun SearchBar(
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                 decorationBox = { innerTextField ->
-                    Box(contentAlignment = Alignment.CenterStart) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null
+                            ) {
+                                onSearchActiveChange(true)
+                                focusRequester.requestFocus()
+                            },
+                        contentAlignment = Alignment.CenterStart
+                    ) {
                         if (searchQuery.isEmpty() && isSearchActive) {
                             Text(
                                 stringResource(id = R.string.search_notes),
