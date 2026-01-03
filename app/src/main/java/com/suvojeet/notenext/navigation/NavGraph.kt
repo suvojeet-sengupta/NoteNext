@@ -77,6 +77,7 @@ import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.repository.SettingsRepository
 import com.suvojeet.notenext.ui.settings.BackupScreen
+import com.suvojeet.notenext.ui.qr.QrScannerScreen
 
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.map
@@ -408,6 +409,19 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                 ) {
                     AboutScreen(
                         onBackClick = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "qr_scanner",
+                    enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                    exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                ) {
+                    QrScannerScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onNoteScanned = { title, content ->
+                            notesViewModel.onEvent(NotesEvent.CreateNoteFromQr(title, content))
+                            navController.popBackStack()
+                        }
                     )
                 }
                 composable(
@@ -762,6 +776,19 @@ fun NavGraph(themeMode: ThemeMode, windowSizeClass: WindowSizeClass, startNoteId
                 ) {
                     AboutScreen(
                         onBackClick = { navController.popBackStack() }
+                    )
+                }
+                composable(
+                    route = "qr_scanner",
+                    enterTransition = { slideInHorizontally(initialOffsetX = { it }, animationSpec = tween(300)) },
+                    exitTransition = { slideOutHorizontally(targetOffsetX = { it }, animationSpec = tween(300)) }
+                ) {
+                    QrScannerScreen(
+                        onBackClick = { navController.popBackStack() },
+                        onNoteScanned = { title, content ->
+                            notesViewModel.onEvent(NotesEvent.CreateNoteFromQr(title, content))
+                            navController.popBackStack()
+                        }
                     )
                 }
                 composable(

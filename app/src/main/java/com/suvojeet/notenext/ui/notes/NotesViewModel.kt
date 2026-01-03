@@ -561,6 +561,30 @@ class NotesViewModel @Inject constructor(
             is NotesEvent.CollapseNote -> {
                 onEvent(NotesEvent.OnSaveNoteClick)
             }
+            is NotesEvent.CreateNoteFromQr -> {
+                viewModelScope.launch {
+                    undoRedoManager.reset("" to TextFieldValue())
+                    _state.value = state.value.copy(
+                        expandedNoteId = -1,
+                        editingTitle = event.title,
+                        editingContent = TextFieldValue(event.content),
+                        editingColor = 0,
+                        editingIsNewNote = true,
+                        editingLastEdited = 0,
+                        canUndo = false,
+                        canRedo = false,
+                        editingLabel = null,
+                        linkPreviews = emptyList(),
+                        editingNoteType = "TEXT",
+                        editingChecklist = emptyList(),
+                        checklistInputValues = emptyMap(),
+                        editingAttachments = emptyList(),
+                        editingIsLocked = false,
+                        editingNoteVersions = emptyList()
+                    )
+                    _events.emit(NotesUiEvent.ShowToast("Note imported from QR code!"))
+                }
+            }
             is NotesEvent.AddChecklistItem -> {
                 val newItem = ChecklistItem(text = "", isChecked = false, position = state.value.editingChecklist.size)
                 val updatedChecklist = state.value.editingChecklist + newItem

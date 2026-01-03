@@ -77,6 +77,7 @@ sealed class NotesEvent {
     data class CreateProject(val name: String) : NotesEvent()
     data class MoveSelectedNotesToProject(val projectId: Int?) : NotesEvent()
     data class CreateNoteFromSharedText(val text: String) : NotesEvent()
+    data class CreateNoteFromQr(val title: String, val content: String) : NotesEvent()
     data class OnSearchQueryChange(val query: String) : NotesEvent()
     data class OnRestoreVersion(val version: NoteVersion) : NotesEvent()
     data class NavigateToNoteByTitle(val title: String) : NotesEvent()
