@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.LockOpen
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.FileDownload
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -125,7 +126,7 @@ fun MoreOptionsSheet(
             })
             options.add(OptionItem(stringResource(id = R.string.labels), Icons.AutoMirrored.Filled.Label) { onEvent(NotesEvent.OnAddLabelsToCurrentNoteClick) })
             options.add(OptionItem("Print", Icons.Default.Print) { onPrint() })
-            options.add(OptionItem(stringResource(id = R.string.save_as), Icons.Default.Check) { showSaveAsDialog(true) })
+            options.add(OptionItem(stringResource(id = R.string.save_as), Icons.Default.FileDownload) { showSaveAsDialog(true) })
             
             if (!state.editingIsNewNote) {
                 options.add(OptionItem(stringResource(id = R.string.history), Icons.Default.History) { showHistoryDialog(true) })
