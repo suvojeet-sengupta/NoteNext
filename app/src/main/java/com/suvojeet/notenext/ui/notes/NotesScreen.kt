@@ -80,6 +80,8 @@ import androidx.compose.ui.res.stringResource
 import com.suvojeet.notenext.R
 
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
+import com.suvojeet.notenext.ui.components.ShareOptionsDialog
+import com.suvojeet.notenext.ui.components.QrCodeDisplayDialog
 import com.suvojeet.notenext.util.findActivity
 import kotlinx.coroutines.flow.SharedFlow
 
@@ -117,6 +119,7 @@ fun NotesScreen(
     var showMoveToProjectDialog by remember { mutableStateOf(false) }
     var showColorPickerDialog by remember { mutableStateOf(false) }
     var showWhatsNewDialog by remember { mutableStateOf(false) }
+    var showShareOptionsDialog by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -226,7 +229,7 @@ fun NotesScreen(
                                         onArchiveClick = { viewModel.onEvent(NotesEvent.ArchiveSelectedNotes) },
                                         onDeleteClick = { showDeleteDialog = true },
                                         onCopyClick = { viewModel.onEvent(NotesEvent.CopySelectedNotes) },
-                                        onSendClick = { viewModel.onEvent(NotesEvent.SendSelectedNotes) },
+                                        onSendClick = { showShareOptionsDialog = true },
                                         onLabelClick = { showLabelDialog = true },
                                         onMoveToProjectClick = { showMoveToProjectDialog = true },
                                         onLockClick = { viewModel.onEvent(NotesEvent.ToggleLockForSelectedNotes) },
@@ -375,6 +378,50 @@ fun NotesScreen(
 
                         if (showWhatsNewDialog) {
                             WhatsNewDialog(onDismiss = { showWhatsNewDialog = false })
+                        }
+
+                        // Share Options Dialog
+                        var showQrDisplayDialog by remember { mutableStateOf(false) }
+                        var qrNoteTitle by remember { mutableStateOf("") }
+                        var qrNoteContent by remember { mutableStateOf("") }
+
+                        if (showShareOptionsDialog) {
+                            ShareOptionsDialog(
+                                onDismiss = { 
+                                    showShareOptionsDialog = false 
+                                },
+                                onShareAsQr = {
+                                    // Get first selected note for QR (or combine if multiple)
+                                    val selectedNotes = state.notes.filter { state.selectedNoteIds.contains(it.note.id) }
+                                    if (selectedNotes.isNotEmpty()) {
+                                        val firstNote = selectedNotes.first()
+                                        qrNoteTitle = firstNote.note.title
+                                        qrNoteContent = if (selectedNotes.size == 1) {
+                                            com.suvojeet.notenext.util.HtmlConverter.htmlToPlainText(firstNote.note.content)
+                                        } else {
+                                            selectedNotes.joinToString("\n\n---\n\n") { note ->
+                                                "${note.note.title}\n${com.suvojeet.notenext.util.HtmlConverter.htmlToPlainText(note.note.content)}"
+                                            }
+                                        }
+                                        showQrDisplayDialog = true
+                                    }
+                                    showShareOptionsDialog = false
+                                    viewModel.onEvent(NotesEvent.ClearSelection)
+                                },
+                                onShareAsText = {
+                                    viewModel.onEvent(NotesEvent.SendSelectedNotes)
+                                    showShareOptionsDialog = false
+                                }
+                            )
+                        }
+
+                        // QR Code Display Dialog
+                        if (showQrDisplayDialog) {
+                            QrCodeDisplayDialog(
+                                noteTitle = qrNoteTitle,
+                                noteContent = qrNoteContent,
+                                onDismiss = { showQrDisplayDialog = false }
+                            )
                         }
 
                         Column(modifier = Modifier.padding(padding).clickable(
