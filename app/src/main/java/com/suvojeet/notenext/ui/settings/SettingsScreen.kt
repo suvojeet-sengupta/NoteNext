@@ -41,6 +41,8 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.ImportExport
 import androidx.compose.material.icons.filled.PrivacyTip
+import androidx.compose.material.icons.filled.NewReleases
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.SentimentDissatisfied
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -120,6 +122,7 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
     var showHistoryDialog by remember { mutableStateOf(false) }
     var showRateDialog by remember { mutableStateOf(false) }
     var showContactUsDialog by remember { mutableStateOf(false) }
+    var showChangelogDialog by remember { mutableStateOf(false) }
     
     // -- Import Logic --
     // We need BackupRestoreViewModel for import logic
@@ -350,10 +353,36 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                         icon = Icons.Default.Info,
                         title = stringResource(id = R.string.about),
                         subtitle = "Version, License & Credits",
-                        iconColor = MaterialTheme.colorScheme.onSurfaceVariant, // Neutral color for about
+                        iconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         onClick = { onNavigate("about") }
                     )
                     HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+                    
+                    SettingsItem(
+                        icon = Icons.Default.NewReleases,
+                         title = "Changelog",
+                        subtitle = "See what's new in v1.2.6",
+                        iconColor = Color(0xFFE91E63),
+                        onClick = { showChangelogDialog = true }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
+                    SettingsItem(
+                        icon = Icons.Default.Code,
+                        title = "Source Code",
+                        subtitle = "View on GitHub",
+                        iconColor = Color(0xFF24292E), // GitHub Dark
+                        onClick = {
+                            try {
+                                val intent = Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/suvojeet-sengupta/NoteNext"))
+                                context.startActivity(intent)
+                            } catch (e: Exception) {
+                                // Handle case where no browser is installed
+                            }
+                        }
+                    )
+                    HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp), thickness = 0.5.dp, color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f))
+
                     SettingsItem(
                         icon = androidx.compose.material.icons.Icons.Filled.PrivacyTip,
                         title = "Privacy Policy",
@@ -537,6 +566,10 @@ fun SettingsScreen(onBackClick: () -> Unit, onNavigate: (String) -> Unit) {
                 importKeepLauncher.launch(arrayOf("application/zip"))
             }
         )
+    }
+
+    if (showChangelogDialog) {
+        ChangelogDialog(onDismiss = { showChangelogDialog = false })
     }
 }
 
