@@ -99,6 +99,14 @@ fun NotesScreen(
     val state by viewModel.state.collectAsState()
     var isFabExpanded by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
+    
+    // Calculate isDarkTheme for theme-adaptive note colors
+    val systemInDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
+    val isDarkTheme = when (themeMode) {
+        ThemeMode.DARK, ThemeMode.AMOLED -> true
+        ThemeMode.SYSTEM -> systemInDarkTheme
+        else -> false
+    }
 
     val isSelectionModeActive = state.selectedNoteIds.isNotEmpty()
     var showLabelDialog by remember { mutableStateOf(false) }
@@ -476,7 +484,8 @@ fun NotesScreen(
                                                         onNoteClick = { onNoteClickAction(note) },
                                                         onNoteLongClick = {
                                                             viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                        }
+                                                        },
+                                                        isDarkTheme = isDarkTheme
                                                     )
                                                 }
                                             }
@@ -505,7 +514,8 @@ fun NotesScreen(
                                                         onNoteClick = { onNoteClickAction(note) },
                                                         onNoteLongClick = {
                                                             viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                        }
+                                                        },
+                                                        isDarkTheme = isDarkTheme
                                                     )
                                                 }
                                             }
@@ -540,7 +550,8 @@ fun NotesScreen(
                                                         onNoteClick = { onNoteClickAction(note) },
                                                         onNoteLongClick = {
                                                             viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                        }
+                                                        },
+                                                        isDarkTheme = isDarkTheme
                                                     )
                                                 }
                                             }
@@ -569,7 +580,8 @@ fun NotesScreen(
                                                         onNoteClick = { onNoteClickAction(note) },
                                                         onNoteLongClick = {
                                                             viewModel.onEvent(NotesEvent.ToggleNoteSelection(note.note.id))
-                                                        }
+                                                        },
+                                                        isDarkTheme = isDarkTheme
                                                     )
                                                 }
                                             }
