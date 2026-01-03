@@ -270,16 +270,6 @@ fun SearchBar(
                                     onSortMenuDismissRequest()
                                 }
                             )
-                            SortMenuItem(
-                                text = "Custom",
-                                icon = Icons.Default.List,
-                                isSelected = currentSortType == SortType.CUSTOM,
-                                onClick = {
-                                    onSortOptionClick(SortType.CUSTOM)
-                                    onSortMenuDismissRequest()
-                                }
-                            )
-                        }
                     }
                 }
             }
