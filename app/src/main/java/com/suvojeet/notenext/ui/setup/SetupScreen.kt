@@ -36,7 +36,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.setup.components.PermissionItem
 import com.suvojeet.notenext.ui.settings.BackupRestoreViewModel
-import com.suvojeet.notenext.ui.settings.PasswordInputDialog
+import com.suvojeet.notenext.ui.components.PasswordInputDialog
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.android.gms.common.api.ApiException
