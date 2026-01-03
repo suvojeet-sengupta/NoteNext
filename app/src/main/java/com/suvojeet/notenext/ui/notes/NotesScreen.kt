@@ -396,11 +396,13 @@ fun NotesScreen(
                                     if (selectedNotes.isNotEmpty()) {
                                         val firstNote = selectedNotes.first()
                                         qrNoteTitle = firstNote.note.title
+                                        // Simple HTML strip (avoid suspend function in composable)
+                                        fun stripHtml(html: String): String = html.replace(Regex("<[^>]*>"), "").trim()
                                         qrNoteContent = if (selectedNotes.size == 1) {
-                                            com.suvojeet.notenext.util.HtmlConverter.htmlToPlainText(firstNote.note.content)
+                                            stripHtml(firstNote.note.content)
                                         } else {
                                             selectedNotes.joinToString("\n\n---\n\n") { note ->
-                                                "${note.note.title}\n${com.suvojeet.notenext.util.HtmlConverter.htmlToPlainText(note.note.content)}"
+                                                "${note.note.title}\n${stripHtml(note.note.content)}"
                                             }
                                         }
                                         showQrDisplayDialog = true
