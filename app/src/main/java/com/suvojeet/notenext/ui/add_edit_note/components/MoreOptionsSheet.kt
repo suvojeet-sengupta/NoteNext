@@ -88,8 +88,9 @@ fun MoreOptionsSheet(
             if (!state.editingIsNewNote && state.editingLastEdited != 0L) {
                 Text(
                     text = stringResource(id = R.string.last_edited, dateFormat.format(Date(state.editingLastEdited))),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(vertical = 16.dp)
                 )
                 Divider()
