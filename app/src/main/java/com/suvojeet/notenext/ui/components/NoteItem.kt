@@ -3,6 +3,7 @@ package com.suvojeet.notenext.ui.components
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
@@ -35,6 +36,8 @@ import com.suvojeet.notenext.data.NoteSummaryWithAttachments
 import com.suvojeet.notenext.core.model.NoteType
 import com.suvojeet.notenext.ui.theme.NoteGradients
 import com.suvojeet.notenext.util.HtmlConverter
+import com.suvojeet.notenext.ui.components.CuteCardShape
+import com.suvojeet.notenext.ui.components.PlayfulPalette
 
 @Composable
 fun NoteItem(
@@ -50,12 +53,18 @@ fun NoteItem(
     val adaptiveColor = NoteGradients.getAdaptiveColor(note.note.color, isDarkTheme)
     val isDefaultColor = adaptiveColor == 0
 
+    // Playful vibe: default-colour notes get a stable pastel tint derived from their id,
+    // so the grid reads as a friendly quilt rather than a wall of grey surfaces. Notes
+    // the user has explicitly coloured still honour that choice.
+    val playfulTint = PlayfulPalette.tintFor(note.note.id)
+    val effectiveBackground = if (isDefaultColor) playfulTint else Color(adaptiveColor)
+
     val contentColor = if (isDefaultColor) {
         MaterialTheme.colorScheme.onSurface
     } else {
         NoteGradients.getContentColor(adaptiveColor)
     }
-    
+
     val tintColor = if (isDefaultColor) {
         MaterialTheme.colorScheme.onSurfaceVariant
     } else {
@@ -78,36 +87,49 @@ fun NoteItem(
     }
     val motionScheme = MaterialTheme.motionScheme
     val elevation by animateDpAsState(
-        targetValue = if (isSelected) 4.dp else (if (isDefaultColor) 1.dp else 0.dp),
+        targetValue = if (isSelected) 6.dp else 2.dp,
         animationSpec = motionScheme.fastSpatialSpec(),
         label = "Elevation"
     )
 
-    val cardShape = if (note.note.isPinned) {
-        MaterialTheme.shapes.extraLarge
-    } else {
-        MaterialTheme.shapes.medium
-    }
+    // Playful vibe: every card is a squircle. Pinned cards bump up a touch more
+    // rounded so they still read as "special" but not via a different shape family.
+    val cardShape = CuteCardShape
 
-    val borderStroke = if (isSelected) {
-        BorderStroke(2.dp, MaterialTheme.colorScheme.primary)
-    } else if (isDefaultColor) {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.12f))
-    } else {
-        null
+    // Bouncy selection pulse — cards gently scale up when selected.
+    val selectionScale by animateFloatAsState(
+        targetValue = if (isSelected) 0.97f else 1f,
+        animationSpec = androidx.compose.animation.core.spring(
+            dampingRatio = androidx.compose.animation.core.Spring.DampingRatioMediumBouncy,
+            stiffness = androidx.compose.animation.core.Spring.StiffnessMedium
+        ),
+        label = "SelectionScale"
+    )
+
+    val borderStroke = when {
+        isSelected -> BorderStroke(3.dp, MaterialTheme.colorScheme.primary)
+        isDefaultColor -> BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.08f))
+        else -> null
     }
 
     Card(
         modifier = modifier
             .fillMaxWidth()
-            .springPress()
+            .graphicsLayer {
+                scaleX = selectionScale
+                scaleY = selectionScale
+            }
+            .springPress(
+                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioHighBouncy,
+                stiffness = 500f
+            )
             .combinedClickable(
                 onClick = onNoteClick,
                 onLongClick = onNoteLongClick
             ),
         shape = cardShape,
         colors = CardDefaults.cardColors(
-            containerColor = if (isDefaultColor) MaterialTheme.colorScheme.surfaceContainer else Color(adaptiveColor),
+            containerColor = effectiveBackground,
             contentColor = contentColor
         ),
         border = borderStroke,

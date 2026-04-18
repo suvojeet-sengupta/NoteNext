@@ -34,12 +34,16 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.theme.ThemeMode
+import com.suvojeet.notenext.ui.components.CuteButtonShape
+import com.suvojeet.notenext.ui.components.CuteCardShape
+import com.suvojeet.notenext.ui.components.PlayfulPalette
 
 @Composable
 fun MultiActionFab(
@@ -54,9 +58,11 @@ fun MultiActionFab(
     themeMode: ThemeMode,
     isScrollExpanded: Boolean = true
 ) {
+    // Playful vibe: the FAB icon spins with a little bounce when toggling — gives
+    // the "+" a cute twist instead of a stiff quarter turn.
     val rotation by animateFloatAsState(
         targetValue = if (isExpanded) 135f else 0f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium),
         label = "FabIconRotation"
     )
 
@@ -97,7 +103,14 @@ fun MultiActionFab(
         val bouncySpringSpec = spring<Float>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
         val bouncyIntOffsetSpec = spring<androidx.compose.ui.unit.IntOffset>(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessLow)
 
-        // Items in reverse order (top to bottom)
+        // Items in reverse order (top to bottom). Each one gets its own pastel tint
+        // so the expanded FAB reads like a little candy menu.
+        val projectTint = PlayfulPalette.lavender()
+        val todoTint = PlayfulPalette.mint()
+        val drawingTint = PlayfulPalette.sky()
+        val checklistTint = PlayfulPalette.peach()
+        val noteTint = PlayfulPalette.pink()
+
         AnimatedVisibility(
             visible = showProject && showProjectButton,
             enter = fadeIn(bouncySpringSpec) + slideInVertically(initialOffsetY = { it / 2 }, animationSpec = bouncyIntOffsetSpec) + scaleIn(initialScale = 0.5f, animationSpec = bouncySpringSpec),
@@ -110,7 +123,8 @@ fun MultiActionFab(
                     onProjectClick()
                     onExpandedChange(false)
                 },
-                themeMode = themeMode
+                themeMode = themeMode,
+                tint = projectTint
             )
         }
 
@@ -128,7 +142,8 @@ fun MultiActionFab(
                     onTodoClick()
                     onExpandedChange(false)
                 },
-                themeMode = themeMode
+                themeMode = themeMode,
+                tint = todoTint
             )
         }
 
@@ -144,7 +159,8 @@ fun MultiActionFab(
                     onDrawingClick()
                     onExpandedChange(false)
                 },
-                themeMode = themeMode
+                themeMode = themeMode,
+                tint = drawingTint
             )
         }
 
@@ -160,7 +176,8 @@ fun MultiActionFab(
                     onChecklistClick()
                     onExpandedChange(false)
                 },
-                themeMode = themeMode
+                themeMode = themeMode,
+                tint = checklistTint
             )
         }
 
@@ -176,7 +193,8 @@ fun MultiActionFab(
                     onNoteClick()
                     onExpandedChange(false)
                 },
-                themeMode = themeMode
+                themeMode = themeMode,
+                tint = noteTint
             )
         }
 
@@ -230,39 +248,40 @@ private fun FabItem(
     icon: ImageVector,
     label: String,
     onClick: () -> Unit,
-    themeMode: ThemeMode
+    themeMode: ThemeMode,
+    tint: Color = MaterialTheme.colorScheme.secondaryContainer
 ) {
-    val cardColor = if (themeMode == ThemeMode.AMOLED) {
-        MaterialTheme.colorScheme.surface
-    } else {
-        MaterialTheme.colorScheme.secondaryContainer
-    }
-    
+    // AMOLED keeps a black surface + thin outline so the pastel reads as an accent
+    // on the icon/text instead of a big coloured rectangle.
+    val cardColor = if (themeMode == ThemeMode.AMOLED) MaterialTheme.colorScheme.surface else tint
     val border = if (themeMode == ThemeMode.AMOLED) {
-        BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f))
-    } else {
-        null
-    }
+        BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f))
+    } else null
 
     Card(
-        modifier = Modifier.clickable { onClick() }.springPress(),
-        shape = MaterialTheme.shapes.large,
+        modifier = Modifier
+            .clickable { onClick() }
+            .springPress(
+                dampingRatio = Spring.DampingRatioHighBouncy,
+                stiffness = 500f
+            ),
+        shape = CuteButtonShape,
         colors = CardDefaults.cardColors(
             containerColor = cardColor,
-            contentColor = if (themeMode == ThemeMode.AMOLED) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSecondaryContainer
+            contentColor = MaterialTheme.colorScheme.onSurface
         ),
         border = border,
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+            horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Icon(
-                imageVector = icon, 
-                contentDescription = label, 
-                tint = MaterialTheme.colorScheme.primary
+                imageVector = icon,
+                contentDescription = label,
+                tint = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = label,

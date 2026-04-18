@@ -3,25 +3,23 @@ package com.suvojeet.notenext.ui.components
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.suvojeet.notenext.core.R
-import kotlinx.coroutines.delay
 
+/**
+ * Playful empty state — a wobbling mascot peeks at the user with a pastel
+ * bubble background and a bouncy reveal. The optional icon from callers is
+ * ignored on purpose: the mascot is the character now. Message + description
+ * still drive the copy, so the call sites don't need to change.
+ */
 @Composable
 fun EmptyState(
     icon: ImageVector,
@@ -30,135 +28,123 @@ fun EmptyState(
     modifier: Modifier = Modifier
 ) {
     var visible by remember { mutableStateOf(false) }
-    LaunchedEffect(Unit) {
-        visible = true
-    }
+    LaunchedEffect(Unit) { visible = true }
 
-    Column(
-        modifier = modifier.fillMaxSize().padding(24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // Expressive Animated Icon Background
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier.padding(bottom = 32.dp)
+    Box(modifier = modifier.fillMaxSize()) {
+        // Soft pastel blobs in the background
+        PastelBlobBackground(alpha = 0.35f)
+
+        Column(
+            modifier = Modifier.fillMaxSize().padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            // Morphing-like background animation using animated size and alpha
-            val infiniteTransition = rememberInfiniteTransition(label = "EmptyStateBg")
-            val scale by infiniteTransition.animateFloat(
-                initialValue = 0.8f,
-                targetValue = 1.2f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = EaseInOutCubic),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "BgScale"
-            )
-            val alpha by infiniteTransition.animateFloat(
-                initialValue = 0.1f,
-                targetValue = 0.3f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(2000, easing = EaseInOutCubic),
-                    repeatMode = RepeatMode.Reverse
-                ),
-                label = "BgAlpha"
-            )
-
-            Box(
-                modifier = Modifier
-                    .size(160.dp)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                    }
-                    .clip(CircleShape)
-                    .background(
-                        brush = Brush.radialGradient(
-                            colors = listOf(
-                                MaterialTheme.colorScheme.primary.copy(alpha = alpha),
-                                Color.Transparent
-                            )
-                        )
-                    )
-            )
-            
-            this@Column.AnimatedVisibility(
-                visible = visible,
-                enter = fadeIn(spring(stiffness = Spring.StiffnessLow)) + 
-                        scaleIn(initialScale = 0.5f, animationSpec = spring(dampingRatio = 0.6f))
-            ) {
-                Surface(
-                    modifier = Modifier.size(100.dp),
-                    shape = CircleShape,
-                    color = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    tonalElevation = 2.dp,
-                    shadowElevation = 4.dp
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                         Icon(
-                            imageVector = icon,
-                            contentDescription = null,
-                            modifier = Modifier.size(48.dp),
-                            tint = MaterialTheme.colorScheme.primary
-                        )
-                    }
-                }
-            }
-        }
-
-        // Animated Message
-        AnimatedVisibility(
-            visible = visible,
-            enter = fadeIn(tween(600, delayMillis = 200)) + 
-                    slideInVertically(tween(600, delayMillis = 200)) { it / 2 }
-        ) {
-            Text(
-                text = message,
-                style = MaterialTheme.typography.headlineSmall.copy(
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = (-0.5).sp
-                ),
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-
-        // Animated Description
-        if (description != null) {
+            // Bouncy mascot entry
             AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(600, delayMillis = 400)) + 
-                        slideInVertically(tween(600, delayMillis = 400)) { it / 2 }
+                enter = fadeIn(spring(stiffness = Spring.StiffnessLow)) +
+                        scaleIn(
+                            initialScale = 0.4f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioHighBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
             ) {
-                Column {
-                    Spacer(modifier = Modifier.height(12.dp))
-                    Text(
-                        text = description,
-                        style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(horizontal = 32.dp),
-                        lineHeight = 24.sp
-                    )
-                }
+                CuteMascot(size = 160.dp)
             }
-        }
-        
-        // Subtle hint for first time users
-        if (description != null && message.contains("No notes", ignoreCase = true)) {
-             AnimatedVisibility(
+
+            Spacer(Modifier.height(24.dp))
+
+            AnimatedVisibility(
                 visible = visible,
-                enter = fadeIn(tween(1000, delayMillis = 1000))
+                enter = fadeIn(tween(500, delayMillis = 180)) +
+                        slideInVertically(
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMedium
+                            )
+                        ) { it / 3 }
             ) {
-                Column {
-                    Spacer(modifier = Modifier.height(48.dp))
-                    LoadingIndicator(
-                        modifier = Modifier.size(32.dp),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f)
-                    )
+                Text(
+                    text = playfulHeadline(message),
+                    style = MaterialTheme.typography.headlineSmall.copy(
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = (-0.5).sp
+                    ),
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            }
+
+            if (description != null) {
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(tween(500, delayMillis = 340)) +
+                            slideInVertically(
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessMedium
+                                )
+                            ) { it / 3 }
+                ) {
+                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Spacer(Modifier.height(10.dp))
+                        Text(
+                            text = playfulSubcopy(description),
+                            style = MaterialTheme.typography.bodyLarge,
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.padding(horizontal = 24.dp),
+                            lineHeight = 24.sp
+                        )
+                    }
+                }
+            }
+
+            // A row of pastel bubbles as a decorative footer "constellation"
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(tween(700, delayMillis = 500))
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Spacer(Modifier.height(28.dp))
+                    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        PastelBubble(tint = PlayfulPalette.pink()) {
+                            Text("✨", style = MaterialTheme.typography.bodyLarge)
+                        }
+                        PastelBubble(tint = PlayfulPalette.mint()) {
+                            Text("🌱", style = MaterialTheme.typography.bodyLarge)
+                        }
+                        PastelBubble(tint = PlayfulPalette.sky()) {
+                            Text("💭", style = MaterialTheme.typography.bodyLarge)
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+/**
+ * Map the developer-supplied message to a friendlier phrasing where we can
+ * recognise it. Unknown messages fall through unchanged so localised strings
+ * from callers still work.
+ */
+private fun playfulHeadline(raw: String): String {
+    val lower = raw.lowercase()
+    return when {
+        lower.contains("no notes yet") -> "It's a bit quiet in here…"
+        lower.contains("no notes found") && lower.contains("label") -> "Nothing under that label yet"
+        lower.contains("no notes found") -> "Hmm, nothing matches"
+        else -> raw
+    }
+}
+
+private fun playfulSubcopy(raw: String): String {
+    val lower = raw.lowercase()
+    return when {
+        lower.contains("create your first note") -> "Tap the + to jot down your first thought ✏️"
+        else -> raw
     }
 }
