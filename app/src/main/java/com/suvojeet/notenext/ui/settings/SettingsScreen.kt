@@ -83,9 +83,9 @@ fun SettingsScreen(
 
     var searchQuery by remember { mutableStateOf("") }
 
-    var showThemeDialog by remember { mutableStateOf(false) }
+    var showThemeSheet by remember { mutableStateOf(false) }
     var showAutoDeleteDialog by remember { mutableStateOf(false) }
-    var showLanguageDialog by remember { mutableStateOf(false) }
+    var showLanguageSheet by remember { mutableStateOf(false) }
     var showBugReportDialog by remember { mutableStateOf(false) }
     var issueDescription by remember { mutableStateOf("") }
     var showImportSourceDialog by remember { mutableStateOf(false) }
@@ -126,7 +126,7 @@ fun SettingsScreen(
                         title = context.getString(R.string.theme),
                         subtitle = selectedThemeMode.name.lowercase().replaceFirstChar { it.uppercase() },
                         iconColor = primaryColor,
-                        onClick = { showThemeDialog = true }
+                        onClick = { showThemeSheet = true }
                     ),
                     SettingsItemData(
                         icon = Icons.Rounded.Link,
@@ -142,7 +142,7 @@ fun SettingsScreen(
                         title = context.getString(R.string.language),
                         subtitle = if (selectedLanguage == "hi") "Hindi (भारत)" else "English (US)",
                         iconColor = tertiaryColor,
-                        onClick = { showLanguageDialog = true }
+                        onClick = { showLanguageSheet = true }
                     )
                 )
             ),
@@ -396,9 +396,39 @@ fun SettingsScreen(
         }
     }
 
-    if (showThemeDialog) ThemeChooserDialog(selectedThemeMode, { theme -> scope.launch { settingsRepository.saveThemeMode(theme) }; showThemeDialog = false }, { showThemeDialog = false })
+    if (showThemeSheet) {
+        SelectionBottomSheet(
+            title = stringResource(id = R.string.choose_theme),
+            items = ThemeMode.values().toList(),
+            selectedItem = selectedThemeMode,
+            onDismiss = { showThemeSheet = false },
+            onItemSelected = { theme ->
+                scope.launch { settingsRepository.saveThemeMode(theme) }
+                showThemeSheet = false
+            },
+            itemLabel = { mode -> 
+                if (mode == ThemeMode.AMOLED) stringResource(id = R.string.theme_amoled) 
+                else mode.name.lowercase().replaceFirstChar { it.uppercase() }
+            }
+        )
+    }
+
+    if (showLanguageSheet) {
+        val languages = listOf("en" to R.string.language_english, "hi" to R.string.language_hindi)
+        SelectionBottomSheet(
+            title = stringResource(id = R.string.choose_language),
+            items = languages,
+            selectedItem = languages.find { it.first == selectedLanguage },
+            onDismiss = { showLanguageSheet = false },
+            onItemSelected = { (code, _) ->
+                scope.launch { settingsRepository.saveLanguage(code) }
+                showLanguageSheet = false
+            },
+            itemLabel = { stringResource(id = it.second) }
+        )
+    }
+
     if (showAutoDeleteDialog) AutoDeleteDialog(autoDeleteDays, { days -> scope.launch { settingsRepository.saveAutoDeleteDays(days) }; showAutoDeleteDialog = false }, { showAutoDeleteDialog = false })
-    if (showLanguageDialog) LanguageChooserDialog(selectedLanguage, { lang -> scope.launch { settingsRepository.saveLanguage(lang) }; showLanguageDialog = false }, { showLanguageDialog = false })
     if (showImportSourceDialog) ImportSourceDialog({ showImportSourceDialog = false }, { showImportSourceDialog = false; showKeepInstructionsDialog = true })
     if (showKeepInstructionsDialog) KeepInstructionsDialog({ showKeepInstructionsDialog = false }, { showKeepInstructionsDialog = false; importKeepLauncher.launch(arrayOf("application/zip")) })
     if (showRateDialog) RateAppDialog(context) { showRateDialog = false }
@@ -408,6 +438,61 @@ fun SettingsScreen(
         ACRA.errorReporter.handleSilentException(Exception("Manual Bug Report: $issueDescription"))
         issueDescription = ""
     }, { showBugReportDialog = false })
+}
+
+@Composable
+private fun <T> SelectionBottomSheet(
+    title: String,
+    items: List<T>,
+    selectedItem: T?,
+    onDismiss: () -> Unit,
+    onItemSelected: (T) -> Unit,
+    itemLabel: @Composable (T) -> String
+) {
+    ModalBottomSheet(
+        onDismissRequest = onDismiss,
+        containerColor = MaterialTheme.colorScheme.surfaceContainerLow,
+        shape = RoundedCornerShape(topStart = 28.dp, topEnd = 28.dp),
+        dragHandle = { BottomSheetDefaults.DragHandle() }
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 32.dp)
+        ) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(horizontal = 24.dp, vertical = 16.dp)
+            )
+            
+            LazyColumn {
+                items(items) { item ->
+                    ListItem(
+                        modifier = Modifier
+                            .clickable { onItemSelected(item) }
+                            .padding(horizontal = 8.dp),
+                        headlineContent = { 
+                            Text(
+                                text = itemLabel(item),
+                                style = MaterialTheme.typography.bodyLarge,
+                                fontWeight = if (item == selectedItem) FontWeight.Bold else FontWeight.Medium
+                            ) 
+                        },
+                        leadingContent = {
+                            RadioButton(
+                                selected = (item == selectedItem),
+                                onClick = null,
+                                colors = RadioButtonDefaults.colors(selectedColor = MaterialTheme.colorScheme.primary)
+                            )
+                        },
+                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
+                    )
+                }
+            }
+        }
+    }
 }
 
 private data class SettingsSectionData(
@@ -477,20 +562,21 @@ private fun SettingsItem(
 ) {
     ListItem(
         modifier = Modifier
-            .springPress()
+            .padding(horizontal = 8.dp)
+            .clip(MaterialTheme.shapes.large)
             .clickable(enabled = onClick != null || hasSwitch) {
                 if (hasSwitch && onCheckedChange != null) onCheckedChange(!checked) else onClick?.invoke()
             },
         headlineContent = { Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.SemiBold) },
-        supportingContent = subtitle?.let { { Text(text = it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant) } },
+        supportingContent = subtitle?.let { { Text(text = it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)) } },
         leadingContent = {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(iconColor.copy(alpha = 0.12f), MaterialTheme.shapes.medium),
+                    .size(42.dp)
+                    .background(MaterialTheme.colorScheme.surfaceContainerHighest, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(22.dp), tint = iconColor)
+                Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(20.dp), tint = iconColor)
             }
         },
         trailingContent = {
@@ -507,56 +593,10 @@ private fun SettingsItem(
                     )
                 )
             } else if (onClick != null) {
-                Icon(imageVector = Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.4f))
+                Icon(imageVector = Icons.Rounded.ChevronRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f))
             }
         },
         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-    )
-}
-
-@Composable
-private fun LanguageChooserDialog(selectedLanguage: String, onLanguageSelected: (String) -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = MaterialTheme.shapes.extraLarge,
-        title = { Text(stringResource(id = R.string.choose_language)) },
-        text = {
-            Column {
-                listOf("en" to R.string.language_english, "hi" to R.string.language_hindi).forEach { (code, resId) ->
-                    Row(
-                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { onLanguageSelected(code) }.padding(12.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        RadioButton(selected = (selectedLanguage == code), onClick = null)
-                        Spacer(Modifier.width(16.dp))
-                        Text(stringResource(id = resId))
-                    }
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text(stringResource(id = R.string.cancel)) } }
-    )
-}
-
-@Composable
-private fun ThemeChooserDialog(selectedThemeMode: ThemeMode, onThemeSelected: (ThemeMode) -> Unit, onDismiss: () -> Unit) {
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        shape = MaterialTheme.shapes.extraLarge,
-        title = { Text(stringResource(id = R.string.choose_theme)) },
-        text = {
-            Column {
-                ThemeMode.values().forEach { mode ->
-                    ListItem(
-                        headlineContent = { Text(if (mode == ThemeMode.AMOLED) stringResource(id = R.string.theme_amoled) else mode.name.lowercase().replaceFirstChar { it.uppercase() }) },
-                        leadingContent = { RadioButton(selected = (mode == selectedThemeMode), onClick = null) },
-                        modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable { onThemeSelected(mode) },
-                        colors = ListItemDefaults.colors(containerColor = Color.Transparent)
-                    )
-                }
-            }
-        },
-        confirmButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text(stringResource(id = R.string.cancel)) } }
     )
 }
 
@@ -566,15 +606,51 @@ private fun AutoDeleteDialog(currentDays: Int, onConfirm: (Int) -> Unit, onDismi
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
+        icon = { Icon(Icons.Rounded.DeleteSweep, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
         title = { Text(stringResource(id = R.string.auto_delete_after)) },
         text = {
-            Column {
-                Text("${pos.roundToInt()} days", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary, modifier = Modifier.align(Alignment.CenterHorizontally))
-                Slider(value = pos, onValueChange = { pos = it }, valueRange = 1f..60f, steps = 58)
+            Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                Text(
+                    text = "${pos.roundToInt()} days",
+                    style = MaterialTheme.typography.displaySmall,
+                    fontWeight = FontWeight.Black,
+                    color = MaterialTheme.colorScheme.primary
+                )
+                Spacer(modifier = Modifier.height(16.dp))
+                Slider(
+                    value = pos,
+                    onValueChange = { pos = it },
+                    valueRange = 1f..60f,
+                    steps = 58,
+                    colors = SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary,
+                        inactiveTrackColor = MaterialTheme.colorScheme.primaryContainer
+                    )
+                )
+                Text(
+                    text = "Notes in trash will be permanently deleted after this period.",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                )
             }
         },
-        confirmButton = { TextButton(onClick = { onConfirm(pos.roundToInt()) }, modifier = Modifier.springPress()) { Text(stringResource(id = R.string.save)) } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text(stringResource(id = R.string.cancel)) } }
+        confirmButton = { 
+            Button(
+                onClick = { onConfirm(pos.roundToInt()) },
+                modifier = Modifier.springPress(),
+                shape = CircleShape
+            ) { 
+                Text(stringResource(id = R.string.save)) 
+            } 
+        },
+        dismissButton = { 
+            TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { 
+                Text(stringResource(id = R.string.cancel)) 
+            } 
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
@@ -605,30 +681,63 @@ private fun CheckForUpdateItem(viewModel: com.suvojeet.notenext.ui.MainViewModel
 
 @Composable
 fun ImportSourceDialog(onDismiss: () -> Unit, onSelectKeep: () -> Unit) {
-    val keepColor = MaterialTheme.colorScheme.primary
-    val evernoteColor = MaterialTheme.colorScheme.secondary
+    val keepColor = Color(0xFFF4B400) // Keep Yellow
+    val evernoteColor = Color(0xFF00A82D) // Evernote Green
 
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
+        icon = { Icon(Icons.Rounded.ImportExport, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
         title = { Text("Import from...") },
         text = {
-            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 ImportOptionItem("Google Keep", Icons.Rounded.Description, keepColor, onSelectKeep)
                 ImportOptionItem("Evernote", Icons.Rounded.Description, evernoteColor, enabled = false)
             }
         },
         confirmButton = {},
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text("Cancel") } }
+        dismissButton = { 
+            TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { 
+                Text("Cancel") 
+            } 
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
 @Composable
 fun ImportOptionItem(text: String, icon: ImageVector, color: Color, onClick: () -> Unit = {}, enabled: Boolean = true) {
-    Row(modifier = Modifier.fillMaxWidth().clip(MaterialTheme.shapes.medium).clickable(enabled = enabled, onClick = onClick).padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-        Icon(imageVector = icon, contentDescription = null, tint = if (enabled) color else Color.Gray, modifier = Modifier.size(24.dp))
-        Spacer(Modifier.width(16.dp))
-        Text(text = text, style = MaterialTheme.typography.bodyLarge, color = if (enabled) MaterialTheme.colorScheme.onSurface else Color.Gray)
+    Surface(
+        onClick = onClick,
+        enabled = enabled,
+        shape = MaterialTheme.shapes.large,
+        color = if (enabled) MaterialTheme.colorScheme.surfaceContainerHighest else MaterialTheme.colorScheme.surface.copy(alpha = 0.5f),
+        modifier = Modifier.fillMaxWidth().springPress()
+    ) {
+        Row(
+            modifier = Modifier.padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(color.copy(alpha = 0.15f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(imageVector = icon, contentDescription = null, tint = if (enabled) color else Color.Gray, modifier = Modifier.size(20.dp))
+            }
+            Spacer(Modifier.width(16.dp))
+            Text(
+                text = text, 
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+            )
+            if (!enabled) {
+                Spacer(Modifier.weight(1f))
+                Text("Coming Soon", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+        }
     }
 }
 
@@ -637,10 +746,20 @@ fun KeepInstructionsDialog(onDismiss: () -> Unit, onImport: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
+        icon = { Icon(Icons.Rounded.Help, contentDescription = null, tint = MaterialTheme.colorScheme.primary) },
         title = { Text("Google Keep Import") },
-        text = { Text("Please select your Google Takeout ZIP file to import your Keep notes.") },
-        confirmButton = { TextButton(onClick = onImport, modifier = Modifier.springPress()) { Text("Select ZIP") } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text("Cancel") } }
+        text = { Text("Please select your Google Takeout ZIP file to import your Keep notes. We'll extract your text notes and checklists.") },
+        confirmButton = { 
+            Button(onClick = onImport, modifier = Modifier.springPress(), shape = CircleShape) { 
+                Text("Select ZIP") 
+            } 
+        },
+        dismissButton = { 
+            TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { 
+                Text("Cancel") 
+            } 
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
@@ -649,16 +768,37 @@ private fun BugReportDialog(desc: String, onDescChange: (String) -> Unit, onSend
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
+        icon = { Icon(Icons.Rounded.BugReport, contentDescription = null, tint = MaterialTheme.colorScheme.error) },
         title = { Text("Bug Report") },
         text = { 
             Column {
-                Text("Describe the issue you're facing. System logs will be attached automatically.", style = MaterialTheme.typography.bodyMedium)
-                Spacer(Modifier.height(8.dp))
-                OutlinedTextField(value = desc, onValueChange = onDescChange, label = { Text("Issue description") }, modifier = Modifier.fillMaxWidth(), shape = MaterialTheme.shapes.extraSmall) 
+                Text("Describe the issue you're facing. System logs will be attached automatically.", style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Spacer(Modifier.height(16.dp))
+                OutlinedTextField(
+                    value = desc, 
+                    onValueChange = onDescChange, 
+                    placeholder = { Text("Issue description...") }, 
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = MaterialTheme.shapes.large
+                ) 
             }
         },
-        confirmButton = { TextButton(onClick = onSend, modifier = Modifier.springPress()) { Text("Send Report") } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text("Cancel") } }
+        confirmButton = { 
+            Button(
+                onClick = onSend, 
+                modifier = Modifier.springPress(), 
+                enabled = desc.isNotBlank(),
+                shape = CircleShape
+            ) { 
+                Text("Send Report") 
+            } 
+        },
+        dismissButton = { 
+            TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { 
+                Text("Cancel") 
+            } 
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
 
@@ -667,13 +807,23 @@ fun RateAppDialog(context: android.content.Context, onDismiss: () -> Unit) {
     AlertDialog(
         onDismissRequest = onDismiss,
         shape = MaterialTheme.shapes.extraLarge,
+        icon = { Icon(Icons.Rounded.Star, contentDescription = null, tint = Color(0xFFFFB300)) },
         title = { Text("Rate NoteNext") },
-        text = { Text("Loving the app? Help us by rating it on the Play Store!") },
-        confirmButton = { TextButton(onClick = { 
-            try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))) }
-            catch (e: Exception) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))) }
-            onDismiss()
-        }, modifier = Modifier.springPress()) { Text("Rate Now") } },
-        dismissButton = { TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { Text("Later") } }
+        text = { Text("Loving the app? Help us grow by rating it on the Play Store! It only takes a minute.") },
+        confirmButton = { 
+            Button(onClick = { 
+                try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=${context.packageName}"))) }
+                catch (e: Exception) { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=${context.packageName}"))) }
+                onDismiss()
+            }, modifier = Modifier.springPress(), shape = CircleShape) { 
+                Text("Rate Now") 
+            } 
+        },
+        dismissButton = { 
+            TextButton(onClick = onDismiss, modifier = Modifier.springPress()) { 
+                Text("Later") 
+            } 
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh
     )
 }
