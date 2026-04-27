@@ -299,8 +299,8 @@ fun ChecklistItemRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(backgroundColor) // Use the passed background color
-                .padding(vertical = 8.dp)
-                .padding(start = (item.level * 24).dp),
+                .padding(vertical = 4.dp)
+                .padding(start = (item.level * 16).dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(

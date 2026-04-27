@@ -52,18 +52,18 @@ fun AddEditNoteBottomAppBar(
     BottomAppBar(
         containerColor = backgroundColor,
         windowInsets = BottomAppBarDefaults.windowInsets,
-        modifier = Modifier.height(64.dp)
+        modifier = Modifier.height(56.dp)
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 8.dp),
+                .padding(horizontal = 4.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             ButtonGroup(
                 modifier = Modifier, 
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Box {
                     var fabCoordinates by remember { mutableStateOf<IntOffset?>(null) }
@@ -73,7 +73,7 @@ fun AddEditNoteBottomAppBar(
                         onClick = { showAttachmentMenu = true },
                         shape = MaterialTheme.shapes.extraLarge,
                         modifier = Modifier
-                            .size(40.dp)
+                            .size(36.dp)
                             .springPress()
                             .onGloballyPositioned { coordinates ->
                                 fabCoordinates = IntOffset(
@@ -85,7 +85,7 @@ fun AddEditNoteBottomAppBar(
                         containerColor = MaterialTheme.colorScheme.primaryContainer,
                         contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                     ) {
-                        Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_attachment), modifier = Modifier.size(20.dp))
+                        Icon(Icons.Default.Add, contentDescription = stringResource(id = R.string.add_attachment), modifier = Modifier.size(18.dp))
                     }
 
                     if (showAttachmentMenu) {
@@ -107,66 +107,66 @@ fun AddEditNoteBottomAppBar(
                 FloatingActionButton(
                     onClick = { showColorPicker(true) },
                     shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.size(40.dp).springPress(),
+                    modifier = Modifier.size(36.dp).springPress(),
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Icons.Default.Palette, contentDescription = stringResource(id = R.string.toggle_color_picker), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Palette, contentDescription = stringResource(id = R.string.toggle_color_picker), modifier = Modifier.size(18.dp))
                 }
                 FloatingActionButton(
                     onClick = { showFormatBar(true) },
                     shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.size(40.dp).springPress(),
+                    modifier = Modifier.size(36.dp).springPress(),
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Icons.Default.TextFields, contentDescription = stringResource(id = R.string.toggle_format_bar), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.TextFields, contentDescription = stringResource(id = R.string.toggle_format_bar), modifier = Modifier.size(18.dp))
                 }
                 FloatingActionButton(
                     onClick = { showReminderDialog(true) },
                     shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.size(40.dp).springPress(),
+                    modifier = Modifier.size(36.dp).springPress(),
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     contentColor = MaterialTheme.colorScheme.onPrimaryContainer
                 ) {
-                    Icon(Icons.Default.Alarm, contentDescription = "Set Reminder", modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.Alarm, contentDescription = "Set Reminder", modifier = Modifier.size(18.dp))
                 }
             }
 
             ButtonGroup(
                 modifier = Modifier, 
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 if (state.canUndo || state.canRedo) {
                     FloatingActionButton(
                         onClick = { onEvent(NotesEvent.OnUndoClick) },
                         shape = MaterialTheme.shapes.extraLarge,
-                        modifier = Modifier.size(40.dp).springPress(),
+                        modifier = Modifier.size(36.dp).springPress(),
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = if (state.canUndo) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     ) {
-                        Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(id = R.string.undo), modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Rounded.Undo, contentDescription = stringResource(id = R.string.undo), modifier = Modifier.size(18.dp))
                     }
 
                     FloatingActionButton(
                         onClick = { onEvent(NotesEvent.OnRedoClick) },
                         shape = MaterialTheme.shapes.extraLarge,
-                        modifier = Modifier.size(40.dp).springPress(),
+                        modifier = Modifier.size(36.dp).springPress(),
                         containerColor = MaterialTheme.colorScheme.secondaryContainer,
                         contentColor = if (state.canRedo) MaterialTheme.colorScheme.onSecondaryContainer else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     ) {
-                        Icon(Icons.AutoMirrored.Rounded.Redo, contentDescription = stringResource(id = R.string.redo), modifier = Modifier.size(20.dp))
+                        Icon(Icons.AutoMirrored.Rounded.Redo, contentDescription = stringResource(id = R.string.redo), modifier = Modifier.size(18.dp))
                     }
                 }
 
                 FloatingActionButton(
                     onClick = { showMoreOptions(true) },
                     shape = MaterialTheme.shapes.extraLarge,
-                    modifier = Modifier.size(40.dp).springPress(),
+                    modifier = Modifier.size(36.dp).springPress(),
                     containerColor = MaterialTheme.colorScheme.secondaryContainer,
                     contentColor = MaterialTheme.colorScheme.onSurface
                 ) {
-                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more_options), modifier = Modifier.size(20.dp))
+                    Icon(Icons.Default.MoreVert, contentDescription = stringResource(id = R.string.more_options), modifier = Modifier.size(18.dp))
                 }
             }
         }

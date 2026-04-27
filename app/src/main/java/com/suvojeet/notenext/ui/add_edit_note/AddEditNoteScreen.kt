@@ -340,12 +340,12 @@ fun AddEditNoteScreen(
                     Surface(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                            .padding(horizontal = 8.dp, vertical = 4.dp)
                             .imePadding(),
                         shape = MaterialTheme.shapes.extraLarge,
                         color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
-                        tonalElevation = 3.dp,
-                        shadowElevation = 8.dp
+                        tonalElevation = 2.dp,
+                        shadowElevation = 6.dp
                     ) {
                         AddEditNoteBottomAppBar(
                             state = state,
@@ -475,7 +475,7 @@ fun AddEditNoteScreen(
                             }
 
                             item {
-                                Spacer(modifier = Modifier.height(300.dp))
+                                Spacer(modifier = Modifier.height(120.dp))
                             }
                         }
                     } else {
@@ -533,7 +533,7 @@ fun AddEditNoteScreen(
                             }
 
                             item {
-                                Spacer(modifier = Modifier.height(300.dp))
+                                Spacer(modifier = Modifier.height(120.dp))
                             }
                         }
                     }

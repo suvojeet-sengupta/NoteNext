@@ -50,32 +50,27 @@ fun AddEditNoteTopAppBar(
     contentColor: Color = MaterialTheme.colorScheme.onSurface,
     scrollBehavior: TopAppBarScrollBehavior? = null
 ) {
-    CenterAlignedTopAppBar(
+    TopAppBar(
         title = {
             if (state.editingIsNewNote) {
                 Text(
                     text = if (editingNoteType == NoteType.CHECKLIST) stringResource(id = R.string.add_checklist) else stringResource(id = R.string.add_note),
-                    style = MaterialTheme.typography.titleLarge,
-                    fontWeight = FontWeight.ExtraBold
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
                 )
             }
         },
         navigationIcon = {
-            FilledIconButton(
+            IconButton(
                 onClick = onDismiss,
                 modifier = Modifier
-                    .padding(start = 8.dp)
-                    .springPress(),
-                shape = MaterialTheme.shapes.medium,
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
-                    contentColor = contentColor
-                )
+                    .padding(start = 4.dp)
+                    .springPress()
             ) {
-                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back))
+                Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(id = R.string.back), tint = contentColor)
             }
         },
-        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+        colors = TopAppBarDefaults.topAppBarColors(
             containerColor = backgroundColor,
             titleContentColor = contentColor,
             actionIconContentColor = contentColor,
@@ -85,8 +80,8 @@ fun AddEditNoteTopAppBar(
         actions = {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                modifier = Modifier.padding(end = 8.dp)
+                horizontalArrangement = Arrangement.spacedBy(2.dp),
+                modifier = Modifier.padding(end = 4.dp)
             ) {
                 SavedStatusIndicator(status = state.saveStatus, contentColor = contentColor)
 

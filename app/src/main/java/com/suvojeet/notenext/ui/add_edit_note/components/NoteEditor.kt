@@ -51,7 +51,7 @@ fun NoteTitleEditor(
     
     Column(
         modifier = Modifier
-            .padding(horizontal = 24.dp, vertical = 8.dp)
+            .padding(horizontal = 16.dp, vertical = 4.dp)
             .graphicsLayer {
                 translationY = parallaxOffset
             }
@@ -267,7 +267,7 @@ fun NoteContentChunkEditor(
         }
     }
 
-    Box(modifier = Modifier.padding(horizontal = 24.dp)) {
+    Box(modifier = Modifier.padding(horizontal = 16.dp)) {
         BasicTextField(
             value = highlightedChunk,
             onValueChange = { newHighlightedChunk ->
