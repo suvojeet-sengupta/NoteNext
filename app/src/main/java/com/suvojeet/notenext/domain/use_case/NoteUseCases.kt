@@ -1,5 +1,6 @@
 package com.suvojeet.notenext.domain.use_case
 
+import com.suvojeet.notenext.core.util.SortType
 import javax.inject.Inject
 
 data class NoteUseCases @Inject constructor(
@@ -8,8 +9,7 @@ data class NoteUseCases @Inject constructor(
     val addNote: AddNoteUseCase,
     val getNote: GetNoteUseCase
 ) {
-    fun getPinnedNoteSummaries() = getNotes.getPinnedNoteSummaries()
-    fun getOtherNoteSummariesPaged(query: String = "", sortType: com.suvojeet.notenext.data.SortType = com.suvojeet.notenext.data.SortType.DATE_MODIFIED) =
-        getNotes.getOtherNoteSummariesPaged(query, sortType)
+    fun getPinnedNoteSummaries(isDecoy: Boolean = false) = getNotes.getPinnedNoteSummaries(isDecoy)
+    fun getOtherNoteSummariesPaged(query: String = "", sortType: SortType = SortType.DATE_MODIFIED, isDecoy: Boolean = false) =
+        getNotes.getOtherNoteSummariesPaged(query, sortType, isDecoy)
 }
-

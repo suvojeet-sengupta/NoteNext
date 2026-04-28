@@ -55,7 +55,7 @@ import com.suvojeet.notenext.ui.add_edit_note.AddEditNoteScreen
 import com.suvojeet.notenext.ui.components.*
 import com.suvojeet.notenext.core.model.NoteType
 import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import com.suvojeet.notenext.ui.reminder.ReminderSetDialog
 import com.suvojeet.notenext.data.repository.SettingsRepository
 import com.suvojeet.notenext.ui.theme.ThemeMode
@@ -77,9 +77,14 @@ fun ProjectNotesScreen(
     navController: NavController,
     onBackClick: () -> Unit,
     themeMode: ThemeMode,
-    settingsRepository: SettingsRepository
+    settingsRepository: SettingsRepository,
+    isDecoySession: Boolean = false
 ) {
     val viewModel: ProjectNotesViewModel = hiltViewModel()
+    
+    LaunchedEffect(isDecoySession) {
+        viewModel.setDecoyMode(isDecoySession)
+    }
     val state by viewModel.state.collectAsStateWithLifecycle()
     var searchQuery by remember { mutableStateOf("") }
     var isSearchActive by remember { mutableStateOf(false) }

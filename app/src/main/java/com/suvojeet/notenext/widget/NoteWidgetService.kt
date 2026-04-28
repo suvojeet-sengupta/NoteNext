@@ -9,6 +9,7 @@ import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.NoteRepository
 import com.suvojeet.notenext.util.HtmlConverter
 import com.suvojeet.notenext.core.model.NoteType
+import com.suvojeet.notenext.core.util.SortType
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
@@ -40,7 +41,7 @@ class NoteWidgetRemoteViewsFactory(
         runBlocking {
             try {
                 // Fetch Pinned notes first
-                val allNotesWithAttachments = repository.getNotes("", com.suvojeet.notenext.data.SortType.DATE_MODIFIED).first()
+                val allNotesWithAttachments = repository.getNotes("", SortType.DATE_MODIFIED).first()
                 notes = allNotesWithAttachments
                         .map { it.note }
                         .filter { it.isPinned && !it.isArchived && !it.isBinned }

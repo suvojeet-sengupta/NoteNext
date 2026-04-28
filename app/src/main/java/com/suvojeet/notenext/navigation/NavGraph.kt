@@ -42,6 +42,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import com.suvojeet.notenext.ui.notes.NotesEvent
 import com.suvojeet.notenext.ui.notes.NotesViewModel
+import com.suvojeet.notenext.ui.MainViewModel
 import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.data.repository.SettingsRepository
 import kotlinx.coroutines.launch
@@ -60,6 +61,7 @@ fun NavGraph(
     themeMode: ThemeMode,
     windowSizeClass: WindowSizeClass,
     settingsRepository: SettingsRepository,
+    mainViewModel: MainViewModel,
     startNoteId: Int = -1,
     startProjectId: Int = -1,
     startAddNote: Boolean = false,
@@ -75,6 +77,12 @@ fun NavGraph(
     val notesViewModel: NotesViewModel = hiltViewModel()
     val notesState by notesViewModel.listState.collectAsState()
     val editState by notesViewModel.editState.collectAsState()
+
+    val isDecoySession by mainViewModel.isDecoySession.collectAsState()
+
+    LaunchedEffect(isDecoySession) {
+        notesViewModel.setDecoyMode(isDecoySession)
+    }
 
     val activity = context.findActivity() as? FragmentActivity
     val biometricAuthManager = if (activity != null) {

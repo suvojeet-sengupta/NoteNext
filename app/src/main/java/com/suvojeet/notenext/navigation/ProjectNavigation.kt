@@ -29,7 +29,8 @@ fun NavGraphBuilder.projectGraph(
     navController: NavHostController,
     themeMode: ThemeMode,
     settingsRepository: SettingsRepository,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    isDecoySession: Boolean = false
 ) {
     val slideEnter = slideInHorizontally(initialOffsetX = { it }, animationSpec = spring()) + fadeIn(spring())
     val slideExit = slideOutHorizontally(targetOffsetX = { it }, animationSpec = spring()) + fadeOut(spring())
@@ -54,7 +55,8 @@ fun NavGraphBuilder.projectGraph(
             navController = navController,
             onBackClick = { navController.popBackStack() },
             themeMode = themeMode,
-            settingsRepository = settingsRepository
+            settingsRepository = settingsRepository,
+            isDecoySession = isDecoySession
         )
     }
 
@@ -64,6 +66,11 @@ fun NavGraphBuilder.projectGraph(
     ) {
         val viewModel: ProjectNotesViewModel = hiltViewModel()
         val scope = rememberCoroutineScope()
+        
+        androidx.compose.runtime.LaunchedEffect(isDecoySession) {
+            viewModel.setDecoyMode(isDecoySession)
+        }
+
         AddEditNoteScreen(
             state = viewModel.state.collectAsState().value.toNotesEditState(),
             onEvent = { viewModel.onEvent(it.toProjectNotesEvent()) },

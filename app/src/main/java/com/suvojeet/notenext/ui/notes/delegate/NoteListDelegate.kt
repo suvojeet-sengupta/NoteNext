@@ -4,7 +4,8 @@ package com.suvojeet.notenext.ui.notes.delegate
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.suvojeet.notenext.data.NoteRepository
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
+import com.suvojeet.notenext.core.util.NoteSearchState
 import com.suvojeet.notenext.ui.notes.NotesListState
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,28 +29,32 @@ class NoteListDelegate @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     private val _sortType = MutableStateFlow(SortType.DATE_MODIFIED)
     private val _filteredProjectId = MutableStateFlow<Int?>(null)
+    private val _isDecoy = MutableStateFlow(false)
 
     fun observeNotes(scope: CoroutineScope) {
         val combinedFlow = combine(
             _searchQuery,
             _sortType,
-            _filteredProjectId
-        ) { query, sort, project -> Triple(query, sort, project) }
-            .distinctUntilChanged()
+            _filteredProjectId,
+            _isDecoy
+        ) { query, sort, project, decoy -> 
+            android.util.Log.d("NoteListDelegate", "Combined: query=$query, sort=$sort, project=$project, decoy=$decoy")
+            NoteSearchState(query, sort, project, decoy) 
+        }.distinctUntilChanged()
 
-        combinedFlow.flatMapLatest { (query, _, project) ->
-            repository.getPinnedNoteSummaries(query, project)
+        combinedFlow.flatMapLatest { state ->
+            repository.getPinnedNoteSummaries(state.query, state.projectId, state.isDecoy)
         }.onEach { pinned ->
             _listState.update { it.copy(pinnedNotes = pinned.toImmutableList()) }
         }.launchIn(scope)
 
-        combinedFlow.onEach { (query, sort, project) ->
+        combinedFlow.onEach { state ->
             _listState.update { 
                 it.copy(
-                    pagedNotes = repository.getOtherNoteSummariesPaged(query, sort, project).cachedIn(scope),
-                    searchQuery = query,
-                    sortType = sort,
-                    filteredProjectId = project
+                    pagedNotes = repository.getOtherNoteSummariesPaged(state.query, state.sortType, state.projectId, state.isDecoy).cachedIn(scope),
+                    searchQuery = state.query,
+                    sortType = state.sortType,
+                    filteredProjectId = state.projectId
                 )
             }
         }.launchIn(scope)
@@ -74,6 +79,10 @@ class NoteListDelegate @Inject constructor(
 
     fun setProjectId(projectId: Int?) {
         _filteredProjectId.value = projectId
+    }
+
+    fun setDecoyMode(isDecoy: Boolean) {
+        _isDecoy.value = isDecoy
     }
 
     fun toggleSelection(noteId: Int) {

@@ -13,16 +13,16 @@ import kotlinx.coroutines.flow.Flow
 interface NoteDao {
 
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 ORDER BY isPinned DESC, lastEdited DESC")
-    fun getNotes(): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isDecoy = :isDecoy ORDER BY isPinned DESC, lastEdited DESC")
+    fun getNotes(isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 1 ORDER BY lastEdited DESC")
-    fun getArchivedNotes(): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isArchived = 1 AND isDecoy = :isDecoy ORDER BY lastEdited DESC")
+    fun getArchivedNotes(isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
-    @Query("SELECT * FROM notes WHERE isBinned = 1 ORDER BY lastEdited DESC")
-    fun getBinnedNotes(): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isBinned = 1 AND isDecoy = :isDecoy ORDER BY lastEdited DESC")
+    fun getBinnedNotes(isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("SELECT * FROM notes WHERE id = :id")
@@ -69,89 +69,89 @@ interface NoteDao {
     fun getAllReminders(): Flow<List<Note>>
 
     @Transaction
-    @Query("SELECT * FROM notes WHERE projectId = :projectId AND isBinned = 0 ORDER BY isPinned DESC, lastEdited DESC")
-    fun getNotesByProjectId(projectId: Int): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE projectId = :projectId AND isBinned = 0 AND isDecoy = :isDecoy ORDER BY isPinned DESC, lastEdited DESC")
+    fun getNotesByProjectId(projectId: Int, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.* FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
-        AND notes.isArchived = 0 AND notes.isBinned = 0
+        AND notes.isArchived = 0 AND notes.isBinned = 0 AND notes.isDecoy = :isDecoy
         ORDER BY notes.isPinned DESC, notes.lastEdited DESC
     """)
-    fun searchNotes(query: String): Flow<List<NoteWithAttachments>>
+    fun searchNotes(query: String, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     // Optimized Queries for NotesViewModel
 
     // 1. DATE_MODIFIED
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) ORDER BY isPinned DESC, lastEdited DESC")
-    fun getNotesOrderedByDateModified(projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY isPinned DESC, lastEdited DESC")
+    fun getNotesOrderedByDateModified(projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.* FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
-        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId)
+        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.isPinned DESC, notes.lastEdited DESC
     """)
-    fun searchNotesOrderedByDateModified(query: String, projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    fun searchNotesOrderedByDateModified(query: String, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     // 2. DATE_CREATED
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) ORDER BY isPinned DESC, createdAt DESC")
-    fun getNotesOrderedByDateCreated(projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY isPinned DESC, createdAt DESC")
+    fun getNotesOrderedByDateCreated(projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.* FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
-        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId)
+        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.isPinned DESC, notes.createdAt DESC
     """)
-    fun searchNotesOrderedByDateCreated(query: String, projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    fun searchNotesOrderedByDateCreated(query: String, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     // 3. TITLE
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) ORDER BY isPinned DESC, title ASC")
-    fun getNotesOrderedByTitle(projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY isPinned DESC, title ASC")
+    fun getNotesOrderedByTitle(projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.* FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
-        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId)
+        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.isPinned DESC, notes.title ASC
     """)
-    fun searchNotesOrderedByTitle(query: String, projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    fun searchNotesOrderedByTitle(query: String, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     // 4. CUSTOM (Position)
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) ORDER BY isPinned DESC, position ASC")
-    fun getNotesOrderedByPosition(projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY isPinned DESC, position ASC")
+    fun getNotesOrderedByPosition(projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.* FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
-        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId)
+        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.isPinned DESC, notes.position ASC
     """)
-    fun searchNotesOrderedByPosition(query: String, projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    fun searchNotesOrderedByPosition(query: String, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.* FROM notes
         WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 1
-        AND (projectId IS :projectId)
+        AND (projectId IS :projectId) AND isDecoy = :isDecoy
         ORDER BY lastEdited DESC
     """)
-    fun getPinnedNotes(projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    fun getPinnedNotes(projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     @Transaction
     @Query("""
@@ -159,17 +159,17 @@ interface NoteDao {
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND notes.isPinned = 1
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.lastEdited DESC
     """)
-    fun searchPinnedNotes(query: String, projectId: Int? = null): Flow<List<NoteWithAttachments>>
+    fun searchPinnedNotes(query: String, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
 
     // Paging Queries for "Others" (Non-pinned)
 
     // 1. DATE_MODIFIED
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) ORDER BY lastEdited DESC")
-    fun getOtherNotesPagedOrderedByDateModified(projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY lastEdited DESC")
+    fun getOtherNotesPagedOrderedByDateModified(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     @Transaction
     @Query("""
@@ -177,15 +177,15 @@ interface NoteDao {
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.lastEdited DESC
     """)
-    fun searchOtherNotesPagedOrderedByDateModified(query: String, projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    fun searchOtherNotesPagedOrderedByDateModified(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     // 2. DATE_CREATED
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) ORDER BY createdAt DESC")
-    fun getOtherNotesPagedOrderedByDateCreated(projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY createdAt DESC")
+    fun getOtherNotesPagedOrderedByDateCreated(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     @Transaction
     @Query("""
@@ -193,15 +193,15 @@ interface NoteDao {
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.createdAt DESC
     """)
-    fun searchOtherNotesPagedOrderedByDateCreated(query: String, projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    fun searchOtherNotesPagedOrderedByDateCreated(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     // 3. TITLE
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) ORDER BY title ASC")
-    fun getOtherNotesPagedOrderedByTitle(projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY title ASC")
+    fun getOtherNotesPagedOrderedByTitle(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     @Transaction
     @Query("""
@@ -209,15 +209,15 @@ interface NoteDao {
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.title ASC
     """)
-    fun searchOtherNotesPagedOrderedByTitle(query: String, projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    fun searchOtherNotesPagedOrderedByTitle(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     // 4. CUSTOM (Position)
     @Transaction
-    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) ORDER BY position ASC")
-    fun getOtherNotesPagedOrderedByPosition(projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    @Query("SELECT * FROM notes WHERE isArchived = 0 AND isBinned = 0 AND isPinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy ORDER BY position ASC")
+    fun getOtherNotesPagedOrderedByPosition(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     @Transaction
     @Query("""
@@ -225,10 +225,10 @@ interface NoteDao {
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.position ASC
     """)
-    fun searchOtherNotesPagedOrderedByPosition(query: String, projectId: Int? = null): PagingSource<Int, NoteWithAttachments>
+    fun searchOtherNotesPagedOrderedByPosition(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteWithAttachments>
 
     @Query("UPDATE notes SET position = :position WHERE id = :id")
     suspend fun updateNotePosition(id: Int, position: Int)
@@ -273,169 +273,169 @@ interface NoteDao {
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
  isArchived = 0 AND isBinned = 0 AND isPinned = 1
-        AND (projectId IS :projectId)
+        AND (projectId IS :projectId) AND isDecoy = :isDecoy
         ORDER BY lastEdited DESC
     """)
-    fun getPinnedNoteSummaries(projectId: Int? = null): Flow<List<NoteSummaryWithAttachments>>
+    fun getPinnedNoteSummaries(projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND notes.isPinned = 1
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.lastEdited DESC
     """)
-    fun searchPinnedNoteSummaries(query: String, projectId: Int? = null): Flow<List<NoteSummaryWithAttachments>>
+    fun searchPinnedNoteSummaries(query: String, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
  isArchived = 0 AND isBinned = 0 AND isPinned = 0 
-        AND (projectId IS :projectId) 
+        AND (projectId IS :projectId) AND isDecoy = :isDecoy
         ORDER BY lastEdited DESC
     """)
-    fun getOtherNoteSummariesPagedOrderedByDateModified(projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun getOtherNoteSummariesPagedOrderedByDateModified(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.lastEdited DESC
     """)
-    fun searchOtherNoteSummariesPagedOrderedByDateModified(query: String, projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun searchOtherNoteSummariesPagedOrderedByDateModified(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
  isArchived = 0 AND isBinned = 0 AND isPinned = 0 
-        AND (projectId IS :projectId) 
+        AND (projectId IS :projectId) AND isDecoy = :isDecoy
         ORDER BY createdAt DESC
     """)
-    fun getOtherNoteSummariesPagedOrderedByDateCreated(projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun getOtherNoteSummariesPagedOrderedByDateCreated(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.createdAt DESC
     """)
-    fun searchOtherNoteSummariesPagedOrderedByDateCreated(query: String, projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun searchOtherNoteSummariesPagedOrderedByDateCreated(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
  isArchived = 0 AND isBinned = 0 AND isPinned = 0 
-        AND (projectId IS :projectId) 
+        AND (projectId IS :projectId) AND isDecoy = :isDecoy
         ORDER BY title ASC
     """)
-    fun getOtherNoteSummariesPagedOrderedByTitle(projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun getOtherNoteSummariesPagedOrderedByTitle(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.title ASC
     """)
-    fun searchOtherNoteSummariesPagedOrderedByTitle(query: String, projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun searchOtherNoteSummariesPagedOrderedByTitle(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
  isArchived = 0 AND isBinned = 0 AND isPinned = 0 
-        AND (projectId IS :projectId) 
+        AND (projectId IS :projectId) AND isDecoy = :isDecoy
         ORDER BY position ASC
     """)
-    fun getOtherNoteSummariesPagedOrderedByPosition(projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun getOtherNoteSummariesPagedOrderedByPosition(projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
         AND notes.isArchived = 0 AND notes.isBinned = 0 AND isPinned = 0 
-        AND (notes.projectId IS :projectId)
+        AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
         ORDER BY notes.position ASC
     """)
-    fun searchOtherNoteSummariesPagedOrderedByPosition(query: String, projectId: Int? = null): PagingSource<Int, NoteSummaryWithAttachments>
+    fun searchOtherNoteSummariesPagedOrderedByPosition(query: String, projectId: Int? = null, isDecoy: Boolean = false): PagingSource<Int, NoteSummaryWithAttachments>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
- isArchived = 1 ORDER BY lastEdited DESC
+ isArchived = 1 AND isDecoy = :isDecoy ORDER BY lastEdited DESC
     """)
-    fun getArchivedNoteSummaries(): Flow<List<NoteSummaryWithAttachments>>
+    fun getArchivedNoteSummaries(isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
 
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
- isBinned = 1 ORDER BY lastEdited DESC
+ isBinned = 1 AND isDecoy = :isDecoy ORDER BY lastEdited DESC
     """)
-    fun getBinnedNoteSummaries(): Flow<List<NoteSummaryWithAttachments>>
+    fun getBinnedNoteSummaries(isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
     @Transaction
     @Query("""
         SELECT notes.id AS id, notes.title AS title, 
         CASE WHEN notes.isEncrypted = 1 THEN notes.content ELSE SUBSTR(notes.content, 1, 500) END AS content,
-        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime
+        notes.createdAt AS createdAt, notes.lastEdited AS lastEdited, notes.color AS color, notes.isPinned AS isPinned, notes.isArchived AS isArchived, notes.reminderTime AS reminderTime, notes.label AS label, notes.isBinned AS isBinned, notes.binnedOn AS binnedOn, notes.isImportant AS isImportant, notes.noteType AS noteType, notes.projectId AS projectId, notes.isLocked AS isLocked, notes.position AS position, notes.aiSummary AS aiSummary, notes.iv AS iv, notes.isEncrypted AS isEncrypted, notes.repeatOption AS repeatOption, notes.linkPreviews AS linkPreviews, notes.expiryTime AS expiryTime, notes.isDecoy AS isDecoy
         FROM notes WHERE
- projectId = :projectId AND isBinned = 0 ORDER BY isPinned DESC, lastEdited DESC
+ projectId = :projectId AND isBinned = 0 AND isDecoy = :isDecoy ORDER BY isPinned DESC, lastEdited DESC
     """)
-    fun getNoteSummariesByProjectId(projectId: Int): Flow<List<NoteSummaryWithAttachments>>
+    fun getNoteSummariesByProjectId(projectId: Int, isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
 
-    @Query("SELECT id FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId)")
-    suspend fun getAllNoteIds(projectId: Int? = null): List<Int>
+    @Query("SELECT id FROM notes WHERE isArchived = 0 AND isBinned = 0 AND (projectId IS :projectId) AND isDecoy = :isDecoy")
+    suspend fun getAllNoteIds(projectId: Int? = null, isDecoy: Boolean = false): List<Int>
 
     @Query("""
         SELECT notes.id FROM notes
         JOIN notes_fts ON notes.id = notes_fts.rowid
         WHERE notes_fts MATCH :query
-        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId)
+        AND notes.isArchived = 0 AND notes.isBinned = 0 AND (notes.projectId IS :projectId) AND notes.isDecoy = :isDecoy
     """)
-    suspend fun searchAllNoteIds(query: String, projectId: Int? = null): List<Int>
+    suspend fun searchAllNoteIds(query: String, projectId: Int? = null, isDecoy: Boolean = false): List<Int>
 }

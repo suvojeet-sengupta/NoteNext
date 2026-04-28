@@ -2,24 +2,25 @@ package com.suvojeet.notenext.data
 
 import kotlinx.coroutines.flow.Flow
 import androidx.paging.PagingData
+import com.suvojeet.notenext.core.util.SortType
 
 interface NoteRepository {
     // Note operations
-    fun getNotes(searchQuery: String = "", sortType: SortType = SortType.DATE_MODIFIED, projectId: Int? = null): Flow<List<NoteWithAttachments>>
-    fun getPinnedNotes(searchQuery: String = "", projectId: Int? = null): Flow<List<NoteWithAttachments>>
-    fun getOtherNotesPaged(searchQuery: String = "", sortType: SortType = SortType.DATE_MODIFIED, projectId: Int? = null): Flow<PagingData<NoteWithAttachments>>
+    fun getNotes(searchQuery: String = "", sortType: SortType = SortType.DATE_MODIFIED, projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
+    fun getPinnedNotes(searchQuery: String = "", projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
+    fun getOtherNotesPaged(searchQuery: String = "", sortType: SortType = SortType.DATE_MODIFIED, projectId: Int? = null, isDecoy: Boolean = false): Flow<PagingData<NoteWithAttachments>>
 
     // Optimized Note Summary operations
-    fun getPinnedNoteSummaries(searchQuery: String = "", projectId: Int? = null): Flow<List<NoteSummaryWithAttachments>>
-    fun getOtherNoteSummariesPaged(searchQuery: String = "", sortType: SortType = SortType.DATE_MODIFIED, projectId: Int? = null): Flow<PagingData<NoteSummaryWithAttachments>>
-    fun getArchivedNoteSummaries(): Flow<List<NoteSummaryWithAttachments>>
-    fun getBinnedNoteSummaries(): Flow<List<NoteSummaryWithAttachments>>
-    fun getNoteSummariesByProjectId(projectId: Int): Flow<List<NoteSummaryWithAttachments>>
-    suspend fun getAllNoteIds(searchQuery: String = "", projectId: Int? = null): List<Int>
+    fun getPinnedNoteSummaries(searchQuery: String = "", projectId: Int? = null, isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
+    fun getOtherNoteSummariesPaged(searchQuery: String = "", sortType: SortType = SortType.DATE_MODIFIED, projectId: Int? = null, isDecoy: Boolean = false): Flow<PagingData<NoteSummaryWithAttachments>>
+    fun getArchivedNoteSummaries(isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
+    fun getBinnedNoteSummaries(isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
+    fun getNoteSummariesByProjectId(projectId: Int, isDecoy: Boolean = false): Flow<List<NoteSummaryWithAttachments>>
+    suspend fun getAllNoteIds(searchQuery: String = "", projectId: Int? = null, isDecoy: Boolean = false): List<Int>
 
-    fun getArchivedNotes(): Flow<List<NoteWithAttachments>>
-    fun getBinnedNotes(): Flow<List<NoteWithAttachments>>
-    fun getNotesByProjectId(projectId: Int): Flow<List<NoteWithAttachments>>
+    fun getArchivedNotes(isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
+    fun getBinnedNotes(isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
+    fun getNotesByProjectId(projectId: Int, isDecoy: Boolean = false): Flow<List<NoteWithAttachments>>
     fun getNotesModifiedSince(timestamp: Long): Flow<List<NoteWithAttachments>>
     suspend fun getNoteById(id: Int): NoteWithAttachments?
     suspend fun insertNote(note: Note): Long

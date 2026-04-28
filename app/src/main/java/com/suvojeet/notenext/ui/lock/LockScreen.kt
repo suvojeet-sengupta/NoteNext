@@ -25,10 +25,28 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import com.suvojeet.notenext.ui.components.springPress
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material.icons.rounded.Backspace
+import androidx.compose.ui.draw.clip
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.suvojeet.notenext.ui.MainViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun LockScreen(onUnlock: () -> Unit) {
+fun LockScreen(
+    onUnlock: (Boolean) -> Unit,
+    viewModel: MainViewModel = hiltViewModel()
+) {
     val context = LocalContext.current
+    val settingsRepository = viewModel.settingsRepository
+    val realPin by settingsRepository.appLockPin.collectAsStateWithLifecycle(initialValue = null)
+    val decoyPin by settingsRepository.decoyPin.collectAsStateWithLifecycle(initialValue = null)
+    val isDecoyEnabled by settingsRepository.enableDecoyVault.collectAsStateWithLifecycle(initialValue = false)
+
+    var enteredPin by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
     
     val activity = context.findActivity() as? FragmentActivity
@@ -52,7 +70,7 @@ fun LockScreen(onUnlock: () -> Unit) {
     LaunchedEffect(biometricAuthManager) {
         if (isAuthAvailable) {
             biometricAuthManager?.showBiometricPrompt(
-                onAuthSuccess = { _ -> onUnlock() },
+                onAuthSuccess = { _ -> onUnlock(false) },
                 onAuthError = {
                     if (it != "Authentication error: User Canceled" && !it.contains("Canceled")) {
                         error = it
@@ -115,7 +133,7 @@ fun LockScreen(onUnlock: () -> Unit) {
                  FilledTonalButton(
                     onClick = {
                         biometricAuthManager?.showBiometricPrompt(
-                            onAuthSuccess = { _ -> onUnlock() },
+                            onAuthSuccess = { _ -> onUnlock(false) },
                             onAuthError = {
                                 if (it != "Authentication error: User Canceled" && !it.contains("Canceled")) {
                                     error = it
@@ -132,21 +150,83 @@ fun LockScreen(onUnlock: () -> Unit) {
                 ) {
                     Icon(Icons.Default.Fingerprint, contentDescription = null, modifier = Modifier.size(24.dp))
                     Spacer(modifier = Modifier.width(12.dp))
-                    Text("Unlock with Biometrics or PIN", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                    Text("Unlock with Biometrics", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
                 }
-            } else {
-                Surface(
-                    color = MaterialTheme.colorScheme.errorContainer,
-                    shape = MaterialTheme.shapes.medium,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                         text = "Security lock is not available on this device", 
-                         color = MaterialTheme.colorScheme.onErrorContainer,
-                         modifier = Modifier.padding(16.dp),
-                         textAlign = TextAlign.Center,
-                         style = MaterialTheme.typography.bodyMedium
-                    )
+            }
+            
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // PIN Dots
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                repeat(4) { index ->
+                    val active = index < enteredPin.length
+                    Surface(
+                        modifier = Modifier.size(16.dp),
+                        shape = CircleShape,
+                        color = if (active) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                        border = if (!active) BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant) else null
+                    ) {}
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Numeric Keypad
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                val keys = listOf(
+                    listOf("1", "2", "3"),
+                    listOf("4", "5", "6"),
+                    listOf("7", "8", "9"),
+                    listOf("", "0", "DEL")
+                )
+
+                keys.forEach { row ->
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceEvenly
+                    ) {
+                        row.forEach { key ->
+                            if (key.isEmpty()) {
+                                Spacer(modifier = Modifier.size(64.dp))
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .size(64.dp)
+                                        .clip(CircleShape)
+                                        .background(MaterialTheme.colorScheme.surfaceContainerLow)
+                                        .clickable {
+                                            if (key == "DEL") {
+                                                if (enteredPin.isNotEmpty()) enteredPin = enteredPin.dropLast(1)
+                                            } else if (enteredPin.length < 4) {
+                                                enteredPin += key
+                                                if (enteredPin.length == 4) {
+                                                    // Validate
+                                                    when {
+                                                        enteredPin == realPin -> onUnlock(false)
+                                                        isDecoyEnabled && enteredPin == decoyPin -> onUnlock(true)
+                                                        else -> {
+                                                            error = "Invalid PIN"
+                                                            enteredPin = ""
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        .springPress(),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (key == "DEL") {
+                                        Icon(Icons.Rounded.Backspace, contentDescription = "Delete")
+                                    } else {
+                                        Text(key, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
 

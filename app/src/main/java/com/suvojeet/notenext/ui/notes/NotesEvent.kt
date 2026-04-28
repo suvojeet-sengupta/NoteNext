@@ -9,7 +9,7 @@ import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.NoteVersion
 import com.suvojeet.notenext.data.NoteSummaryWithAttachments
 import com.suvojeet.notenext.data.RepeatOption
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import java.time.LocalDate
 import java.time.LocalTime
 

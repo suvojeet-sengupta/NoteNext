@@ -16,7 +16,8 @@ class SaveNoteUseCase @Inject constructor(
         note: Note,
         checklist: List<ChecklistItem>,
         attachments: List<Attachment>,
-        isNewNote: Boolean
+        isNewNote: Boolean,
+        isDecoy: Boolean = false
     ): SaveNoteResult {
         // Logic to check if the note is empty
         val isNoteEmpty = note.title.isBlank() && (
@@ -38,7 +39,7 @@ class SaveNoteUseCase @Inject constructor(
 
         val currentTime = System.currentTimeMillis()
         val noteToSave = if (isNewNote || note.id == -1) {
-            note.copy(createdAt = currentTime, lastEdited = currentTime)
+            note.copy(createdAt = currentTime, lastEdited = currentTime, isDecoy = isDecoy)
         } else {
             // Before updating, save current state as a version
             repository.getNoteById(note.id)?.let { oldNoteWithAttachments ->

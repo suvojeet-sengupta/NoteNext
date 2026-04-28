@@ -3,7 +3,7 @@ package com.suvojeet.notenext.ui.project
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import com.suvojeet.notenext.data.NoteSummaryWithAttachments
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import com.suvojeet.notenext.data.RepeatOption
 import com.suvojeet.notenext.data.NoteVersion
 import com.suvojeet.notenext.core.model.NoteType

@@ -1,4 +1,4 @@
-package com.suvojeet.notenext.data
+package com.suvojeet.notenext.core.util
 
 import androidx.annotation.Keep
 import kotlinx.serialization.Serializable

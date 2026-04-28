@@ -21,6 +21,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.suvojeet.notenext.R
@@ -43,8 +46,11 @@ fun PrivacySecurityScreen(
     val enableAppLock by settingsRepository.enableAppLock.collectAsStateWithLifecycle(initialValue = false)
     val disallowScreenshots by settingsRepository.disallowScreenshots.collectAsStateWithLifecycle(initialValue = false)
     val clipboardTimeout by settingsRepository.clipboardClearTimeout.collectAsStateWithLifecycle(initialValue = 0L)
+    val enableDecoyVault by settingsRepository.enableDecoyVault.collectAsStateWithLifecycle(initialValue = false)
+    val decoyPin by settingsRepository.decoyPin.collectAsStateWithLifecycle(initialValue = null)
 
     var showClipboardDialog by remember { mutableStateOf(false) }
+    var showDecoyPinDialog by remember { mutableStateOf(false) }
     var showSelfDestructInfo by remember { mutableStateOf(false) }
 
     Scaffold(
@@ -138,6 +144,43 @@ fun PrivacySecurityScreen(
 
             item {
                 ExpressiveSection(
+                    title = "Decoy Vault",
+                    description = "A secondary PIN that reveals a fake set of notes"
+                ) {
+                    SettingsGroupCard {
+                        SettingsToggle(
+                            icon = Icons.Rounded.VisibilityOff,
+                            title = "Enable Decoy Vault",
+                            subtitle = "Use a secondary PIN for coercion situations",
+                            iconColor = MaterialTheme.colorScheme.secondary,
+                            checked = enableDecoyVault,
+                            onCheckedChange = { 
+                                if (it && decoyPin == null) {
+                                    showDecoyPinDialog = true
+                                } else {
+                                    scope.launch { settingsRepository.saveEnableDecoyVault(it) }
+                                }
+                            }
+                        )
+                        if (enableDecoyVault) {
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 16.dp),
+                                color = MaterialTheme.colorScheme.outlineVariant.copy(alpha = 0.5f)
+                            )
+                            SettingsItem(
+                                icon = Icons.Rounded.Password,
+                                title = "Set Decoy PIN",
+                                subtitle = if (decoyPin == null) "Not set" else "****",
+                                iconColor = MaterialTheme.colorScheme.secondary,
+                                onClick = { showDecoyPinDialog = true }
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                ExpressiveSection(
                     title = "Data Privacy",
                     description = "Protect your note content from outside eyes"
                 ) {
@@ -201,6 +244,19 @@ fun PrivacySecurityScreen(
                 showClipboardDialog = false
             },
             onDismiss = { showClipboardDialog = false }
+        )
+    }
+
+    if (showDecoyPinDialog) {
+        DecoyPinDialog(
+            onPinSelected = {
+                scope.launch { 
+                    settingsRepository.saveDecoyPin(it)
+                    settingsRepository.saveEnableDecoyVault(true)
+                }
+                showDecoyPinDialog = false
+            },
+            onDismiss = { showDecoyPinDialog = false }
         )
     }
     if (showSelfDestructInfo) {
@@ -304,6 +360,69 @@ private fun SettingsToggle(
 }
 
 @Composable
+private fun DecoyPinDialog(
+    onPinSelected: (String) -> Unit,
+    onDismiss: () -> Unit
+) {
+    var pin by remember { mutableStateOf("") }
+    var confirmPin by remember { mutableStateOf("") }
+    var error by remember { mutableStateOf<String?>(null) }
+
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("Set Decoy PIN") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                Text("Enter a 4-digit secondary PIN. Entering this PIN on the lock screen will open a separate, decoy vault.")
+                
+                OutlinedTextField(
+                    value = pin,
+                    onValueChange = { if (it.length <= 4) pin = it },
+                    label = { Text("Secondary PIN") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                OutlinedTextField(
+                    value = confirmPin,
+                    onValueChange = { if (it.length <= 4) confirmPin = it },
+                    label = { Text("Confirm Secondary PIN") },
+                    visualTransformation = PasswordVisualTransformation(),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    modifier = Modifier.fillMaxWidth()
+                )
+                
+                if (error != null) {
+                    Text(error!!, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.labelMedium)
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    if (pin.length != 4) {
+                        error = "PIN must be 4 digits"
+                    } else if (pin != confirmPin) {
+                        error = "PINs do not match"
+                    } else {
+                        onPinSelected(pin)
+                    }
+                }
+            ) {
+                Text("Save")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        },
+        shape = MaterialTheme.shapes.extraLarge
+    )
+}
+
+@Composable
 private fun SettingsItem(
     icon: ImageVector,
     title: String,
@@ -339,3 +458,4 @@ private fun SettingsItem(
         colors = ListItemDefaults.colors(containerColor = Color.Transparent)
     )
 }
+

@@ -26,6 +26,8 @@ object PreferencesKeys {
     val LAST_SEEN_VERSION = intPreferencesKey("last_seen_version")
     val DISALLOW_SCREENSHOTS = booleanPreferencesKey("disallow_screenshots")
     val CLIPBOARD_CLEAR_TIMEOUT = longPreferencesKey("clipboard_clear_timeout")
+    val ENABLE_DECOY_VAULT = booleanPreferencesKey("enable_decoy_vault")
+    val DECOY_PIN = stringPreferencesKey("decoy_pin")
 
     // Groq API Settings
     val USE_CUSTOM_GROQ_KEY = booleanPreferencesKey("use_custom_groq_key")
@@ -199,10 +201,23 @@ class SettingsRepository(private val context: Context) {
         }
 
     suspend fun saveClipboardClearTimeout(timeout: Long) {
-        context.dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CLIPBOARD_CLEAR_TIMEOUT] = timeout
-        }
+        context.dataStore.edit { preferences -> preferences[PreferencesKeys.CLIPBOARD_CLEAR_TIMEOUT] = timeout }
     }
+
+    val enableDecoyVault: Flow<Boolean> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.ENABLE_DECOY_VAULT] ?: false }
+
+    suspend fun saveEnableDecoyVault(enable: Boolean) {
+        context.dataStore.edit { preferences -> preferences[PreferencesKeys.ENABLE_DECOY_VAULT] = enable }
+    }
+
+    val decoyPin: Flow<String?> = context.dataStore.data
+        .map { preferences -> preferences[PreferencesKeys.DECOY_PIN] }
+
+    suspend fun saveDecoyPin(pin: String) {
+        context.dataStore.edit { preferences -> preferences[PreferencesKeys.DECOY_PIN] = pin }
+    }
+
 
     // AI Provider Settings
     val preferredAIProvider: Flow<String> = context.dataStore.data

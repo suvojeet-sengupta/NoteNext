@@ -268,7 +268,7 @@ class MainActivity : FragmentActivity() {
                             } else if (isSetupCompleteLoaded == false) {
                                 SetupScreen { }
                             } else if (enableAppLockLoaded == true && !unlockedByAuth) {
-                                LockScreen(onUnlock = { viewModel.onUnlock() })
+                                LockScreen(onUnlock = { isDecoy -> viewModel.onUnlock(isDecoy) })
                             } else {
                                 val startNoteId by viewModel.startNoteId.collectAsStateWithLifecycle()
                                 val startProjectId by viewModel.startProjectId.collectAsStateWithLifecycle()
@@ -281,7 +281,8 @@ class MainActivity : FragmentActivity() {
                                 NavGraph(
                                     themeMode = themeMode,
                                     windowSizeClass = windowSizeClass,
-                                    settingsRepository = viewModel.settingsRepository, // We still need settingsRepository for NavGraph for now, or we should refactor NavGraph too.
+                                    settingsRepository = viewModel.settingsRepository,
+                                    mainViewModel = viewModel,
                                     startNoteId = startNoteId,
                                     startProjectId = startProjectId,
                                     startAddNote = startAddNote,

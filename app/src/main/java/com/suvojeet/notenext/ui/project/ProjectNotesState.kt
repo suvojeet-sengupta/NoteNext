@@ -7,7 +7,7 @@ import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.NoteSummaryWithAttachments
 import com.suvojeet.notenext.data.Project
 import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import com.suvojeet.notenext.ui.notes.SaveStatus
 
 import com.suvojeet.notenext.core.model.NoteType

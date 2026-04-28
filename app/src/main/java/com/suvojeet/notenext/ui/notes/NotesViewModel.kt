@@ -23,7 +23,7 @@ import com.suvojeet.notenext.data.LinkPreview
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.Project
 import com.suvojeet.notenext.data.ProjectDao
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.data.AlarmScheduler
 import java.time.LocalDateTime
@@ -112,6 +112,7 @@ class NotesViewModel @Inject constructor(
     private val _events = MutableSharedFlow<NotesUiEvent>()
     val events = _events.asSharedFlow()
 
+    private var isDecoySession: Boolean = false
     private var recentlyDeletedNote: Note? = null
     
     private var selectionActionsJob: Job? = null
@@ -148,6 +149,11 @@ class NotesViewModel @Inject constructor(
             val labelNames = labels.map { it.name }.toImmutableList()
             editorDelegate.updateState { it.copy(labels = labelNames) }
         }.launchIn(viewModelScope)
+    }
+
+    fun setDecoyMode(isDecoy: Boolean) {
+        this.isDecoySession = isDecoy
+        listDelegate.setDecoyMode(isDecoy)
     }
 
     override fun onCleared() {
@@ -461,7 +467,8 @@ class NotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     val allIds = repository.getAllNoteIds(
                         searchQuery = listState.value.searchQuery,
-                        projectId = listState.value.filteredProjectId
+                        projectId = listState.value.filteredProjectId,
+                        isDecoy = isDecoySession
                     )
                     listDelegate.updateState { it.copy(selectedNoteIds = allIds.toImmutableList()) }
                 }
@@ -564,7 +571,11 @@ class NotesViewModel @Inject constructor(
                 viewModelScope.launch {
                     val selectedNotes = getSelectedNotes()
                     for (noteWithAttachments in selectedNotes) {
-                        val copiedNote = noteWithAttachments.note.copy(id = 0, title = "${noteWithAttachments.note.title} (Copy)")
+                        val copiedNote = noteWithAttachments.note.copy(
+                            id = 0, 
+                            title = "${noteWithAttachments.note.title} (Copy)",
+                            isDecoy = isDecoySession
+                        )
                         val newNoteId = repository.insertNote(copiedNote)
                         require(newNoteId <= Int.MAX_VALUE) { "Note ID overflow" }
                         noteWithAttachments.attachments.forEach { attachment ->
@@ -1531,7 +1542,8 @@ class NotesViewModel @Inject constructor(
                     isLocked = editState.value.editingIsLocked,
                     reminderTime = editState.value.editingReminderTime,
                     repeatOption = editState.value.editingRepeatOption,
-                    expiryTime = editState.value.editingExpiryTime
+                    expiryTime = editState.value.editingExpiryTime,
+                    isDecoy = isDecoySession
                 )
             } else { // Existing note
                 repository.getNoteById(noteId)?.let { existingNote ->

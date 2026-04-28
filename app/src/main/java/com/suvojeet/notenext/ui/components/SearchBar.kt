@@ -22,7 +22,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.notes.LayoutType
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import androidx.compose.ui.focus.onFocusChanged
 
 import com.suvojeet.notenext.ui.theme.fullShape

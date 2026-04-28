@@ -13,6 +13,7 @@ import android.content.Context
 import dagger.hilt.android.qualifiers.ApplicationContext
 import com.suvojeet.notenext.data.backup.BackupWorker
 import com.suvojeet.notenext.util.CryptoUtils
+import com.suvojeet.notenext.core.util.SortType
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -34,117 +35,117 @@ class NoteRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getNotes(searchQuery: String, sortType: SortType, projectId: Int?): Flow<List<NoteWithAttachments>> {
+    override fun getNotes(searchQuery: String, sortType: SortType, projectId: Int?, isDecoy: Boolean): Flow<List<NoteWithAttachments>> {
         val flow = if (searchQuery.isBlank()) {
             when (sortType) {
-                SortType.DATE_MODIFIED -> noteDao.getNotesOrderedByDateModified(projectId)
-                SortType.DATE_CREATED -> noteDao.getNotesOrderedByDateCreated(projectId)
-                SortType.TITLE -> noteDao.getNotesOrderedByTitle(projectId)
-                SortType.CUSTOM -> noteDao.getNotesOrderedByPosition(projectId)
+                SortType.DATE_MODIFIED -> noteDao.getNotesOrderedByDateModified(projectId, isDecoy)
+                SortType.DATE_CREATED -> noteDao.getNotesOrderedByDateCreated(projectId, isDecoy)
+                SortType.TITLE -> noteDao.getNotesOrderedByTitle(projectId, isDecoy)
+                SortType.CUSTOM -> noteDao.getNotesOrderedByPosition(projectId, isDecoy)
             }
         } else {
             val formattedQuery = "$searchQuery*"
             when (sortType) {
-                SortType.DATE_MODIFIED -> noteDao.searchNotesOrderedByDateModified(formattedQuery, projectId)
-                SortType.DATE_CREATED -> noteDao.searchNotesOrderedByDateCreated(formattedQuery, projectId)
-                SortType.TITLE -> noteDao.searchNotesOrderedByTitle(formattedQuery, projectId)
-                SortType.CUSTOM -> noteDao.searchNotesOrderedByPosition(formattedQuery, projectId)
+                SortType.DATE_MODIFIED -> noteDao.searchNotesOrderedByDateModified(formattedQuery, projectId, isDecoy)
+                SortType.DATE_CREATED -> noteDao.searchNotesOrderedByDateCreated(formattedQuery, projectId, isDecoy)
+                SortType.TITLE -> noteDao.searchNotesOrderedByTitle(formattedQuery, projectId, isDecoy)
+                SortType.CUSTOM -> noteDao.searchNotesOrderedByPosition(formattedQuery, projectId, isDecoy)
             }
         }
         return flow
     }
 
-    override fun getPinnedNotes(searchQuery: String, projectId: Int?): Flow<List<NoteWithAttachments>> {
+    override fun getPinnedNotes(searchQuery: String, projectId: Int?, isDecoy: Boolean): Flow<List<NoteWithAttachments>> {
         return if (searchQuery.isBlank()) {
-            noteDao.getPinnedNotes(projectId)
+            noteDao.getPinnedNotes(projectId, isDecoy)
         } else {
             val formattedQuery = "$searchQuery*"
-            noteDao.searchPinnedNotes(formattedQuery, projectId)
+            noteDao.searchPinnedNotes(formattedQuery, projectId, isDecoy)
         }
     }
 
-    override fun getPinnedNoteSummaries(searchQuery: String, projectId: Int?): Flow<List<NoteSummaryWithAttachments>> {
+    override fun getPinnedNoteSummaries(searchQuery: String, projectId: Int?, isDecoy: Boolean): Flow<List<NoteSummaryWithAttachments>> {
         return if (searchQuery.isBlank()) {
-            noteDao.getPinnedNoteSummaries(projectId)
+            noteDao.getPinnedNoteSummaries(projectId, isDecoy)
         } else {
             val formattedQuery = "$searchQuery*"
-            noteDao.searchPinnedNoteSummaries(formattedQuery, projectId)
+            noteDao.searchPinnedNoteSummaries(formattedQuery, projectId, isDecoy)
         }
     }
 
-    override fun getOtherNotesPaged(searchQuery: String, sortType: SortType, projectId: Int?): Flow<PagingData<NoteWithAttachments>> {
+    override fun getOtherNotesPaged(searchQuery: String, sortType: SortType, projectId: Int?, isDecoy: Boolean): Flow<PagingData<NoteWithAttachments>> {
         return Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true),
             pagingSourceFactory = {
                 if (searchQuery.isBlank()) {
                     when (sortType) {
-                        SortType.DATE_MODIFIED -> noteDao.getOtherNotesPagedOrderedByDateModified(projectId)
-                        SortType.DATE_CREATED -> noteDao.getOtherNotesPagedOrderedByDateCreated(projectId)
-                        SortType.TITLE -> noteDao.getOtherNotesPagedOrderedByTitle(projectId)
-                        SortType.CUSTOM -> noteDao.getOtherNotesPagedOrderedByPosition(projectId)
+                        SortType.DATE_MODIFIED -> noteDao.getOtherNotesPagedOrderedByDateModified(projectId, isDecoy)
+                        SortType.DATE_CREATED -> noteDao.getOtherNotesPagedOrderedByDateCreated(projectId, isDecoy)
+                        SortType.TITLE -> noteDao.getOtherNotesPagedOrderedByTitle(projectId, isDecoy)
+                        SortType.CUSTOM -> noteDao.getOtherNotesPagedOrderedByPosition(projectId, isDecoy)
                     }
                 } else {
                     val formattedQuery = "$searchQuery*"
                     when (sortType) {
-                        SortType.DATE_MODIFIED -> noteDao.searchOtherNotesPagedOrderedByDateModified(formattedQuery, projectId)
-                        SortType.DATE_CREATED -> noteDao.searchOtherNotesPagedOrderedByDateCreated(formattedQuery, projectId)
-                        SortType.TITLE -> noteDao.searchOtherNotesPagedOrderedByTitle(formattedQuery, projectId)
-                        SortType.CUSTOM -> noteDao.searchOtherNotesPagedOrderedByPosition(formattedQuery, projectId)
+                        SortType.DATE_MODIFIED -> noteDao.searchOtherNotesPagedOrderedByDateModified(formattedQuery, projectId, isDecoy)
+                        SortType.DATE_CREATED -> noteDao.searchOtherNotesPagedOrderedByDateCreated(formattedQuery, projectId, isDecoy)
+                        SortType.TITLE -> noteDao.searchOtherNotesPagedOrderedByTitle(formattedQuery, projectId, isDecoy)
+                        SortType.CUSTOM -> noteDao.searchOtherNotesPagedOrderedByPosition(formattedQuery, projectId, isDecoy)
                     }
                 }
             }
         ).flow
     }
 
-    override fun getOtherNoteSummariesPaged(searchQuery: String, sortType: SortType, projectId: Int?): Flow<PagingData<NoteSummaryWithAttachments>> {
+    override fun getOtherNoteSummariesPaged(searchQuery: String, sortType: SortType, projectId: Int?, isDecoy: Boolean): Flow<PagingData<NoteSummaryWithAttachments>> {
         return Pager(
             config = PagingConfig(pageSize = 20, enablePlaceholders = true),
             pagingSourceFactory = {
                 if (searchQuery.isBlank()) {
                     when (sortType) {
-                        SortType.DATE_MODIFIED -> noteDao.getOtherNoteSummariesPagedOrderedByDateModified(projectId)
-                        SortType.DATE_CREATED -> noteDao.getOtherNoteSummariesPagedOrderedByDateCreated(projectId)
-                        SortType.TITLE -> noteDao.getOtherNoteSummariesPagedOrderedByTitle(projectId)
-                        SortType.CUSTOM -> noteDao.getOtherNoteSummariesPagedOrderedByPosition(projectId)
+                        SortType.DATE_MODIFIED -> noteDao.getOtherNoteSummariesPagedOrderedByDateModified(projectId, isDecoy)
+                        SortType.DATE_CREATED -> noteDao.getOtherNoteSummariesPagedOrderedByDateCreated(projectId, isDecoy)
+                        SortType.TITLE -> noteDao.getOtherNoteSummariesPagedOrderedByTitle(projectId, isDecoy)
+                        SortType.CUSTOM -> noteDao.getOtherNoteSummariesPagedOrderedByPosition(projectId, isDecoy)
                     }
                 } else {
                     val formattedQuery = "$searchQuery*"
                     when (sortType) {
-                        SortType.DATE_MODIFIED -> noteDao.searchOtherNoteSummariesPagedOrderedByDateModified(formattedQuery, projectId)
-                        SortType.DATE_CREATED -> noteDao.searchOtherNoteSummariesPagedOrderedByDateCreated(formattedQuery, projectId)
-                        SortType.TITLE -> noteDao.searchOtherNoteSummariesPagedOrderedByTitle(formattedQuery, projectId)
-                        SortType.CUSTOM -> noteDao.searchOtherNoteSummariesPagedOrderedByPosition(formattedQuery, projectId)
+                        SortType.DATE_MODIFIED -> noteDao.searchOtherNoteSummariesPagedOrderedByDateModified(formattedQuery, projectId, isDecoy)
+                        SortType.DATE_CREATED -> noteDao.searchOtherNoteSummariesPagedOrderedByDateCreated(formattedQuery, projectId, isDecoy)
+                        SortType.TITLE -> noteDao.searchOtherNoteSummariesPagedOrderedByTitle(formattedQuery, projectId, isDecoy)
+                        SortType.CUSTOM -> noteDao.searchOtherNoteSummariesPagedOrderedByPosition(formattedQuery, projectId, isDecoy)
                     }
                 }
             }
         ).flow
     }
 
-    override fun getArchivedNoteSummaries(): Flow<List<NoteSummaryWithAttachments>> = 
-        noteDao.getArchivedNoteSummaries()
+    override fun getArchivedNoteSummaries(isDecoy: Boolean): Flow<List<NoteSummaryWithAttachments>> = 
+        noteDao.getArchivedNoteSummaries(isDecoy)
 
-    override fun getBinnedNoteSummaries(): Flow<List<NoteSummaryWithAttachments>> = 
-        noteDao.getBinnedNoteSummaries()
+    override fun getBinnedNoteSummaries(isDecoy: Boolean): Flow<List<NoteSummaryWithAttachments>> = 
+        noteDao.getBinnedNoteSummaries(isDecoy)
 
-    override fun getNoteSummariesByProjectId(projectId: Int): Flow<List<NoteSummaryWithAttachments>> = 
-        noteDao.getNoteSummariesByProjectId(projectId)
+    override fun getNoteSummariesByProjectId(projectId: Int, isDecoy: Boolean): Flow<List<NoteSummaryWithAttachments>> = 
+        noteDao.getNoteSummariesByProjectId(projectId, isDecoy)
 
-    override suspend fun getAllNoteIds(searchQuery: String, projectId: Int?): List<Int> {
+    override suspend fun getAllNoteIds(searchQuery: String, projectId: Int?, isDecoy: Boolean): List<Int> {
         return if (searchQuery.isBlank()) {
-            noteDao.getAllNoteIds(projectId)
+            noteDao.getAllNoteIds(projectId, isDecoy)
         } else {
-            noteDao.searchAllNoteIds(searchQuery, projectId)
+            noteDao.searchAllNoteIds(searchQuery, projectId, isDecoy)
         }
     }
 
-    override fun getArchivedNotes(): Flow<List<NoteWithAttachments>> = 
-        noteDao.getArchivedNotes()
+    override fun getArchivedNotes(isDecoy: Boolean): Flow<List<NoteWithAttachments>> = 
+        noteDao.getArchivedNotes(isDecoy)
 
-    override fun getBinnedNotes(): Flow<List<NoteWithAttachments>> = 
-        noteDao.getBinnedNotes()
+    override fun getBinnedNotes(isDecoy: Boolean): Flow<List<NoteWithAttachments>> = 
+        noteDao.getBinnedNotes(isDecoy)
 
-    override fun getNotesByProjectId(projectId: Int): Flow<List<NoteWithAttachments>> = 
-        noteDao.getNotesByProjectId(projectId)
+    override fun getNotesByProjectId(projectId: Int, isDecoy: Boolean): Flow<List<NoteWithAttachments>> = 
+        noteDao.getNotesByProjectId(projectId, isDecoy)
 
     override fun getNotesModifiedSince(timestamp: Long): Flow<List<NoteWithAttachments>> =
         noteDao.getNotesModifiedSince(timestamp)

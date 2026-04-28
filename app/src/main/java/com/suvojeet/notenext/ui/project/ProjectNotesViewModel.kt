@@ -20,7 +20,7 @@ import com.suvojeet.notenext.data.NoteDao
 import com.suvojeet.notenext.util.HtmlConverter
 import com.suvojeet.notenext.data.LinkPreviewRepository
 import com.suvojeet.notenext.data.ProjectDao
-import com.suvojeet.notenext.data.SortType
+import com.suvojeet.notenext.core.util.SortType
 import com.suvojeet.notenext.data.AlarmScheduler
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -38,6 +38,8 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import com.suvojeet.notenext.data.repository.AiRepository
@@ -69,6 +71,7 @@ class ProjectNotesViewModel @Inject constructor(
     private val _events = MutableSharedFlow<ProjectNotesUiEvent>()
     val events = _events.asSharedFlow()
 
+    private var isDecoySession: Boolean = false
     private var recentlyDeletedNote: Note? = null
     private var autoSaveJob: Job? = null
     private var linkDetectionJob: Job? = null
@@ -76,6 +79,7 @@ class ProjectNotesViewModel @Inject constructor(
     private val projectId: Int = savedStateHandle.get<Int>("projectId") ?: -1
 
     private val _sortType = MutableStateFlow(SortType.DATE_MODIFIED)
+    private val _isDecoy = MutableStateFlow(false)
 
     private fun scheduleAutoSave() {
         autoSaveJob?.cancel()
@@ -99,7 +103,7 @@ class ProjectNotesViewModel @Inject constructor(
             }
 
             combine(
-                repository.getNoteSummariesByProjectId(projectId),
+                _isDecoy.flatMapLatest { decoy -> repository.getNoteSummariesByProjectId(projectId, decoy) },
                 todoRepository.getTodosByProject(projectId),
                 repository.getLabels(),
                 _sortType
@@ -118,6 +122,11 @@ class ProjectNotesViewModel @Inject constructor(
                 )
             }.launchIn(viewModelScope)
         }
+    }
+
+    fun setDecoyMode(isDecoy: Boolean) {
+        this.isDecoySession = isDecoy
+        _isDecoy.value = isDecoy
     }
 
     fun onEvent(event: ProjectNotesEvent) {
@@ -171,7 +180,8 @@ class ProjectNotesViewModel @Inject constructor(
             is ProjectNotesEvent.SelectAllNotes -> {
                 viewModelScope.launch {
                     val allIds = repository.getAllNoteIds(
-                        projectId = projectId
+                        projectId = projectId,
+                        isDecoy = isDecoySession
                     )
                     _state.value = state.value.copy(selectedNoteIds = allIds)
                 }
@@ -1008,7 +1018,8 @@ class ProjectNotesViewModel @Inject constructor(
                                 isLocked = state.value.editingIsLocked,
                                 reminderTime = state.value.editingReminderTime,
                                 repeatOption = state.value.editingRepeatOption,
-                                expiryTime = state.value.editingExpiryTime
+                                expiryTime = state.value.editingExpiryTime,
+                                isDecoy = isDecoySession
                             )
                         } else { // Existing note
                             repository.getNoteById(noteId)?.let { existingNote ->

@@ -84,6 +84,9 @@ class MainViewModel @Inject constructor(
     private val _unlockedByAuth = MutableStateFlow(false)
     val unlockedByAuth = _unlockedByAuth.asStateFlow()
 
+    private val _isDecoySession = MutableStateFlow(false)
+    val isDecoySession = _isDecoySession.asStateFlow()
+
     private val _lockTrigger = MutableStateFlow(0L)
     val lockTrigger = _lockTrigger.asStateFlow()
 
@@ -130,7 +133,8 @@ class MainViewModel @Inject constructor(
         _sharedText.value = sharedText
     }
 
-    fun onUnlock() {
+    fun onUnlock(isDecoy: Boolean = false) {
+        _isDecoySession.value = isDecoy
         _unlockedByAuth.value = true
     }
 
@@ -140,6 +144,7 @@ class MainViewModel @Inject constructor(
             val currentTime = System.currentTimeMillis()
             if (currentTime - lastPauseTime > 120_000) { // 2 minutes
                 _unlockedByAuth.value = false
+                _isDecoySession.value = false
                 _lockTrigger.value = currentTime
             }
         }
