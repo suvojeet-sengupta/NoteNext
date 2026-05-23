@@ -17,6 +17,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -225,40 +227,8 @@ fun NotesScreen(
                                         onSelectAllClick = { viewModel.onEvent(NotesEvent.SelectAllNotes) }
                                     )
                                 } else {
-                                    TopAppBar(
-                                        title = {
-                                            SearchBar(
-                                                searchQuery = listState.searchQuery,
-                                                onSearchQueryChange = { viewModel.onEvent(NotesEvent.OnSearchQueryChange(it)) },
-                                                isSearchActive = isSearchActive,
-                                                onSearchActiveChange = { isSearchActive = it },
-                                                onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
-                                                onSortClick = { showSortMenu = true },
-                                                layoutType = listState.layoutType,
-                                                sortMenuExpanded = showSortMenu,
-                                                onSortMenuDismissRequest = { showSortMenu = false },
-                                                onSortOptionClick = { sortType ->
-                                                    val newSortType = if (sortType == listState.sortType) {
-                                                        SortType.DATE_MODIFIED
-                                                    } else {
-                                                        sortType
-                                                    }
-                                                    viewModel.onEvent(NotesEvent.SortNotes(newSortType))
-                                                },
-                                                currentSortType = listState.sortType
-                                            )
-                                        },
-                                        navigationIcon = {
-                                            IconButton(onClick = onMenuClick) {
-                                                Icon(Icons.Default.Menu, contentDescription = stringResource(id = R.string.menu))
-                                            }
-                                        },
-                                        scrollBehavior = scrollBehavior,
-                                        colors = TopAppBarDefaults.topAppBarColors(
-                                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                                            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                                        )
-                                    )
+                                    // Normal mode: editorial masthead + search are rendered
+                                    // in the scrolling content below (see Column).
                                 }
                             }
                         },
@@ -394,6 +364,83 @@ fun NotesScreen(
                             val pinnedNotes = listState.pinnedNotes
 
                             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+                                Spacer(modifier = Modifier.height(8.dp))
+
+                                if (!isSearchActive && !isSelectionModeActive) {
+                                    val today = remember {
+                                        java.text.SimpleDateFormat("EEEE · d MMM yyyy", java.util.Locale.getDefault())
+                                            .format(java.util.Date()).uppercase()
+                                    }
+                                    val sortLabel = when (listState.sortType) {
+                                        SortType.DATE_CREATED -> "CREATED"
+                                        SortType.TITLE -> "TITLE"
+                                        else -> "RECENT"
+                                    }
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(start = 22.dp, end = 22.dp, top = 8.dp, bottom = 10.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.Top
+                                    ) {
+                                        Column(modifier = Modifier.weight(1f)) {
+                                            Text(
+                                                text = today,
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = listState.filteredLabel ?: stringResource(id = R.string.notes),
+                                                style = MaterialTheme.typography.headlineMedium,
+                                                color = MaterialTheme.colorScheme.onSurface
+                                            )
+                                            Spacer(modifier = Modifier.height(2.dp))
+                                            Text(
+                                                text = "SORTED BY $sortLabel · ${pinnedNotes.size} PINNED",
+                                                style = MaterialTheme.typography.labelSmall,
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            )
+                                        }
+                                        Box(
+                                            modifier = Modifier
+                                                .size(40.dp)
+                                                .clip(CircleShape)
+                                                .background(MaterialTheme.colorScheme.primary)
+                                                .clickable { onMenuClick() },
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Menu,
+                                                contentDescription = stringResource(id = R.string.menu),
+                                                tint = MaterialTheme.colorScheme.onPrimary,
+                                                modifier = Modifier.size(20.dp)
+                                            )
+                                        }
+                                    }
+                                }
+
+                                SearchBar(
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    searchQuery = listState.searchQuery,
+                                    onSearchQueryChange = { viewModel.onEvent(NotesEvent.OnSearchQueryChange(it)) },
+                                    isSearchActive = isSearchActive,
+                                    onSearchActiveChange = { isSearchActive = it },
+                                    onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
+                                    onSortClick = { showSortMenu = true },
+                                    layoutType = listState.layoutType,
+                                    sortMenuExpanded = showSortMenu,
+                                    onSortMenuDismissRequest = { showSortMenu = false },
+                                    onSortOptionClick = { sortType ->
+                                        val newSortType = if (sortType == listState.sortType) {
+                                            SortType.DATE_MODIFIED
+                                        } else {
+                                            sortType
+                                        }
+                                        viewModel.onEvent(NotesEvent.SortNotes(newSortType))
+                                    },
+                                    currentSortType = listState.sortType
+                                )
                                 Spacer(modifier = Modifier.height(8.dp))
 
                                 if (!isSearchActive && !isSelectionModeActive && listState.labels.isNotEmpty()) {
