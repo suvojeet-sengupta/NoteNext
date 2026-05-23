@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.core.util.SortType
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 
 import com.suvojeet.notenext.ui.theme.fullShape
@@ -42,7 +44,8 @@ fun SearchBar(
     onSortMenuDismissRequest: () -> Unit,
     onSortOptionClick: (SortType) -> Unit,
     currentSortType: SortType,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    focusRequester: FocusRequester? = null
 ) {
     Surface(
         modifier = modifier
@@ -105,6 +108,7 @@ fun SearchBar(
                 },
                 modifier = Modifier
                     .weight(1f)
+                    .then(if (focusRequester != null) Modifier.focusRequester(focusRequester) else Modifier)
                     .onFocusChanged { if (it.isFocused) onSearchActiveChange(true) },
                 colors = TextFieldDefaults.colors(
                     focusedContainerColor = Color.Transparent,

@@ -90,7 +90,14 @@ fun NotesScreen(
     val editState by viewModel.editState.collectAsStateWithLifecycle()
     var isFabExpanded by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
-    
+    val searchFocusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+
+    LaunchedEffect(isSearchActive) {
+        if (isSearchActive) {
+            runCatching { searchFocusRequester.requestFocus() }
+        }
+    }
+
     val systemInDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
     val isDarkTheme = when (themeMode) {
         ThemeMode.DARK, ThemeMode.AMOLED, ThemeMode.MOCHA, ThemeMode.SAGE -> true
@@ -190,9 +197,7 @@ fun NotesScreen(
         ) { expandedId ->
             if (expandedId == null) {
                 Box(modifier = Modifier.fillMaxSize()) {
-                    val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
                     Scaffold(
-                        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                         topBar = {
                             AnimatedContent(
                                 targetState = isSelectionModeActive,
@@ -420,28 +425,31 @@ fun NotesScreen(
                                     }
                                 }
 
-                                SearchBar(
-                                    modifier = Modifier.padding(horizontal = 16.dp),
-                                    searchQuery = listState.searchQuery,
-                                    onSearchQueryChange = { viewModel.onEvent(NotesEvent.OnSearchQueryChange(it)) },
-                                    isSearchActive = isSearchActive,
-                                    onSearchActiveChange = { isSearchActive = it },
-                                    onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
-                                    onSortClick = { showSortMenu = true },
-                                    layoutType = listState.layoutType,
-                                    sortMenuExpanded = showSortMenu,
-                                    onSortMenuDismissRequest = { showSortMenu = false },
-                                    onSortOptionClick = { sortType ->
-                                        val newSortType = if (sortType == listState.sortType) {
-                                            SortType.DATE_MODIFIED
-                                        } else {
-                                            sortType
-                                        }
-                                        viewModel.onEvent(NotesEvent.SortNotes(newSortType))
-                                    },
-                                    currentSortType = listState.sortType
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
+                                if (!isSelectionModeActive) {
+                                    SearchBar(
+                                        modifier = Modifier.padding(horizontal = 16.dp),
+                                        focusRequester = searchFocusRequester,
+                                        searchQuery = listState.searchQuery,
+                                        onSearchQueryChange = { viewModel.onEvent(NotesEvent.OnSearchQueryChange(it)) },
+                                        isSearchActive = isSearchActive,
+                                        onSearchActiveChange = { isSearchActive = it },
+                                        onLayoutToggleClick = { viewModel.onEvent(NotesEvent.ToggleLayout) },
+                                        onSortClick = { showSortMenu = true },
+                                        layoutType = listState.layoutType,
+                                        sortMenuExpanded = showSortMenu,
+                                        onSortMenuDismissRequest = { showSortMenu = false },
+                                        onSortOptionClick = { sortType ->
+                                            val newSortType = if (sortType == listState.sortType) {
+                                                SortType.DATE_MODIFIED
+                                            } else {
+                                                sortType
+                                            }
+                                            viewModel.onEvent(NotesEvent.SortNotes(newSortType))
+                                        },
+                                        currentSortType = listState.sortType
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
 
                                 if (!isSearchActive && !isSelectionModeActive && listState.labels.isNotEmpty()) {
                                     Row(
