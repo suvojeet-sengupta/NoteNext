@@ -29,7 +29,7 @@ import androidx.compose.material.icons.filled.PlaylistAddCheck
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.automirrored.filled.Label
-import androidx.compose.material.icons.automirrored.outlined.Label as OutlinedLabel
+import androidx.compose.material.icons.automirrored.outlined.Label
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -335,7 +335,7 @@ private fun MoreSheet(
                 )
                 labels.forEach { label ->
                     NavigationDrawerItem(
-                        icon = { Icon(OutlinedLabel, contentDescription = label) },
+                        icon = { Icon(Icons.AutoMirrored.Outlined.Label, contentDescription = label) },
                         label = { Text(label) },
                         selected = activeLabel == label,
                         onClick = { onLabelSelected(label) },
