@@ -467,8 +467,29 @@ fun NotesScreen(
                                     Spacer(modifier = Modifier.height(4.dp))
                                 }
 
+                                if (isSearchActive && listState.searchQuery.isNotEmpty()) {
+                                    val resultCount = pinnedNotes.size + pagedNotes.itemCount
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(horizontal = 22.dp, vertical = 6.dp),
+                                        horizontalArrangement = Arrangement.SpaceBetween
+                                    ) {
+                                        Text(
+                                            text = "$resultCount RESULTS",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                        Text(
+                                            text = "INDEXED ON-DEVICE",
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.tertiary
+                                        )
+                                    }
+                                }
+
                                 val isNotesEmpty = pinnedNotes.isEmpty() &&
-                                                 pagedNotes.itemCount == 0 && 
+                                                 pagedNotes.itemCount == 0 &&
                                                  pagedNotes.loadState.refresh is androidx.paging.LoadState.NotLoading
                                 
                                 val isLoading = listState.isLoading || pagedNotes.loadState.refresh is androidx.paging.LoadState.Loading

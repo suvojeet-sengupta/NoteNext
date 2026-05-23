@@ -95,6 +95,25 @@ fun NoteTitleEditor(
             maxLines = 3
         )
 
+        val wordCount = remember(state.editingContent.text) {
+            state.editingContent.text
+                .replace(Regex("<[^>]*>"), " ")
+                .split(Regex("\\s+"))
+                .count { it.isNotBlank() }
+        }
+        val editedDate = remember(state.editingLastEdited) {
+            state.editingLastEdited?.let {
+                java.text.SimpleDateFormat("EEE d MMM · HH:mm", java.util.Locale.getDefault())
+                    .format(java.util.Date(it)).uppercase()
+            }
+        }
+        Text(
+            text = if (editedDate != null) "$editedDate  ·  $wordCount WORDS" else "$wordCount WORDS",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
+        )
+
         ReminderDisplay(
             reminderTime = state.editingReminderTime,
             repeatOption = state.editingRepeatOption,
