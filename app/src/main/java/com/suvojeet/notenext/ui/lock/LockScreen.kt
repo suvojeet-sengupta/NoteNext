@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.suvojeet.notenext.ui.components.springPress
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.rounded.Backspace
@@ -161,28 +162,48 @@ fun LockScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             if (isAuthAvailable) {
-                 FilledTonalButton(
-                    onClick = {
-                        biometricAuthManager?.showBiometricPrompt(
-                            onAuthSuccess = { _ -> onUnlock(false) },
-                            onAuthError = {
-                                if (it != "Authentication error: User Canceled" && !it.contains("Canceled")) {
-                                    error = it
-                                }
-                            },
-                            onAuthFailed = { error = biometricAuthFailedString }
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(64.dp)
-                        .springPress(),
-                    shape = MaterialTheme.shapes.medium
-                ) {
-                    Icon(Icons.Default.Fingerprint, contentDescription = null, modifier = Modifier.size(24.dp))
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text("Unlock with Biometrics", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+                val triggerBiometric = {
+                    biometricAuthManager?.showBiometricPrompt(
+                        onAuthSuccess = { _ -> onUnlock(false) },
+                        onAuthError = {
+                            if (it != "Authentication error: User Canceled" && !it.contains("Canceled")) {
+                                error = it
+                            }
+                        },
+                        onAuthFailed = { error = biometricAuthFailedString }
+                    )
+                    Unit
                 }
+                Box(
+                    modifier = Modifier
+                        .size(132.dp)
+                        .clip(CircleShape)
+                        .border(1.dp, MaterialTheme.colorScheme.outlineVariant, CircleShape)
+                        .clickable(onClick = triggerBiometric)
+                        .springPress(),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(92.dp)
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.surfaceContainerHigh),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Default.Fingerprint,
+                            contentDescription = "Unlock with Biometrics",
+                            modifier = Modifier.size(44.dp),
+                            tint = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(14.dp))
+                Text(
+                    text = "Touch sensor to unlock",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
             }
 
             Spacer(modifier = Modifier.height(32.dp))
