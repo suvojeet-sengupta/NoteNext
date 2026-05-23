@@ -15,6 +15,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.Redo
+import androidx.compose.material.icons.automirrored.rounded.Undo
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.FormatListBulleted
 import androidx.compose.material.icons.filled.FormatQuote
@@ -154,6 +156,16 @@ fun AddEditNoteBottomAppBar(
                     }
                 }
             }
+
+            if (state.canUndo || state.canRedo) {
+                ToolDivider()
+                IconTool(icon = Icons.AutoMirrored.Rounded.Undo, description = stringResource(id = R.string.undo), enabled = state.canUndo) {
+                    onEvent(NotesEvent.OnUndoClick)
+                }
+                IconTool(icon = Icons.AutoMirrored.Rounded.Redo, description = stringResource(id = R.string.redo), enabled = state.canRedo) {
+                    onEvent(NotesEvent.OnRedoClick)
+                }
+            }
         }
     }
 }
@@ -193,6 +205,7 @@ private fun IconTool(
     icon: ImageVector,
     description: String,
     active: Boolean = false,
+    enabled: Boolean = true,
     modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
@@ -201,14 +214,18 @@ private fun IconTool(
             .size(40.dp)
             .clip(MaterialTheme.shapes.small)
             .background(if (active) Color.White.copy(alpha = 0.14f) else Color.Transparent)
-            .clickable(onClick = onClick)
+            .clickable(enabled = enabled, onClick = onClick)
             .springPress(),
         contentAlignment = Alignment.Center
     ) {
         Icon(
             imageVector = icon,
             contentDescription = description,
-            tint = if (active) ObsidianAccent else OnObsidian.copy(alpha = 0.72f),
+            tint = when {
+                active -> ObsidianAccent
+                enabled -> OnObsidian.copy(alpha = 0.72f)
+                else -> OnObsidian.copy(alpha = 0.3f)
+            },
             modifier = Modifier.size(20.dp)
         )
     }
