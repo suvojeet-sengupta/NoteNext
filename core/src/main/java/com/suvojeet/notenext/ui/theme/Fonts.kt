@@ -13,8 +13,8 @@ import com.suvojeet.notenext.core.R
  * DM Sans   — the quiet body/UI voice.
  * JetBrains Mono — the factual meta voice (dates, counts, labels).
  *
- * The .ttf files live in core/src/main/res/font/. See that directory's
- * FONTS_README.txt for the exact files and where to download them (all OFL).
+ * The .ttf files live in core/src/main/res/font/. See core/FONTS_README.txt
+ * for the exact files and where to download them (all OFL).
  */
 
 val Fraunces = FontFamily(
