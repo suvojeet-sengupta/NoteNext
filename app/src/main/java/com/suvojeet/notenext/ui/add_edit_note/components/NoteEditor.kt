@@ -62,12 +62,15 @@ fun NoteTitleEditor(
         TextField(
             value = state.editingTitle,
             onValueChange = { newTitle: String -> onEvent(NotesEvent.OnTitleChange(newTitle)) },
-            placeholder = { 
+            placeholder = {
                 Text(
-                    stringResource(id = R.string.title), 
-                    style = MaterialTheme.typography.displaySmall.copy(fontWeight = FontWeight.Black),
+                    stringResource(id = R.string.title),
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                        fontWeight = FontWeight.Normal
+                    ),
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f)
-                ) 
+                )
             },
             modifier = Modifier.fillMaxWidth(),
             colors = TextFieldDefaults.colors(
@@ -84,7 +87,8 @@ fun NoteTitleEditor(
             ),
             textStyle = MaterialTheme.typography.displaySmall.copy(
                 color = titleTextColor,
-                fontWeight = FontWeight.Black,
+                fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                fontWeight = FontWeight.Normal,
                 letterSpacing = (-0.5).sp
             ),
             singleLine = false,
@@ -189,7 +193,12 @@ fun NoteContentChunkEditor(
         4 -> MaterialTheme.typography.titleLarge.copy(color = contentTextColor, fontWeight = FontWeight.Bold)
         5 -> MaterialTheme.typography.titleMedium.copy(color = contentTextColor, fontWeight = FontWeight.Bold)
         6 -> MaterialTheme.typography.titleSmall.copy(color = contentTextColor, fontWeight = FontWeight.Bold)
-        else -> MaterialTheme.typography.bodyLarge.copy(color = contentTextColor, lineHeight = 28.sp)
+        else -> MaterialTheme.typography.bodyLarge.copy(
+            color = contentTextColor,
+            fontFamily = com.suvojeet.notenext.ui.theme.Fraunces,
+            fontSize = 17.sp,
+            lineHeight = 28.sp
+        )
     }
 
     var chunkLayoutResult by remember { mutableStateOf<TextLayoutResult?>(null) }

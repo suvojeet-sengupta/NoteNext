@@ -161,6 +161,8 @@ class MainActivity : FragmentActivity() {
                 ThemeMode.LIGHT -> false
                 ThemeMode.DARK -> true
                 ThemeMode.AMOLED -> true
+                ThemeMode.MOCHA -> true
+                ThemeMode.SAGE -> true
             }
 
             androidx.compose.runtime.LaunchedEffect(darkTheme) {

@@ -1,10 +1,11 @@
 @file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
 package com.suvojeet.notenext.ui.add_edit_note.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.History
 import androidx.compose.material.icons.rounded.Restore
@@ -49,11 +50,16 @@ fun NoteHistoryDialog(
                     modifier = Modifier.fillMaxWidth(),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    items(
+                    itemsIndexed(
                         items = sortedVersions,
-                        key = { it.timestamp }
-                    ) { version ->
-                        VersionItem(version, isLocked = isLocked, onClick = { onVersionClick(version) })
+                        key = { _, v -> v.timestamp }
+                    ) { index, version ->
+                        VersionItem(
+                            version = version,
+                            isLocked = isLocked,
+                            isCurrent = index == 0,
+                            onClick = { onVersionClick(version) }
+                        )
                     }
                 }
             }
@@ -67,40 +73,66 @@ fun NoteHistoryDialog(
 }
 
 @Composable
-private fun VersionItem(version: NoteVersion, isLocked: Boolean, onClick: () -> Unit) {
-    val date = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault()).format(Date(version.timestamp))
-    
+private fun VersionItem(version: NoteVersion, isLocked: Boolean, isCurrent: Boolean, onClick: () -> Unit) {
+    val date = SimpleDateFormat("MMM dd · HH:mm", Locale.getDefault()).format(Date(version.timestamp))
+
     val decryptedVersion = androidx.compose.runtime.remember(version.title, version.content, version.isEncrypted) {
         if (version.isEncrypted) {
             // Note: If this requires biometric auth and the duration has expired, this might fail or show error text.
             // But usually the user just opened the note, so auth duration should be active.
-            com.suvojeet.notenext.util.CryptoUtils.decryptNoteVersion(version, isLocked) 
+            com.suvojeet.notenext.util.CryptoUtils.decryptNoteVersion(version, isLocked)
         } else {
             version
         }
     }
 
-    Surface(
-        onClick = onClick,
-        shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceContainerHigh,
-        modifier = Modifier.fillMaxWidth().springPress()
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
-            modifier = Modifier.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween
+        // Timeline node
+        Box(
+            modifier = Modifier.size(20.dp),
+            contentAlignment = Alignment.Center
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(text = date, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.Bold)
-                Text(
-                    text = decryptedVersion.content.take(60).replace("\n", " ") + if (decryptedVersion.content.length > 60) "..." else "",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
+            Box(
+                modifier = Modifier
+                    .size(if (isCurrent) 12.dp else 10.dp)
+                    .clip(androidx.compose.foundation.shape.CircleShape)
+                    .background(
+                        if (isCurrent) MaterialTheme.colorScheme.tertiary
+                        else MaterialTheme.colorScheme.surfaceContainerHighest
+                    )
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Surface(
+            onClick = onClick,
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.surfaceContainerHigh,
+            modifier = Modifier.weight(1f).springPress()
+        ) {
+            Row(
+                modifier = Modifier.padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = if (isCurrent) "$date · Current" else date,
+                        style = MaterialTheme.typography.labelMedium,
+                        color = if (isCurrent) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = decryptedVersion.content.take(60).replace("\n", " ") + if (decryptedVersion.content.length > 60) "..." else "",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        maxLines = 1
+                    )
+                }
+                Icon(Icons.Rounded.Restore, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
             }
-            Icon(Icons.Rounded.Restore, contentDescription = null, tint = MaterialTheme.colorScheme.secondary, modifier = Modifier.size(20.dp))
         }
     }
 }

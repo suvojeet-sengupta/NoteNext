@@ -5,6 +5,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.spring
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -72,11 +73,11 @@ fun EditLabelsScreen(
                 )
             } else {
                 MediumTopAppBar(
-                    title = { 
+                    title = {
                         Text(
                             stringResource(id = R.string.edit_labels),
-                            fontWeight = FontWeight.Black
-                        ) 
+                            fontWeight = FontWeight.Normal
+                        )
                     },
                     navigationIcon = {
                         IconButton(onClick = onBackPressed, modifier = Modifier.springPress()) {
@@ -203,19 +204,15 @@ fun LabelItem(
             ) 
         },
         leadingContent = {
-            Surface(
-                shape = CircleShape,
-                color = MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.4f),
-                modifier = Modifier.size(40.dp)
+            Box(
+                modifier = Modifier.size(40.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Label,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(20.dp)
-                    )
-                }
+                Box(
+                    modifier = Modifier
+                        .size(12.dp)
+                        .background(MaterialTheme.colorScheme.tertiary, CircleShape)
+                )
             }
         },
         trailingContent = {

@@ -15,6 +15,8 @@ import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.staggeredgrid.LazyVerticalStaggeredGrid
@@ -89,7 +91,7 @@ fun NotesScreen(
     
     val systemInDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
     val isDarkTheme = when (themeMode) {
-        ThemeMode.DARK, ThemeMode.AMOLED -> true
+        ThemeMode.DARK, ThemeMode.AMOLED, ThemeMode.MOCHA, ThemeMode.SAGE -> true
         ThemeMode.SYSTEM -> systemInDarkTheme
         else -> false
     }
@@ -145,6 +147,9 @@ fun NotesScreen(
                     }
                 }
                 is NotesUiEvent.ScrollToSearchResult -> {}
+                is NotesUiEvent.ActivateSearch -> {
+                    isSearchActive = true
+                }
             }
         }
     }
@@ -390,8 +395,32 @@ fun NotesScreen(
 
                             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                                 Spacer(modifier = Modifier.height(8.dp))
-                                
-                                val isNotesEmpty = pinnedNotes.isEmpty() && 
+
+                                if (!isSearchActive && !isSelectionModeActive && listState.labels.isNotEmpty()) {
+                                    Row(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .horizontalScroll(rememberScrollState())
+                                            .padding(horizontal = 12.dp, vertical = 4.dp),
+                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                    ) {
+                                        FilterChip(
+                                            selected = listState.filteredLabel == null,
+                                            onClick = { viewModel.onEvent(NotesEvent.FilterByLabel(null)) },
+                                            label = { Text(stringResource(id = R.string.all)) }
+                                        )
+                                        listState.labels.forEach { label ->
+                                            FilterChip(
+                                                selected = listState.filteredLabel == label,
+                                                onClick = { viewModel.onEvent(NotesEvent.FilterByLabel(label)) },
+                                                label = { Text(label) }
+                                            )
+                                        }
+                                    }
+                                    Spacer(modifier = Modifier.height(4.dp))
+                                }
+
+                                val isNotesEmpty = pinnedNotes.isEmpty() &&
                                                  pagedNotes.itemCount == 0 && 
                                                  pagedNotes.loadState.refresh is androidx.paging.LoadState.NotLoading
                                 

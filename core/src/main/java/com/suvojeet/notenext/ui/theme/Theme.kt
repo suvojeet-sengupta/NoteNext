@@ -1,8 +1,8 @@
 package com.suvojeet.notenext.ui.theme
 
-import android.app.Activity
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.MaterialExpressiveTheme
 import androidx.compose.material3.MotionScheme
@@ -11,12 +11,8 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalView
-import androidx.core.view.WindowCompat
 
 private val lightColorScheme = lightColorScheme(
     primary = primaryLight,
@@ -90,51 +86,99 @@ private val darkColorScheme = darkColorScheme(
     surfaceContainerHighest = surfaceContainerHighestDark,
 )
 
+private fun ColorScheme.amoled(): ColorScheme = copy(
+    background = Color.Black,
+    surface = Color.Black,
+    surfaceVariant = Color.Black,
+    surfaceContainerLowest = Color.Black,
+    surfaceContainerLow = Color.Black,
+    surfaceContainer = Color.Black,
+    surfaceContainerHigh = Color(0xFF121212),
+    surfaceContainerHighest = Color(0xFF1E1E1E)
+)
+
+// Mocha — warm brown editorial dark mood.
+private val mochaColorScheme = darkColorScheme.copy(
+    background = Color(0xFF2A1F18),
+    onBackground = Color(0xFFEEE2D5),
+    surface = Color(0xFF2A1F18),
+    onSurface = Color(0xFFEEE2D5),
+    surfaceVariant = Color(0xFF3A2C22),
+    onSurfaceVariant = Color(0xFFB6A493),
+    surfaceContainerLowest = Color(0xFF221A13),
+    surfaceContainerLow = Color(0xFF31251C),
+    surfaceContainer = Color(0xFF362A20),
+    surfaceContainerHigh = Color(0xFF433428),
+    surfaceContainerHighest = Color(0xFF503E30),
+    primary = Color(0xFFEEE2D5),
+    onPrimary = Color(0xFF2A1F18),
+    primaryContainer = Color(0xFF433428),
+    onPrimaryContainer = Color(0xFFEEE2D5),
+    secondary = Color(0xFFD2C0AC),
+    onSecondaryContainer = Color(0xFFEEE2D5),
+    tertiary = NightAccent,
+    onTertiary = Color(0xFF2A1F18),
+    outline = Color(0xFF6A5847),
+    outlineVariant = Color(0xFF3A2C22),
+    inverseSurface = Color(0xFFEEE2D5),
+    inverseOnSurface = Color(0xFF31251C),
+)
+
+// Sage — muted green editorial dark mood.
+private val sageColorScheme = darkColorScheme.copy(
+    background = Color(0xFF29382E),
+    onBackground = Color(0xFFE6EDE2),
+    surface = Color(0xFF29382E),
+    onSurface = Color(0xFFE6EDE2),
+    surfaceVariant = Color(0xFF36473B),
+    onSurfaceVariant = Color(0xFFA9B8A2),
+    surfaceContainerLowest = Color(0xFF223025),
+    surfaceContainerLow = Color(0xFF2F4034),
+    surfaceContainer = Color(0xFF344539),
+    surfaceContainerHigh = Color(0xFF405344),
+    surfaceContainerHighest = Color(0xFF4C6150),
+    primary = Color(0xFFE6EDE2),
+    onPrimary = Color(0xFF29382E),
+    primaryContainer = Color(0xFF405344),
+    onPrimaryContainer = Color(0xFFE6EDE2),
+    secondary = Color(0xFFC4D2BC),
+    onSecondaryContainer = Color(0xFFE6EDE2),
+    tertiary = NightAccent,
+    onTertiary = Color(0xFF29382E),
+    outline = Color(0xFF647A68),
+    outlineVariant = Color(0xFF36473B),
+    inverseSurface = Color(0xFFE6EDE2),
+    inverseOnSurface = Color(0xFF2F4034),
+)
+
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NoteNextTheme(
     themeMode: ThemeMode = ThemeMode.SYSTEM,
-    dynamicColor: Boolean = true,
+    dynamicColor: Boolean = false,
     content: @Composable () -> Unit
 ) {
+    // Bespoke editorial moods always win — they ignore dynamic color so the
+    // Ink & Paper identity is preserved.
+    val bespoke: ColorScheme? = when (themeMode) {
+        ThemeMode.MOCHA -> mochaColorScheme
+        ThemeMode.SAGE -> sageColorScheme
+        else -> null
+    }
+
     val darkTheme = when (themeMode) {
         ThemeMode.SYSTEM -> isSystemInDarkTheme()
         ThemeMode.LIGHT -> false
-        ThemeMode.DARK -> true
-        ThemeMode.AMOLED -> true
+        ThemeMode.DARK, ThemeMode.AMOLED, ThemeMode.MOCHA, ThemeMode.SAGE -> true
     }
 
-    val colorScheme = when {
+    val colorScheme = bespoke ?: when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             val scheme = if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
-            if (themeMode == ThemeMode.AMOLED) {
-                scheme.copy(
-                    background = Color.Black,
-                    surface = Color.Black,
-                    surfaceVariant = Color.Black,
-                    surfaceContainerLowest = Color.Black,
-                    surfaceContainerLow = Color.Black,
-                    surfaceContainer = Color.Black,
-                    surfaceContainerHigh = Color(0xFF121212),
-                    surfaceContainerHighest = Color(0xFF1E1E1E)
-                )
-            } else scheme
+            if (themeMode == ThemeMode.AMOLED) scheme.amoled() else scheme
         }
-        darkTheme -> {
-            if (themeMode == ThemeMode.AMOLED) {
-                darkColorScheme.copy(
-                    background = Color.Black,
-                    surface = Color.Black,
-                    surfaceVariant = Color.Black,
-                    surfaceContainerLowest = Color.Black,
-                    surfaceContainerLow = Color.Black,
-                    surfaceContainer = Color.Black,
-                    surfaceContainerHigh = Color(0xFF121212),
-                    surfaceContainerHighest = Color(0xFF1E1E1E)
-                )
-            } else darkColorScheme
-        }
+        darkTheme -> if (themeMode == ThemeMode.AMOLED) darkColorScheme.amoled() else darkColorScheme
         else -> lightColorScheme
     }
 

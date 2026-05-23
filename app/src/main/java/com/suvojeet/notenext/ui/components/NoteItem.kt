@@ -130,13 +130,15 @@ fun NoteItem(
                 modifier = Modifier.padding(16.dp)
             ) {
                 if (note.note.isPinned) {
-                    Icon(
-                        imageVector = Icons.Outlined.PushPin,
-                        contentDescription = stringResource(id = R.string.pinned_note_description),
-                        modifier = Modifier
-                            .size(18.dp)
-                            .align(Alignment.End),
-                        tint = tintColor
+                    Text(
+                        text = stringResource(id = R.string.pinned_note_description),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontFamily = com.suvojeet.notenext.ui.theme.Fraunces,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                            fontWeight = FontWeight.Normal
+                        ),
+                        color = if (isDefaultColor) MaterialTheme.colorScheme.tertiary else contentColor.copy(alpha = 0.8f),
+                        modifier = Modifier.align(Alignment.End)
                     )
                     Spacer(modifier = Modifier.height(4.dp))
                 }
@@ -145,8 +147,8 @@ fun NoteItem(
                     val unescapedTitle = remember(decryptedNote.title) {
                         androidx.core.text.HtmlCompat.fromHtml(decryptedNote.title, androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
                     }
-                    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-                    val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
+                    val primaryContainer = MaterialTheme.colorScheme.tertiaryContainer
+                    val onPrimaryContainer = MaterialTheme.colorScheme.onTertiaryContainer
                     
                     val titleText = remember(unescapedTitle, searchQuery, primaryContainer, onPrimaryContainer) {
                         if (searchQuery.isNotEmpty()) {
@@ -175,7 +177,7 @@ fun NoteItem(
 
                     Text(
                         text = titleText,
-                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.titleLarge,
                         color = contentColor,
                         maxLines = 2,
                         overflow = TextOverflow.Ellipsis
@@ -384,8 +386,8 @@ fun NoteItem(
                             val label = note.note.label
                             if (!label.isNullOrEmpty()) {
                                 Surface(
-                                    shape = MaterialTheme.shapes.small,
-                                    color = if (isDefaultColor) MaterialTheme.colorScheme.secondaryContainer else contentColor.copy(alpha = 0.15f)
+                                    shape = androidx.compose.foundation.shape.CircleShape,
+                                    color = if (isDefaultColor) MaterialTheme.colorScheme.surfaceContainerHighest else contentColor.copy(alpha = 0.12f)
                                 ) {
                                     val primaryContainer = MaterialTheme.colorScheme.primaryContainer
                                     val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
@@ -414,13 +416,25 @@ fun NoteItem(
                                         }
                                     }
 
-                                    Text(
-                                        text = labelText,
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.Medium,
-                                        color = if (isDefaultColor) MaterialTheme.colorScheme.onSecondaryContainer else contentColor,
-                                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp)
-                                    )
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                        modifier = Modifier.padding(horizontal = 10.dp, vertical = 5.dp)
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(5.dp)
+                                                .background(
+                                                    color = if (isDefaultColor) MaterialTheme.colorScheme.tertiary else contentColor.copy(alpha = 0.8f),
+                                                    shape = androidx.compose.foundation.shape.CircleShape
+                                                )
+                                        )
+                                        Text(
+                                            text = labelText,
+                                            style = MaterialTheme.typography.labelMedium,
+                                            color = if (isDefaultColor) MaterialTheme.colorScheme.onSurfaceVariant else contentColor
+                                        )
+                                    }
                                 }
                             }
 

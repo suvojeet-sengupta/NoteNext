@@ -285,17 +285,20 @@ private fun WelcomePage() {
             Text(
                 text = stringResource(id = R.string.setup_welcome_title),
                 style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Black,
+                fontWeight = FontWeight.Normal,
                 textAlign = TextAlign.Center
             )
         }
-        
+
         Spacer(modifier = Modifier.height(16.dp))
-        
+
         AnimatedSetupStep(visible = visible, delay = 400) {
             Text(
                 text = stringResource(id = R.string.setup_welcome_subtitle),
-                style = MaterialTheme.typography.bodyLarge,
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = com.suvojeet.notenext.ui.theme.Fraunces,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 textAlign = TextAlign.Center
             )

@@ -319,7 +319,7 @@ fun ProjectNotesScreen(
                             ) {
                                 val systemInDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
                                 val isDarkTheme = when (themeMode) {
-                                    ThemeMode.DARK, ThemeMode.AMOLED -> true
+                                    ThemeMode.DARK, ThemeMode.AMOLED, ThemeMode.MOCHA, ThemeMode.SAGE -> true
                                     ThemeMode.SYSTEM -> systemInDarkTheme
                                     else -> false
                                 }

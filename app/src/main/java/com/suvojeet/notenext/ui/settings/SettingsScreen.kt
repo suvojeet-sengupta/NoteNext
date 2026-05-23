@@ -127,7 +127,14 @@ fun SettingsScreen(
                     SettingsItemData(
                         icon = Icons.Rounded.Palette,
                         title = context.getString(R.string.theme),
-                        subtitle = selectedThemeMode.name.lowercase().replaceFirstChar { it.uppercase() },
+                        subtitle = when (selectedThemeMode) {
+                            ThemeMode.AMOLED -> context.getString(R.string.theme_amoled)
+                            ThemeMode.LIGHT -> "Paper"
+                            ThemeMode.DARK -> "Midnight"
+                            ThemeMode.MOCHA -> "Mocha"
+                            ThemeMode.SAGE -> "Sage"
+                            ThemeMode.SYSTEM -> "System"
+                        },
                         iconColor = primaryColor,
                         onClick = { showThemeSheet = true }
                     ),
@@ -415,9 +422,15 @@ fun SettingsScreen(
                 scope.launch { settingsRepository.saveThemeMode(theme) }
                 showThemeSheet = false
             },
-            itemLabel = { mode -> 
-                if (mode == ThemeMode.AMOLED) stringResource(id = R.string.theme_amoled) 
-                else mode.name.lowercase().replaceFirstChar { it.uppercase() }
+            itemLabel = { mode ->
+                when (mode) {
+                    ThemeMode.AMOLED -> stringResource(id = R.string.theme_amoled)
+                    ThemeMode.LIGHT -> "Paper"
+                    ThemeMode.DARK -> "Midnight"
+                    ThemeMode.MOCHA -> "Mocha"
+                    ThemeMode.SAGE -> "Sage"
+                    ThemeMode.SYSTEM -> "System"
+                }
             }
         )
     }

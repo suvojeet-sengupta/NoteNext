@@ -194,7 +194,7 @@ private fun AttachmentMenu(
             exit = fadeOut(animationSpec = spring())
         ) {
             val isDark = when (themeMode) {
-                ThemeMode.DARK, ThemeMode.AMOLED -> true
+                ThemeMode.DARK, ThemeMode.AMOLED, ThemeMode.MOCHA, ThemeMode.SAGE -> true
                 ThemeMode.SYSTEM -> isSystemInDarkTheme()
                 else -> false
             }

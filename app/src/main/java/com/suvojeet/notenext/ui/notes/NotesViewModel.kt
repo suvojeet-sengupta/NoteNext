@@ -112,6 +112,11 @@ class NotesViewModel @Inject constructor(
     private val _events = MutableSharedFlow<NotesUiEvent>()
     val events = _events.asSharedFlow()
 
+    /** Triggered by the Search tab in the bottom bar to open in-screen search. */
+    fun activateSearch() {
+        viewModelScope.launch { _events.emit(NotesUiEvent.ActivateSearch) }
+    }
+
     private var isDecoySession: Boolean = false
     private var recentlyDeletedNote: Note? = null
     

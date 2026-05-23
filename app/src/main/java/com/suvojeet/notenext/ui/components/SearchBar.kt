@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.ui.notes.LayoutType
 import com.suvojeet.notenext.core.util.SortType
@@ -92,12 +93,15 @@ fun SearchBar(
                     onSearchQueryChange(it)
                     if (!isSearchActive) onSearchActiveChange(true)
                 },
-                placeholder = { 
+                placeholder = {
                     Text(
                         stringResource(id = R.string.search_notes),
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontFamily = com.suvojeet.notenext.ui.theme.Fraunces,
+                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                        ),
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
-                    ) 
+                    )
                 },
                 modifier = Modifier
                     .weight(1f)
@@ -108,9 +112,12 @@ fun SearchBar(
                     disabledContainerColor = Color.Transparent,
                     focusedIndicatorColor = Color.Transparent,
                     unfocusedIndicatorColor = Color.Transparent,
-                    cursorColor = MaterialTheme.colorScheme.primary
+                    cursorColor = MaterialTheme.colorScheme.tertiary
                 ),
-                textStyle = MaterialTheme.typography.bodyLarge,
+                textStyle = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = com.suvojeet.notenext.ui.theme.Fraunces,
+                    fontSize = 18.sp
+                ),
                 singleLine = true
             )
 

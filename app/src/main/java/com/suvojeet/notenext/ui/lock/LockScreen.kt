@@ -145,13 +145,16 @@ fun LockScreen(
             Text(
                 text = stringResource(id = R.string.app_name),
                 style = MaterialTheme.typography.displaySmall,
-                fontWeight = FontWeight.Black,
+                fontWeight = FontWeight.Normal,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
             Text(
-                text = if (isDecoyEnabled) "Enter your PIN" else "Protected with device security",
-                style = MaterialTheme.typography.bodyMedium,
+                text = if (isDecoyEnabled) "Enter your PIN" else "Your archive is sealed behind you",
+                style = MaterialTheme.typography.titleMedium.copy(
+                    fontFamily = com.suvojeet.notenext.ui.theme.Fraunces,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                ),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
