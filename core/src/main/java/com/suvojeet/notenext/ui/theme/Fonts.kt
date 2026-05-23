@@ -17,14 +17,16 @@ import com.suvojeet.notenext.core.R
  * for the exact files and where to download them (all OFL).
  */
 
+// Fraunces ships static instances for Light/Regular/SemiBold (no Medium);
+// Medium (500) requests resolve to the nearest available weight.
 val Fraunces = FontFamily(
     Font(R.font.fraunces_light, FontWeight.Light),
     Font(R.font.fraunces_light_italic, FontWeight.Light, FontStyle.Italic),
     Font(R.font.fraunces_regular, FontWeight.Normal),
     Font(R.font.fraunces_italic, FontWeight.Normal, FontStyle.Italic),
-    Font(R.font.fraunces_medium, FontWeight.Medium),
-    Font(R.font.fraunces_medium_italic, FontWeight.Medium, FontStyle.Italic),
+    Font(R.font.fraunces_semibold, FontWeight.Medium),
     Font(R.font.fraunces_semibold, FontWeight.SemiBold),
+    Font(R.font.fraunces_semibold_italic, FontWeight.SemiBold, FontStyle.Italic),
 )
 
 val DmSans = FontFamily(
