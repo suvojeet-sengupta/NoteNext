@@ -371,7 +371,9 @@ fun NotesScreen(
                             Column(modifier = Modifier.fillMaxSize().padding(padding)) {
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                if (!isSearchActive && !isSelectionModeActive) {
+                                // Masthead + chips: rendered as the first scrollable list
+                                // item (below) so they scroll away instead of fixed chrome.
+                                val notesTopHeader: @Composable () -> Unit = {
                                     val today = remember {
                                         java.text.SimpleDateFormat("EEEE · d MMM yyyy", java.util.Locale.getDefault())
                                             .format(java.util.Date()).uppercase()
@@ -381,46 +383,71 @@ fun NotesScreen(
                                         SortType.TITLE -> "TITLE"
                                         else -> "RECENT"
                                     }
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 22.dp, end = 22.dp, top = 8.dp, bottom = 10.dp),
-                                        horizontalArrangement = Arrangement.SpaceBetween,
-                                        verticalAlignment = Alignment.Top
-                                    ) {
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = today,
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            Text(
-                                                text = listState.filteredLabel ?: stringResource(id = R.string.notes),
-                                                style = MaterialTheme.typography.headlineMedium,
-                                                color = MaterialTheme.colorScheme.onSurface
-                                            )
-                                            Spacer(modifier = Modifier.height(2.dp))
-                                            Text(
-                                                text = "SORTED BY $sortLabel · ${pinnedNotes.size} PINNED",
-                                                style = MaterialTheme.typography.labelSmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                        Box(
+                                    Column {
+                                        Row(
                                             modifier = Modifier
-                                                .size(40.dp)
-                                                .clip(CircleShape)
-                                                .background(MaterialTheme.colorScheme.primary)
-                                                .clickable { onMenuClick() },
-                                            contentAlignment = Alignment.Center
+                                                .fillMaxWidth()
+                                                .padding(start = 22.dp, end = 22.dp, top = 8.dp, bottom = 10.dp),
+                                            horizontalArrangement = Arrangement.SpaceBetween,
+                                            verticalAlignment = Alignment.Top
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Menu,
-                                                contentDescription = stringResource(id = R.string.menu),
-                                                tint = MaterialTheme.colorScheme.onPrimary,
-                                                modifier = Modifier.size(20.dp)
-                                            )
+                                            Column(modifier = Modifier.weight(1f)) {
+                                                Text(
+                                                    text = today,
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(
+                                                    text = listState.filteredLabel ?: stringResource(id = R.string.notes),
+                                                    style = MaterialTheme.typography.headlineMedium,
+                                                    color = MaterialTheme.colorScheme.onSurface
+                                                )
+                                                Spacer(modifier = Modifier.height(2.dp))
+                                                Text(
+                                                    text = "SORTED BY $sortLabel · ${pinnedNotes.size} PINNED",
+                                                    style = MaterialTheme.typography.labelSmall,
+                                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                                )
+                                            }
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(40.dp)
+                                                    .clip(CircleShape)
+                                                    .background(MaterialTheme.colorScheme.primary)
+                                                    .clickable { onMenuClick() },
+                                                contentAlignment = Alignment.Center
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Menu,
+                                                    contentDescription = stringResource(id = R.string.menu),
+                                                    tint = MaterialTheme.colorScheme.onPrimary,
+                                                    modifier = Modifier.size(20.dp)
+                                                )
+                                            }
+                                        }
+                                        if (listState.labels.isNotEmpty()) {
+                                            Row(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .horizontalScroll(rememberScrollState())
+                                                    .padding(horizontal = 12.dp, vertical = 4.dp),
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                                            ) {
+                                                FilterChip(
+                                                    selected = listState.filteredLabel == null,
+                                                    onClick = { viewModel.onEvent(NotesEvent.FilterByLabel(null)) },
+                                                    label = { Text(stringResource(id = R.string.all)) }
+                                                )
+                                                listState.labels.forEach { label ->
+                                                    FilterChip(
+                                                        selected = listState.filteredLabel == label,
+                                                        onClick = { viewModel.onEvent(NotesEvent.FilterByLabel(label)) },
+                                                        label = { Text(label) }
+                                                    )
+                                                }
+                                            }
+                                            Spacer(modifier = Modifier.height(4.dp))
                                         }
                                     }
                                 }
@@ -449,30 +476,6 @@ fun NotesScreen(
                                         currentSortType = listState.sortType
                                     )
                                     Spacer(modifier = Modifier.height(8.dp))
-                                }
-
-                                if (!isSearchActive && !isSelectionModeActive && listState.labels.isNotEmpty()) {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .horizontalScroll(rememberScrollState())
-                                            .padding(horizontal = 12.dp, vertical = 4.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        FilterChip(
-                                            selected = listState.filteredLabel == null,
-                                            onClick = { viewModel.onEvent(NotesEvent.FilterByLabel(null)) },
-                                            label = { Text(stringResource(id = R.string.all)) }
-                                        )
-                                        listState.labels.forEach { label ->
-                                            FilterChip(
-                                                selected = listState.filteredLabel == label,
-                                                onClick = { viewModel.onEvent(NotesEvent.FilterByLabel(label)) },
-                                                label = { Text(label) }
-                                            )
-                                        }
-                                    }
-                                    Spacer(modifier = Modifier.height(4.dp))
                                 }
 
                                 if (isSearchActive && listState.searchQuery.isNotEmpty()) {
@@ -505,6 +508,9 @@ fun NotesScreen(
                                 if (isLoading) {
                                     ExpressiveLoading()
                                 } else if (isNotesEmpty) {
+                                    if (!isSearchActive && !isSelectionModeActive) {
+                                        notesTopHeader()
+                                    }
                                     val currentLabel = listState.filteredLabel
                                     val emptyMessage = if (currentLabel != null) {
                                         stringResource(id = R.string.no_notes_found_label, currentLabel)
@@ -555,6 +561,9 @@ fun NotesScreen(
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 verticalItemSpacing = 8.dp
                                             ) {
+                                                if (!isSearchActive && !isSelectionModeActive) {
+                                                    item(span = StaggeredGridItemSpan.FullLine) { notesTopHeader() }
+                                                }
                                                 if (pinnedNotes.isNotEmpty()) {
                                                     item(span = StaggeredGridItemSpan.FullLine) {
                                                         Text(
@@ -649,6 +658,9 @@ fun NotesScreen(
                                                 contentPadding = PaddingValues(8.dp),
                                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                                             ) {
+                                                if (!isSearchActive && !isSelectionModeActive) {
+                                                    item { notesTopHeader() }
+                                                }
                                                 if (pinnedNotes.isNotEmpty()) {
                                                     item {
                                                         Text(

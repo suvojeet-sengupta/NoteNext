@@ -234,8 +234,8 @@ fun NoteItem(
                                 androidx.compose.ui.text.AnnotatedString(unescaped)
                             }
 
-                            val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-                            val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
+                            val primaryContainer = MaterialTheme.colorScheme.tertiaryContainer
+                            val onPrimaryContainer = MaterialTheme.colorScheme.onTertiaryContainer
 
                             val highlightedContent = remember(annotatedContent, searchQuery, primaryContainer, onPrimaryContainer) {
                                 if (searchQuery.isNotEmpty()) {
@@ -389,8 +389,8 @@ fun NoteItem(
                                     shape = androidx.compose.foundation.shape.CircleShape,
                                     color = if (isDefaultColor) MaterialTheme.colorScheme.surfaceContainerHighest else contentColor.copy(alpha = 0.12f)
                                 ) {
-                                    val primaryContainer = MaterialTheme.colorScheme.primaryContainer
-                                    val onPrimaryContainer = MaterialTheme.colorScheme.onPrimaryContainer
+                                    val primaryContainer = MaterialTheme.colorScheme.tertiaryContainer
+                                    val onPrimaryContainer = MaterialTheme.colorScheme.onTertiaryContainer
 
                                     val labelText = remember(label, searchQuery, primaryContainer, onPrimaryContainer) {
                                         if (searchQuery.isNotEmpty()) {
@@ -478,8 +478,8 @@ private fun ChecklistPreview(checklistItems: List<ChecklistItem>, contentColor: 
                     androidx.core.text.HtmlCompat.fromHtml(item.text, androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
                 }
                 
-                val primaryContainer = colorScheme.primaryContainer
-                val onPrimaryContainer = colorScheme.onPrimaryContainer
+                val primaryContainer = colorScheme.tertiaryContainer
+                val onPrimaryContainer = colorScheme.onTertiaryContainer
 
                 val itemText = remember(unescapedItemText, searchQuery, primaryContainer, onPrimaryContainer) {
                     if (searchQuery.isNotEmpty()) {

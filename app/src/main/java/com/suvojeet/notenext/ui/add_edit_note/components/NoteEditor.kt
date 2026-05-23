@@ -107,8 +107,9 @@ fun NoteTitleEditor(
                     .format(java.util.Date(it)).uppercase()
             }
         }
+        val wordLabel = if (wordCount == 1) "WORD" else "WORDS"
         Text(
-            text = if (editedDate != null) "$editedDate  ·  $wordCount WORDS" else "$wordCount WORDS",
+            text = if (editedDate != null) "$editedDate  ·  $wordCount $wordLabel" else "$wordCount $wordLabel",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 6.dp, bottom = 2.dp)
