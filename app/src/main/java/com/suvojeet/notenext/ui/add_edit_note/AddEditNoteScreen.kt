@@ -325,7 +325,9 @@ fun AddEditNoteScreen(
                         editingNoteType = state.editingNoteType,
                         onToggleFocusMode = { isFocusMode = !isFocusMode },
                         isFocusMode = isFocusMode,
-
+                        onShowColorPicker = { showColorPicker = true },
+                        onShowReminder = { checkAndRequestReminderPermissions() },
+                        onShowMoreOptions = { showMoreOptions = true },
                         backgroundColor = backgroundColor,
                         contentColor = contentColor
                     )
@@ -337,43 +339,32 @@ fun AddEditNoteScreen(
                     enter = slideInVertically(initialOffsetY = { it }, animationSpec = spring()) + fadeIn(spring()),
                     exit = slideOutVertically(targetOffsetY = { it }, animationSpec = spring()) + fadeOut(spring())
                 ) {
-                    Surface(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 4.dp)
-                            .imePadding(),
-                        shape = MaterialTheme.shapes.extraLarge,
-                        color = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.95f),
-                        tonalElevation = 2.dp,
-                        shadowElevation = 6.dp
-                    ) {
-                        AddEditNoteBottomAppBar(
-                            state = state,
-                            onEvent = onEvent,
-                            showColorPicker = { showColorPicker = !showColorPicker },
-                            showFormatBar = { showFormatBar = !showFormatBar },
-                            showReminderDialog = { 
-                                if (it) checkAndRequestReminderPermissions() else showReminderDialog = false 
-                            },
-                            showMoreOptions = { showMoreOptions = it },
-                            onImageClick = { getContent.launch("image/*") },
-                            onTakePhotoClick = {
-                                val hasCameraPermission = androidx.core.content.ContextCompat.checkSelfPermission(
-                                    context, android.Manifest.permission.CAMERA
-                                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
-                                if (hasCameraPermission) {
-                                    launchCamera()
-                                } else {
-                                    cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
-                                }
-                            },
-                            onAudioClick = {
-                                Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
-                            },
-                            themeMode = themeMode,
-                            backgroundColor = Color.Transparent
-                        )
-                    }
+                    AddEditNoteBottomAppBar(
+                        state = state,
+                        onEvent = onEvent,
+                        showColorPicker = { showColorPicker = !showColorPicker },
+                        showFormatBar = { showFormatBar = !showFormatBar },
+                        showReminderDialog = {
+                            if (it) checkAndRequestReminderPermissions() else showReminderDialog = false
+                        },
+                        showMoreOptions = { showMoreOptions = it },
+                        onImageClick = { getContent.launch("image/*") },
+                        onTakePhotoClick = {
+                            val hasCameraPermission = androidx.core.content.ContextCompat.checkSelfPermission(
+                                context, android.Manifest.permission.CAMERA
+                            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                            if (hasCameraPermission) {
+                                launchCamera()
+                            } else {
+                                cameraPermissionLauncher.launch(android.Manifest.permission.CAMERA)
+                            }
+                        },
+                        onAudioClick = {
+                            Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
+                        },
+                        themeMode = themeMode,
+                        backgroundColor = Color.Transparent
+                    )
                 }
             }
         ) { padding ->
