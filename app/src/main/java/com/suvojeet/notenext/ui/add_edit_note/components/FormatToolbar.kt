@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.AddLink
 import androidx.compose.material.icons.filled.FormatUnderlined
 import androidx.compose.material.icons.filled.FormatSize
 import androidx.compose.material.icons.filled.FormatListBulleted
+import androidx.compose.material.icons.filled.FormatQuote
 import androidx.compose.material.icons.filled.AutoAwesome
 import androidx.compose.material.icons.automirrored.filled.FormatIndentDecrease
 import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
@@ -140,6 +141,15 @@ fun FormatToolbar(
                     onCheckedChange = { _ -> onEvent(NotesEvent.ApplyBulletedList) },
                     icon = Icons.Default.FormatListBulleted,
                     description = "Bulleted List",
+                    isActive = false
+                )
+            }
+
+            item {
+                FormatToggleButton(
+                    onCheckedChange = { _ -> onEvent(NotesEvent.ApplyBlockquote) },
+                    icon = Icons.Default.FormatQuote,
+                    description = "Blockquote",
                     isActive = false
                 )
             }

@@ -55,6 +55,7 @@ sealed class NotesEvent {
     data class ApplyStyleToContent(val style: SpanStyle) : NotesEvent()
     data class ApplyHeadingStyle(val level: Int) : NotesEvent()
     object ApplyBulletedList : NotesEvent()
+    object ApplyBlockquote : NotesEvent()
     data class OnColorChange(val color: Int) : NotesEvent()
     object OnSaveNoteClick : NotesEvent()
     object OnDeleteNoteClick : NotesEvent()

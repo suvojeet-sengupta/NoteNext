@@ -475,6 +475,20 @@ fun AddEditNoteScreen(
                             }
 
                             item {
+                                if (state.editingContent.text.isNotBlank()) {
+                                    Text(
+                                        text = "— Page i of i —",
+                                        style = MaterialTheme.typography.labelSmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 24.dp, bottom = 8.dp)
+                                    )
+                                }
+                            }
+
+                            item {
                                 Spacer(modifier = Modifier.height(120.dp))
                             }
                         }

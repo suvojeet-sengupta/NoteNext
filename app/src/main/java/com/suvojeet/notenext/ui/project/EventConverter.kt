@@ -36,6 +36,7 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.ApplyStyleToContent -> ProjectNotesEvent.ApplyStyleToContent(this.style)
         is NotesEvent.ApplyHeadingStyle -> ProjectNotesEvent.ApplyHeadingStyle(this.level)
         is NotesEvent.ApplyBulletedList -> ProjectNotesEvent.ApplyBulletedList
+        is NotesEvent.ApplyBlockquote -> ProjectNotesEvent.ApplyBlockquote
         is NotesEvent.OnColorChange -> ProjectNotesEvent.OnColorChange(this.color)
         is NotesEvent.OnSaveNoteClick -> ProjectNotesEvent.OnSaveNoteClick(shouldCollapse = true)
         is NotesEvent.OnDeleteNoteClick -> ProjectNotesEvent.OnDeleteNoteClick

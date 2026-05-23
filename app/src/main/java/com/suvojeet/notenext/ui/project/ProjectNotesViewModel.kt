@@ -718,6 +718,16 @@ class ProjectNotesViewModel @Inject constructor(
                 )
                 scheduleAutoSave()
             }
+            is ProjectNotesEvent.ApplyBlockquote -> {
+                val updatedContent = richTextController.toggleBlockquote(state.value.editingContent)
+                val updatedHistory = state.value.editingHistory.take(state.value.editingHistoryIndex + 1) + (state.value.editingTitle to updatedContent)
+                _state.value = state.value.copy(
+                    editingContent = updatedContent,
+                    editingHistory = updatedHistory,
+                    editingHistoryIndex = updatedHistory.lastIndex
+                )
+                scheduleAutoSave()
+            }
             is ProjectNotesEvent.ApplyHeadingStyle -> {
                 _state.value = state.value.copy(
                     activeHeadingStyle = event.level,

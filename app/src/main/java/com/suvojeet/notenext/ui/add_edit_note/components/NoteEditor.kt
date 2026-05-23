@@ -5,7 +5,10 @@ import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.Alignment
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -58,6 +61,25 @@ fun NoteTitleEditor(
             }
     ) {
         val titleTextColor = MaterialTheme.colorScheme.onSurface
+
+        if (!state.editingLabel.isNullOrBlank()) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(6.dp),
+                modifier = Modifier.padding(bottom = 6.dp)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(5.dp)
+                        .background(MaterialTheme.colorScheme.tertiary, CircleShape)
+                )
+                Text(
+                    text = state.editingLabel!!.uppercase(),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+        }
 
         TextField(
             value = state.editingTitle,

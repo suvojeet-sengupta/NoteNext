@@ -991,6 +991,14 @@ class NotesViewModel @Inject constructor(
                 ) }
                 scheduleAutoSave()
             }
+            is NotesEvent.ApplyBlockquote -> {
+                val updatedContent = richTextController.toggleBlockquote(editState.value.editingContent)
+                editorDelegate.reset(editState.value.editingTitle, updatedContent)
+                editorDelegate.updateState { it.copy(
+                    editingContent = updatedContent
+                ) }
+                scheduleAutoSave()
+            }
             is NotesEvent.ApplyHeadingStyle -> {
                 val updatedContent = richTextController.applyHeading(editState.value.editingContent, event.level)
 
