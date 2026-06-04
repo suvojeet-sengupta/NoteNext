@@ -25,8 +25,8 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.unit.ColorProvider
-import androidx.compose.ui.graphics.Color
 import com.suvojeet.notenext.MainActivity
+import com.suvojeet.notenext.R
 import com.suvojeet.notenext.core.model.NoteType
 import com.suvojeet.notenext.data.ChecklistItem
 import com.suvojeet.notenext.data.NoteSummaryWithAttachments
@@ -34,13 +34,14 @@ import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.flow.map
 import androidx.core.text.HtmlCompat
 
-// Day/night color providers so the widget follows the system theme instead of being
-// locked to a white background with black text (unreadable in dark mode).
-private val WidgetBg = ColorProvider(day = Color.White, night = Color(0xFF1C1B1F))
-private val CardBg = ColorProvider(day = Color(0xFFF2F2F7), night = Color(0xFF2B2930))
-private val PrimaryText = ColorProvider(day = Color.Black, night = Color.White)
-private val SecondaryText = ColorProvider(day = Color(0xFF666666), night = Color(0xFFBDBDBD))
-private val AccentColor = ColorProvider(day = Color(0xFF1A73E8), night = Color(0xFF8AB4F8))
+// Day/night ColorProviders backed by values/colors.xml + values-night/colors.xml so the
+// widget follows the system theme. ColorProvider(resId) is the correct API for Glance 1.x —
+// the day/night named-parameter constructor only exists in later versions.
+private val WidgetBg = ColorProvider(R.color.widget_bg)
+private val CardBg = ColorProvider(R.color.widget_card_bg)
+private val PrimaryText = ColorProvider(R.color.widget_text_primary)
+private val SecondaryText = ColorProvider(R.color.widget_text_secondary)
+private val AccentColor = ColorProvider(R.color.widget_accent)
 
 class NoteGlanceWidget : GlanceAppWidget() {
 

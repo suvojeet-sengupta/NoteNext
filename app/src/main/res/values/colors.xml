@@ -8,4 +8,11 @@
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
     <color name="ic_launcher_background">#FFFFFF</color>
+
+    <!-- Widget theme colors (light) -->
+    <color name="widget_bg">#FFFFFFFF</color>
+    <color name="widget_card_bg">#FFF2F2F7</color>
+    <color name="widget_text_primary">#FF000000</color>
+    <color name="widget_text_secondary">#FF666666</color>
+    <color name="widget_accent">#FF1A73E8</color>
 </resources>
