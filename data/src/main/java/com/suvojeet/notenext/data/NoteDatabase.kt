@@ -353,11 +353,12 @@ abstract class NoteDatabase : RoomDatabase() {
                 
                 db.execSQL("CREATE INDEX IF NOT EXISTS `index_checklist_items_noteId` ON `checklist_items` (`noteId`)")
 
-                // Data Migration
-                val cursor = db.query("SELECT id, content FROM notes WHERE noteType = 'CHECKLIST'")
+                // Data Migration. Wrap the cursor in .use{} so it is closed even if the
+                // JSON parse loop throws — otherwise a bad row leaks the cursor mid-upgrade.
+                db.query("SELECT id, content FROM notes WHERE noteType = 'CHECKLIST'").use { cursor ->
                 if (cursor.moveToFirst()) {
                     val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
-                    
+
                     do {
                         val noteId = cursor.getInt(cursor.getColumnIndexOrThrow("id"))
                         val content = cursor.getString(cursor.getColumnIndexOrThrow("content"))
@@ -378,7 +379,7 @@ abstract class NoteDatabase : RoomDatabase() {
                         }
                     } while (cursor.moveToNext())
                 }
-                cursor.close()
+                }
             }
         }
 

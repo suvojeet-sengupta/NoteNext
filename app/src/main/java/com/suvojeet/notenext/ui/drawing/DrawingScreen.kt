@@ -51,6 +51,14 @@ fun DrawingScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var currentPath by remember { mutableStateOf<Path?>(null) }
     val context = LocalContext.current
+
+    // Surface save failures so a drawing is never lost silently.
+    LaunchedEffect(state.errorMessage) {
+        state.errorMessage?.let { message ->
+            android.widget.Toast.makeText(context, message, android.widget.Toast.LENGTH_LONG).show()
+            viewModel.onEvent(DrawingEvent.ErrorShown)
+        }
+    }
     
     val isExpanded = windowSizeClass.widthSizeClass != WindowWidthSizeClass.Compact
 

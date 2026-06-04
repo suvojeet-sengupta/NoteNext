@@ -197,11 +197,12 @@ fun saveAsPdf(
     attachments.filter { it.type == AttachmentType.IMAGE }.forEach { attachment ->
         try {
             val imageUri = android.net.Uri.parse(attachment.uri)
-            val inputStream = context.contentResolver.openInputStream(imageUri)
-            val bitmap = android.graphics.BitmapFactory.decodeStream(inputStream)
-            inputStream?.close()
+            // .use{} guarantees the stream closes even if decodeStream throws.
+            val bitmap = context.contentResolver.openInputStream(imageUri)?.use { input ->
+                android.graphics.BitmapFactory.decodeStream(input)
+            }
 
-            if (bitmap != null) {
+            if (bitmap != null && bitmap.width > 0) {
                 val aspectRatio = bitmap.height.toFloat() / bitmap.width.toFloat()
                 var targetWidth = contentWidth.toFloat()
                 var targetHeight = targetWidth * aspectRatio

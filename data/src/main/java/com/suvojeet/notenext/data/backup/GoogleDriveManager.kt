@@ -164,7 +164,9 @@ class GoogleDriveManager @Inject constructor() {
                 .setFields("files(id, createdTime)")
                 .execute()
             
-             val latest = fileList.files.maxByOrNull { it.createdTime.value }
+             // Drive may return a null files list or entries with a null createdTime;
+             // guard both so a successful-but-empty response can't NPE the restore.
+             val latest = fileList.files?.maxByOrNull { it.createdTime?.value ?: 0L }
              latest?.id ?: run {
                  // Fallback to legacy
                  val legacyQuery = "name = 'notenext_backup.zip' and 'appDataFolder' in parents and trashed = false"
@@ -173,8 +175,9 @@ class GoogleDriveManager @Inject constructor() {
                     .setSpaces("appDataFolder")
                     .setFields("files(id)")
                     .execute()
-                 if(legacyList.files.isEmpty()) throw Exception("No backup found")
-                 legacyList.files[0].id
+                 val legacyFiles = legacyList.files
+                 if (legacyFiles.isNullOrEmpty()) throw Exception("No backup found")
+                 legacyFiles.first().id
              }
         }
 

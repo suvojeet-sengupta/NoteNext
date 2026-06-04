@@ -43,7 +43,14 @@ class BackupWorker @AssistedInject constructor(
             return@withContext Result.failure()
         }
 
-        setForeground(createForegroundInfo())
+        // On Android 12+ a foreground-service start can be disallowed (background start
+        // limits) and on 13+ the notification can be blocked. Neither should abort the
+        // backup itself — degrade to a normal background worker if promotion fails.
+        try {
+            setForeground(createForegroundInfo())
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
 
         var success = true
         var errorMessage = ""
@@ -123,8 +130,13 @@ class BackupWorker @AssistedInject constructor(
             .setSmallIcon(icon)
             .setAutoCancel(true)
             .build()
-            
-        notificationManager.notify(notificationId, notification)
+
+        // POST_NOTIFICATIONS may be denied on Android 13+; don't let that crash the worker.
+        try {
+            notificationManager.notify(notificationId, notification)
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
     }
 
     private fun createForegroundInfo(): ForegroundInfo {

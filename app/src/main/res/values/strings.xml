@@ -1,5 +1,7 @@
 <resources>
     <string name="app_name">NoteNext</string>
+    <string name="shortcut_new_note_short">New note</string>
+    <string name="shortcut_new_note_long">Create a new note</string>
     <string name="manage_labels">Manage Labels</string>
     <string name="label_icon">Label icon</string>
     <string name="pinned_note_description">Pinned note</string>

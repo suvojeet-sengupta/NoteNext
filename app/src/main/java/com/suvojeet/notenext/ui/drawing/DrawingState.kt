@@ -18,5 +18,6 @@ data class DrawingState(
     val currentStrokeWidth: Float = 10f,
     val isEraserMode: Boolean = false,
     val isSaving: Boolean = false,
-    val showBrushSettings: Boolean = false
+    val showBrushSettings: Boolean = false,
+    val errorMessage: String? = null
 )

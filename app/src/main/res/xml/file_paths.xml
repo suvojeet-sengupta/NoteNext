@@ -13,5 +13,8 @@
 
         <!-- Logcat sharing -->
         <cache-path name="logs" path="logs" />
+
+        <!-- Saved drawings shared via FileProvider before being copied to attachments -->
+        <cache-path name="drawings" path="drawings/" />
     </paths>
 </resources>

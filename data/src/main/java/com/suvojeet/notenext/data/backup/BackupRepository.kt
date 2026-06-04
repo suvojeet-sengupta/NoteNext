@@ -52,16 +52,18 @@ class BackupRepository @Inject constructor(
         coerceInputValues = true
     }
 
-    suspend fun createBackupZip(targetFile: File, includeAttachments: Boolean = true, since: Long = 0) {
-        FileOutputStream(targetFile).use { fos ->
+    /** @return number of attachments that could not be read and were skipped. */
+    suspend fun createBackupZip(targetFile: File, includeAttachments: Boolean = true, since: Long = 0): Int {
+        return FileOutputStream(targetFile).use { fos ->
             ZipOutputStream(fos).use { zos ->
                 writeBackupToZip(zos, includeAttachments, since)
             }
         }
     }
-    
-    suspend fun createBackupZip(outputStream: java.io.OutputStream, includeAttachments: Boolean = true, since: Long = 0) {
-         ZipOutputStream(outputStream).use { zos ->
+
+    /** @return number of attachments that could not be read and were skipped. */
+    suspend fun createBackupZip(outputStream: java.io.OutputStream, includeAttachments: Boolean = true, since: Long = 0): Int {
+         return ZipOutputStream(outputStream).use { zos ->
             writeBackupToZip(zos, includeAttachments, since)
         }
     }
@@ -82,10 +84,16 @@ class BackupRepository @Inject constructor(
             val file = dir.createFile("application/zip", fileName) 
                 ?: throw Exception("Failed to create file in selected directory.")
 
-            context.contentResolver.openOutputStream(file.uri)?.use { outputStream ->
-                createBackupZip(outputStream, includeAttachments, since)
+            // A null stream means the write silently no-ops and we'd falsely report
+            // success — treat it as a hard error so the user knows the backup didn't happen.
+            val outputStream = context.contentResolver.openOutputStream(file.uri)
+                ?: throw Exception("Could not open the selected file for writing. Please re-select the backup folder.")
+            val missing = outputStream.use { os -> createBackupZip(os, includeAttachments, since) }
+            if (missing > 0) {
+                "Backup successful: $fileName ($missing attachment(s) could not be read and were skipped)"
+            } else {
+                "Backup successful: $fileName"
             }
-            "Backup successful: $fileName"
         } catch (e: Exception) {
             e.printStackTrace()
             throw Exception("Failed to save backup: ${e.message}")
@@ -120,27 +128,36 @@ class BackupRepository @Inject constructor(
     suspend fun backupToEncryptedStream(outputStream: java.io.OutputStream?, password: String, includeAttachments: Boolean = true, since: Long = 0) {
         if (outputStream == null) throw Exception("Output stream is null")
         
-        // Use Piped streams to avoid writing plain-text temp files to disk for better security
-        val pipedInputStream = java.io.PipedInputStream()
+        // Use Piped streams to avoid writing plain-text temp files to disk for better security.
+        // A larger buffer reduces how often the writer blocks waiting for the reader.
+        val pipedInputStream = java.io.PipedInputStream(64 * 1024)
         val pipedOutputStream = java.io.PipedOutputStream(pipedInputStream)
-        
+
         coroutineScope {
             // Launch zip writing in a separate coroutine
             val zipJob = launch(Dispatchers.IO) {
                 try {
                     createBackupZip(pipedOutputStream, includeAttachments, since)
                 } finally {
-                    pipedOutputStream.close()
+                    runCatching { pipedOutputStream.close() }
                 }
             }
-            
+
             // Encrypt and write to outputStream in the current coroutine
             try {
                 outputStream.use { out ->
                     EncryptionUtils.encryptStream(pipedInputStream, out, password)
                 }
+            } catch (e: Throwable) {
+                // If encryption fails, the zip coroutine may be blocked on a write() to a pipe
+                // that nobody is draining. A plain blocking write() ignores coroutine
+                // cancellation, so zipJob.join() below would deadlock. Closing the read end
+                // makes that write() throw and lets the coroutine finish.
+                runCatching { pipedInputStream.close() }
+                throw e
             } finally {
                 zipJob.join()
+                runCatching { pipedInputStream.close() }
             }
         }
     }
@@ -197,7 +214,7 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    private suspend fun writeBackupToZip(zos: ZipOutputStream, includeAttachments: Boolean, since: Long = 0) {
+    private suspend fun writeBackupToZip(zos: ZipOutputStream, includeAttachments: Boolean, since: Long = 0): Int {
         val manifest = mutableMapOf<String, String>()
         val attachmentUriMap = mutableMapOf<String, String>() // Fix 1: Map originalUri to zipEntryName
         val md = MessageDigest.getInstance("SHA-256")
@@ -285,6 +302,8 @@ class BackupRepository @Inject constructor(
         zos.putNextEntry(ZipEntry("manifest.json"))
         zos.write(manifestJson.toByteArray())
         zos.closeEntry()
+
+        return missingAttachmentsCount
     }
 
 

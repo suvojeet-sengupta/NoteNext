@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asAndroidPath
 import androidx.compose.ui.graphics.toArgb
+import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -85,6 +86,9 @@ class DrawingViewModel @Inject constructor() : ViewModel() {
             is DrawingEvent.SaveDrawing -> {
                 saveDrawing(event.context, event.onSaveComplete)
             }
+            DrawingEvent.ErrorShown -> {
+                _state.update { it.copy(errorMessage = null) }
+            }
         }
     }
 
@@ -135,8 +139,14 @@ class DrawingViewModel @Inject constructor() : ViewModel() {
                     bounds.bottom + padding
                 )
 
-                val width = max(minSize, bounds.width()).toInt()
-                val height = max(minSize, bounds.height()).toInt()
+                // Clamp to a sane range. A pathological path can produce a huge or
+                // non-finite width/height; toInt() on Float.MAX_VALUE overflows to a
+                // negative Int and createBitmap() then throws. Cap at 4096px per side.
+                val maxSize = 4096f
+                val rawWidth = bounds.width().let { if (it.isFinite()) it else minSize }
+                val rawHeight = bounds.height().let { if (it.isFinite()) it else minSize }
+                val width = rawWidth.coerceIn(minSize, maxSize).toInt()
+                val height = rawHeight.coerceIn(minSize, maxSize).toInt()
 
                 // Create bitmap just large enough for the drawing
                 val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
@@ -169,19 +179,36 @@ class DrawingViewModel @Inject constructor() : ViewModel() {
                     canvas.drawPath(androidPath, paint)
                 }
 
-                val file = File(context.cacheDir, "drawing_${System.currentTimeMillis()}.png")
+                // Must live under the cache-path mapped in file_paths.xml ("drawings/")
+                // so FileProvider can grant a content:// URI for it.
+                val drawingsDir = File(context.cacheDir, "drawings").apply { mkdirs() }
+                val file = File(drawingsDir, "drawing_${System.currentTimeMillis()}.png")
                 FileOutputStream(file).use { out ->
                     bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
                 }
                 
+                // Share via FileProvider (content:// + temporary read grant) rather than
+                // a raw file:// URI, which throws FileUriExposedException on Android 7+.
+                val sharedUri = FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    file
+                )
                 withContext(Dispatchers.Main) {
-                    _state.update { it.copy(isSaving = false) }
-                    onSaveComplete(Uri.fromFile(file))
+                    _state.update { it.copy(isSaving = false, errorMessage = null) }
+                    onSaveComplete(sharedUri)
                 }
             } catch (e: Exception) {
                 e.printStackTrace()
                 withContext(Dispatchers.Main) {
-                    _state.update { it.copy(isSaving = false) }
+                    // Surface the failure instead of losing the drawing silently.
+                    _state.update { it.copy(isSaving = false, errorMessage = "Couldn't save drawing. Please try again.") }
+                    onSaveComplete(null)
+                }
+            } catch (e: OutOfMemoryError) {
+                e.printStackTrace()
+                withContext(Dispatchers.Main) {
+                    _state.update { it.copy(isSaving = false, errorMessage = "Drawing is too large to save.") }
                     onSaveComplete(null)
                 }
             }

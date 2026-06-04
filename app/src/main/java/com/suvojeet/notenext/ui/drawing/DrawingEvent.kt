@@ -15,4 +15,5 @@ sealed class DrawingEvent {
     data class ToggleEraserMode(val isEraser: Boolean) : DrawingEvent()
     object ToggleBrushSettings : DrawingEvent()
     data class SaveDrawing(val context: Context, val onSaveComplete: (Uri?) -> Unit) : DrawingEvent()
+    object ErrorShown : DrawingEvent()
 }

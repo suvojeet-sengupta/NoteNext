@@ -27,10 +27,11 @@ object NoteHtmlGenerator {
             .joinToString("<br>") { attachment ->
                 try {
                     val uri = Uri.parse(attachment.uri)
-                    val inputStream = context.contentResolver.openInputStream(uri)
-                    val bitmap = BitmapFactory.decodeStream(inputStream)
-                    inputStream?.close()
-                    
+                    // .use{} guarantees the stream closes even if decodeStream throws.
+                    val bitmap = context.contentResolver.openInputStream(uri)?.use { input ->
+                        BitmapFactory.decodeStream(input)
+                    }
+
                     if (bitmap != null) {
                         val outputStream = ByteArrayOutputStream()
                         bitmap.compress(Bitmap.CompressFormat.JPEG, 70, outputStream)

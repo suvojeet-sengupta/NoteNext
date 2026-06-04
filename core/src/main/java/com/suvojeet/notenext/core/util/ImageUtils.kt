@@ -52,9 +52,11 @@ object ImageUtils {
                 )
                 
                 val finalBitmap = if (ratio < 1.0) {
-                    val width = (originalBitmap.width * ratio).toInt()
-                    val height = (originalBitmap.height * ratio).toInt()
-                    Bitmap.createScaledBitmap(originalBitmap, width, height, true)
+                    val width = (originalBitmap.width * ratio).toInt().coerceAtLeast(1)
+                    val height = (originalBitmap.height * ratio).toInt().coerceAtLeast(1)
+                    // createScaledBitmap can return null on allocation failure; fall back
+                    // to the original rather than crashing on a null dereference.
+                    Bitmap.createScaledBitmap(originalBitmap, width, height, true) ?: originalBitmap
                 } else {
                     originalBitmap
                 }
@@ -68,13 +70,14 @@ object ImageUtils {
                 
                 val fileName = "IMG_${UUID.randomUUID()}.jpg"
                 val file = File(imagesDir, fileName)
-                val outputStream = FileOutputStream(file)
 
-                // Compress to JPEG with 80% quality
-                finalBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
-                outputStream.flush()
-                outputStream.close()
-                
+                // Compress to JPEG with 80% quality. Use .use{} so the stream is closed
+                // even if compress() throws (prevents file-descriptor leaks on repeated saves).
+                FileOutputStream(file).use { outputStream ->
+                    finalBitmap.compress(Bitmap.CompressFormat.JPEG, 80, outputStream)
+                    outputStream.flush()
+                }
+
                 if (finalBitmap != originalBitmap) {
                     finalBitmap.recycle()
                 }
@@ -82,6 +85,11 @@ object ImageUtils {
 
                 // Return the Uri for the new file
                 FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
+            } catch (e: OutOfMemoryError) {
+                // Large camera images on low-RAM devices can exhaust the heap. OOM is an
+                // Error (not an Exception) so it would otherwise crash the app here.
+                e.printStackTrace()
+                null
             } catch (e: Exception) {
                 e.printStackTrace()
                 null
