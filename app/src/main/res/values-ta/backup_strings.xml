@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Tamil (ta) translations for the Backup screen. Native review recommended. -->
 <resources>
+    <string name="google_sign_in_failed">Google உள்நுழைவு தோல்வியடைந்தது. மீண்டும் முயற்சிக்கவும்.</string>
     <string name="backup_restore_method_title">எவ்வாறு மீட்டெடுக்க விரும்புகிறீர்கள்?</string>
     <string name="backup_restore_method_subtitle_local">உங்கள் காப்புப் பிரதிக்கான மீட்டமைப்பு முறையைத் தேர்ந்தெடுக்கவும்.</string>
     <string name="backup_restore_method_subtitle_drive">இந்தப் பதிப்பிற்கான மீட்டமைப்பு முறையைத் தேர்ந்தெடுக்கவும்.</string>

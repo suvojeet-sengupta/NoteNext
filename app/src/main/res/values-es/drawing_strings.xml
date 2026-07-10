@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="drawing_close_cd">Cerrar</string>
+    <string name="drawing_undo_cd">Deshacer</string>
+    <string name="drawing_redo_cd">Rehacer</string>
+    <string name="drawing_clear_all_cd">Borrar todo</string>
+    <string name="drawing_settings_cd">Ajustes</string>
+    <string name="drawing_stroke_width_cd">Grosor del trazo</string>
+    <string name="drawing_placeholder">Empieza a dibujar aquí…</string>
+    <string name="drawing_stroke_size_label">%1$d px</string>
+    <string name="drawing_tool_brush">Pincel</string>
+    <string name="drawing_tool_eraser">Borrador</string>
+</resources>

@@ -183,4 +183,12 @@
 
     <string name="ai_settings_banner_title">NoteNext मध्ये AI कसे कार्य करते</string>
     <string name="ai_settings_banner_body">प्रत्येक AI वैशिष्ट्य डिफॉल्टनुसार बंद आहे. तुम्ही एक चालू केल्यावर, तुमच्या नोटमधील संबंधित मजकूर तुम्ही निवडलेल्या प्रदात्याला पाठवला जातो — आणि इतर काहीही नाही. आम्ही तुमचा संपूर्ण डेटाबेस, संलग्नक किंवा लेबल्स कधीही मोठ्या प्रमाणात अपलोड करत नाही. तुम्ही वर एका टॅपने सर्वकाही अक्षम करू शकता.</string>
+
+    <!-- AiActionItemsSheet -->
+    <string name="ai_extract_tasks_title">कृती घटक</string>
+    <string name="ai_extract_tasks_desc">AI ने तुमच्या नोंदीतून ही कामे काढली</string>
+    <string name="ai_extract_tasks_extracting">कामे काढत आहे…</string>
+    <string name="ai_extract_tasks_empty">कोणतीही कृतीयोग्य कामे आढळली नाहीत.</string>
+    <string name="ai_extract_tasks_add_to_todo">करायच्या गोष्टीत जोडा</string>
+    <string name="ai_extract_tasks_items_count">%1$d कामे निवडली</string>
 </resources>

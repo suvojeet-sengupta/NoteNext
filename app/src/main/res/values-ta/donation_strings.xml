@@ -1,0 +1,28 @@
+<resources>
+    <string name="support_notenext">NoteNext-ஐ ஆதரி</string>
+    <string name="made_with_love_free">அனைவருக்காகவும் ❤️ உடன் உருவாக்கப்பட்டது</string>
+    <string name="donation_description">NoteNext 100% இலவசம், திறந்த மூலம், விளம்பரங்கள் எதுவும் இல்லை. உங்கள் ஆதரவு அதை அப்படியே வைத்திருக்க உதவுகிறது, மேலும் இன்னும் சிறந்த அம்சங்களை உருவாக்க எனக்கு ஊக்கமளிக்கிறது!</string>
+    <string name="why_donate">ஏன் ஆதரிக்க வேண்டும்?</string>
+    <string name="reason_independent_title">சுதந்திரமான &amp; மனிதநேயம்</string>
+    <string name="reason_independent_desc">ஒரு நிறுவனத்தால் அல்ல, உங்கள் அனுபவத்தைப் பற்றி அக்கறை கொண்ட ஒரே ஒரு டெவலப்பரால் உருவாக்கப்பட்டது.</string>
+    <string name="reason_privacy_title">தனியுரிமை முதலில்</string>
+    <string name="reason_privacy_desc">விளம்பரங்கள் இல்லை, கண்காணிப்பு இல்லை, உங்கள் தரவை விற்பதில்லை. என்றுமே. உங்கள் குறிப்புகள் உங்கள் சாதனத்தில் தனிப்பட்டதாக இருக்கும்.</string>
+    <string name="reason_updates_title">தொடர்ச்சியான வளர்ச்சி</string>
+    <string name="reason_updates_desc">உங்கள் பங்களிப்பு புதிய அம்சங்கள், பிழை திருத்தங்கள் மற்றும் NoteNext-ஐ சிறப்பாக்கும் வழக்கமான புதுப்பிப்புகளுக்கு ஊக்கமளிக்கிறது.</string>
+    <string name="choose_amount">தொகையைத் தேர்ந்தெடு</string>
+    <string name="donate_small_label">எனக்கு ஒரு காபி வாங்கு</string>
+    <string name="donate_small_desc">நன்றியின் ஒரு சிறிய அடையாளம்</string>
+    <string name="donate_medium_label">எனக்கு ஒரு சிற்றுண்டி வாங்கு</string>
+    <string name="donate_medium_desc">நீங்கள் உண்மையிலேயே அற்புதம்!</string>
+    <string name="donate_large_label">NoteNext-ஐ மேம்படுத்து</string>
+    <string name="donate_large_desc">புகழ்பெற்ற ஆதரவாளர் நிலை!</string>
+    <string name="thank_you_title">நன்றி! 🎉</string>
+    <string name="thank_you_msg">உங்கள் ஆதரவு மிகவும் மதிப்புமிக்கது! ❤️\nஉங்களைப் போன்ற அற்புதமான மனிதர்களால் NoteNext தொடர்ந்து வளரும்.</string>
+    <string name="thank_you_confirm">வரவேற்கிறோம்! 😊</string>
+    <string name="connecting_play_store">Play Store-உடன் இணைக்கிறது…</string>
+    <string name="could_not_connect_play_store">Play Store-உடன் இணைக்க முடியவில்லை</string>
+    <string name="check_internet_try_again">உங்கள் இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="loading_options">நன்கொடை விருப்பங்களை ஏற்றுகிறது…</string>
+    <string name="secure_google_play">அனைத்து வாங்குதல்களும் Google Play மூலம் பாதுகாப்பாகச் செயலாக்கப்படுகின்றன.</string>
+    <string name="purchase_failed">வாங்குதல் தோல்வியடைந்தது: %1$s</string>
+</resources>

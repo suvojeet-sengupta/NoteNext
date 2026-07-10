@@ -1,0 +1,118 @@
+<resources>
+    <string name="settings_title">Ajustes</string>
+    <string name="display_section_title">Pantalla</string>
+    <string name="theme">Tema</string>
+    <string name="rich_link_preview">Vista previa enriquecida de enlaces</string>
+    <string name="rich_link_preview_subtitle">Mostrar vista previa de los enlaces en las notas</string>
+    <string name="shape_family">Familia de formas (experimental)</string>
+    <string name="bin_section_title">Papelera</string>
+    <string name="auto_delete_binned_notes">Eliminar automáticamente las notas de la papelera</string>
+    <string name="auto_delete_subtitle">Después de %1$d días</string>
+    <string name="security_section_title">Seguridad</string>
+    <string name="app_lock">Bloqueo de la app</string>
+    <string name="app_lock_subtitle">Protege la app con un PIN o bloqueo biométrico</string>
+    <string name="backup_restore_section_title">Copia de seguridad y restauración</string>
+    <string name="backup">Copia de seguridad</string>
+    <string name="restore">Restaurar</string>
+    <string name="about">Acerca de</string>
+    <string name="choose_theme">Elegir tema</string>
+    <string name="theme_amoled">AMOLED puro (optimizado para pantallas AMOLED)</string>
+    <string name="auto_delete_after">Eliminar automáticamente después de</string>
+    <string name="days">%1$d días</string>
+    <string name="choose_shape_family">Elegir familia de formas</string>
+    <string name="language">Idioma</string>
+    <string name="language_subtitle">Cambiar el idioma de la aplicación</string>
+    <string name="choose_language">Elegir idioma</string>
+    <string name="language_english">Inglés</string>
+    <string name="language_hindi">Hindi</string>
+    <string name="language_tamil">Tamil</string>
+    <string name="language_bengali">Bengalí</string>
+    <string name="language_marathi">Maratí</string>
+    <string name="language_spanish">Español</string>
+
+    <!-- About &amp; Privacy -->
+    <string name="privacy_policy">Política de privacidad</string>
+    <string name="privacy_policy_description">Descubre cómo protegemos tus notas y datos</string>
+    <string name="security_details">Detalles de seguridad</string>
+    <string name="security_details_description">Desglose técnico de nuestra infraestructura de seguridad</string>
+    <string name="faq">Preguntas frecuentes</string>
+    <string name="faq_description">Preguntas frecuentes sobre NoteNext</string>
+    <string name="features_title">Funciones</string>
+    <string name="features_description">Descubre todo lo que NoteNext puede hacer</string>
+
+    <!-- SettingsScreen sections -->
+    <string name="settings_section_display_subtitle">Preferencias visuales y de idioma</string>
+    <string name="settings_section_data">Datos y mantenimiento</string>
+    <string name="settings_section_data_subtitle">Copias de seguridad, importaciones y limpieza</string>
+    <string name="settings_section_support_logging">Soporte y registros</string>
+    <string name="settings_section_support_logging_subtitle">Información y reproducción de errores</string>
+    <string name="settings_section_support_updates">Soporte y actualizaciones</string>
+    <string name="settings_section_support_updates_subtitle">Mantén NoteNext funcionando sin problemas</string>
+
+    <!-- SettingsScreen items -->
+    <string name="settings_auto_cleanup">Limpieza automática</string>
+    <string name="settings_auto_cleanup_subtitle">Vaciar la papelera después de %1$d días</string>
+    <string name="settings_backup_restore_subtitle">Gestión de datos en la nube y locales</string>
+    <string name="settings_privacy_security">Privacidad y seguridad</string>
+    <string name="settings_privacy_security_subtitle">Bloqueo de la app, capturas, borrado del portapapeles</string>
+    <string name="settings_import_notes">Importar notas</string>
+    <string name="settings_import_notes_subtitle">Importar desde un ZIP de Google Keep</string>
+    <string name="settings_ai_label">IA</string>
+    <string name="settings_ai_subtitle">Interruptor principal, proveedores, funciones, panel de uso</string>
+    <string name="settings_app_info">Información de la app</string>
+    <string name="settings_app_info_subtitle">Versión estable %1$s</string>
+    <string name="settings_stop_logging">Detener registro</string>
+    <string name="settings_start_logging">Iniciar registro</string>
+    <string name="settings_logging_active_subtitle">Registro activo. Reproduce el error ahora.</string>
+    <string name="settings_start_logging_subtitle">Registra los registros de la app para informar de errores</string>
+    <string name="settings_source_code">Código fuente</string>
+    <string name="settings_source_code_subtitle">Consulta nuestro repositorio de GitHub</string>
+    <string name="settings_log_saved_toast">Registro guardado y listo para compartir</string>
+    <string name="settings_logging_started_toast">Registro iniciado. Reproduce el error ahora.</string>
+    <string name="settings_search_placeholder">Buscar en ajustes…</string>
+
+    <!-- SettingsScreen featured cards -->
+    <string name="settings_card_privacy">Privacidad</string>
+    <string name="settings_card_protected">Protegido</string>
+    <string name="settings_card_secure_now">Asegurar ahora</string>
+    <string name="settings_card_sync">Sincronización</string>
+    <string name="settings_card_sync_subtitle">Copia de datos</string>
+
+    <!-- SettingsScreen support &amp; updates -->
+    <string name="settings_rate_app">Valorar NoteNext</string>
+    <string name="settings_rate_app_subtitle">Muestra tu apoyo en Play Store</string>
+    <string name="settings_whats_new">Novedades</string>
+    <string name="settings_whats_new_subtitle">Ver el último registro de cambios</string>
+    <string name="settings_current_version">Actual: v%1$s</string>
+
+    <!-- SettingsScreen dialogs -->
+    <string name="settings_auto_delete_explanation">Las notas de la papelera se eliminarán de forma permanente después de este período.</string>
+    <string name="settings_import_from_title">Importar desde…</string>
+    <string name="settings_coming_soon">Próximamente</string>
+    <string name="settings_keep_import_title">Importación de Google Keep</string>
+    <string name="settings_keep_import_message">Selecciona tu archivo ZIP de Google Takeout para importar tus notas de Keep. Extraeremos tus notas de texto y listas.</string>
+    <string name="settings_select_zip">Seleccionar ZIP</string>
+    <string name="settings_bug_report_title">Informe de error</string>
+    <string name="settings_bug_report_message">Describe el problema que tienes. Los registros del sistema se adjuntarán automáticamente.</string>
+    <string name="settings_bug_report_placeholder">Descripción del problema…</string>
+    <string name="settings_send_report">Enviar informe</string>
+    <string name="settings_rate_dialog_message">¿Te encanta la app? Ayúdanos a crecer valorándola en Play Store. Solo te llevará un minuto.</string>
+    <string name="settings_rate_now">Valorar ahora</string>
+    <string name="settings_later">Más tarde</string>
+
+    <!-- Language display labels (kept in source script) -->
+    <string name="settings_lang_subtitle_en">Inglés (EE. UU.)</string>
+    <string name="settings_lang_subtitle_hi">Hindi (भारत)</string>
+    <string name="settings_lang_subtitle_ta">Tamil (தமிழ்)</string>
+    <string name="settings_lang_subtitle_bn">Bengalí (বাংলা)</string>
+    <string name="settings_lang_subtitle_mr">Maratí (मराठी)</string>
+    <string name="settings_lang_subtitle_es">Español (España)</string>
+
+    <!-- BinScreen -->
+    <string name="bin_empty_action_cd">Vaciar papelera</string>
+    <string name="bin_section_title_deleted">Notas eliminadas</string>
+    <string name="bin_section_desc">Las notas de la papelera se eliminarán automáticamente después de %1$d días</string>
+    <string name="bin_empty_dialog_title">Vaciar papelera</string>
+    <string name="bin_empty_dialog_message">¿Seguro que quieres eliminar de forma permanente todas las notas de la papelera? Esta acción no se puede deshacer.</string>
+    <string name="bin_empty_dialog_action">Eliminar todo</string>
+</resources>

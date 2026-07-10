@@ -183,4 +183,12 @@
 
     <string name="ai_settings_banner_title">NoteNext-এ AI কীভাবে কাজ করে</string>
     <string name="ai_settings_banner_body">প্রতিটি AI বৈশিষ্ট্য ডিফল্টভাবে বন্ধ। আপনি যখন একটি চালু করেন, আপনার নোটের প্রাসঙ্গিক টেক্সট আপনার নির্বাচিত প্রোভাইডারে পাঠানো হয় — এবং অন্য কিছু নয়। আমরা কখনই আপনার সম্পূর্ণ ডেটাবেস, সংযুক্তি বা লেবেলগুলি বাল্কে আপলোড করি না। আপনি উপরে এক ট্যাপে সবকিছু নিষ্ক্রিয় করতে পারেন।</string>
+
+    <!-- AiActionItemsSheet -->
+    <string name="ai_extract_tasks_title">কার্যকরী আইটেম</string>
+    <string name="ai_extract_tasks_desc">AI আপনার নোট থেকে এই কাজগুলি বের করেছে</string>
+    <string name="ai_extract_tasks_extracting">কাজ বের করা হচ্ছে…</string>
+    <string name="ai_extract_tasks_empty">কোনো কার্যকরী কাজ পাওয়া যায়নি।</string>
+    <string name="ai_extract_tasks_add_to_todo">করণীয়তে যোগ করুন</string>
+    <string name="ai_extract_tasks_items_count">%1$d কাজ নির্বাচিত</string>
 </resources>

@@ -1,0 +1,28 @@
+<resources>
+    <string name="support_notenext">NoteNext-কে সমর্থন করুন</string>
+    <string name="made_with_love_free">সবার জন্য ❤️ দিয়ে তৈরি</string>
+    <string name="donation_description">NoteNext 100% বিনামূল্যের, ওপেন-সোর্স এবং কোনো বিজ্ঞাপন নেই। আপনার সমর্থন এটিকে সেভাবেই রাখতে সাহায্য করে এবং আরও ভালো বৈশিষ্ট্য তৈরি করতে আমাকে উৎসাহিত করে!</string>
+    <string name="why_donate">কেন সমর্থন করবেন?</string>
+    <string name="reason_independent_title">স্বাধীন &amp; মানবিক</string>
+    <string name="reason_independent_desc">কোনো কর্পোরেশন নয়, আপনার অভিজ্ঞতার যত্ন নেন এমন একজন ডেভেলপার দ্বারা তৈরি।</string>
+    <string name="reason_privacy_title">গোপনীয়তা প্রথমে</string>
+    <string name="reason_privacy_desc">কোনো বিজ্ঞাপন নেই, কোনো ট্র্যাকিং নেই, আপনার ডেটা বিক্রি করা হয় না। কখনও না। আপনার নোট আপনার ডিভাইসে ব্যক্তিগত থাকে।</string>
+    <string name="reason_updates_title">অবিরত বৃদ্ধি</string>
+    <string name="reason_updates_desc">আপনার অবদান নতুন বৈশিষ্ট্য, বাগ সমাধান এবং NoteNext-কে আরও ভালো করার জন্য নিয়মিত আপডেটকে চালিত করে।</string>
+    <string name="choose_amount">একটি পরিমাণ বেছে নিন</string>
+    <string name="donate_small_label">আমাকে একটি কফি কিনে দিন</string>
+    <string name="donate_small_desc">কৃতজ্ঞতার একটি ছোট নিদর্শন</string>
+    <string name="donate_medium_label">আমাকে একটি নাস্তা কিনে দিন</string>
+    <string name="donate_medium_desc">আপনি সত্যিই দুর্দান্ত!</string>
+    <string name="donate_large_label">NoteNext-কে চাঙ্গা করুন</string>
+    <string name="donate_large_desc">কিংবদন্তি সমর্থক স্তর!</string>
+    <string name="thank_you_title">ধন্যবাদ! 🎉</string>
+    <string name="thank_you_msg">আপনার সমর্থন অমূল্য! ❤️\nআপনার মতো অসাধারণ মানুষের কারণে NoteNext বাড়তে থাকবে।</string>
+    <string name="thank_you_confirm">স্বাগতম! 😊</string>
+    <string name="connecting_play_store">Play Store-এ সংযোগ করা হচ্ছে…</string>
+    <string name="could_not_connect_play_store">Play Store-এ সংযোগ করা যায়নি</string>
+    <string name="check_internet_try_again">আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।</string>
+    <string name="loading_options">দান বিকল্প লোড হচ্ছে…</string>
+    <string name="secure_google_play">সমস্ত ক্রয় Google Play-এর মাধ্যমে নিরাপদে প্রক্রিয়া করা হয়।</string>
+    <string name="purchase_failed">ক্রয় ব্যর্থ হয়েছে: %1$s</string>
+</resources>

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- LabelDialog -->
+    <string name="label_dialog_title">Gestionar etiquetas</string>
+    <string name="label_dialog_subtitle">Organiza tus notas con etiquetas personalizadas</string>
+    <string name="label_dialog_input_placeholder">Escribe el nombre de la etiqueta…</string>
+    <string name="label_dialog_add_cd">Añadir</string>
+    <string name="label_dialog_existing">Etiquetas existentes</string>
+    <string name="label_dialog_empty">Aún no hay etiquetas</string>
+
+    <!-- EditLabelsScreen -->
+    <string name="edit_labels_title">Editar etiquetas</string>
+    <string name="edit_labels_empty_title">Aún no hay etiquetas</string>
+    <string name="edit_labels_empty_subtitle">Crea etiquetas para organizar tus notas</string>
+    <string name="edit_labels_create">Crear etiqueta</string>
+    <string name="edit_labels_rename">Cambiar nombre</string>
+    <string name="edit_labels_delete_confirm">¿Eliminar esta etiqueta?</string>
+    <string name="edit_labels_delete_message">Las notas que usan esta etiqueta conservarán su contenido; solo se quita la etiqueta.</string>
+    <string name="edit_labels_search_cd">Buscar etiquetas</string>
+    <string name="edit_labels_section_title">Gestión de etiquetas</string>
+    <string name="edit_labels_section_desc">Crea y organiza etiquetas para mantener tus notas estructuradas.</string>
+    <string name="edit_labels_empty_default">Aún no hay etiquetas. Crea una para organizar tus notas.</string>
+    <string name="edit_labels_empty_search">No hay etiquetas que coincidan con "%1$s"</string>
+    <string name="edit_labels_delete_cd">Eliminar etiqueta</string>
+    <string name="edit_labels_name_field">Nombre de la etiqueta</string>
+    <string name="edit_labels_clear_cd">Borrar</string>
+    <string name="edit_labels_save_changes">Guardar cambios</string>
+    <string name="edit_labels_create_label">Crear etiqueta</string>
+</resources>

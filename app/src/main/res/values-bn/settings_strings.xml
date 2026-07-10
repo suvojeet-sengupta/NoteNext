@@ -30,6 +30,7 @@
     <string name="language_tamil">তামিল</string>
     <string name="language_bengali">বাংলা</string>
     <string name="language_marathi">মারাঠি</string>
+    <string name="language_spanish">স্প্যানিশ</string>
 
     <string name="privacy_policy">গোপনীয়তা নীতি</string>
     <string name="privacy_policy_description">জানুন আমরা কীভাবে আপনার নোট ও ডেটা সুরক্ষিত রাখি</string>
@@ -100,6 +101,7 @@
     <string name="settings_lang_subtitle_ta">তামিল (தமிழ்)</string>
     <string name="settings_lang_subtitle_bn">বাংলা (বাংলা)</string>
     <string name="settings_lang_subtitle_mr">মারাঠি (मराठी)</string>
+    <string name="settings_lang_subtitle_es">স্প্যানিশ (Español)</string>
 
     <string name="bin_empty_action_cd">বিন খালি করুন</string>
     <string name="bin_section_title_deleted">মুছে ফেলা নোট</string>

@@ -1,0 +1,244 @@
+<resources>
+    <string name="app_name">NoteNext</string>
+    <string name="manage_labels">Gestionar etiquetas</string>
+    <string name="label_icon">Icono de etiqueta</string>
+    <string name="pinned_note_description">Nota fijada</string>
+    <string name="attachment_icon_description">Adjunto</string>
+    <string name="reminder_icon_description">Recordatorio</string>
+    <string name="reminder_date_format">dd MMM yyyy HH:mm</string>
+    <string name="list_view_icon_description">Vista de lista</string>
+    <string name="grid_view_icon_description">Vista de cuadrícula</string>
+    <string name="checkbox_content_description">Casilla de elemento de lista</string>
+    <string name="selected_color_description">Color seleccionado</string>
+    <string name="bold_description">Negrita</string>
+    <string name="italic_description">Cursiva</string>
+    <string name="underline_description">Subrayado</string>
+    <string name="heading_style_description">Estilo de encabezado</string>
+    <string name="insert_link_description">Insertar enlace</string>
+    <string name="image_content_description">Imagen</string>
+    <string name="history">Historial</string>
+    <string name="unlock_with_biometrics">Desbloquear con datos biométricos</string>
+    <string name="biometric_setup_required">Se requiere configurar datos biométricos para activar el bloqueo de la app.</string>
+    <string name="crash_toast_text">NoteNext se cerró inesperadamente. Se envió un informe al desarrollador.</string>
+    <string name="widget_description">Lista interactiva de tus notas y listas fijadas.</string>
+    <string name="glance_widget_name">Widget interactivo de NoteNext</string>
+    <string name="save_as_note">Guardar como nota interna</string>
+
+    <!-- Crash Report -->
+    <string name="crash_report_title">Informe de fallo</string>
+    <string name="crash_report_text">Se enviará un informe de fallo al desarrollador</string>
+    <string name="crash_report_channel">Canal de informes de fallos</string>
+
+    <!-- Update Related -->
+    <string name="update_downloaded_ready">Actualización descargada y lista para instalar</string>
+    <string name="restart_to_update">Reiniciar para actualizar</string>
+    <string name="update_available">Actualización disponible</string>
+    <string name="update_now">Actualizar ahora</string>
+    <string name="you_are_up_to_date">Estás al día</string>
+    <string name="check_for_updates">Buscar actualizaciones</string>
+    <string name="checking_for_updates">Buscando actualizaciones…</string>
+    <string name="update_ready">Actualización lista</string>
+    <string name="downloading_update">Descargando actualización</string>
+    <string name="installing_update">Instalando actualización</string>
+    <string name="downloading_msg">Estamos descargando la última versión de NoteNext para ti.</string>
+    <string name="installing_msg">Finalizando la instalación de la actualización. Esto tardará un momento.</string>
+    <string name="update_available_msg">Hemos añadido nuevas funciones geniales y corregido errores para mejorar tu experiencia.</string>
+    <string name="downloading">Descargando…</string>
+    <string name="installing">Instalando…</string>
+    <string name="run_in_background">Ejecutar en segundo plano</string>
+    <string name="later">Más tarde</string>
+
+    <!-- Navigation -->
+    <string name="notes">Notas</string>
+    <string name="projects">Proyectos</string>
+    <string name="archive">Archivo</string>
+    <string name="reminders">Recordatorios</string>
+    <string name="todos">Tareas</string>
+    <string name="bin">Papelera</string>
+    <string name="settings">Ajustes</string>
+    <string name="labels">Etiquetas</string>
+
+    <!-- Common Buttons -->
+    <string name="save">Guardar</string>
+    <string name="cancel">Cancelar</string>
+    <string name="ok">Aceptar</string>
+    <string name="create">Crear</string>
+    <string name="delete">Eliminar</string>
+    <string name="request">Solicitar</string>
+    <string name="move">Mover</string>
+    <string name="share">Compartir</string>
+    <string name="edit">Editar</string>
+    <string name="add">Añadir</string>
+    <string name="remove">Quitar</string>
+    <string name="close">Cerrar</string>
+    <string name="back">Atrás</string>
+    <string name="menu">Menú</string>
+    <string name="search">Buscar</string>
+
+    <!-- Add/Edit Note -->
+    <string name="add_note">Añadir nota</string>
+    <string name="note">Nota</string>
+    <string name="title">Título</string>
+    <string name="add_attachment">Añadir adjunto</string>
+    <string name="toggle_color_picker">Mostrar u ocultar selector de color</string>
+    <string name="toggle_format_bar">Mostrar u ocultar barra de formato</string>
+    <string name="undo">Deshacer</string>
+    <string name="redo">Rehacer</string>
+    <string name="more_options">Más opciones</string>
+    <string name="add_image">Añadir imagen</string>
+    <string name="take_photo">Tomar foto</string>
+    <string name="audio_recording">Grabación de audio</string>
+    <string name="add_checklist">Añadir lista de tareas</string>
+    <string name="pin_note">Fijar nota</string>
+    <string name="unpin_note">Dejar de fijar nota</string>
+    <string name="archive_note">Archivar nota</string>
+    <string name="unarchive_note">Desarchivar nota</string>
+    <string name="delete_note">Eliminar nota</string>
+    <string name="move_to_bin_question">¿Mover a la papelera?</string>
+    <string name="move_to_bin_message">Esta nota se moverá a la papelera.</string>
+    <string name="move_to_bin">Mover a la papelera</string>
+    <string name="exact_alarm_permission">Permiso de alarmas exactas</string>
+    <string name="exact_alarm_permission_description">Este permiso es necesario para que los recordatorios funcionen con precisión</string>
+    <string name="last_edited">Última edición: %s</string>
+    <string name="edited">Editado %1$s</string>
+    <string name="send">Enviar</string>
+    <string name="tick_boxes">Marcar casillas</string>
+    <string name="make_a_copy">Hacer una copia</string>
+    <string name="save_as">Guardar como</string>
+    <string name="lock">Bloquear</string>
+    <string name="unlock">Desbloquear</string>
+    <string name="convert_to_list">Convertir en lista</string>
+    <string name="convert_to_text">Convertir en texto</string>
+    <string name="convert_to_todo">Convertir en tarea</string>
+    <string name="print">Imprimir</string>
+    <string name="move_to_project">Mover a proyecto</string>
+    <string name="add_label">Añadir etiqueta</string>
+    <string name="create_new_label">Crear nueva etiqueta</string>
+    <string name="create_new_project">Crear nuevo proyecto</string>
+    <string name="project_name">Nombre del proyecto</string>
+    <string name="project_description">Descripción del proyecto</string>
+    <string name="edit_description">Editar descripción</string>
+    <string name="none_remove_from_project">Ninguno (quitar del proyecto)</string>
+    <string name="link_preview_removed">Vista previa del enlace eliminada</string>
+    <string name="send_notes_via">Enviar notas mediante</string>
+    <string name="project_created">Proyecto creado</string>
+
+    <!-- Collaborative share link -->
+    <string name="share_link_creating">Creando enlace para compartir…</string>
+    <string name="share_link_select_one">Selecciona una nota para compartir</string>
+    <string name="share_link_only_first">Compartiendo la primera nota seleccionada como enlace colaborativo</string>
+    <string name="share_link_failed">No se pudo crear el enlace. Comprueba tu conexión.</string>
+    <string name="share_link_ready_title">Enlace de colaboración listo</string>
+    <string name="share_link_ready_subtitle">Cualquier persona con este enlace puede ver y editar en tiempo real.</string>
+    <string name="share_link_copy">Copiar enlace</string>
+    <string name="share_link_copied">Enlace copiado</string>
+    <string name="share_link_share">Compartir enlace</string>
+    <string name="share_link_open">Abrir colaboración</string>
+    <string name="share_link_stop">Dejar de compartir</string>
+    <string name="share_link_unshared">Se dejó de compartir. El enlace ya no funciona.</string>
+    <string name="share_link_unshare_failed">No se pudo dejar de compartir. Comprueba tu conexión.</string>
+    <string name="share_link_unshare_no_token">Solo la persona que creó este enlace puede dejar de compartirlo.</string>
+    <string name="share_via_link">Compartir enlace mediante</string>
+
+    <!-- Heading Styles -->
+    <string name="normal_text">Texto normal</string>
+    <string name="heading_1">Encabezado 1</string>
+    <string name="heading_2">Encabezado 2</string>
+    <string name="heading_3">Encabezado 3</string>
+    <string name="heading_4">Encabezado 4</string>
+    <string name="heading_5">Encabezado 5</string>
+    <string name="heading_6">Encabezado 6</string>
+
+    <!-- Checklist -->
+    <string name="add_item">Añadir elemento</string>
+    <string name="checklist">Lista de tareas</string>
+
+    <!-- Image Viewer -->
+    <string name="image_viewer">Visor de imágenes</string>
+    <string name="remove_image">Quitar imagen</string>
+
+    <!-- Link Preview -->
+    <string name="link_preview_image">Imagen de vista previa del enlace</string>
+    <string name="remove_preview">Quitar vista previa</string>
+    <string name="copy_url">Copiar URL</string>
+
+    <!-- More Options Sheet -->
+    <string name="search_notes">Buscar notas</string>
+
+    <!-- Note Editor -->
+    <string name="restore_note_title">Restaurar nota</string>
+    <string name="restore_note_confirmation">Esta nota se restaurará a su ubicación original</string>
+
+    <!-- Archive Screen -->
+    <string name="no_archived_notes">No hay notas archivadas</string>
+
+    <!-- Notes Screen -->
+    <string name="no_notes_found_label">No se encontraron notas</string>
+    <string name="no_notes_found">No se encontraron notas</string>
+    <string name="no_notes_yet">Aún no hay notas</string>
+    <string name="create_your_first_note">Crea tu primera nota</string>
+    <string name="pinned">Fijadas</string>
+    <string name="others">Otras</string>
+
+    <!-- Projects Screen -->
+    <string name="no_projects_yet">Aún no hay proyectos</string>
+    <string name="create_first_project">Crea tu primer proyecto para organizar tus notas</string>
+
+    <!-- Labels Screen -->
+    <string name="labels_title">Etiquetas</string>
+    <string name="edit_labels">Editar etiquetas</string>
+    <string name="new_label">Nueva etiqueta</string>
+
+    <!-- Reminder Screen -->
+    <string name="reminders_title">Recordatorios</string>
+    <string name="add_reminder_title">Añadir recordatorio</string>
+    <string name="select_date">Seleccionar fecha</string>
+    <string name="select_time">Seleccionar hora</string>
+
+    <!-- Drawing -->
+    <string name="drawing">Dibujo</string>
+    <string name="todo">Tarea</string>
+
+    <!-- About Screen -->
+    <string name="about_screen_title">Acerca de</string>
+    <string name="what_makes_us_different">Qué nos hace diferentes</string>
+    <string name="local_storage_title">Almacenamiento local</string>
+    <string name="local_storage_description">Todas tus notas se guardan localmente en tu dispositivo</string>
+    <string name="about_the_app_title">Acerca de la app</string>
+    <string name="about_the_app_description">NoteNext es una aplicación de notas india, totalmente gratuita y de código abierto. Te ayuda a organizar tus pensamientos, ideas y tareas diarias de forma sencilla, intuitiva y centrada en la privacidad. Crea notas y listas, y configura recordatorios para mantener el control de tu agenda mientras conservas tus datos bajo tu control.</string>
+    <string name="core_developer">Desarrollador principal</string>
+    <string name="open_source_title">Código abierto</string>
+    <string name="made_with_love">Hecho con ❤️</string>
+    <string name="notenext">NoteNext</string>
+    <string name="about_subtitle">Indio • Código abierto • Gratis y privado</string>
+    <string name="notenext_logo">Logotipo de NoteNext</string>
+    <string name="ic_launcher_foreground">Primer plano del icono de la app</string>
+    <string name="official_website">Sitio web oficial</string>
+    <string name="developer_website">Sitio web del desarrollador</string>
+    <string name="view_privacy_policy">Ver política de privacidad</string>
+
+    <!-- Backup Screen -->
+    <string name="backup_title">Copia de seguridad</string>
+
+    <!-- AI Settings -->
+    <string name="groq_settings_title">Ajustes de IA</string>
+    <string name="use_custom_api_key">Usar clave de API personalizada</string>
+    <string name="use_custom_api_key_subtitle">Introduce tu propia clave de API de IA</string>
+    <string name="enter_groq_api_key">Introduce la clave de API de IA</string>
+    <string name="api_key_placeholder">Clave de API</string>
+    <string name="fetching_models">Obteniendo modelos…</string>
+    <string name="fetch_models">Obtener modelos</string>
+    <string name="select_fast_model">Seleccionar modelo rápido</string>
+    <string name="select_fast_model_subtitle">Elige un modelo para respuestas rápidas</string>
+    <string name="select_large_model">Seleccionar modelo grande</string>
+    <string name="select_large_model_subtitle">Elige un modelo para respuestas detalladas</string>
+    <string name="api_key_instructions_title">Cómo obtener una clave de API</string>
+    <string name="api_key_step_1">1. Ve al sitio web del proveedor de IA</string>
+    <string name="api_key_step_2">2. Crea una cuenta o inicia sesión</string>
+    <string name="api_key_step_3">3. Ve a la sección de claves de API</string>
+    <string name="api_key_step_4">4. Crea una nueva clave de API</string>
+    <string name="open_groq_console">Abrir consola de IA</string>
+
+    <!-- Biometric -->
+    <string name="biometric_auth_failed">Error de autenticación biométrica</string>
+</resources>

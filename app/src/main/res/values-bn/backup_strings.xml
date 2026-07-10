@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Bengali (bn) translations for the Backup screen. Native review recommended. -->
 <resources>
+    <string name="google_sign_in_failed">Google সাইন-ইন ব্যর্থ হয়েছে। আবার চেষ্টা করুন।</string>
     <string name="backup_restore_method_title">আপনি কীভাবে পুনরুদ্ধার করতে চান?</string>
     <string name="backup_restore_method_subtitle_local">আপনার ব্যাকআপের জন্য পুনরুদ্ধার পদ্ধতি নির্বাচন করুন।</string>
     <string name="backup_restore_method_subtitle_drive">এই সংস্করণের জন্য পুনরুদ্ধার পদ্ধতি নির্বাচন করুন।</string>

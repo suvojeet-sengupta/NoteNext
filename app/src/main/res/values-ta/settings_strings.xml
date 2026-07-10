@@ -30,6 +30,7 @@
     <string name="language_tamil">தமிழ்</string>
     <string name="language_bengali">பெங்காலி</string>
     <string name="language_marathi">மராத்தி</string>
+    <string name="language_spanish">ஸ்பானிஷ்</string>
 
     <string name="privacy_policy">தனியுரிமைக் கொள்கை</string>
     <string name="privacy_policy_description">உங்கள் குறிப்புகள் மற்றும் தரவை எப்படி பாதுகாக்கிறோம் என்பதை அறியவும்</string>
@@ -100,6 +101,7 @@
     <string name="settings_lang_subtitle_ta">தமிழ் (தமிழ்)</string>
     <string name="settings_lang_subtitle_bn">பெங்காலி (বাংলা)</string>
     <string name="settings_lang_subtitle_mr">மராத்தி (मराठी)</string>
+    <string name="settings_lang_subtitle_es">ஸ்பானிஷ் (Español)</string>
 
     <string name="bin_empty_action_cd">குப்பைத் தொட்டியை காலி செய்</string>
     <string name="bin_section_title_deleted">நீக்கப்பட்ட குறிப்புகள்</string>

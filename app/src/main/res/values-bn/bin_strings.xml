@@ -1,0 +1,15 @@
+<resources>
+    <string name="bin_title">রিসাইকেল বিন</string>
+    <string name="empty_bin">বিন খালি করুন</string>
+    <string name="bin_empty_message">বিন খালি</string>
+    <string name="restore_note">নোট পুনরুদ্ধার করুন</string>
+    <string name="delete_permanently">স্থায়ীভাবে মুছুন</string>
+    <string name="binned_note_restored">নোট পুনরুদ্ধার করা হয়েছে</string>
+    <string name="binned_note_deleted_permanently">নোট স্থায়ীভাবে মুছে ফেলা হয়েছে</string>
+    <string name="empty_bin_confirmation">আপনি কি নিশ্চিত যে বিন খালি করতে চান? এটি বিনের সমস্ত নোট স্থায়ীভাবে মুছে ফেলবে।</string>
+    <string name="empty_bin_confirmation_title">বিন খালি করবেন?</string>
+
+    <string name="x_selected">%1$d নির্বাচিত</string>
+    <string name="clear_selection">নির্বাচন সাফ করুন</string>
+    <string name="days_left">%1$d দিন বাকি</string>
+</resources>

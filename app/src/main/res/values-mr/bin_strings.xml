@@ -1,0 +1,15 @@
+<resources>
+    <string name="bin_title">कचरापेटी</string>
+    <string name="empty_bin">कचरापेटी रिकामी करा</string>
+    <string name="bin_empty_message">कचरापेटी रिकामी आहे</string>
+    <string name="restore_note">नोंद पुनर्संचयित करा</string>
+    <string name="delete_permanently">कायमचे हटवा</string>
+    <string name="binned_note_restored">नोंद पुनर्संचयित केली</string>
+    <string name="binned_note_deleted_permanently">नोंद कायमची हटवली</string>
+    <string name="empty_bin_confirmation">तुम्हाला खात्री आहे की तुम्ही कचरापेटी रिकामी करू इच्छिता? यामुळे कचरापेटीतील सर्व नोंदी कायमच्या हटवल्या जातील.</string>
+    <string name="empty_bin_confirmation_title">कचरापेटी रिकामी करायची?</string>
+
+    <string name="x_selected">%1$d निवडल्या</string>
+    <string name="clear_selection">निवड साफ करा</string>
+    <string name="days_left">%1$d दिवस शिल्लक</string>
+</resources>

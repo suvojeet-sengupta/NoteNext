@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- Marathi (mr) translations for the Backup screen. Native review recommended. -->
 <resources>
+    <string name="google_sign_in_failed">Google साइन-इन अयशस्वी झाले. पुन्हा प्रयत्न करा.</string>
     <string name="backup_restore_method_title">तुम्हाला कसे पुनर्संचयित करायचे आहे?</string>
     <string name="backup_restore_method_subtitle_local">तुमच्या बॅकअपसाठी पुनर्संचयन पद्धत निवडा.</string>
     <string name="backup_restore_method_subtitle_drive">या आवृत्तीसाठी पुनर्संचयन पद्धत निवडा.</string>

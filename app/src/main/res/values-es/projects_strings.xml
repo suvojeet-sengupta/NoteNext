@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ProjectScreen -->
+    <string name="projects_more_cd">Más</string>
+    <string name="projects_add_menu">Añadir proyecto</string>
+    <string name="projects_section_title">Espacios de trabajo</string>
+    <string name="projects_section_desc">Agrupa tus notas e ideas relacionadas</string>
+    <string name="projects_delete_title">Eliminar proyecto</string>
+    <string name="projects_delete_message">¿Seguro que quieres eliminar este proyecto? Esta acción no se puede deshacer.</string>
+
+    <!-- HierarchicalProjectItem -->
+    <string name="projects_expand_cd">Expandir</string>
+    <string name="projects_collapse_cd">Contraer</string>
+    <string name="projects_pin_to_home">Fijar en inicio</string>
+    <string name="projects_add_subproject">Añadir subproyecto</string>
+</resources>

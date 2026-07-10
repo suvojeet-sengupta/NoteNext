@@ -1,0 +1,15 @@
+<resources>
+    <string name="bin_title">குப்பை</string>
+    <string name="empty_bin">குப்பையை காலி செய்</string>
+    <string name="bin_empty_message">குப்பை காலியாக உள்ளது</string>
+    <string name="restore_note">குறிப்பை மீட்டெடு</string>
+    <string name="delete_permanently">நிரந்தரமாக நீக்கு</string>
+    <string name="binned_note_restored">குறிப்பு மீட்டெடுக்கப்பட்டது</string>
+    <string name="binned_note_deleted_permanently">குறிப்பு நிரந்தரமாக நீக்கப்பட்டது</string>
+    <string name="empty_bin_confirmation">குப்பையைக் காலி செய்ய விரும்புகிறீர்களா? இது குப்பையில் உள்ள அனைத்துக் குறிப்புகளையும் நிரந்தரமாக நீக்கும்.</string>
+    <string name="empty_bin_confirmation_title">குப்பையைக் காலி செய்யவா?</string>
+
+    <string name="x_selected">%1$d தேர்ந்தெடுக்கப்பட்டது</string>
+    <string name="clear_selection">தேர்வை அழி</string>
+    <string name="days_left">%1$d நாட்கள் மீதம்</string>
+</resources>

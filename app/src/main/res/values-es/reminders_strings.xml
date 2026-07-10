@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ReminderSetDialog -->
+    <string name="rem_date">Fecha</string>
+    <string name="rem_time">Hora</string>
+    <string name="rem_repeat_interval">Intervalo de repetición</string>
+    <string name="rem_set_reminder_button">Establecer recordatorio</string>
+
+    <!-- ReminderScreen -->
+    <string name="rem_screen_title">Recordatorios</string>
+    <string name="rem_screen_empty_title">Aún no hay recordatorios</string>
+    <string name="rem_screen_empty_subtitle">Los recordatorios que configures en las notas aparecerán aquí.</string>
+
+    <string name="rem_tab_all">Todos</string>
+    <string name="rem_tab_upcoming">Próximos</string>
+    <string name="rem_tab_elapsed">Vencidos</string>
+    <string name="rem_section_all">Todos los recordatorios</string>
+    <string name="rem_section_default">Recordatorios</string>
+    <string name="rem_section_desc">Gestiona tus notas urgentes</string>
+    <string name="rem_empty_message">No se encontraron recordatorios</string>
+    <string name="rem_no_title">Sin título</string>
+    <string name="rem_next_label">Siguiente: %1$s</string>
+    <string name="rem_delete_cd">Eliminar recordatorio</string>
+</resources>

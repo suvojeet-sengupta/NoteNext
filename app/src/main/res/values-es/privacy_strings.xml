@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Sections -->
+    <string name="priv_section_app_access">Acceso a la app</string>
+    <string name="priv_section_app_access_desc">Controla cómo tú y otros acceden a tus notas</string>
+    <string name="priv_section_decoy">Bóveda señuelo</string>
+    <string name="priv_section_decoy_desc">Un PIN secundario que muestra un conjunto falso de notas</string>
+    <string name="priv_section_data">Privacidad de datos</string>
+    <string name="priv_section_data_desc">Protege el contenido de tus notas de miradas ajenas</string>
+    <string name="priv_section_ephemeral">Contenido efímero</string>
+    <string name="priv_section_ephemeral_desc">Notas que no perduran</string>
+
+    <!-- Toast errors -->
+    <string name="priv_toast_enroll_fallback">Activa un bloqueo de pantalla o datos biométricos en los ajustes del sistema.</string>
+    <string name="priv_toast_biometric_unavailable">La autenticación biométrica no está disponible en este dispositivo.</string>
+
+    <!-- Decoy Vault -->
+    <string name="priv_enable_decoy">Activar bóveda señuelo</string>
+    <string name="priv_enable_decoy_subtitle">Usa un PIN secundario para situaciones de coacción</string>
+    <string name="priv_set_decoy_pin">Establecer PIN señuelo</string>
+    <string name="priv_decoy_pin_not_set">Sin establecer</string>
+    <string name="priv_decoy_pin_masked">****</string>
+
+    <!-- Data Privacy -->
+    <string name="priv_disallow_screenshots">No permitir capturas de pantalla</string>
+    <string name="priv_disallow_screenshots_subtitle">Impide la captura de pantalla y oculta el contenido en recientes</string>
+    <string name="priv_clipboard_clear_title">Borrado inteligente del portapapeles</string>
+    <string name="priv_clipboard_disabled">Desactivado</string>
+    <string name="priv_clipboard_immediately_bg">Inmediatamente al pasar a segundo plano</string>
+    <string name="priv_clipboard_30s">Después de 30 segundos</string>
+    <string name="priv_clipboard_1m">Después de 1 minuto</string>
+    <string name="priv_clipboard_5m">Después de 5 minutos</string>
+    <string name="priv_clipboard_custom">Tiempo de espera personalizado</string>
+
+    <!-- Clipboard timeout dialog -->
+    <string name="priv_clipboard_dialog_title">Tiempo de espera para borrar el portapapeles</string>
+    <string name="priv_clipboard_opt_disabled">Desactivado</string>
+    <string name="priv_clipboard_opt_immediate">Inmediatamente</string>
+    <string name="priv_clipboard_opt_30s">30 segundos</string>
+    <string name="priv_clipboard_opt_1m">1 minuto</string>
+    <string name="priv_clipboard_opt_5m">5 minutos</string>
+
+    <!-- Self-destruct -->
+    <string name="priv_self_destruct_title">Notas autodestructivas</string>
+    <string name="priv_self_destruct_subtitle">Configura notas para que se eliminen automáticamente después de un tiempo</string>
+    <string name="priv_self_destruct_message">La autodestrucción es una función por nota. Puedes establecer un temporizador para cualquier nota tocando el menú \'Más\' (tres puntos) mientras editas una nota y seleccionando \'Temporizador de autodestrucción\'. Cuando el temporizador expire, la nota se eliminará de forma permanente.</string>
+
+    <!-- Decoy PIN dialog -->
+    <string name="priv_decoy_dialog_title">Establecer PIN señuelo</string>
+    <string name="priv_decoy_dialog_message">Introduce un PIN secundario de 4 dígitos. Al introducir este PIN en la pantalla de bloqueo se abrirá una bóveda señuelo separada.</string>
+    <string name="priv_decoy_pin_label">PIN secundario</string>
+    <string name="priv_decoy_pin_confirm_label">Confirmar PIN secundario</string>
+    <string name="priv_err_pin_length">El PIN debe tener 4 dígitos</string>
+    <string name="priv_err_pin_mismatch">Los PIN no coinciden</string>
+    <string name="priv_err_pin_clash">El PIN señuelo debe ser distinto del PIN de la app</string>
+    <string name="priv_saving">Guardando…</string>
+</resources>

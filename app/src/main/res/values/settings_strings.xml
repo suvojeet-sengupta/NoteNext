@@ -28,6 +28,7 @@
     <string name="language_tamil">Tamil</string>
     <string name="language_bengali">Bengali</string>
     <string name="language_marathi">Marathi</string>
+    <string name="language_spanish">Spanish</string>
 
     <!-- About &amp; Privacy -->
     <string name="privacy_policy">Privacy Policy</string>
@@ -105,6 +106,7 @@
     <string name="settings_lang_subtitle_ta">Tamil (தமிழ்)</string>
     <string name="settings_lang_subtitle_bn">Bengali (বাংলা)</string>
     <string name="settings_lang_subtitle_mr">Marathi (मराठी)</string>
+    <string name="settings_lang_subtitle_es">Spanish (Español)</string>
 
     <!-- BinScreen -->
     <string name="bin_empty_action_cd">Empty Bin</string>

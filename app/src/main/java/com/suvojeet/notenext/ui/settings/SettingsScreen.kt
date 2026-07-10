@@ -148,6 +148,7 @@ fun SettingsScreen(
                             "ta" -> context.getString(R.string.settings_lang_subtitle_ta)
                             "bn" -> context.getString(R.string.settings_lang_subtitle_bn)
                             "mr" -> context.getString(R.string.settings_lang_subtitle_mr)
+                            "es" -> context.getString(R.string.settings_lang_subtitle_es)
                             else -> context.getString(R.string.settings_lang_subtitle_en)
                         },
                         iconColor = tertiaryColor,
@@ -429,6 +430,7 @@ fun SettingsScreen(
             "ta" to R.string.language_tamil,
             "bn" to R.string.language_bengali,
             "mr" to R.string.language_marathi,
+            "es" to R.string.language_spanish,
         )
         SelectionBottomSheet(
             title = stringResource(id = R.string.choose_language),

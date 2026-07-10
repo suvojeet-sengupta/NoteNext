@@ -1,0 +1,244 @@
+<resources>
+    <string name="app_name">NoteNext</string>
+    <string name="manage_labels">लेबल व्यवस्थापित करा</string>
+    <string name="label_icon">लेबल चिन्ह</string>
+    <string name="pinned_note_description">पिन केलेली नोंद</string>
+    <string name="attachment_icon_description">संलग्नक</string>
+    <string name="reminder_icon_description">स्मरणपत्र</string>
+    <string name="reminder_date_format">dd MMM yyyy HH:mm</string>
+    <string name="list_view_icon_description">यादी दृश्य</string>
+    <string name="grid_view_icon_description">ग्रिड दृश्य</string>
+    <string name="checkbox_content_description">चेकलिस्ट घटक चेकबॉक्स</string>
+    <string name="selected_color_description">निवडलेला रंग</string>
+    <string name="bold_description">ठळक</string>
+    <string name="italic_description">तिरपे</string>
+    <string name="underline_description">अधोरेखित</string>
+    <string name="heading_style_description">शीर्षक शैली</string>
+    <string name="insert_link_description">दुवा घाला</string>
+    <string name="image_content_description">प्रतिमा</string>
+    <string name="history">इतिहास</string>
+    <string name="unlock_with_biometrics">बायोमेट्रिक्सने अनलॉक करा</string>
+    <string name="biometric_setup_required">अ‍ॅप लॉक सक्षम करण्यासाठी बायोमेट्रिक सेटअप आवश्यक आहे.</string>
+    <string name="crash_toast_text">NoteNext क्रॅश झाले. विकसकाला अहवाल पाठवला आहे.</string>
+    <string name="widget_description">तुमच्या पिन केलेल्या नोंदी आणि चेकलिस्टची परस्परसंवादी यादी.</string>
+    <string name="glance_widget_name">NoteNext परस्परसंवादी विजेट</string>
+    <string name="save_as_note">अंतर्गत नोंद म्हणून जतन करा</string>
+
+    <!-- Crash Report -->
+    <string name="crash_report_title">क्रॅश अहवाल</string>
+    <string name="crash_report_text">विकसकाला क्रॅश अहवाल पाठवला जाईल</string>
+    <string name="crash_report_channel">क्रॅश अहवाल चॅनेल</string>
+
+    <!-- Update Related -->
+    <string name="update_downloaded_ready">अद्यतन डाउनलोड झाले आणि स्थापित करण्यासाठी तयार आहे</string>
+    <string name="restart_to_update">अद्यतनित करण्यासाठी पुन्हा सुरू करा</string>
+    <string name="update_available">अद्यतन उपलब्ध</string>
+    <string name="update_now">आता अद्यतनित करा</string>
+    <string name="you_are_up_to_date">तुम्ही अद्ययावत आहात</string>
+    <string name="check_for_updates">अद्यतनांसाठी तपासा</string>
+    <string name="checking_for_updates">अद्यतने तपासत आहे…</string>
+    <string name="update_ready">अद्यतन तयार</string>
+    <string name="downloading_update">अद्यतन डाउनलोड करत आहे</string>
+    <string name="installing_update">अद्यतन स्थापित करत आहे</string>
+    <string name="downloading_msg">आम्ही तुमच्यासाठी NoteNext ची नवीनतम आवृत्ती डाउनलोड करत आहोत.</string>
+    <string name="installing_msg">अद्यतन स्थापना अंतिम करत आहे. यास थोडा वेळ लागेल.</string>
+    <string name="update_available_msg">तुमचा अनुभव सुधारण्यासाठी आम्ही काही उत्तम नवीन वैशिष्ट्ये जोडली आहेत आणि त्रुटी दुरुस्त केल्या आहेत.</string>
+    <string name="downloading">डाउनलोड करत आहे…</string>
+    <string name="installing">स्थापित करत आहे…</string>
+    <string name="run_in_background">पार्श्वभूमीत चालवा</string>
+    <string name="later">नंतर</string>
+
+    <!-- Navigation -->
+    <string name="notes">नोंदी</string>
+    <string name="projects">प्रकल्प</string>
+    <string name="archive">संग्रह</string>
+    <string name="reminders">स्मरणपत्रे</string>
+    <string name="todos">करायच्या गोष्टी</string>
+    <string name="bin">कचरापेटी</string>
+    <string name="settings">सेटिंग्ज</string>
+    <string name="labels">लेबल</string>
+
+    <!-- Common Buttons -->
+    <string name="save">जतन करा</string>
+    <string name="cancel">रद्द करा</string>
+    <string name="ok">ठीक आहे</string>
+    <string name="create">तयार करा</string>
+    <string name="delete">हटवा</string>
+    <string name="request">विनंती</string>
+    <string name="move">हलवा</string>
+    <string name="share">सामायिक करा</string>
+    <string name="edit">संपादित करा</string>
+    <string name="add">जोडा</string>
+    <string name="remove">काढून टाका</string>
+    <string name="close">बंद करा</string>
+    <string name="back">मागे</string>
+    <string name="menu">मेनू</string>
+    <string name="search">शोधा</string>
+
+    <!-- Add/Edit Note -->
+    <string name="add_note">नोंद जोडा</string>
+    <string name="note">नोंद</string>
+    <string name="title">शीर्षक</string>
+    <string name="add_attachment">संलग्नक जोडा</string>
+    <string name="toggle_color_picker">रंग निवडक टॉगल करा</string>
+    <string name="toggle_format_bar">स्वरूप पट्टी टॉगल करा</string>
+    <string name="undo">पूर्ववत करा</string>
+    <string name="redo">पुन्हा करा</string>
+    <string name="more_options">अधिक पर्याय</string>
+    <string name="add_image">प्रतिमा जोडा</string>
+    <string name="take_photo">फोटो काढा</string>
+    <string name="audio_recording">ऑडिओ रेकॉर्डिंग</string>
+    <string name="add_checklist">चेकलिस्ट जोडा</string>
+    <string name="pin_note">नोंद पिन करा</string>
+    <string name="unpin_note">नोंद अनपिन करा</string>
+    <string name="archive_note">नोंद संग्रहित करा</string>
+    <string name="unarchive_note">नोंद संग्रहातून काढा</string>
+    <string name="delete_note">नोंद हटवा</string>
+    <string name="move_to_bin_question">कचरापेटीत हलवायचे?</string>
+    <string name="move_to_bin_message">ही नोंद कचरापेटीत हलवली जाईल.</string>
+    <string name="move_to_bin">कचरापेटीत हलवा</string>
+    <string name="exact_alarm_permission">अचूक अलार्म परवानगी</string>
+    <string name="exact_alarm_permission_description">स्मरणपत्रे अचूकपणे कार्य करण्यासाठी ही परवानगी आवश्यक आहे</string>
+    <string name="last_edited">शेवटचे संपादन: %s</string>
+    <string name="edited">%1$s संपादित केले</string>
+    <string name="send">पाठवा</string>
+    <string name="tick_boxes">पेट्यांवर खूण करा</string>
+    <string name="make_a_copy">एक प्रत बनवा</string>
+    <string name="save_as">असे जतन करा</string>
+    <string name="lock">लॉक करा</string>
+    <string name="unlock">अनलॉक करा</string>
+    <string name="convert_to_list">यादीत रूपांतरित करा</string>
+    <string name="convert_to_text">मजकुरात रूपांतरित करा</string>
+    <string name="convert_to_todo">करायच्या गोष्टीत रूपांतरित करा</string>
+    <string name="print">छापा</string>
+    <string name="move_to_project">प्रकल्पात हलवा</string>
+    <string name="add_label">लेबल जोडा</string>
+    <string name="create_new_label">नवीन लेबल तयार करा</string>
+    <string name="create_new_project">नवीन प्रकल्प तयार करा</string>
+    <string name="project_name">प्रकल्पाचे नाव</string>
+    <string name="project_description">प्रकल्प वर्णन</string>
+    <string name="edit_description">वर्णन संपादित करा</string>
+    <string name="none_remove_from_project">काहीही नाही (प्रकल्पातून काढा)</string>
+    <string name="link_preview_removed">दुवा पूर्वावलोकन काढले</string>
+    <string name="send_notes_via">नोंदी याद्वारे पाठवा</string>
+    <string name="project_created">प्रकल्प तयार झाला</string>
+
+    <!-- Collaborative share link -->
+    <string name="share_link_creating">सामायिक दुवा तयार करत आहे…</string>
+    <string name="share_link_select_one">सामायिक करण्यासाठी एक नोंद निवडा</string>
+    <string name="share_link_only_first">पहिली निवडलेली नोंद सहयोगी दुवा म्हणून सामायिक करत आहे</string>
+    <string name="share_link_failed">दुवा तयार करता आला नाही. तुमचे कनेक्शन तपासा.</string>
+    <string name="share_link_ready_title">सहयोग दुवा तयार</string>
+    <string name="share_link_ready_subtitle">हा दुवा असलेला कोणीही थेट पाहू आणि संपादित करू शकतो.</string>
+    <string name="share_link_copy">दुवा कॉपी करा</string>
+    <string name="share_link_copied">दुवा कॉपी केला</string>
+    <string name="share_link_share">दुवा सामायिक करा</string>
+    <string name="share_link_open">सहयोग उघडा</string>
+    <string name="share_link_stop">सामायिक करणे थांबवा</string>
+    <string name="share_link_unshared">सामायिक करणे थांबवले. दुवा आता कार्य करणार नाही.</string>
+    <string name="share_link_unshare_failed">सामायिक करणे थांबवता आले नाही. तुमचे कनेक्शन तपासा.</string>
+    <string name="share_link_unshare_no_token">फक्त हा दुवा तयार करणारी व्यक्तीच सामायिक करणे थांबवू शकते.</string>
+    <string name="share_via_link">दुवा याद्वारे सामायिक करा</string>
+
+    <!-- Heading Styles -->
+    <string name="normal_text">सामान्य मजकूर</string>
+    <string name="heading_1">शीर्षक 1</string>
+    <string name="heading_2">शीर्षक 2</string>
+    <string name="heading_3">शीर्षक 3</string>
+    <string name="heading_4">शीर्षक 4</string>
+    <string name="heading_5">शीर्षक 5</string>
+    <string name="heading_6">शीर्षक 6</string>
+
+    <!-- Checklist -->
+    <string name="add_item">घटक जोडा</string>
+    <string name="checklist">चेकलिस्ट</string>
+
+    <!-- Image Viewer -->
+    <string name="image_viewer">प्रतिमा दर्शक</string>
+    <string name="remove_image">प्रतिमा काढा</string>
+
+    <!-- Link Preview -->
+    <string name="link_preview_image">दुवा पूर्वावलोकन प्रतिमा</string>
+    <string name="remove_preview">पूर्वावलोकन काढा</string>
+    <string name="copy_url">URL कॉपी करा</string>
+
+    <!-- More Options Sheet -->
+    <string name="search_notes">नोंदी शोधा</string>
+
+    <!-- Note Editor -->
+    <string name="restore_note_title">नोंद पुनर्संचयित करा</string>
+    <string name="restore_note_confirmation">ही नोंद तिच्या मूळ स्थानावर पुनर्संचयित केली जाईल</string>
+
+    <!-- Archive Screen -->
+    <string name="no_archived_notes">कोणत्याही संग्रहित नोंदी नाहीत</string>
+
+    <!-- Notes Screen -->
+    <string name="no_notes_found_label">कोणत्याही नोंदी आढळल्या नाहीत</string>
+    <string name="no_notes_found">कोणत्याही नोंदी आढळल्या नाहीत</string>
+    <string name="no_notes_yet">अजून नोंदी नाहीत</string>
+    <string name="create_your_first_note">तुमची पहिली नोंद तयार करा</string>
+    <string name="pinned">पिन केलेल्या</string>
+    <string name="others">इतर</string>
+
+    <!-- Projects Screen -->
+    <string name="no_projects_yet">अजून प्रकल्प नाहीत</string>
+    <string name="create_first_project">तुमच्या नोंदी व्यवस्थित करण्यासाठी तुमचा पहिला प्रकल्प तयार करा</string>
+
+    <!-- Labels Screen -->
+    <string name="labels_title">लेबल</string>
+    <string name="edit_labels">लेबल संपादित करा</string>
+    <string name="new_label">नवीन लेबल</string>
+
+    <!-- Reminder Screen -->
+    <string name="reminders_title">स्मरणपत्रे</string>
+    <string name="add_reminder_title">स्मरणपत्र जोडा</string>
+    <string name="select_date">तारीख निवडा</string>
+    <string name="select_time">वेळ निवडा</string>
+
+    <!-- Drawing -->
+    <string name="drawing">रेखाचित्र</string>
+    <string name="todo">करायची गोष्ट</string>
+
+    <!-- About Screen -->
+    <string name="about_screen_title">विषयी</string>
+    <string name="what_makes_us_different">आम्ही कसे वेगळे आहोत</string>
+    <string name="local_storage_title">स्थानिक संचयन</string>
+    <string name="local_storage_description">तुमच्या सर्व नोंदी तुमच्या डिव्हाइसवर स्थानिकरित्या संग्रहित केल्या जातात</string>
+    <string name="about_the_app_title">अ‍ॅपविषयी</string>
+    <string name="about_the_app_description">NoteNext हे एक भारतीय, पूर्णपणे मोफत आणि ओपन-सोर्स नोंद घेणारे अ‍ॅप्लिकेशन आहे. हे तुम्हाला तुमचे विचार, कल्पना आणि दैनंदिन कामे सोप्या, अंतर्ज्ञानी आणि गोपनीयता-केंद्रित पद्धतीने व्यवस्थित करण्यास मदत करते. तुमचा डेटा तुमच्या नियंत्रणात ठेवून तुमच्या वेळापत्रकावर लक्ष ठेवण्यासाठी नोंदी, चेकलिस्ट तयार करा आणि स्मरणपत्रे सेट करा.</string>
+    <string name="core_developer">मुख्य विकसक</string>
+    <string name="open_source_title">ओपन सोर्स</string>
+    <string name="made_with_love">❤️ ने बनवले</string>
+    <string name="notenext">NoteNext</string>
+    <string name="about_subtitle">भारतीय • ओपन सोर्स • मोफत &amp; खाजगी</string>
+    <string name="notenext_logo">NoteNext लोगो</string>
+    <string name="ic_launcher_foreground">अ‍ॅप चिन्ह अग्रभाग</string>
+    <string name="official_website">अधिकृत संकेतस्थळ</string>
+    <string name="developer_website">विकसक संकेतस्थळ</string>
+    <string name="view_privacy_policy">गोपनीयता धोरण पहा</string>
+
+    <!-- Backup Screen -->
+    <string name="backup_title">बॅकअप</string>
+
+    <!-- AI Settings -->
+    <string name="groq_settings_title">AI सेटिंग्ज</string>
+    <string name="use_custom_api_key">सानुकूल API की वापरा</string>
+    <string name="use_custom_api_key_subtitle">तुमची स्वतःची AI API की प्रविष्ट करा</string>
+    <string name="enter_groq_api_key">AI API की प्रविष्ट करा</string>
+    <string name="api_key_placeholder">API की</string>
+    <string name="fetching_models">मॉडेल आणत आहे…</string>
+    <string name="fetch_models">मॉडेल आणा</string>
+    <string name="select_fast_model">जलद मॉडेल निवडा</string>
+    <string name="select_fast_model_subtitle">जलद प्रतिसादांसाठी एक मॉडेल निवडा</string>
+    <string name="select_large_model">मोठे मॉडेल निवडा</string>
+    <string name="select_large_model_subtitle">तपशीलवार प्रतिसादांसाठी एक मॉडेल निवडा</string>
+    <string name="api_key_instructions_title">API की कशी मिळवावी</string>
+    <string name="api_key_step_1">1. AI प्रदात्याच्या संकेतस्थळावर जा</string>
+    <string name="api_key_step_2">2. खाते तयार करा किंवा साइन इन करा</string>
+    <string name="api_key_step_3">3. API की विभागात जा</string>
+    <string name="api_key_step_4">4. नवीन API की तयार करा</string>
+    <string name="open_groq_console">AI कन्सोल उघडा</string>
+
+    <!-- Biometric -->
+    <string name="biometric_auth_failed">बायोमेट्रिक प्रमाणीकरण अयशस्वी झाले</string>
+</resources>

@@ -1,0 +1,244 @@
+<resources>
+    <string name="app_name">NoteNext</string>
+    <string name="manage_labels">লেবেল পরিচালনা করুন</string>
+    <string name="label_icon">লেবেল আইকন</string>
+    <string name="pinned_note_description">পিন করা নোট</string>
+    <string name="attachment_icon_description">সংযুক্তি</string>
+    <string name="reminder_icon_description">অনুস্মারক</string>
+    <string name="reminder_date_format">dd MMM yyyy HH:mm</string>
+    <string name="list_view_icon_description">তালিকা ভিউ</string>
+    <string name="grid_view_icon_description">গ্রিড ভিউ</string>
+    <string name="checkbox_content_description">চেকলিস্ট আইটেম চেকবক্স</string>
+    <string name="selected_color_description">নির্বাচিত রঙ</string>
+    <string name="bold_description">গাঢ়</string>
+    <string name="italic_description">তির্যক</string>
+    <string name="underline_description">নিম্নরেখা</string>
+    <string name="heading_style_description">শিরোনাম শৈলী</string>
+    <string name="insert_link_description">লিঙ্ক সন্নিবেশ করুন</string>
+    <string name="image_content_description">ছবি</string>
+    <string name="history">ইতিহাস</string>
+    <string name="unlock_with_biometrics">বায়োমেট্রিক্স দিয়ে আনলক করুন</string>
+    <string name="biometric_setup_required">অ্যাপ লক চালু করতে বায়োমেট্রিক সেটআপ প্রয়োজন।</string>
+    <string name="crash_toast_text">NoteNext ক্র্যাশ করেছে। ডেভেলপারের কাছে একটি রিপোর্ট পাঠানো হয়েছে।</string>
+    <string name="widget_description">আপনার পিন করা নোট ও চেকলিস্টের ইন্টারঅ্যাক্টিভ তালিকা।</string>
+    <string name="glance_widget_name">NoteNext ইন্টারঅ্যাক্টিভ উইজেট</string>
+    <string name="save_as_note">অভ্যন্তরীণ নোট হিসেবে সংরক্ষণ করুন</string>
+
+    <!-- Crash Report -->
+    <string name="crash_report_title">ক্র্যাশ রিপোর্ট</string>
+    <string name="crash_report_text">ডেভেলপারের কাছে একটি ক্র্যাশ রিপোর্ট পাঠানো হবে</string>
+    <string name="crash_report_channel">ক্র্যাশ রিপোর্ট চ্যানেল</string>
+
+    <!-- Update Related -->
+    <string name="update_downloaded_ready">আপডেট ডাউনলোড হয়েছে এবং ইনস্টল করার জন্য প্রস্তুত</string>
+    <string name="restart_to_update">আপডেট করতে পুনরায় চালু করুন</string>
+    <string name="update_available">আপডেট উপলব্ধ</string>
+    <string name="update_now">এখনই আপডেট করুন</string>
+    <string name="you_are_up_to_date">আপনি হালনাগাদ আছেন</string>
+    <string name="check_for_updates">আপডেট পরীক্ষা করুন</string>
+    <string name="checking_for_updates">আপডেট পরীক্ষা করা হচ্ছে…</string>
+    <string name="update_ready">আপডেট প্রস্তুত</string>
+    <string name="downloading_update">আপডেট ডাউনলোড হচ্ছে</string>
+    <string name="installing_update">আপডেট ইনস্টল হচ্ছে</string>
+    <string name="downloading_msg">আমরা আপনার জন্য NoteNext-এর সর্বশেষ সংস্করণ ডাউনলোড করছি।</string>
+    <string name="installing_msg">আপডেট ইনস্টলেশন সম্পন্ন করা হচ্ছে। এতে কিছুক্ষণ সময় লাগবে।</string>
+    <string name="update_available_msg">আপনার অভিজ্ঞতা উন্নত করতে আমরা কিছু দুর্দান্ত নতুন বৈশিষ্ট্য যোগ করেছি এবং বাগ সমাধান করেছি।</string>
+    <string name="downloading">ডাউনলোড হচ্ছে…</string>
+    <string name="installing">ইনস্টল হচ্ছে…</string>
+    <string name="run_in_background">ব্যাকগ্রাউন্ডে চালান</string>
+    <string name="later">পরে</string>
+
+    <!-- Navigation -->
+    <string name="notes">নোট</string>
+    <string name="projects">প্রকল্প</string>
+    <string name="archive">সংরক্ষণাগার</string>
+    <string name="reminders">অনুস্মারক</string>
+    <string name="todos">করণীয়</string>
+    <string name="bin">রিসাইকেল বিন</string>
+    <string name="settings">সেটিংস</string>
+    <string name="labels">লেবেল</string>
+
+    <!-- Common Buttons -->
+    <string name="save">সংরক্ষণ করুন</string>
+    <string name="cancel">বাতিল করুন</string>
+    <string name="ok">ঠিক আছে</string>
+    <string name="create">তৈরি করুন</string>
+    <string name="delete">মুছুন</string>
+    <string name="request">অনুরোধ</string>
+    <string name="move">সরান</string>
+    <string name="share">শেয়ার করুন</string>
+    <string name="edit">সম্পাদনা করুন</string>
+    <string name="add">যোগ করুন</string>
+    <string name="remove">সরিয়ে ফেলুন</string>
+    <string name="close">বন্ধ করুন</string>
+    <string name="back">পেছনে</string>
+    <string name="menu">মেনু</string>
+    <string name="search">অনুসন্ধান</string>
+
+    <!-- Add/Edit Note -->
+    <string name="add_note">নোট যোগ করুন</string>
+    <string name="note">নোট</string>
+    <string name="title">শিরোনাম</string>
+    <string name="add_attachment">সংযুক্তি যোগ করুন</string>
+    <string name="toggle_color_picker">রঙ নির্বাচক টগল করুন</string>
+    <string name="toggle_format_bar">ফরম্যাট বার টগল করুন</string>
+    <string name="undo">পূর্বাবস্থায় ফিরুন</string>
+    <string name="redo">পুনরায় করুন</string>
+    <string name="more_options">আরও বিকল্প</string>
+    <string name="add_image">ছবি যোগ করুন</string>
+    <string name="take_photo">ছবি তুলুন</string>
+    <string name="audio_recording">অডিও রেকর্ডিং</string>
+    <string name="add_checklist">চেকলিস্ট যোগ করুন</string>
+    <string name="pin_note">নোট পিন করুন</string>
+    <string name="unpin_note">নোট আনপিন করুন</string>
+    <string name="archive_note">নোট সংরক্ষণাগারে রাখুন</string>
+    <string name="unarchive_note">নোট সংরক্ষণাগার থেকে সরান</string>
+    <string name="delete_note">নোট মুছুন</string>
+    <string name="move_to_bin_question">রিসাইকেল বিনে সরাবেন?</string>
+    <string name="move_to_bin_message">এই নোটটি রিসাইকেল বিনে সরানো হবে।</string>
+    <string name="move_to_bin">রিসাইকেল বিনে সরান</string>
+    <string name="exact_alarm_permission">সঠিক অ্যালার্ম অনুমতি</string>
+    <string name="exact_alarm_permission_description">অনুস্মারকগুলি সঠিকভাবে কাজ করার জন্য এই অনুমতি প্রয়োজন</string>
+    <string name="last_edited">সর্বশেষ সম্পাদিত: %s</string>
+    <string name="edited">%1$s সম্পাদিত</string>
+    <string name="send">পাঠান</string>
+    <string name="tick_boxes">বাক্সে টিক দিন</string>
+    <string name="make_a_copy">একটি অনুলিপি তৈরি করুন</string>
+    <string name="save_as">এভাবে সংরক্ষণ করুন</string>
+    <string name="lock">লক করুন</string>
+    <string name="unlock">আনলক করুন</string>
+    <string name="convert_to_list">তালিকায় রূপান্তর করুন</string>
+    <string name="convert_to_text">টেক্সটে রূপান্তর করুন</string>
+    <string name="convert_to_todo">করণীয়তে রূপান্তর করুন</string>
+    <string name="print">প্রিন্ট করুন</string>
+    <string name="move_to_project">প্রকল্পে সরান</string>
+    <string name="add_label">লেবেল যোগ করুন</string>
+    <string name="create_new_label">নতুন লেবেল তৈরি করুন</string>
+    <string name="create_new_project">নতুন প্রকল্প তৈরি করুন</string>
+    <string name="project_name">প্রকল্পের নাম</string>
+    <string name="project_description">প্রকল্পের বিবরণ</string>
+    <string name="edit_description">বিবরণ সম্পাদনা করুন</string>
+    <string name="none_remove_from_project">কোনোটি নয় (প্রকল্প থেকে সরান)</string>
+    <string name="link_preview_removed">লিঙ্ক প্রিভিউ সরানো হয়েছে</string>
+    <string name="send_notes_via">নোট পাঠান এর মাধ্যমে</string>
+    <string name="project_created">প্রকল্প তৈরি হয়েছে</string>
+
+    <!-- Collaborative share link -->
+    <string name="share_link_creating">শেয়ার লিঙ্ক তৈরি হচ্ছে…</string>
+    <string name="share_link_select_one">শেয়ার করার জন্য একটি নোট নির্বাচন করুন</string>
+    <string name="share_link_only_first">প্রথম নির্বাচিত নোটটি সহযোগী লিঙ্ক হিসেবে শেয়ার করা হচ্ছে</string>
+    <string name="share_link_failed">লিঙ্ক তৈরি করা যায়নি। আপনার সংযোগ পরীক্ষা করুন।</string>
+    <string name="share_link_ready_title">সহযোগিতার লিঙ্ক প্রস্তুত</string>
+    <string name="share_link_ready_subtitle">এই লিঙ্ক যার কাছে থাকবে সে সরাসরি দেখতে ও সম্পাদনা করতে পারবে।</string>
+    <string name="share_link_copy">লিঙ্ক অনুলিপি করুন</string>
+    <string name="share_link_copied">লিঙ্ক অনুলিপি করা হয়েছে</string>
+    <string name="share_link_share">লিঙ্ক শেয়ার করুন</string>
+    <string name="share_link_open">সহযোগিতা খুলুন</string>
+    <string name="share_link_stop">শেয়ার করা বন্ধ করুন</string>
+    <string name="share_link_unshared">শেয়ার করা বন্ধ হয়েছে। লিঙ্কটি আর কাজ করবে না।</string>
+    <string name="share_link_unshare_failed">শেয়ার করা বন্ধ করা যায়নি। আপনার সংযোগ পরীক্ষা করুন।</string>
+    <string name="share_link_unshare_no_token">শুধুমাত্র যিনি এই লিঙ্ক তৈরি করেছেন তিনিই শেয়ার করা বন্ধ করতে পারবেন।</string>
+    <string name="share_via_link">লিঙ্ক শেয়ার করুন এর মাধ্যমে</string>
+
+    <!-- Heading Styles -->
+    <string name="normal_text">সাধারণ টেক্সট</string>
+    <string name="heading_1">শিরোনাম 1</string>
+    <string name="heading_2">শিরোনাম 2</string>
+    <string name="heading_3">শিরোনাম 3</string>
+    <string name="heading_4">শিরোনাম 4</string>
+    <string name="heading_5">শিরোনাম 5</string>
+    <string name="heading_6">শিরোনাম 6</string>
+
+    <!-- Checklist -->
+    <string name="add_item">আইটেম যোগ করুন</string>
+    <string name="checklist">চেকলিস্ট</string>
+
+    <!-- Image Viewer -->
+    <string name="image_viewer">ছবি ভিউয়ার</string>
+    <string name="remove_image">ছবি সরান</string>
+
+    <!-- Link Preview -->
+    <string name="link_preview_image">লিঙ্ক প্রিভিউ ছবি</string>
+    <string name="remove_preview">প্রিভিউ সরান</string>
+    <string name="copy_url">URL অনুলিপি করুন</string>
+
+    <!-- More Options Sheet -->
+    <string name="search_notes">নোট অনুসন্ধান করুন</string>
+
+    <!-- Note Editor -->
+    <string name="restore_note_title">নোট পুনরুদ্ধার করুন</string>
+    <string name="restore_note_confirmation">এই নোটটি তার মূল অবস্থানে পুনরুদ্ধার করা হবে</string>
+
+    <!-- Archive Screen -->
+    <string name="no_archived_notes">কোনো সংরক্ষণাগারভুক্ত নোট নেই</string>
+
+    <!-- Notes Screen -->
+    <string name="no_notes_found_label">কোনো নোট পাওয়া যায়নি</string>
+    <string name="no_notes_found">কোনো নোট পাওয়া যায়নি</string>
+    <string name="no_notes_yet">এখনও কোনো নোট নেই</string>
+    <string name="create_your_first_note">আপনার প্রথম নোট তৈরি করুন</string>
+    <string name="pinned">পিন করা</string>
+    <string name="others">অন্যান্য</string>
+
+    <!-- Projects Screen -->
+    <string name="no_projects_yet">এখনও কোনো প্রকল্প নেই</string>
+    <string name="create_first_project">আপনার নোট সংগঠিত করতে আপনার প্রথম প্রকল্প তৈরি করুন</string>
+
+    <!-- Labels Screen -->
+    <string name="labels_title">লেবেল</string>
+    <string name="edit_labels">লেবেল সম্পাদনা করুন</string>
+    <string name="new_label">নতুন লেবেল</string>
+
+    <!-- Reminder Screen -->
+    <string name="reminders_title">অনুস্মারক</string>
+    <string name="add_reminder_title">অনুস্মারক যোগ করুন</string>
+    <string name="select_date">তারিখ নির্বাচন করুন</string>
+    <string name="select_time">সময় নির্বাচন করুন</string>
+
+    <!-- Drawing -->
+    <string name="drawing">অঙ্কন</string>
+    <string name="todo">করণীয়</string>
+
+    <!-- About Screen -->
+    <string name="about_screen_title">সম্পর্কে</string>
+    <string name="what_makes_us_different">আমরা কীভাবে আলাদা</string>
+    <string name="local_storage_title">স্থানীয় স্টোরেজ</string>
+    <string name="local_storage_description">আপনার সমস্ত নোট আপনার ডিভাইসে স্থানীয়ভাবে সংরক্ষিত হয়</string>
+    <string name="about_the_app_title">অ্যাপ সম্পর্কে</string>
+    <string name="about_the_app_description">NoteNext একটি ভারতীয়, সম্পূর্ণ বিনামূল্যের এবং ওপেন-সোর্স নোট নেওয়ার অ্যাপ্লিকেশন। এটি আপনাকে সহজ, স্বজ্ঞাত এবং গোপনীয়তা-কেন্দ্রিক উপায়ে আপনার চিন্তাভাবনা, ধারণা এবং দৈনন্দিন কাজগুলি সংগঠিত করতে সাহায্য করে। আপনার ডেটা আপনার নিয়ন্ত্রণে রেখে আপনার সময়সূচীর উপর নজর রাখতে নোট, চেকলিস্ট তৈরি করুন এবং অনুস্মারক সেট করুন।</string>
+    <string name="core_developer">মূল ডেভেলপার</string>
+    <string name="open_source_title">ওপেন সোর্স</string>
+    <string name="made_with_love">❤️ দিয়ে তৈরি</string>
+    <string name="notenext">NoteNext</string>
+    <string name="about_subtitle">ভারতীয় • ওপেন সোর্স • বিনামূল্যে &amp; ব্যক্তিগত</string>
+    <string name="notenext_logo">NoteNext লোগো</string>
+    <string name="ic_launcher_foreground">অ্যাপ আইকন ফোরগ্রাউন্ড</string>
+    <string name="official_website">অফিসিয়াল ওয়েবসাইট</string>
+    <string name="developer_website">ডেভেলপার ওয়েবসাইট</string>
+    <string name="view_privacy_policy">গোপনীয়তা নীতি দেখুন</string>
+
+    <!-- Backup Screen -->
+    <string name="backup_title">ব্যাকআপ</string>
+
+    <!-- AI Settings -->
+    <string name="groq_settings_title">AI সেটিংস</string>
+    <string name="use_custom_api_key">কাস্টম API কী ব্যবহার করুন</string>
+    <string name="use_custom_api_key_subtitle">আপনার নিজস্ব AI API কী লিখুন</string>
+    <string name="enter_groq_api_key">AI API কী লিখুন</string>
+    <string name="api_key_placeholder">API কী</string>
+    <string name="fetching_models">মডেল আনা হচ্ছে…</string>
+    <string name="fetch_models">মডেল আনুন</string>
+    <string name="select_fast_model">দ্রুত মডেল নির্বাচন করুন</string>
+    <string name="select_fast_model_subtitle">দ্রুত উত্তরের জন্য একটি মডেল বেছে নিন</string>
+    <string name="select_large_model">বড় মডেল নির্বাচন করুন</string>
+    <string name="select_large_model_subtitle">বিস্তারিত উত্তরের জন্য একটি মডেল বেছে নিন</string>
+    <string name="api_key_instructions_title">কীভাবে একটি API কী পাবেন</string>
+    <string name="api_key_step_1">1. AI প্রদানকারীর ওয়েবসাইটে যান</string>
+    <string name="api_key_step_2">2. একটি অ্যাকাউন্ট তৈরি করুন বা সাইন ইন করুন</string>
+    <string name="api_key_step_3">3. API কী বিভাগে যান</string>
+    <string name="api_key_step_4">4. একটি নতুন API কী তৈরি করুন</string>
+    <string name="open_groq_console">AI কনসোল খুলুন</string>
+
+    <!-- Biometric -->
+    <string name="biometric_auth_failed">বায়োমেট্রিক প্রমাণীকরণ ব্যর্থ হয়েছে</string>
+</resources>

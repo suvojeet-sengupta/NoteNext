@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- AIProviderSettingsScreen -->
+    <string name="ai_providers_title">Proveedores de IA</string>
+    <string name="ai_select_provider_title">Seleccionar proveedor de IA</string>
+    <string name="ai_select_provider_description">Elige tu servicio de IA preferido para resúmenes, listas y más</string>
+
+    <string name="ai_provider_groq_desc">Inferencia rápida con modelos Llama y Qwen</string>
+    <string name="ai_provider_openai_desc">Modelos GPT-4o y GPT-4 Turbo</string>
+    <string name="ai_provider_anthropic_name">Anthropic (Claude)</string>
+    <string name="ai_provider_anthropic_desc">Modelos Claude 3.5 Sonnet y Opus</string>
+    <string name="ai_provider_gemini_name">Google Gemini</string>
+    <string name="ai_provider_gemini_desc">Modelos Gemini 3.1 Pro y Flash</string>
+
+    <string name="ai_groq_config_title">Configuración de Groq</string>
+    <string name="ai_groq_config_description">Configura tu clave de API de Groq (opcional)</string>
+    <string name="ai_groq_key_label">Clave de API de Groq (opcional)</string>
+    <string name="ai_groq_key_help">Déjalo vacío para usar la clave integrada de la app. Obtén tu clave en console.groq.com</string>
+    <string name="ai_groq_advanced_settings">Ajustes avanzados de Groq</string>
+
+    <string name="ai_openai_config_title">Configuración de OpenAI</string>
+    <string name="ai_openai_config_description">Introduce tu clave de API de OpenAI</string>
+    <string name="ai_openai_base_url_label">URL base (opcional)</string>
+    <string name="ai_openai_key_label">Clave de API de OpenAI</string>
+    <string name="ai_openai_key_help">Tu clave de API se guarda localmente y nunca se envía a ningún servidor excepto OpenAI</string>
+    <string name="ai_select_openai_model">Seleccionar modelo de OpenAI</string>
+
+    <string name="ai_anthropic_config_title">Configuración de Anthropic</string>
+    <string name="ai_anthropic_config_description">Introduce tu clave de API de Anthropic</string>
+    <string name="ai_anthropic_key_label">Clave de API de Anthropic</string>
+    <string name="ai_anthropic_key_help">Tu clave de API se guarda localmente y nunca se envía a ningún servidor excepto Anthropic</string>
+    <string name="ai_select_anthropic_model">Seleccionar modelo de Anthropic</string>
+
+    <string name="ai_gemini_config_title">Configuración de Gemini</string>
+    <string name="ai_gemini_config_description">Introduce tu clave de API de Google Gemini</string>
+    <string name="ai_gemini_key_label">Clave de API de Gemini</string>
+    <string name="ai_gemini_key_help">Tu clave de API se guarda localmente y nunca se envía a ningún servidor excepto Google</string>
+    <string name="ai_select_gemini_model">Seleccionar modelo de Gemini</string>
+
+    <string name="ai_model_selector_subtitle">Elige qué modelo usar para las tareas de IA</string>
+    <string name="ai_fetching_models">Obteniendo modelos…</string>
+    <string name="ai_refresh_models">Actualizar modelos</string>
+
+    <!-- AIProviderConfigSections -->
+    <string name="ai_config_section_groq">Configuración de Groq</string>
+    <string name="ai_config_section_groq_desc">La app incluye una clave de Groq integrada. Usa la tuya para obtener límites de uso más altos.</string>
+    <string name="ai_config_use_own_groq">Usar mi propia clave de Groq</string>
+    <string name="ai_config_groq_custom_active">La clave personalizada se enviará con cada solicitud a Groq</string>
+    <string name="ai_config_groq_bundled_active">Se usa la clave integrada (con límite de uso, compartida)</string>
+    <string name="ai_config_groq_key_label">Clave de API de Groq</string>
+    <string name="ai_config_groq_key_help">Se guarda localmente junto con el resto de tus ajustes. Solo se envía a api.groq.com.</string>
+    <string name="ai_config_get_key">Obtener clave</string>
+    <string name="ai_config_refresh">Actualizar</string>
+    <string name="ai_config_fast_model">Modelo rápido (tareas cortas)</string>
+    <string name="ai_config_large_model">Modelo grande (tareas complejas)</string>
+
+    <string name="ai_config_section_openai">Configuración de OpenAI</string>
+    <string name="ai_config_section_openai_desc">Usa tu propia clave. Compatible con endpoints autoalojados mediante la URL base.</string>
+    <string name="ai_config_openai_base_url">URL base (avanzado)</string>
+    <string name="ai_config_openai_key_label">Clave de API de OpenAI</string>
+    <string name="ai_config_openai_key_help">Se guarda localmente. Solo se envía a la URL indicada arriba.</string>
+    <string name="ai_config_model">Modelo</string>
+
+    <string name="ai_config_section_anthropic">Configuración de Anthropic (Claude)</string>
+    <string name="ai_config_section_anthropic_desc">Usa tu propia clave de API de Anthropic. Solo se envía a api.anthropic.com.</string>
+    <string name="ai_config_anthropic_key_label">Clave de API de Anthropic</string>
+    <string name="ai_config_get_a_key">Obtener una clave</string>
+
+    <string name="ai_config_section_gemini">Configuración de Google Gemini</string>
+    <string name="ai_config_section_gemini_desc">Usa tu propia clave de API de Gemini. Solo se envía a generativelanguage.googleapis.com.</string>
+    <string name="ai_config_gemini_key_label">Clave de API de Gemini</string>
+
+    <string name="ai_config_select_model">Seleccionar modelo</string>
+
+    <!-- AiChecklistDialog -->
+    <string name="ai_checklist_no_internet">Sin conexión a internet. Comprueba tu red.</string>
+    <string name="ai_checklist_title">Creador de listas inteligentes</string>
+    <string name="ai_checklist_powered_by">Con tecnología de IA</string>
+    <string name="ai_checklist_recent_prompts">Indicaciones recientes</string>
+    <string name="ai_checklist_prompt_label">¿Qué lista debo crear?</string>
+    <string name="ai_checklist_prompt_placeholder">p. ej. Lista de equipaje para excursión</string>
+    <string name="ai_checklist_regenerate_cd">Regenerar</string>
+    <string name="ai_checklist_thinking">Pensando…</string>
+    <string name="ai_checklist_proposed_items">Elementos propuestos</string>
+    <string name="ai_checklist_items_count">%1$d elementos</string>
+    <string name="ai_checklist_disclaimer">La IA puede dar información inexacta. Verifícala.</string>
+    <string name="ai_checklist_generate">Generar lista</string>
+    <string name="ai_checklist_insert">Insertar en la nota</string>
+    <string name="ai_checklist_remove_item_cd">Quitar elemento</string>
+    <string name="ai_checklist_close_cd">Cerrar</string>
+
+    <!-- AIUsageDashboardScreen -->
+    <string name="ai_usage_title">Uso</string>
+    <string name="ai_usage_clear_cd">Borrar</string>
+    <string name="ai_usage_section_features">Por función</string>
+    <string name="ai_usage_section_features_desc">Con qué frecuencia se ha usado cada función de IA en este dispositivo</string>
+    <string name="ai_usage_section_details">Detalles</string>
+    <string name="ai_usage_section_details_desc">Tasa de éxito, latencia media, aceptación</string>
+    <string name="ai_usage_section_provider">Por proveedor</string>
+    <string name="ai_usage_section_provider_desc">Qué servicio de IA gestionó tus solicitudes</string>
+    <string name="ai_usage_clear_dialog_title">¿Borrar el historial de uso de IA?</string>
+    <string name="ai_usage_clear_dialog_message">Esto elimina de forma permanente las estadísticas de uso locales que se muestran en este panel. Tus notas y los ajustes de las funciones de IA no se ven afectados.</string>
+    <string name="ai_usage_clear_action">Borrar</string>
+    <string name="ai_usage_empty_title">Aún no hay actividad de IA</string>
+    <string name="ai_usage_empty_subtitle">Cuando actives una función de IA y la uses, verás con qué frecuencia se ejecutó, qué tan rápida fue y con qué frecuencia aceptaste sus sugerencias, todo guardado localmente en este dispositivo.</string>
+    <string name="ai_usage_hero_label">Invocaciones de IA</string>
+    <string name="ai_usage_pill_success">Éxito</string>
+    <string name="ai_usage_pill_success_rate">Tasa de éxito</string>
+    <string name="ai_usage_helpfulness_label">Sugerencias que aceptaste</string>
+    <string name="ai_usage_helpfulness_value">%1$d%%  ·  %2$d de %3$d</string>
+    <string name="ai_usage_no_data">Aún no hay datos</string>
+    <string name="ai_usage_runs">%1$d ejecuciones</string>
+    <string name="ai_usage_avg_latency">Latencia media</string>
+    <string name="ai_usage_accepted_label">Aceptadas</string>
+    <string name="ai_usage_accepted_value">%1$d%% aceptadas (%2$d/%3$d)</string>
+
+    <!-- AiSummarySheet -->
+    <string name="ai_summary_brand">NoteNext IA</string>
+    <string name="ai_summary_copy_cd">Copiar resumen</string>
+    <string name="ai_summary_share_cd">Compartir resumen</string>
+    <string name="ai_summary_close_cd">Cerrar</string>
+    <string name="ai_summary_clip_label">Resumen de IA</string>
+    <string name="ai_summary_copied_toast">Copiado al portapapeles</string>
+    <string name="ai_summary_share_subject">Resumen de la nota</string>
+    <string name="ai_summary_share_chooser">Compartir resumen</string>
+    <string name="ai_summary_summarizing">Resumiendo…</string>
+    <string name="ai_summary_thinking">Pensando…</string>
+    <string name="ai_summary_hide_thinking">Ocultar proceso de razonamiento</string>
+    <string name="ai_summary_disclaimer">El contenido generado por IA puede ser inexacto. Verifica la información importante.</string>
+    <string name="ai_summary_unavailable">No hay ningún resumen disponible.</string>
+
+    <!-- ToneRewriteScreen -->
+    <string name="ai_tone_title">Reescribir tono</string>
+    <string name="ai_tone_apply_cd">Aplicar</string>
+    <string name="ai_tone_rewriting_in">Reescribiendo en tono %1$s</string>
+    <string name="ai_tone_pick_below">Elige un tono a continuación</string>
+    <string name="ai_tone_preview">Vista previa</string>
+    <string name="ai_tone_in_progress">La IA está reescribiendo…</string>
+    <string name="ai_tone_apply_changes">Aplicar cambios</string>
+    <string name="ai_tone_try_again">Intentar de nuevo</string>
+
+    <!-- AiActionItemsSheet -->
+    <string name="ai_extract_tasks_title">Elementos de acción</string>
+    <string name="ai_extract_tasks_desc">La IA extrajo estas tareas de tu nota</string>
+    <string name="ai_extract_tasks_extracting">Extrayendo tareas…</string>
+    <string name="ai_extract_tasks_empty">No se encontraron tareas accionables.</string>
+    <string name="ai_extract_tasks_add_to_todo">Añadir a tareas</string>
+    <string name="ai_extract_tasks_items_count">%1$d tareas seleccionadas</string>
+
+    <!-- AIFeaturesScreen -->
+    <string name="ai_features_title">Funciones de IA</string>
+    <string name="ai_features_quick_actions">Acciones rápidas</string>
+    <string name="ai_features_quick_actions_desc">Aplicar a todas las funciones a la vez</string>
+    <string name="ai_features_disable_all">Desactivar todo</string>
+    <string name="ai_features_enable_all">Activar todo</string>
+    <string name="ai_features_group_ondemand">Acciones de nota (bajo demanda)</string>
+    <string name="ai_features_group_ondemand_desc">Tú las activas explícitamente: nada se ejecuta a menos que toques un botón.</string>
+    <string name="ai_features_group_suggestions">Sugerencias (después de guardar)</string>
+    <string name="ai_features_group_suggestions_desc">Se ejecutan de forma discreta después de guardar una nota. Nunca aplican cambios: tú tocas para aceptar.</string>
+    <string name="ai_features_group_ondevice">Funciones en el dispositivo</string>
+    <string name="ai_features_group_ondevice_desc">Se ejecutan localmente en tu teléfono y no requieren el interruptor principal de IA ni un proveedor de red.</string>
+    <string name="ai_features_master_off_banner">El interruptor principal de IA está DESACTIVADO. Los interruptores por función de abajo están deshabilitados hasta que lo actives desde el centro de ajustes de IA.</string>
+
+    <!-- AISettingsScreen -->
+    <string name="ai_settings_title">IA</string>
+    <string name="ai_settings_master_section">Interruptor principal</string>
+    <string name="ai_settings_master_section_desc">Activa o desactiva todas las funciones de IA. NoteNext funciona primero sin conexión: la IA es opcional.</string>
+    <string name="ai_settings_master_on_title">La IA está activada</string>
+    <string name="ai_settings_master_off_title">La IA está desactivada</string>
+    <string name="ai_settings_master_on_subtitle">Los interruptores por función de abajo surten efecto</string>
+    <string name="ai_settings_master_off_subtitle">Todas las funciones de IA están desactivadas: no se enviará nada a ningún proveedor</string>
+
+    <string name="ai_settings_manage_section">Gestionar</string>
+    <string name="ai_settings_manage_section_desc">Elige qué funciones se ejecutan y observa lo que hacen</string>
+    <string name="ai_settings_nav_features">Funciones de IA</string>
+    <string name="ai_settings_nav_features_subtitle">Activa o desactiva cada función individualmente</string>
+    <string name="ai_settings_nav_ondevice">Funciones en el dispositivo</string>
+    <string name="ai_settings_nav_ondevice_subtitle">Funciones inteligentes que se ejecutan localmente sin IA</string>
+    <string name="ai_settings_nav_dashboard">Panel de uso</string>
+    <string name="ai_settings_nav_dashboard_empty">Aún no hay llamadas de IA</string>
+    <string name="ai_settings_nav_dashboard_count">%1$d invocaciones de IA registradas</string>
+
+    <string name="ai_settings_provider_section">Proveedor</string>
+    <string name="ai_settings_provider_section_desc">Elige qué servicio gestiona tus solicitudes de IA. El proveedor predeterminado está integrado; los demás necesitan una clave de API.</string>
+    <string name="ai_settings_provider_default_name">Proveedor de IA</string>
+    <string name="ai_settings_provider_default_desc">Inferencia rápida, incluida con la app</string>
+    <string name="ai_settings_provider_openai_desc">GPT-4o, GPT-4.1: usa tu propia clave</string>
+    <string name="ai_settings_provider_anthropic_desc">Claude Sonnet, Haiku, Opus: usa tu propia clave</string>
+    <string name="ai_settings_provider_gemini_desc">Gemini Flash y Pro: usa tu propia clave</string>
+    <string name="ai_settings_badge_default">Predeterminado</string>
+    <string name="ai_settings_badge_configured">Configurado</string>
+    <string name="ai_settings_provider_selected_cd">Seleccionado</string>
+
+    <string name="ai_settings_privacy_section">Privacidad</string>
+    <string name="ai_settings_privacy_section_desc">Telemetría solo local: nada de aquí sale nunca de tu dispositivo</string>
+    <string name="ai_settings_track_usage_title">Registrar el uso de IA localmente</string>
+    <string name="ai_settings_track_usage_subtitle">Alimenta el panel. Cuenta qué funciones se ejecutaron, cuándo y con qué resultado. El contenido de la nota nunca se registra.</string>
+
+    <string name="ai_settings_banner_title">Cómo funciona la IA en NoteNext</string>
+    <string name="ai_settings_banner_body">Todas las funciones de IA están DESACTIVADAS de forma predeterminada. Cuando activas una, el texto relevante de tu nota se envía al proveedor que hayas elegido, y nada más. Nunca subimos tu base de datos completa, adjuntos o etiquetas en masa. Puedes desactivarlo todo con un solo toque arriba.</string>
+</resources>

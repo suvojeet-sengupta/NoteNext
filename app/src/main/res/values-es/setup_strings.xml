@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- SetupScreen navigation -->
+    <string name="setup_back">Atrás</string>
+    <string name="setup_next">Siguiente</string>
+    <string name="setup_get_started">Comenzar</string>
+
+    <!-- Welcome page -->
+    <string name="setup_welcome_title">Te damos la bienvenida a NoteNext</string>
+    <string name="setup_welcome_subtitle">Tu bloc de notas seguro, expresivo y local, diseñado para todos.</string>
+    <string name="setup_feature_private">🔒 Privado y local</string>
+    <string name="setup_feature_cloud">☁️ Copia en la nube</string>
+    <string name="setup_feature_reminders">🔔 Recordatorios inteligentes</string>
+    <string name="setup_privacy_consent">Al continuar, aceptas nuestra Política de privacidad</string>
+
+    <!-- Cloud Sync page -->
+    <string name="setup_cloud_sync_title">Sincronización en la nube</string>
+    <string name="setup_cloud_sync_subtitle">Copia de seguridad segura en Google Drive</string>
+    <string name="setup_connected_to">Conectado a %1$s</string>
+    <string name="setup_cloud_sync_pitch">Mantén tus notas sincronizadas entre dispositivos con almacenamiento seguro en la nube.</string>
+    <string name="setup_connect_google">Conectar cuenta de Google</string>
+    <string name="setup_daily_auto_backup">Copia automática diaria</string>
+    <string name="setup_highly_recommended">Muy recomendado</string>
+    <string name="setup_data_restored">Datos restaurados correctamente</string>
+    <string name="setup_restore_previous">Restaurar notas anteriores</string>
+
+    <!-- Permissions page -->
+    <string name="setup_permissions_title">Acceso del sistema</string>
+    <string name="setup_perm_notifications_title">Notificaciones</string>
+    <string name="setup_perm_notifications_desc">Necesario para los recordatorios y el estado de sincronización.</string>
+    <string name="setup_perm_exact_alarms_title">Alarmas exactas</string>
+    <string name="setup_perm_exact_alarms_desc">Garantiza que los recordatorios se activen con precisión.</string>
+    <string name="setup_progress">Progreso: %1$d/%2$d</string>
+    <string name="setup_all_ready">¡Todo listo!</string>
+</resources>

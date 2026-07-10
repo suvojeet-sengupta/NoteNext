@@ -1,0 +1,15 @@
+<resources>
+    <string name="bin_title">Papelera</string>
+    <string name="empty_bin">Vaciar papelera</string>
+    <string name="bin_empty_message">La papelera está vacía</string>
+    <string name="restore_note">Restaurar nota</string>
+    <string name="delete_permanently">Eliminar de forma permanente</string>
+    <string name="binned_note_restored">Nota restaurada</string>
+    <string name="binned_note_deleted_permanently">Nota eliminada de forma permanente</string>
+    <string name="empty_bin_confirmation">¿Seguro que quieres vaciar la papelera? Esto eliminará de forma permanente todas las notas de la papelera.</string>
+    <string name="empty_bin_confirmation_title">¿Vaciar papelera?</string>
+
+    <string name="x_selected">%1$d seleccionadas</string>
+    <string name="clear_selection">Borrar selección</string>
+    <string name="days_left">%1$d días restantes</string>
+</resources>

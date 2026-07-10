@@ -1,0 +1,28 @@
+<resources>
+    <string name="support_notenext">NoteNext ला पाठिंबा द्या</string>
+    <string name="made_with_love_free">सर्वांसाठी ❤️ ने बनवले</string>
+    <string name="donation_description">NoteNext 100% मोफत, ओपन-सोर्स आहे आणि त्यात कोणत्याही जाहिराती नाहीत. तुमचा पाठिंबा ते तसेच ठेवण्यास मदत करतो आणि आणखी चांगली वैशिष्ट्ये तयार करण्यास मला प्रेरित करतो!</string>
+    <string name="why_donate">पाठिंबा का द्यावा?</string>
+    <string name="reason_independent_title">स्वतंत्र &amp; मानवी</string>
+    <string name="reason_independent_desc">एखाद्या कंपनीने नव्हे, तर तुमच्या अनुभवाची काळजी घेणाऱ्या एकाच विकसकाने बनवले.</string>
+    <string name="reason_privacy_title">गोपनीयता प्रथम</string>
+    <string name="reason_privacy_desc">जाहिराती नाहीत, ट्रॅकिंग नाही, तुमचा डेटा विकला जात नाही. कधीही नाही. तुमच्या नोंदी तुमच्या डिव्हाइसवर खाजगी राहतात.</string>
+    <string name="reason_updates_title">सतत वाढ</string>
+    <string name="reason_updates_desc">तुमचे योगदान नवीन वैशिष्ट्ये, त्रुटी दुरुस्ती आणि NoteNext अधिक चांगले करण्यासाठी नियमित अद्यतनांना चालना देते.</string>
+    <string name="choose_amount">रक्कम निवडा</string>
+    <string name="donate_small_label">मला एक कॉफी घ्या</string>
+    <string name="donate_small_desc">कृतज्ञतेचे एक छोटेसे प्रतीक</string>
+    <string name="donate_medium_label">मला एक नाश्ता घ्या</string>
+    <string name="donate_medium_desc">तुम्ही खरोखर अप्रतिम आहात!</string>
+    <string name="donate_large_label">NoteNext ला बळ द्या</string>
+    <string name="donate_large_desc">प्रख्यात समर्थक स्तर!</string>
+    <string name="thank_you_title">धन्यवाद! 🎉</string>
+    <string name="thank_you_msg">तुमचा पाठिंबा अमूल्य आहे! ❤️\nतुमच्यासारख्या अप्रतिम लोकांमुळे NoteNext वाढत राहील.</string>
+    <string name="thank_you_confirm">तुमचे स्वागत आहे! 😊</string>
+    <string name="connecting_play_store">Play Store शी कनेक्ट करत आहे…</string>
+    <string name="could_not_connect_play_store">Play Store शी कनेक्ट करता आले नाही</string>
+    <string name="check_internet_try_again">तुमचे इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="loading_options">देणगी पर्याय लोड करत आहे…</string>
+    <string name="secure_google_play">सर्व खरेदी Google Play द्वारे सुरक्षितपणे प्रक्रिया केल्या जातात.</string>
+    <string name="purchase_failed">खरेदी अयशस्वी झाली: %1$s</string>
+</resources>

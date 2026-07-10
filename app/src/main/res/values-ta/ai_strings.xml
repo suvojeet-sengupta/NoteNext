@@ -183,4 +183,12 @@
 
     <string name="ai_settings_banner_title">NoteNext-இல் AI எவ்வாறு செயல்படுகிறது</string>
     <string name="ai_settings_banner_body">ஒவ்வொரு AI அம்சமும் இயல்பாக முடக்கப்பட்டுள்ளது. நீங்கள் ஒன்றை இயக்கும்போது, உங்கள் குறிப்பின் தொடர்புடைய உரை நீங்கள் தேர்ந்தெடுத்த வழங்குநருக்கு அனுப்பப்படுகிறது — வேறு எதுவும் இல்லை. உங்கள் முழு தரவுத்தளம், இணைப்புகள் அல்லது லேபிள்களை நாங்கள் ஒருபோதும் மொத்தமாக பதிவேற்றுவதில்லை. மேலே ஒரு தட்டுதலில் எல்லாவற்றையும் நீங்கள் முடக்கலாம்.</string>
+
+    <!-- AiActionItemsSheet -->
+    <string name="ai_extract_tasks_title">செயல் உருப்படிகள்</string>
+    <string name="ai_extract_tasks_desc">உங்கள் குறிப்பிலிருந்து AI இந்தப் பணிகளைப் பிரித்தெடுத்தது</string>
+    <string name="ai_extract_tasks_extracting">பணிகளைப் பிரித்தெடுக்கிறது…</string>
+    <string name="ai_extract_tasks_empty">செயல்படுத்தக்கூடிய பணிகள் எதுவும் இல்லை.</string>
+    <string name="ai_extract_tasks_add_to_todo">செய்யவேண்டியவற்றில் சேர்</string>
+    <string name="ai_extract_tasks_items_count">%1$d பணிகள் தேர்ந்தெடுக்கப்பட்டன</string>
 </resources>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="google_sign_in_failed">Error al iniciar sesión con Google. Inténtalo de nuevo.</string>
+
+    <!-- BackupScreen restore method picker -->
+    <string name="backup_restore_method_title">¿Cómo quieres restaurar?</string>
+    <string name="backup_restore_method_subtitle_local">Selecciona un método de restauración para tu copia de seguridad.</string>
+    <string name="backup_restore_method_subtitle_drive">Selecciona un método de restauración para esta versión.</string>
+    <string name="backup_merge_title">Combinar con los datos actuales</string>
+    <string name="backup_merge_description">Conserva tus notas actuales y añade todo lo de la copia de seguridad como entradas nuevas.</string>
+    <string name="backup_merge_description_drive">Conserva las notas actuales y añade todo lo de la copia de seguridad como entradas nuevas.</string>
+    <string name="backup_overwrite_title">Sobrescritura total (restauración limpia)</string>
+    <string name="backup_overwrite_description">BORRA todos los datos actuales y reemplázalos por completo con el contenido de la copia de seguridad.</string>
+
+    <!-- Section headers -->
+    <string name="backup_section_manual">Copia de seguridad manual</string>
+    <string name="backup_section_settings">Ajustes de copia de seguridad</string>
+    <string name="backup_section_smart">Inteligente e incremental</string>
+
+    <!-- Drive delete dialog -->
+    <string name="backup_delete_drive_title">Eliminar copia de Drive</string>
+    <string name="backup_delete_drive_message">¿Seguro que quieres eliminar de forma permanente la copia de seguridad de Google Drive? Esta acción no se puede deshacer.</string>
+    <string name="backup_delete_drive_button">Eliminar copia de seguridad de Drive</string>
+
+    <!-- Unlink dialog -->
+    <string name="backup_unlink_title">Desvincular cuenta</string>
+    <string name="backup_unlink_message">Al desvincular se detendrán las copias automáticas en Drive. Las copias locales no se verán afectadas.</string>
+    <string name="backup_unlink_button">Desvincular</string>
+
+    <!-- Delete version dialog -->
+    <string name="backup_delete_version_title">Eliminar versión de la copia</string>
+    <string name="backup_delete_version_message">¿Seguro que quieres eliminar de forma permanente esta versión de la copia de seguridad? Esto no se puede deshacer.</string>
+
+    <!-- Password dialog -->
+    <string name="backup_change_password_title">Cambiar contraseña</string>
+    <string name="backup_update_password_button">Actualizar contraseña</string>
+
+    <!-- Google Drive card -->
+    <string name="backup_google_drive">Google Drive</string>
+    <string name="backup_drive_linked">Vinculada: %1$s</string>
+    <string name="backup_drive_signin_prompt">Inicia sesión para respaldar tus datos en la nube.</string>
+    <string name="backup_include_attachments">Incluir adjuntos</string>
+    <string name="backup_encrypt">Cifrar copia de seguridad</string>
+    <string name="backup_password_set">Contraseña establecida</string>
+    <string name="backup_change_password">Cambiar contraseña</string>
+    <string name="backup_about_encryption">Acerca del cifrado</string>
+    <string name="backup_backing_up">Realizando copia de seguridad…</string>
+    <string name="backup_now">Hacer copia ahora</string>
+    <string name="backup_restore_latest">Restaurar la más reciente</string>
+    <string name="backup_history">Historial de copias</string>
+    <string name="backup_sign_in">Iniciar sesión</string>
+    <string name="backup_unknown_date">Fecha desconocida</string>
+    <string name="backup_action_restore">Restaurar</string>
+    <string name="backup_action_delete">Eliminar</string>
+
+    <!-- Local backup card -->
+    <string name="backup_local_storage">Almacenamiento local</string>
+    <string name="backup_local_storage_subtitle">Haz una copia o restaura desde el almacenamiento del dispositivo</string>
+    <string name="backup_label_backup">Copia de seguridad</string>
+    <string name="backup_label_restore">Restaurar</string>
+    <string name="backup_to_selected_folder">Copia en la carpeta seleccionada</string>
+    <string name="backup_select_folder">Seleccionar carpeta y hacer copia</string>
+    <string name="backup_restoring">Restaurando…</string>
+    <string name="backup_restore_from_file">Restaurar desde archivo</string>
+    <string name="backup_scanning">Escaneando…</string>
+    <string name="backup_selective_restore">Restauración selectiva</string>
+
+    <!-- Auto backup settings card -->
+    <string name="backup_auto_title">Copia de seguridad automática</string>
+    <string name="backup_auto_encrypt">Cifrar copias automáticas</string>
+    <string name="backup_auto_encrypt_subtitle">Protege las copias en segundo plano con una contraseña</string>
+    <string name="backup_frequency">Frecuencia</string>
+    <string name="backup_frequency_daily">Diaria</string>
+    <string name="backup_frequency_weekly">Semanal</string>
+    <string name="backup_signin_required">Se requiere iniciar sesión</string>
+    <string name="backup_sd_card_folder">Tarjeta SD / carpeta local</string>
+    <string name="backup_folder_selected">Seleccionada</string>
+    <string name="backup_change_folder">Cambiar carpeta</string>
+
+    <!-- Dashboard -->
+    <string name="backup_health">Estado de la copia</string>
+    <string name="backup_health_no_backups">Aún no hay copias</string>
+    <string name="backup_health_secure">Todo seguro</string>
+    <string name="backup_health_failed">Copia fallida</string>
+    <string name="backup_last_attempt">Último intento</string>
+    <string name="backup_storage_used">Almacenamiento usado</string>
+    <string name="backup_never">Nunca</string>
+    <string name="backup_count_notes">Notas</string>
+    <string name="backup_count_projects">Proyectos</string>
+    <string name="backup_count_labels">Etiquetas</string>
+    <string name="backup_count_files">Archivos</string>
+
+    <!-- Scan result dialog -->
+    <string name="backup_contents_title">Contenido de la copia</string>
+    <string name="backup_contents_created">Creada: %1$s</string>
+    <string name="backup_contents_select_projects">Selecciona los proyectos a restaurar</string>
+    <string name="backup_contents_merge_note">Nota: los proyectos seleccionados se combinarán con tus datos actuales.</string>
+    <string name="backup_restore_selected">Restaurar seleccionados</string>
+
+    <!-- Smart backup card -->
+    <string name="backup_optimization">Optimización</string>
+    <string name="backup_incremental">Copia de seguridad incremental</string>
+    <string name="backup_incremental_subtitle">Guarda solo los cambios desde la última copia para ahorrar datos y almacenamiento.</string>
+    <string name="backup_smart_trigger">Activación inteligente de copia</string>
+    <string name="backup_smart_trigger_subtitle">Haz una copia automáticamente tras un cierto número de ediciones.</string>
+    <string name="backup_after_edits">Copia tras %1$d ediciones</string>
+    <string name="backup_current_edits">Ediciones actuales: %1$d</string>
+    <string name="backup_charging_only">Copia solo mientras se carga</string>
+    <string name="backup_charging_only_subtitle">Ahorra batería haciendo copias solo cuando está enchufado.</string>
+
+    <!-- Password dialogs -->
+    <string name="backup_password_set_title">Establecer contraseña de la copia</string>
+    <string name="backup_password_set_confirm">Cifrar y guardar</string>
+    <string name="backup_password_aes_badge">Protegido con cifrado AES-256</string>
+    <string name="backup_password_set_message">Introduce una contraseña para cifrar tu copia de seguridad. Necesitarás esta contraseña para restaurarla.</string>
+    <string name="backup_password_label">Contraseña</string>
+    <string name="backup_password_confirm_label">Confirmar contraseña</string>
+    <string name="backup_password_strength_label">Seguridad: %1$s</string>
+    <string name="backup_password_strength_weak">Débil</string>
+    <string name="backup_password_strength_medium">Media</string>
+    <string name="backup_password_strength_strong">Fuerte</string>
+    <string name="backup_password_error_empty">La contraseña no puede estar vacía</string>
+    <string name="backup_password_error_short">La contraseña debe tener al menos %1$d caracteres</string>
+    <string name="backup_password_error_weak">La contraseña es demasiado débil. Añade dígitos, mayúsculas o símbolos.</string>
+    <string name="backup_password_error_mismatch">Las contraseñas no coinciden</string>
+
+    <string name="backup_password_input_title">Introducir contraseña</string>
+    <string name="backup_password_input_aes_badge">Copia cifrada con AES-256</string>
+    <string name="backup_password_input_message">Introduce la contraseña para desbloquear y restaurar los datos de tu copia de seguridad.</string>
+    <string name="backup_password_unlock">Desbloquear y restaurar</string>
+
+    <string name="backup_encryption_info_title">Acerca de las copias cifradas</string>
+    <string name="backup_encryption_info_intro">Las copias cifradas ofrecen una capa adicional de seguridad para tus datos.</string>
+    <string name="backup_encryption_info_how_title">Cómo funciona</string>
+    <string name="backup_encryption_info_how_desc">Tus datos se cifran con el estándar AES-256 antes de salir de tu dispositivo. Esto significa que tus notas y adjuntos se codifican en un formato ilegible.</string>
+    <string name="backup_encryption_info_security_title">Seguridad</string>
+    <string name="backup_encryption_info_security_desc">Aunque alguien acceda a tu archivo de copia de seguridad (en Google Drive o tu tarjeta SD), no podrá leer tus datos sin la contraseña correcta. Solo tú tienes la clave.</string>
+    <string name="backup_encryption_info_important_title">Importante</string>
+    <string name="backup_encryption_info_important_desc">No almacenamos tu contraseña de copia de seguridad. Si la pierdes, no podrás restaurar tus datos desde esa copia. Mantén tu contraseña a salvo.</string>
+    <string name="backup_encryption_info_got_it">Entendido</string>
+</resources>

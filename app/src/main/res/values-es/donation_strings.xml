@@ -1,0 +1,28 @@
+<resources>
+    <string name="support_notenext">Apoya a NoteNext</string>
+    <string name="made_with_love_free">Hecho con ❤️ para todos</string>
+    <string name="donation_description">NoteNext es 100% gratis, de código abierto y sin publicidad. Tu apoyo me ayuda a mantenerlo así y me motiva a crear funciones aún mejores.</string>
+    <string name="why_donate">¿Por qué apoyar?</string>
+    <string name="reason_independent_title">Independiente y humano</string>
+    <string name="reason_independent_desc">Creado por un único desarrollador que se preocupa por tu experiencia, no por una corporación.</string>
+    <string name="reason_privacy_title">La privacidad primero</string>
+    <string name="reason_privacy_desc">Sin publicidad, sin seguimiento, sin venta de tus datos. Nunca. Tus notas se mantienen privadas en tu dispositivo.</string>
+    <string name="reason_updates_title">Crecimiento continuo</string>
+    <string name="reason_updates_desc">Tu contribución impulsa nuevas funciones, correcciones de errores y actualizaciones periódicas para mejorar NoteNext.</string>
+    <string name="choose_amount">Elige un importe</string>
+    <string name="donate_small_label">Invítame a un café</string>
+    <string name="donate_small_desc">Un pequeño gesto de agradecimiento</string>
+    <string name="donate_medium_label">Invítame a un aperitivo</string>
+    <string name="donate_medium_desc">¡Eres realmente genial!</string>
+    <string name="donate_large_label">Impulsa NoteNext</string>
+    <string name="donate_large_desc">¡Nivel de mecenas legendario!</string>
+    <string name="thank_you_title">¡Gracias! 🎉</string>
+    <string name="thank_you_msg">¡Tu apoyo lo significa todo! ❤️\nNoteNext seguirá creciendo gracias a personas increíbles como tú.</string>
+    <string name="thank_you_confirm">¡De nada! 😊</string>
+    <string name="connecting_play_store">Conectando con Play Store…</string>
+    <string name="could_not_connect_play_store">No se pudo conectar con Play Store</string>
+    <string name="check_internet_try_again">Comprueba tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="loading_options">Cargando opciones de donación…</string>
+    <string name="secure_google_play">Todas las compras se procesan de forma segura a través de Google Play.</string>
+    <string name="purchase_failed">Compra fallida: %1$s</string>
+</resources>

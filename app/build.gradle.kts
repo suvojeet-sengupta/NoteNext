@@ -54,6 +54,7 @@ android {
             localeFilters.add("ta")
             localeFilters.add("bn")
             localeFilters.add("mr")
+            localeFilters.add("es")
         }
         vectorDrawables {
             useSupportLibrary = true

@@ -1,0 +1,244 @@
+<resources>
+    <string name="app_name">NoteNext</string>
+    <string name="manage_labels">லேபிள்களை நிர்வகி</string>
+    <string name="label_icon">லேபிள் ஐகான்</string>
+    <string name="pinned_note_description">பின் செய்யப்பட்ட குறிப்பு</string>
+    <string name="attachment_icon_description">இணைப்பு</string>
+    <string name="reminder_icon_description">நினைவூட்டல்</string>
+    <string name="reminder_date_format">dd MMM yyyy HH:mm</string>
+    <string name="list_view_icon_description">பட்டியல் காட்சி</string>
+    <string name="grid_view_icon_description">கட்டக் காட்சி</string>
+    <string name="checkbox_content_description">சரிபார்ப்புப் பட்டியல் தேர்வுப்பெட்டி</string>
+    <string name="selected_color_description">தேர்ந்தெடுக்கப்பட்ட நிறம்</string>
+    <string name="bold_description">தடிமன்</string>
+    <string name="italic_description">சாய்வு</string>
+    <string name="underline_description">அடிக்கோடு</string>
+    <string name="heading_style_description">தலைப்பு பாணி</string>
+    <string name="insert_link_description">இணைப்பைச் செருகு</string>
+    <string name="image_content_description">படம்</string>
+    <string name="history">வரலாறு</string>
+    <string name="unlock_with_biometrics">பயோமெட்ரிக்ஸ் மூலம் திற</string>
+    <string name="biometric_setup_required">பயன்பாட்டுப் பூட்டை இயக்க பயோமெட்ரிக் அமைப்பு தேவை.</string>
+    <string name="crash_toast_text">NoteNext செயலிழந்தது. டெவலப்பருக்கு அறிக்கை அனுப்பப்பட்டது.</string>
+    <string name="widget_description">பின் செய்யப்பட்ட உங்கள் குறிப்புகள் மற்றும் பட்டியல்களின் ஊடாடும் பட்டியல்.</string>
+    <string name="glance_widget_name">NoteNext ஊடாடும் விட்ஜெட்</string>
+    <string name="save_as_note">உள் குறிப்பாகச் சேமி</string>
+
+    <!-- Crash Report -->
+    <string name="crash_report_title">செயலிழப்பு அறிக்கை</string>
+    <string name="crash_report_text">டெவலப்பருக்கு செயலிழப்பு அறிக்கை அனுப்பப்படும்</string>
+    <string name="crash_report_channel">செயலிழப்பு அறிக்கை சேனல்</string>
+
+    <!-- Update Related -->
+    <string name="update_downloaded_ready">புதுப்பிப்பு பதிவிறக்கப்பட்டு நிறுவத் தயாராக உள்ளது</string>
+    <string name="restart_to_update">புதுப்பிக்க மறுதொடக்கம் செய்</string>
+    <string name="update_available">புதுப்பிப்பு கிடைக்கிறது</string>
+    <string name="update_now">இப்போதே புதுப்பி</string>
+    <string name="you_are_up_to_date">நீங்கள் புதுப்பித்த நிலையில் உள்ளீர்கள்</string>
+    <string name="check_for_updates">புதுப்பிப்புகளைச் சரிபார்</string>
+    <string name="checking_for_updates">புதுப்பிப்புகளைச் சரிபார்க்கிறது…</string>
+    <string name="update_ready">புதுப்பிப்பு தயார்</string>
+    <string name="downloading_update">புதுப்பிப்பைப் பதிவிறக்குகிறது</string>
+    <string name="installing_update">புதுப்பிப்பை நிறுவுகிறது</string>
+    <string name="downloading_msg">உங்களுக்காக NoteNext-இன் சமீபத்திய பதிப்பை நாங்கள் பதிவிறக்குகிறோம்.</string>
+    <string name="installing_msg">புதுப்பிப்பு நிறுவலை இறுதி செய்கிறது. இதற்கு சிறிது நேரம் ஆகும்.</string>
+    <string name="update_available_msg">உங்கள் அனுபவத்தை மேம்படுத்த சில அற்புதமான புதிய அம்சங்களைச் சேர்த்து பிழைகளைச் சரிசெய்துள்ளோம்.</string>
+    <string name="downloading">பதிவிறக்குகிறது…</string>
+    <string name="installing">நிறுவுகிறது…</string>
+    <string name="run_in_background">பின்னணியில் இயக்கு</string>
+    <string name="later">பிறகு</string>
+
+    <!-- Navigation -->
+    <string name="notes">குறிப்புகள்</string>
+    <string name="projects">திட்டங்கள்</string>
+    <string name="archive">காப்பகம்</string>
+    <string name="reminders">நினைவூட்டல்கள்</string>
+    <string name="todos">செய்யவேண்டியவை</string>
+    <string name="bin">குப்பை</string>
+    <string name="settings">அமைப்புகள்</string>
+    <string name="labels">லேபிள்கள்</string>
+
+    <!-- Common Buttons -->
+    <string name="save">சேமி</string>
+    <string name="cancel">ரத்து செய்</string>
+    <string name="ok">சரி</string>
+    <string name="create">உருவாக்கு</string>
+    <string name="delete">நீக்கு</string>
+    <string name="request">கோரிக்கை</string>
+    <string name="move">நகர்த்து</string>
+    <string name="share">பகிர்</string>
+    <string name="edit">திருத்து</string>
+    <string name="add">சேர்</string>
+    <string name="remove">அகற்று</string>
+    <string name="close">மூடு</string>
+    <string name="back">பின்</string>
+    <string name="menu">பட்டி</string>
+    <string name="search">தேடு</string>
+
+    <!-- Add/Edit Note -->
+    <string name="add_note">குறிப்பைச் சேர்</string>
+    <string name="note">குறிப்பு</string>
+    <string name="title">தலைப்பு</string>
+    <string name="add_attachment">இணைப்பைச் சேர்</string>
+    <string name="toggle_color_picker">நிறத் தேர்வியை மாற்று</string>
+    <string name="toggle_format_bar">வடிவமைப்புப் பட்டியை மாற்று</string>
+    <string name="undo">செயல்தவிர்</string>
+    <string name="redo">மீண்டும் செய்</string>
+    <string name="more_options">மேலும் விருப்பங்கள்</string>
+    <string name="add_image">படத்தைச் சேர்</string>
+    <string name="take_photo">புகைப்படம் எடு</string>
+    <string name="audio_recording">ஆடியோ பதிவு</string>
+    <string name="add_checklist">சரிபார்ப்புப் பட்டியலைச் சேர்</string>
+    <string name="pin_note">குறிப்பைப் பின் செய்</string>
+    <string name="unpin_note">குறிப்பை பின் நீக்கு</string>
+    <string name="archive_note">குறிப்பைக் காப்பகப்படுத்து</string>
+    <string name="unarchive_note">குறிப்பைக் காப்பகத்திலிருந்து மீட்டெடு</string>
+    <string name="delete_note">குறிப்பை நீக்கு</string>
+    <string name="move_to_bin_question">குப்பைக்கு நகர்த்தவா?</string>
+    <string name="move_to_bin_message">இந்தக் குறிப்பு குப்பைக்கு நகர்த்தப்படும்.</string>
+    <string name="move_to_bin">குப்பைக்கு நகர்த்து</string>
+    <string name="exact_alarm_permission">துல்லிய அலாரம் அனுமதி</string>
+    <string name="exact_alarm_permission_description">நினைவூட்டல்கள் துல்லியமாக வேலை செய்ய இந்த அனுமதி தேவை</string>
+    <string name="last_edited">கடைசியாகத் திருத்தியது: %s</string>
+    <string name="edited">%1$s திருத்தப்பட்டது</string>
+    <string name="send">அனுப்பு</string>
+    <string name="tick_boxes">பெட்டிகளைத் தேர்வுசெய்</string>
+    <string name="make_a_copy">நகல் எடு</string>
+    <string name="save_as">இப்படிச் சேமி</string>
+    <string name="lock">பூட்டு</string>
+    <string name="unlock">திற</string>
+    <string name="convert_to_list">பட்டியலாக மாற்று</string>
+    <string name="convert_to_text">உரையாக மாற்று</string>
+    <string name="convert_to_todo">செய்யவேண்டியதாக மாற்று</string>
+    <string name="print">அச்சிடு</string>
+    <string name="move_to_project">திட்டத்திற்கு நகர்த்து</string>
+    <string name="add_label">லேபிளைச் சேர்</string>
+    <string name="create_new_label">புதிய லேபிளை உருவாக்கு</string>
+    <string name="create_new_project">புதிய திட்டத்தை உருவாக்கு</string>
+    <string name="project_name">திட்டப் பெயர்</string>
+    <string name="project_description">திட்ட விளக்கம்</string>
+    <string name="edit_description">விளக்கத்தைத் திருத்து</string>
+    <string name="none_remove_from_project">எதுவுமில்லை (திட்டத்திலிருந்து அகற்று)</string>
+    <string name="link_preview_removed">இணைப்பு முன்னோட்டம் அகற்றப்பட்டது</string>
+    <string name="send_notes_via">குறிப்புகளை இதன் மூலம் அனுப்பு</string>
+    <string name="project_created">திட்டம் உருவாக்கப்பட்டது</string>
+
+    <!-- Collaborative share link -->
+    <string name="share_link_creating">பகிர்வு இணைப்பை உருவாக்குகிறது…</string>
+    <string name="share_link_select_one">பகிர ஒரு குறிப்பைத் தேர்ந்தெடு</string>
+    <string name="share_link_only_first">முதலில் தேர்ந்தெடுத்த குறிப்பை கூட்டு இணைப்பாகப் பகிர்கிறது</string>
+    <string name="share_link_failed">இணைப்பை உருவாக்க முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்க்கவும்.</string>
+    <string name="share_link_ready_title">கூட்டுப்பணி இணைப்பு தயார்</string>
+    <string name="share_link_ready_subtitle">இந்த இணைப்பு உள்ள எவரும் நேரலையில் பார்த்துத் திருத்தலாம்.</string>
+    <string name="share_link_copy">இணைப்பை நகலெடு</string>
+    <string name="share_link_copied">இணைப்பு நகலெடுக்கப்பட்டது</string>
+    <string name="share_link_share">இணைப்பைப் பகிர்</string>
+    <string name="share_link_open">கூட்டுப்பணியைத் திற</string>
+    <string name="share_link_stop">பகிர்வதை நிறுத்து</string>
+    <string name="share_link_unshared">பகிர்வு நிறுத்தப்பட்டது. இணைப்பு இனி வேலை செய்யாது.</string>
+    <string name="share_link_unshare_failed">பகிர்வை நிறுத்த முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்க்கவும்.</string>
+    <string name="share_link_unshare_no_token">இந்த இணைப்பை உருவாக்கியவர் மட்டுமே பகிர்வதை நிறுத்த முடியும்.</string>
+    <string name="share_via_link">இணைப்பை இதன் மூலம் பகிர்</string>
+
+    <!-- Heading Styles -->
+    <string name="normal_text">சாதாரண உரை</string>
+    <string name="heading_1">தலைப்பு 1</string>
+    <string name="heading_2">தலைப்பு 2</string>
+    <string name="heading_3">தலைப்பு 3</string>
+    <string name="heading_4">தலைப்பு 4</string>
+    <string name="heading_5">தலைப்பு 5</string>
+    <string name="heading_6">தலைப்பு 6</string>
+
+    <!-- Checklist -->
+    <string name="add_item">உருப்படியைச் சேர்</string>
+    <string name="checklist">சரிபார்ப்புப் பட்டியல்</string>
+
+    <!-- Image Viewer -->
+    <string name="image_viewer">படக் காட்சியகம்</string>
+    <string name="remove_image">படத்தை அகற்று</string>
+
+    <!-- Link Preview -->
+    <string name="link_preview_image">இணைப்பு முன்னோட்டப் படம்</string>
+    <string name="remove_preview">முன்னோட்டத்தை அகற்று</string>
+    <string name="copy_url">URL-ஐ நகலெடு</string>
+
+    <!-- More Options Sheet -->
+    <string name="search_notes">குறிப்புகளைத் தேடு</string>
+
+    <!-- Note Editor -->
+    <string name="restore_note_title">குறிப்பை மீட்டெடு</string>
+    <string name="restore_note_confirmation">இந்தக் குறிப்பு அதன் அசல் இடத்திற்கு மீட்டெடுக்கப்படும்</string>
+
+    <!-- Archive Screen -->
+    <string name="no_archived_notes">காப்பகப்படுத்தப்பட்ட குறிப்புகள் இல்லை</string>
+
+    <!-- Notes Screen -->
+    <string name="no_notes_found_label">குறிப்புகள் எதுவும் இல்லை</string>
+    <string name="no_notes_found">குறிப்புகள் எதுவும் இல்லை</string>
+    <string name="no_notes_yet">இன்னும் குறிப்புகள் இல்லை</string>
+    <string name="create_your_first_note">உங்கள் முதல் குறிப்பை உருவாக்கு</string>
+    <string name="pinned">பின் செய்யப்பட்டவை</string>
+    <string name="others">மற்றவை</string>
+
+    <!-- Projects Screen -->
+    <string name="no_projects_yet">இன்னும் திட்டங்கள் இல்லை</string>
+    <string name="create_first_project">உங்கள் குறிப்புகளை ஒழுங்கமைக்க உங்கள் முதல் திட்டத்தை உருவாக்கு</string>
+
+    <!-- Labels Screen -->
+    <string name="labels_title">லேபிள்கள்</string>
+    <string name="edit_labels">லேபிள்களைத் திருத்து</string>
+    <string name="new_label">புதிய லேபிள்</string>
+
+    <!-- Reminder Screen -->
+    <string name="reminders_title">நினைவூட்டல்கள்</string>
+    <string name="add_reminder_title">நினைவூட்டலைச் சேர்</string>
+    <string name="select_date">தேதியைத் தேர்ந்தெடு</string>
+    <string name="select_time">நேரத்தைத் தேர்ந்தெடு</string>
+
+    <!-- Drawing -->
+    <string name="drawing">வரைதல்</string>
+    <string name="todo">செய்யவேண்டியது</string>
+
+    <!-- About Screen -->
+    <string name="about_screen_title">பற்றி</string>
+    <string name="what_makes_us_different">நாங்கள் எப்படி வேறுபடுகிறோம்</string>
+    <string name="local_storage_title">உள்ளூர் சேமிப்பகம்</string>
+    <string name="local_storage_description">உங்கள் அனைத்துக் குறிப்புகளும் உங்கள் சாதனத்தில் உள்ளூரில் சேமிக்கப்படுகின்றன</string>
+    <string name="about_the_app_title">பயன்பாட்டைப் பற்றி</string>
+    <string name="about_the_app_description">NoteNext என்பது ஒரு இந்திய, முற்றிலும் இலவச, திறந்த மூல குறிப்பெடுக்கும் பயன்பாடு. உங்கள் எண்ணங்கள், யோசனைகள் மற்றும் அன்றாட பணிகளை எளிமையான, உள்ளுணர்வான, தனியுரிமையை மையமாகக் கொண்ட முறையில் ஒழுங்கமைக்க இது உதவுகிறது. உங்கள் தரவை உங்கள் கட்டுப்பாட்டில் வைத்திருக்கும் அதே வேளையில், உங்கள் அட்டவணையைக் கண்காணிக்க குறிப்புகள், பட்டியல்களை உருவாக்கி நினைவூட்டல்களை அமைக்கவும்.</string>
+    <string name="core_developer">முதன்மை டெவலப்பர்</string>
+    <string name="open_source_title">திறந்த மூலம்</string>
+    <string name="made_with_love">❤️ உடன் உருவாக்கப்பட்டது</string>
+    <string name="notenext">NoteNext</string>
+    <string name="about_subtitle">இந்திய • திறந்த மூலம் • இலவசம் &amp; தனிப்பட்டது</string>
+    <string name="notenext_logo">NoteNext லோகோ</string>
+    <string name="ic_launcher_foreground">பயன்பாட்டு ஐகான் முன்புலம்</string>
+    <string name="official_website">அதிகாரப்பூர்வ இணையதளம்</string>
+    <string name="developer_website">டெவலப்பர் இணையதளம்</string>
+    <string name="view_privacy_policy">தனியுரிமைக் கொள்கையைக் காண்</string>
+
+    <!-- Backup Screen -->
+    <string name="backup_title">காப்புப்பிரதி</string>
+
+    <!-- AI Settings -->
+    <string name="groq_settings_title">AI அமைப்புகள்</string>
+    <string name="use_custom_api_key">தனிப்பயன் API விசையைப் பயன்படுத்து</string>
+    <string name="use_custom_api_key_subtitle">உங்கள் சொந்த AI API விசையை உள்ளிடு</string>
+    <string name="enter_groq_api_key">AI API விசையை உள்ளிடு</string>
+    <string name="api_key_placeholder">API விசை</string>
+    <string name="fetching_models">மாதிரிகளைப் பெறுகிறது…</string>
+    <string name="fetch_models">மாதிரிகளைப் பெறு</string>
+    <string name="select_fast_model">வேகமான மாதிரியைத் தேர்ந்தெடு</string>
+    <string name="select_fast_model_subtitle">விரைவான பதில்களுக்கு ஒரு மாதிரியைத் தேர்ந்தெடு</string>
+    <string name="select_large_model">பெரிய மாதிரியைத் தேர்ந்தெடு</string>
+    <string name="select_large_model_subtitle">விரிவான பதில்களுக்கு ஒரு மாதிரியைத் தேர்ந்தெடு</string>
+    <string name="api_key_instructions_title">API விசையை எப்படிப் பெறுவது</string>
+    <string name="api_key_step_1">1. AI வழங்குநர் இணையதளத்திற்குச் செல்</string>
+    <string name="api_key_step_2">2. கணக்கை உருவாக்கு அல்லது உள்நுழை</string>
+    <string name="api_key_step_3">3. API விசைகள் பிரிவுக்குச் செல்</string>
+    <string name="api_key_step_4">4. புதிய API விசையை உருவாக்கு</string>
+    <string name="open_groq_console">AI கன்சோலைத் திற</string>
+
+    <!-- Biometric -->
+    <string name="biometric_auth_failed">பயோமெட்ரிக் அங்கீகாரம் தோல்வியடைந்தது</string>
+</resources>

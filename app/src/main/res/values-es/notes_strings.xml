@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- NoteSearchBar -->
+    <string name="note_search_close_cd">Cerrar búsqueda</string>
+    <string name="note_search_placeholder">Buscar en la nota…</string>
+    <string name="note_search_next_cd">Siguiente</string>
+    <string name="note_search_previous_cd">Anterior</string>
+
+    <!-- ChecklistEditor -->
+    <string name="checklist_delete">Eliminar</string>
+    <string name="checklist_delete_item_cd">Eliminar elemento</string>
+    <string name="checklist_delete_all">Eliminar todo</string>
+    <string name="checklist_reorder_cd">Reordenar</string>
+
+    <!-- AddEditNoteDialogs -->
+    <string name="note_dialog_self_destruct_title">Temporizador de autodestrucción</string>
+    <string name="note_dialog_select_time">Seleccionar hora</string>
+    <string name="note_dialog_remove_timer">Quitar temporizador</string>
+    <string name="note_dialog_set">Establecer</string>
+    <string name="note_dialog_custom">Personalizado…</string>
+
+    <!-- Insert Link Dialog -->
+    <string name="link_dialog_title">Insertar enlace</string>
+    <string name="link_dialog_section_options">Opciones de enlace</string>
+    <string name="link_dialog_url">URL</string>
+    <string name="link_dialog_display_text">Texto a mostrar</string>
+    <string name="link_dialog_insert">Insertar</string>
+</resources>
