@@ -1,6 +1,27 @@
 {
   "releases": [
     {
+      "version": "1.5.0",
+      "date": "July 10, 2026",
+      "items": [
+        {
+          "title": "End-to-End Encrypted Sharing",
+          "description": "Shared notes are now encrypted on your device before they ever leave it — the server only ever sees an unreadable, locked blob, and the decryption key travels only inside the share link, never to any server.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Self-Destructing Share Links",
+          "description": "Every share link now expires automatically — choose 10 minutes, 1 hour, 1 day, or 7 days. Optionally turn on 'burn after reading' to delete the note once it's opened, and pick how many reads it survives.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Smarter Re-Sharing",
+          "description": "Re-sharing a note now reuses its existing link instead of creating duplicates, and automatically generates a fresh one if the previous link has already expired.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
       "version": "1.4.4",
       "date": "June 7, 2026",
       "items": [

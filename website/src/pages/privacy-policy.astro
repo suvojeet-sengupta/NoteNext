@@ -13,7 +13,7 @@ import { SITE } from '@/consts';
     <Container size="narrow" class="text-center">
       <p class="text-sm font-semibold text-[#6200ee] mb-3 uppercase tracking-wider">Legal</p>
       <h1 class="text-4xl md:text-5xl font-extrabold mb-3">Privacy Policy</h1>
-      <p class="text-sm text-[#6b7280]">Last updated: May 6, 2026</p>
+      <p class="text-sm text-[#6b7280]">Last updated: July 10, 2026</p>
     </Container>
   </section>
 
@@ -36,9 +36,11 @@ import { SITE } from '@/consts';
           <p class="text-sm">
             <strong>Commitment to Privacy:</strong> NoteNext is a "Local-First" application. Your
             notes and data never leave your device unless you explicitly choose to use an AI
-            feature or the optional Google Drive backup. For your protection, we have explicitly
-            disabled system-level cloud backups and device transfers to prevent accidental data
-            exposure.
+            feature, the optional Google Drive backup, or create an encrypted share link. Even when
+            you share a note, it is end-to-end encrypted on your device first — the server only
+            ever stores an unreadable blob it cannot decrypt. For your protection, we have
+            explicitly disabled system-level cloud backups and device transfers to prevent
+            accidental data exposure.
           </p>
         </div>
 
@@ -92,7 +94,21 @@ import { SITE } from '@/consts';
           <li><strong>Encryption:</strong> You can set a password to encrypt your backups using <strong>AES-256 encryption</strong> before they are uploaded.</li>
         </ul>
 
-        <h2>3. AI Features</h2>
+        <h2>3. Note Sharing (Optional, End-to-End Encrypted)</h2>
+        <p>
+          NoteNext offers an <strong>optional</strong> feature to share a note as a link. This is
+          the only case where note content is stored on our server, and it is designed to be
+          <strong>zero-knowledge</strong>:
+        </p>
+        <ul>
+          <li><strong>Encrypted on your device:</strong> The note's title and content are encrypted with <strong>AES-256-GCM</strong> on your device <em>before</em> anything is uploaded. Our server only ever receives and stores an unreadable, encrypted blob.</li>
+          <li><strong>The key never reaches us:</strong> The decryption key exists only inside the share link itself (its URL fragment). Browsers and apps never transmit that fragment to any server, so we are technically unable to read a shared note.</li>
+          <li><strong>Automatic expiry:</strong> Every shared note is deleted automatically after the duration you pick (10 minutes, 1 hour, 1 day, or 7 days). You can also enable "burn after reading" to delete it once it has been opened.</li>
+          <li><strong>Only metadata is in the clear:</strong> Aside from the encrypted blob, we store only a technical share ID, the chosen expiry time, and an optional display name you provide.</li>
+          <li><strong>You control deletion:</strong> Only the creator can unshare a note early, proven by a secret token stored on your device. We keep no accounts and cannot link a shared note back to you.</li>
+        </ul>
+
+        <h2>4. AI Features</h2>
         <p>
           NoteNext includes AI-powered tools like "Note Summarization" and "Grammar Fix". We
           support multiple providers including
@@ -104,7 +120,7 @@ import { SITE } from '@/consts';
           <li><strong>Privacy:</strong> Data is processed according to the respective provider's privacy policy. We do not store your AI queries on any server.</li>
         </ul>
 
-        <h2>4. Advanced Privacy & Security</h2>
+        <h2>5. Advanced Privacy & Security</h2>
         <ul>
           <li><strong>Decoy Vault:</strong> If enabled, NoteNext allows you to set a secondary PIN that opens a separate, "decoy" set of notes. This provides plausible deniability under coercion. When active, biometric login is hidden to prevent bypass.</li>
           <li><strong>Screenshot Protection:</strong> To prevent data leaks, NoteNext blocks screenshots and hides the app's content from the system "Recents" menu while you are on the App Lock screen.</li>
@@ -112,7 +128,7 @@ import { SITE } from '@/consts';
           <li><strong>Forensic Hardening:</strong> We have disabled standard Android cloud extraction (Android 12+) and device-to-device transfers to ensure your sensitive notes never leave your device's hardware-bound encryption vault.</li>
         </ul>
 
-        <h2>5. Crash Reporting</h2>
+        <h2>6. Crash Reporting</h2>
         <p>To improve app stability, NoteNext uses ACRA (Application Crash Reports for Android). If the app crashes:</p>
         <ul>
           <li>A technical report containing device info and stack traces may be sent to the developer.</li>
@@ -120,16 +136,17 @@ import { SITE } from '@/consts';
           <li>These reports do <strong>not</strong> include your personal note content.</li>
         </ul>
 
-        <h2>6. Data Retention and Deletion</h2>
+        <h2>7. Data Retention and Deletion</h2>
         <p>Your data is yours. You can:</p>
         <ul>
           <li>Delete individual notes (moved to Bin).</li>
           <li>Empty the Bin to permanently delete data.</li>
           <li>Uninstall the app to wipe all local data from your device.</li>
           <li>Delete your Google Drive backups via the app settings or Google Drive directly.</li>
+          <li>Stop sharing a note at any time to delete its encrypted copy from the share server; otherwise it is deleted automatically when its link expires or is burned after reading.</li>
         </ul>
 
-        <h2>7. Third-Party Services</h2>
+        <h2>8. Third-Party Services</h2>
         <p>NoteNext uses these services:</p>
         <ul>
           <li><strong>Google Drive API:</strong> For optional backups.</li>
@@ -138,7 +155,7 @@ import { SITE } from '@/consts';
           <li><strong>Jsoup:</strong> For local generation of link previews (fetches metadata from URLs you type).</li>
         </ul>
 
-        <h2>8. Contact</h2>
+        <h2>9. Contact</h2>
         <p>
           If you have any questions or suggestions about my Privacy Policy, do not hesitate to
           contact me at

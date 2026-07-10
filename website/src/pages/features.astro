@@ -80,6 +80,21 @@ const sections = [
     accent: 'brand',
   },
   {
+    eyebrow: 'Share',
+    title: 'End-to-end encrypted, self-destructing shares',
+    description:
+      'Share a note as a link that only its recipient can read. It is encrypted on your device with AES-256 before it ever leaves — the server only ever stores an unreadable blob, and the decryption key lives only inside the link. Links expire on their own, and can burn after being read.',
+    bullets: [
+      'AES-256-GCM encryption on-device — zero-knowledge server',
+      'Decryption key stays in the link fragment, never sent to any server',
+      'Auto-expiry: 10 minutes, 1 hour, 1 day, or 7 days',
+      'Burn-after-reading with a configurable read count',
+      'Re-sharing reuses the same link instead of creating duplicates',
+    ],
+    icon: 'share',
+    accent: 'accent',
+  },
+  {
     eyebrow: 'Assist',
     title: 'AI on your terms — or not at all',
     description:
