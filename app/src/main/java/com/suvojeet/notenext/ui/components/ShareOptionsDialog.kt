@@ -382,7 +382,7 @@ fun ShareLinkCheckingDialog() {
                 CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
                 Spacer(Modifier.width(16.dp))
                 Text(
-                    text = "Checking existing link…",
+                    text = stringResource(R.string.share_link_checking),
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )

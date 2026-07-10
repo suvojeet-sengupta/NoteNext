@@ -1657,21 +1657,35 @@ class NotesViewModel @Inject constructor(
             _events.emit(NotesUiEvent.ShareLinkChecking(true))
             val status = shareRepository.checkStatus(note.shareId!!)
             _events.emit(NotesUiEvent.ShareLinkChecking(false))
+            // The full link is rebuilt from the stored id + key (server never had the key).
+            val reusableUrl = com.suvojeet.notenext.data.share.ShareConstants.shareUrl(note.shareId!!) + "#" + note.shareKey!!
             status
                 .onSuccess { s ->
-                    // Existing link still valid → reuse it (rebuild url with the stored key).
-                    val url = com.suvojeet.notenext.data.share.ShareConstants.shareUrl(note.shareId!!) + "#" + note.shareKey!!
+                    // Existing link is still alive → reuse it, no duplicate.
+                    _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_reusing)))
                     _events.emit(
-                        NotesUiEvent.ShareLinkReady(url, note.shareId!!, note.title, note.shareDeleteToken, s.expiresAt)
+                        NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareDeleteToken, s.expiresAt)
                     )
                 }
-                .onFailure {
-                    // Expired / burned / gone → drop the stale link and mint a fresh one.
-                    val cleared = note.copy(shareId = null, shareKey = null, shareDeleteToken = null)
-                    if (note.id != 0) runCatching { repository.updateNote(cleared) }
-                    pendingShareNote = cleared
-                    pendingShareSnapshot = null
-                    _events.emit(NotesUiEvent.ShowShareOptions)
+                .onFailure { t ->
+                    val code = (t as? retrofit2.HttpException)?.code()
+                    if (code == 404 || code == 410) {
+                        // Definitively gone (expired / burned / deleted) → drop the stale link
+                        // and prompt to mint a fresh one.
+                        val cleared = note.copy(shareId = null, shareKey = null, shareDeleteToken = null)
+                        if (note.id != 0) runCatching { repository.updateNote(cleared) }
+                        pendingShareNote = cleared
+                        pendingShareSnapshot = null
+                        _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_expired_new)))
+                        _events.emit(NotesUiEvent.ShowShareOptions)
+                    } else {
+                        // Network/server hiccup — we can't confirm it's gone, so DON'T mint a
+                        // duplicate. Reuse the link we already hold and let the user retry later.
+                        _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_verify_failed)))
+                        _events.emit(
+                            NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareDeleteToken, null)
+                        )
+                    }
                 }
             return
         }

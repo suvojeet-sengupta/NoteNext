@@ -167,14 +167,19 @@ fun NotesScreen(
                     }
                 }
                 is NotesUiEvent.ScrollToSearchResult -> {}
+                // The editor (AddEditNoteScreen) is composed on top of this screen and
+                // collects the SAME events flow. When it's open, let IT own the share
+                // dialogs — otherwise both surfaces render them and the dialog appears on
+                // the home screen behind the editor. Only handle share UI here when the
+                // editor is collapsed (i.e. sharing was triggered from the list).
                 is NotesUiEvent.ShareLinkReady -> {
-                    shareLinkReady = event
+                    if (viewModel.editState.value.expandedNoteId == null) shareLinkReady = event
                 }
                 is NotesUiEvent.ShowShareOptions -> {
-                    showShareLinkConfig = true
+                    if (viewModel.editState.value.expandedNoteId == null) showShareLinkConfig = true
                 }
                 is NotesUiEvent.ShareLinkChecking -> {
-                    shareLinkChecking = event.checking
+                    if (viewModel.editState.value.expandedNoteId == null) shareLinkChecking = event.checking
                 }
             }
         }

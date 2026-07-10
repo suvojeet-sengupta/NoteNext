@@ -126,18 +126,23 @@
     <!-- Collaborative share link -->
     <string name="share_link_creating">Creating share link…</string>
     <string name="share_link_select_one">Select a note to share</string>
-    <string name="share_link_only_first">Sharing the first selected note as a collaborative link</string>
+    <string name="share_link_only_first">Sharing the first selected note as an encrypted link</string>
     <string name="share_link_failed">Couldn\'t create link. Check your connection.</string>
-    <string name="share_link_ready_title">Collaboration link ready</string>
-    <string name="share_link_ready_subtitle">Anyone with this link can view and edit live.</string>
+    <string name="share_link_ready_title">Share link ready</string>
+    <string name="share_link_ready_subtitle">Only people with this link can read it. It\'s end-to-end encrypted.</string>
     <string name="share_link_copy">Copy link</string>
     <string name="share_link_copied">Link copied</string>
     <string name="share_link_share">Share link</string>
-    <string name="share_link_open">Open collaboration</string>
+    <string name="share_link_open">Open note</string>
     <string name="share_link_stop">Stop sharing</string>
     <string name="share_link_unshared">Sharing stopped. Link no longer works.</string>
     <string name="share_link_unshare_failed">Couldn\'t stop sharing. Check your connection.</string>
     <string name="share_link_unshare_no_token">Only the person who created this link can stop sharing it.</string>
+    <!-- Re-share dedup feedback -->
+    <string name="share_link_checking">Checking your existing link…</string>
+    <string name="share_link_reusing">This note is already shared — reusing the same link.</string>
+    <string name="share_link_expired_new">Your previous link expired. Create a new one.</string>
+    <string name="share_link_verify_failed">Couldn\'t verify your link online. Showing the existing one.</string>
     <string name="share_via_link">Share link via</string>
     
     <!-- Heading Styles -->
