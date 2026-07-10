@@ -20,6 +20,8 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         // Link sharing from the editor is only wired into the main notes graph;
         // in a project the editor still offers text share, so this degrades to NoOp.
         is NotesEvent.ShareCurrentNoteViaLink -> ProjectNotesEvent.NoOp
+        // Encrypted-link confirmation is only wired into the main notes graph.
+        is NotesEvent.ConfirmShareViaLink -> ProjectNotesEvent.NoOp
         // Unshare is likewise only wired into the main notes graph.
         is NotesEvent.UnshareNote -> ProjectNotesEvent.NoOp
         is NotesEvent.SetReminderForSelectedNotes -> ProjectNotesEvent.SetReminderForSelectedNotes(this.date, this.time, this.repeatOption)

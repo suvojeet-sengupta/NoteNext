@@ -4,30 +4,30 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.suvojeet.notenext.data.Note
 import com.suvojeet.notenext.data.NoteRepository
-import com.suvojeet.notenext.data.share.CollabSession
-import com.suvojeet.notenext.data.share.CollaborationManager
-import com.suvojeet.notenext.data.share.NoteDelta
 import com.suvojeet.notenext.data.share.ShareRepository
 import com.suvojeet.notenext.util.HtmlConverter
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import retrofit2.HttpException
 import javax.inject.Inject
 
 data class SharedNoteUiState(
     val loading: Boolean = true,
     val error: String? = null,
+    /** True when the note is gone for good (expired / burned / missing) — no point retrying. */
+    val gone: Boolean = false,
     val title: String = "",
-    val content: String = "",          // plain text shown in the editor
+    val content: String = "",          // plain text shown read-only
+    val contentHtml: String = "",      // original HTML (used when saving a copy)
     val sharedBy: String = "NoteNext user",
     val createdAt: String? = null,
-    val updatedAt: String? = null,
-    val connected: Boolean = false,
+    val expiresAt: String? = null,
+    val burnAfterRead: Boolean = false,
     val savedLocally: Boolean = false
 )
 
@@ -36,10 +36,14 @@ sealed interface SharedNoteEvent {
     object SavedCopy : SharedNoteEvent
 }
 
+/**
+ * Loads an end-to-end encrypted shared note, decrypts it on-device with the key
+ * from the link fragment, and shows it read-only. There is no live collaboration:
+ * shares are ephemeral secrets the server cannot read, so they cannot be co-edited.
+ */
 @HiltViewModel
 class SharedNoteViewModel @Inject constructor(
     private val shareRepository: ShareRepository,
-    private val collaborationManager: CollaborationManager,
     private val noteRepository: NoteRepository
 ) : ViewModel() {
 
@@ -50,94 +54,60 @@ class SharedNoteViewModel @Inject constructor(
     val events = _events.asSharedFlow()
 
     private var shareId: String? = null
-    private var session: CollabSession? = null
+    private var keyFragment: String? = null
     private var started = false
-    private var syncJob: Job? = null
 
-    // Echo guard: ignore an incoming update that simply mirrors what we last sent.
-    private var lastSentContentHtml: String? = null
-    private var lastSentTitle: String? = null
-
-    fun start(id: String) {
+    fun start(id: String, key: String?) {
         if (started) return
         started = true
         shareId = id
-        load(id)
+        keyFragment = key?.trim()?.takeIf { it.isNotEmpty() }
+        load()
     }
 
-    private fun load(id: String) {
+    private fun load() {
+        val id = shareId ?: return
+        val key = keyFragment
+        if (key == null) {
+            _state.update {
+                it.copy(
+                    loading = false,
+                    gone = true,
+                    error = "This link is missing its decryption key, so the note can't be opened. Ask the sender for the full link."
+                )
+            }
+            return
+        }
         viewModelScope.launch {
-            _state.update { it.copy(loading = true, error = null) }
-            shareRepository.getNote(id)
-                .onSuccess { dto ->
-                    val plain = if (dto.content.isNotBlank()) HtmlConverter.htmlToPlainText(dto.content) else ""
+            _state.update { it.copy(loading = true, error = null, gone = false) }
+            shareRepository.getNote(id, key)
+                .onSuccess { note ->
+                    val plain = if (note.content.isNotBlank()) HtmlConverter.htmlToPlainText(note.content) else ""
                     _state.update {
                         it.copy(
                             loading = false,
                             error = null,
-                            title = dto.title,
+                            gone = false,
+                            title = note.title,
                             content = plain,
-                            sharedBy = dto.sharedBy?.takeIf { s -> s.isNotBlank() } ?: "NoteNext user",
-                            createdAt = dto.createdAt,
-                            updatedAt = dto.updatedAt
+                            contentHtml = note.content,
+                            sharedBy = note.sharedBy,
+                            createdAt = note.createdAt,
+                            expiresAt = note.expiresAt,
+                            burnAfterRead = note.burnAfterRead || note.burned
                         )
                     }
-                    connectCollaboration(id)
                 }
-                .onFailure {
-                    _state.update {
-                        it.copy(loading = false, error = "Couldn't load this note. Check your connection and try again.")
+                .onFailure { t ->
+                    val code = (t as? HttpException)?.code()
+                    val gone = code == 410 || code == 404
+                    val message = when (code) {
+                        410 -> "This note has expired or was already opened, and is no longer available."
+                        404 -> "This note doesn't exist. The link may be incorrect."
+                        else -> "Couldn't open this note. It may be corrupted, or the link may be incomplete."
                     }
+                    _state.update { it.copy(loading = false, gone = gone, error = message) }
                 }
-        }
-    }
-
-    private fun connectCollaboration(id: String) {
-        val s = collaborationManager.open(id)
-        session = s
-        viewModelScope.launch { s.connected.collect { c -> _state.update { st -> st.copy(connected = c) } } }
-        viewModelScope.launch { s.incoming.collect { delta -> applyRemote(delta) } }
-        s.connect()
-    }
-
-    private suspend fun applyRemote(delta: NoteDelta) {
-        // Skip our own echoes.
-        if (delta.content != null && delta.content == lastSentContentHtml) return
-        val newContent = delta.content?.let { HtmlConverter.htmlToPlainText(it) }
-        _state.update { st ->
-            st.copy(
-                title = delta.title ?: st.title,
-                content = newContent ?: st.content
-            )
-        }
-    }
-
-    fun onTitleChange(value: String) {
-        _state.update { it.copy(title = value) }
-        scheduleSync()
-    }
-
-    fun onContentChange(value: String) {
-        _state.update { it.copy(content = value) }
-        scheduleSync()
-    }
-
-    private fun scheduleSync() {
-        val id = shareId ?: return
-        syncJob?.cancel()
-        syncJob = viewModelScope.launch {
-            kotlinx.coroutines.delay(400)
-            val snapshot = _state.value
-            val html = plainToHtml(snapshot.content)
-            lastSentTitle = snapshot.title
-            lastSentContentHtml = html
-            val s = session
-            if (s != null && _state.value.connected) {
-                s.sendEdit(snapshot.title, html)
-            } else {
-                // No live socket — persist directly so the change isn't lost.
-                shareRepository.pushUpdate(id, snapshot.title, html)
-            }
         }
     }
 
@@ -148,7 +118,7 @@ class SharedNoteViewModel @Inject constructor(
             val now = System.currentTimeMillis()
             val note = Note(
                 title = snapshot.title,
-                content = plainToHtml(snapshot.content),
+                content = snapshot.contentHtml.ifBlank { plainToHtml(snapshot.content) },
                 createdAt = now,
                 lastEdited = now,
                 color = 0
@@ -164,18 +134,12 @@ class SharedNoteViewModel @Inject constructor(
     }
 
     fun retry() {
-        val id = shareId ?: return
-        load(id)
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        session?.close()
-        session = null
+        if (_state.value.gone) return
+        load()
     }
 }
 
-/** Escapes plain text and converts newlines to <br> so it renders on the web share page. */
+/** Escapes plain text and converts newlines to <br> so a saved copy keeps its line breaks. */
 private fun plainToHtml(text: String): String =
     text.replace("&", "&amp;")
         .replace("<", "&lt;")

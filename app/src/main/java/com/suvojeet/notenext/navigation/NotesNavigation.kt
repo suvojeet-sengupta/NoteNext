@@ -67,7 +67,7 @@ fun NavGraphBuilder.notesGraph(
             onMenuClick = onMenuClick,
             onDrawingClick = { navController.navigate(Destination.Drawing) },
             onTodoClick = { navController.navigate(Destination.Todo) },
-            onOpenSharedNote = { shareId -> navController.navigate(Destination.SharedNote(shareId)) },
+            onOpenSharedNote = { shareId, key -> navController.navigate(Destination.SharedNote(shareId, key)) },
             events = notesViewModel.events
         )
     }
@@ -129,6 +129,7 @@ fun NavGraphBuilder.notesGraph(
         val route: Destination.SharedNote = backStackEntry.toRoute()
         SharedNoteScreen(
             shareId = route.shareId,
+            key = route.key,
             onBack = {
                 if (!navController.popBackStack()) {
                     navController.navigate(Destination.Notes()) {

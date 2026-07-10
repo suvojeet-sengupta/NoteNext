@@ -1,4 +1,4 @@
-@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 package com.suvojeet.notenext.ui.components
 
 import androidx.compose.foundation.background
@@ -10,11 +10,18 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Link
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.OpenInNew
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import android.widget.Toast
 import com.suvojeet.notenext.R
+import com.suvojeet.notenext.data.share.ShareExpiry
 
 /**
  * A modern dialog that shows share options: QR Code or Text.
@@ -87,7 +95,7 @@ fun ShareOptionsDialog(
                         ShareOptionCard(
                             icon = Icons.Default.Link,
                             title = "Link",
-                            description = "Collaborate live",
+                            description = "Encrypted · expires",
                             iconColor = Color(0xFF7C5CFF), // Purple
                             modifier = Modifier.weight(1f),
                             onClick = { onShareViaLink(); onDismiss() }
@@ -223,6 +231,124 @@ fun ShareLinkDialog(
             }
         }
     }
+}
+
+/**
+ * Shown before an encrypted share link is created. Lets the user choose how long
+ * the link should live and whether it should self-destruct after being read once.
+ */
+@Composable
+fun ShareLinkConfigDialog(
+    onDismiss: () -> Unit,
+    onCreate: (expiry: ShareExpiry, burnAfterRead: Boolean) -> Unit
+) {
+    var expiry by remember { mutableStateOf(ShareExpiry.DEFAULT) }
+    var burnAfterRead by remember { mutableStateOf(false) }
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(Icons.Default.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        text = "Share securely",
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    text = "The note is end-to-end encrypted and auto-deletes when it expires. Only people with the link can read it.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(20.dp))
+
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        Icons.Default.Schedule,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "Link expires in",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
+                Spacer(Modifier.height(10.dp))
+                FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    ShareExpiry.entries.forEach { option ->
+                        FilterChip(
+                            selected = expiry == option,
+                            onClick = { expiry = option },
+                            label = { Text(expiryLabel(option)) }
+                        )
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        Icons.Default.LocalFireDepartment,
+                        contentDescription = null,
+                        tint = if (burnAfterRead) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            text = "Burn after reading",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            text = "Delete the note the first time it's opened",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Switch(checked = burnAfterRead, onCheckedChange = { burnAfterRead = it })
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) { Text("Cancel") }
+                    Spacer(Modifier.width(8.dp))
+                    Button(onClick = { onCreate(expiry, burnAfterRead) }) {
+                        Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Create link")
+                    }
+                }
+            }
+        }
+    }
+}
+
+private fun expiryLabel(expiry: ShareExpiry): String = when (expiry) {
+    ShareExpiry.TEN_MINUTES -> "10 min"
+    ShareExpiry.ONE_HOUR -> "1 hour"
+    ShareExpiry.ONE_DAY -> "1 day"
+    ShareExpiry.SEVEN_DAYS -> "7 days"
 }
 
 @Composable

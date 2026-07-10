@@ -84,6 +84,10 @@ class MainViewModel @Inject constructor(
     private val _sharedNoteId = MutableStateFlow<String?>(null)
     val sharedNoteId = _sharedNoteId.asStateFlow()
 
+    /** Base64url AES key from a share link's fragment (or intent extra), used to decrypt the note. */
+    private val _sharedNoteKey = MutableStateFlow<String?>(null)
+    val sharedNoteKey = _sharedNoteKey.asStateFlow()
+
     private val _unlockedByAuth = MutableStateFlow(false)
     val unlockedByAuth = _unlockedByAuth.asStateFlow()
 
@@ -123,6 +127,7 @@ class MainViewModel @Inject constructor(
         // import the URL as a text file.
         val incomingShareId = if (intent.action == Intent.ACTION_VIEW) extractShareId(intent.data) else null
         _sharedNoteId.value = incomingShareId
+        _sharedNoteKey.value = if (incomingShareId != null) extractShareKey(intent) else null
 
         if (incomingShareId == null && (intent.action == Intent.ACTION_VIEW || intent.action == Intent.ACTION_EDIT)) {
             _externalUri.value = intent.data
@@ -163,6 +168,17 @@ class MainViewModel @Inject constructor(
             }
             else -> null
         }
+    }
+
+    /**
+     * Extracts the end-to-end decryption key that travels with a share deep link.
+     * For App Links (https://…/s/<id>#<key>) and the notenext://note/<id>#<key>
+     * scheme it is the URL fragment; the web page's "Open in app" intent:// button
+     * instead passes it as the `k` intent extra.
+     */
+    private fun extractShareKey(intent: Intent): String? {
+        val fromFragment = intent.data?.encodedFragment?.takeIf { it.isNotBlank() }
+        return fromFragment ?: intent.getStringExtra("k")?.takeIf { it.isNotBlank() }
     }
 
     fun onUnlock(isDecoy: Boolean = false) {

@@ -80,7 +80,11 @@ sealed interface Destination {
     @Serializable
     data object Drawing : Destination
 
-    /** A shared/collaborative note opened from a share link (https://…/s/<id> or notenext://note/<id>). */
+    /**
+     * An encrypted shared note opened from a share link (https://…/s/<id>#<key> or
+     * notenext://note/<id>#<key>). [key] is the base64url AES key from the link
+     * fragment — required to decrypt the note; null means the link was incomplete.
+     */
     @Serializable
-    data class SharedNote(val shareId: String) : Destination
+    data class SharedNote(val shareId: String, val key: String? = null) : Destination
 }

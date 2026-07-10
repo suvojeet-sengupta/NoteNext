@@ -94,6 +94,7 @@ fun AddEditNoteScreen(
     var showMoreOptions by remember { mutableStateOf(false) }
     var showShareOptions by remember { mutableStateOf(false) }
     var shareLinkReady by remember { mutableStateOf<NotesUiEvent.ShareLinkReady?>(null) }
+    var showShareLinkConfig by remember { mutableStateOf(false) }
     var showLabelDialog by remember { mutableStateOf(false) }
     var showSaveAsDialog by remember { mutableStateOf(false) }
     var showExpiryDialog by remember { mutableStateOf(false) }
@@ -261,6 +262,9 @@ fun AddEditNoteScreen(
                 }
                 is NotesUiEvent.ShareLinkReady -> {
                     shareLinkReady = event
+                }
+                is NotesUiEvent.ShowShareOptions -> {
+                    showShareLinkConfig = true
                 }
                 is NotesUiEvent.ScrollToSearchResult -> {
                     val globalIndex = event.index
@@ -719,6 +723,16 @@ fun AddEditNoteScreen(
             onShareViaLink = {
                 onEvent(NotesEvent.ShareCurrentNoteViaLink)
                 showShareOptions = false
+            }
+        )
+    }
+
+    if (showShareLinkConfig) {
+        com.suvojeet.notenext.ui.components.ShareLinkConfigDialog(
+            onDismiss = { showShareLinkConfig = false },
+            onCreate = { expiry, burn ->
+                showShareLinkConfig = false
+                onEvent(NotesEvent.ConfirmShareViaLink(expiry, burn))
             }
         )
     }

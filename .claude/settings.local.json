@@ -8,7 +8,11 @@
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
       "Bash(xargs cat *)",
-      "Bash(xargs ls *)"
+      "Bash(xargs ls *)",
+      "Bash(grep '\\\\.kt$')",
+      "Bash(git -C \"F:/NoteNext\" status)",
+      "Bash(git -C \"F:/NoteNext\" diff --stat)",
+      "Bash(cd /F/NoteNext && find . -type f -name \"PinnedReorderSheet.kt\")"
     ]
   }
 }

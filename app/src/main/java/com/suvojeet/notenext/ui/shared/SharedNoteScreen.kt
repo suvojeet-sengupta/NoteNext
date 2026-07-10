@@ -10,9 +10,11 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.BookmarkAdd
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.CloudDone
 import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -26,13 +28,14 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 @Composable
 fun SharedNoteScreen(
     shareId: String,
+    key: String?,
     onBack: () -> Unit,
     viewModel: SharedNoteViewModel = hiltViewModel()
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    LaunchedEffect(shareId) { viewModel.start(shareId) }
+    LaunchedEffect(shareId, key) { viewModel.start(shareId, key) }
 
     LaunchedEffect(Unit) {
         viewModel.events.collect { event ->
@@ -53,7 +56,7 @@ fun SharedNoteScreen(
                     }
                 },
                 actions = {
-                    ConnectionChip(connected = state.connected)
+                    EncryptedChip()
                     Spacer(Modifier.width(8.dp))
                 }
             )
@@ -83,10 +86,10 @@ fun SharedNoteScreen(
                     CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
                 }
                 state.error != null -> {
-                    ErrorState(message = state.error!!, onRetry = { viewModel.retry() })
+                    ErrorState(message = state.error!!, showRetry = !state.gone, onRetry = { viewModel.retry() })
                 }
                 else -> {
-                    SharedNoteContent(state = state, viewModel = viewModel)
+                    SharedNoteContent(state = state)
                 }
             }
         }
@@ -94,7 +97,7 @@ fun SharedNoteScreen(
 }
 
 @Composable
-private fun SharedNoteContent(state: SharedNoteUiState, viewModel: SharedNoteViewModel) {
+private fun SharedNoteContent(state: SharedNoteUiState) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -127,78 +130,87 @@ private fun SharedNoteContent(state: SharedNoteUiState, viewModel: SharedNoteVie
                         )
                     }
                 }
-                if (state.updatedAt != null || state.createdAt != null) {
-                    Spacer(Modifier.height(8.dp))
-                    val created = state.createdAt?.let { prettyDate(it) }
-                    val updated = state.updatedAt?.let { prettyDate(it) }
-                    Text(
-                        buildString {
-                            if (created != null) append("Created $created")
-                            if (updated != null) {
-                                if (isNotEmpty()) append("  ·  ")
-                                append("Updated $updated")
-                            }
-                        },
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+
+                if (state.expiresAt != null) {
+                    Spacer(Modifier.height(10.dp))
+                    MetaRow(
+                        icon = Icons.Default.Schedule,
+                        text = "Expires ${prettyDate(state.expiresAt)}"
                     )
                 }
-                Spacer(Modifier.height(6.dp))
-                Text(
-                    "Edits sync live with everyone who has this link.",
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                if (state.burnAfterRead) {
+                    Spacer(Modifier.height(6.dp))
+                    MetaRow(
+                        icon = Icons.Default.LocalFireDepartment,
+                        text = "Deleted after this read",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+
+                Spacer(Modifier.height(10.dp))
+                MetaRow(
+                    icon = Icons.Default.Lock,
+                    text = "End-to-end encrypted · only people with the link can read it"
                 )
             }
         }
 
         Spacer(Modifier.height(16.dp))
 
-        OutlinedTextField(
-            value = state.title,
-            onValueChange = { viewModel.onTitleChange(it) },
-            label = { Text("Title") },
-            singleLine = true,
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        OutlinedTextField(
-            value = state.content,
-            onValueChange = { viewModel.onContentChange(it) },
-            label = { Text("Note") },
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 240.dp)
-        )
+        SelectionContainer {
+            Column {
+                Text(
+                    text = state.title.ifBlank { "Untitled note" },
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontWeight = FontWeight.Bold
+                )
+                Spacer(Modifier.height(12.dp))
+                Text(
+                    text = state.content.ifBlank { "This note is empty." },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = if (state.content.isBlank())
+                        MaterialTheme.colorScheme.onSurfaceVariant
+                    else
+                        MaterialTheme.colorScheme.onSurface
+                )
+            }
+        }
 
         Spacer(Modifier.height(96.dp)) // breathing room above the FAB
     }
 }
 
 @Composable
-private fun ConnectionChip(connected: Boolean) {
+private fun MetaRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    text: String,
+    tint: androidx.compose.ui.graphics.Color = MaterialTheme.colorScheme.onSurfaceVariant
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(icon, contentDescription = null, tint = tint, modifier = Modifier.size(16.dp))
+        Spacer(Modifier.width(8.dp))
+        Text(text, style = MaterialTheme.typography.labelMedium, color = tint)
+    }
+}
+
+@Composable
+private fun EncryptedChip() {
     AssistChip(
         onClick = {},
         enabled = false,
-        label = { Text(if (connected) "Live" else "Offline", style = MaterialTheme.typography.labelSmall) },
+        label = { Text("Encrypted", style = MaterialTheme.typography.labelSmall) },
         leadingIcon = {
-            Icon(
-                if (connected) Icons.Default.CloudDone else Icons.Default.CloudOff,
-                contentDescription = null,
-                modifier = Modifier.size(16.dp)
-            )
+            Icon(Icons.Default.Lock, contentDescription = null, modifier = Modifier.size(16.dp))
         },
         colors = AssistChipDefaults.assistChipColors(
-            disabledLabelColor = if (connected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-            disabledLeadingIconContentColor = if (connected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+            disabledLabelColor = MaterialTheme.colorScheme.primary,
+            disabledLeadingIconContentColor = MaterialTheme.colorScheme.primary
         )
     )
 }
 
 @Composable
-private fun BoxScope.ErrorState(message: String, onRetry: () -> Unit) {
+private fun BoxScope.ErrorState(message: String, showRetry: Boolean, onRetry: () -> Unit) {
     Column(
         modifier = Modifier
             .align(Alignment.Center)
@@ -219,8 +231,10 @@ private fun BoxScope.ErrorState(message: String, onRetry: () -> Unit) {
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
-        Spacer(Modifier.height(16.dp))
-        Button(onClick = onRetry) { Text("Retry") }
+        if (showRetry) {
+            Spacer(Modifier.height(16.dp))
+            Button(onClick = onRetry) { Text("Retry") }
+        }
     }
 }
 

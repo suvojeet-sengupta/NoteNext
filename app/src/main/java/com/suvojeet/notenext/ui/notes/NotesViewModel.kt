@@ -739,32 +739,49 @@ class NotesViewModel @Inject constructor(
                     }
                     if (selectedNotes.size > 1) {
                         _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_only_first)))
-                    } else {
-                        _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_creating)))
                     }
-                    shareNoteViaLink(target.note)
+                    // Stash the target and let the UI collect expiry / burn options first.
+                    pendingShareNote = target.note
+                    pendingShareSnapshot = null
+                    _events.emit(NotesUiEvent.ShowShareOptions)
                     listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
                 }
             }
             is NotesEvent.ShareCurrentNoteViaLink -> {
                 viewModelScope.launch {
-                    _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_creating)))
                     val noteId = editState.value.expandedNoteId
                     val note = if (noteId != null && noteId > 0) repository.getNoteById(noteId)?.note else null
                     if (note != null) {
-                        shareNoteViaLink(note)
+                        pendingShareNote = note
+                        pendingShareSnapshot = null
                     } else {
-                        // Brand-new, unsaved note — share an ephemeral snapshot from the
-                        // editor state. There's no row yet, so the share id can't be persisted.
-                        val title = editState.value.editingTitle
-                        val content = editState.value.editingContent.text
-                        shareRepository.shareNote(title, content)
-                            .onSuccess { result ->
-                                _events.emit(NotesUiEvent.ShareLinkReady(result.url, result.shareId, title, result.deleteToken))
-                            }
-                            .onFailure {
-                                _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_failed)))
-                            }
+                        // Brand-new, unsaved note — snapshot the editor state. There's no
+                        // row yet, so the share id can't be persisted back onto a note.
+                        pendingShareNote = null
+                        pendingShareSnapshot = editState.value.editingTitle to editState.value.editingContent.text
+                    }
+                    _events.emit(NotesUiEvent.ShowShareOptions)
+                }
+            }
+            is NotesEvent.ConfirmShareViaLink -> {
+                viewModelScope.launch {
+                    _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_creating)))
+                    val note = pendingShareNote
+                    val snapshot = pendingShareSnapshot
+                    pendingShareNote = null
+                    pendingShareSnapshot = null
+                    when {
+                        note != null -> shareNoteViaLink(note, event.expiry, event.burnAfterRead)
+                        snapshot != null -> {
+                            shareRepository.shareNote(snapshot.first, snapshot.second, event.expiry, event.burnAfterRead)
+                                .onSuccess { result ->
+                                    _events.emit(NotesUiEvent.ShareLinkReady(result.url, result.shareId, snapshot.first, result.deleteToken, result.expiresAt))
+                                }
+                                .onFailure {
+                                    _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_failed)))
+                                }
+                        }
+                        else -> _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_failed)))
                     }
                 }
             }
@@ -1626,33 +1643,25 @@ class NotesViewModel @Inject constructor(
         }
     }
 
+    // Target stashed between the "share via link" tap and the expiry/burn confirmation.
+    private var pendingShareNote: com.suvojeet.notenext.data.Note? = null
+    private var pendingShareSnapshot: Pair<String, String>? = null
+
     /**
-     * Publishes [note] as a collaborative share link. If the note was shared
-     * before (it already has a [com.suvojeet.notenext.data.Note.shareId]) the
-     * same link/room is reused — the latest content is pushed to it — instead of
-     * minting a brand-new link every time. Otherwise a new link is created and
-     * its id is persisted back onto the note so the next share reuses it.
+     * Publishes [note] as an end-to-end encrypted, ephemeral share link with the
+     * chosen [expiry] and optional [burnAfterRead]. Each share is a fresh secret —
+     * the content is encrypted on-device (server stores only ciphertext) and a brand
+     * new link is always minted, since a previous link may have expired or burned.
+     * The new share id + delete-token are persisted onto the local row so the note
+     * can later be unshared.
      */
-    private suspend fun shareNoteViaLink(note: com.suvojeet.notenext.data.Note) {
-        val existingId = note.shareId
-        if (existingId != null) {
-            // Reuse: refresh the shared copy (best-effort) and surface the same link.
-            // The unshare token (if we still hold it) comes from the local row.
-            shareRepository.pushUpdate(existingId, note.title, note.content)
-            _events.emit(
-                NotesUiEvent.ShareLinkReady(
-                    com.suvojeet.notenext.data.share.ShareConstants.shareUrl(existingId),
-                    existingId,
-                    note.title,
-                    note.shareDeleteToken
-                )
-            )
-            return
-        }
-        shareRepository.shareNote(note.title, note.content)
+    private suspend fun shareNoteViaLink(
+        note: com.suvojeet.notenext.data.Note,
+        expiry: com.suvojeet.notenext.data.share.ShareExpiry,
+        burnAfterRead: Boolean
+    ) {
+        shareRepository.shareNote(note.title, note.content, expiry, burnAfterRead)
             .onSuccess { result ->
-                // Persist the id + delete-token so re-sharing keeps the same link
-                // and a later unshare can prove ownership.
                 if (note.id != 0) {
                     runCatching {
                         repository.updateNote(
@@ -1661,7 +1670,7 @@ class NotesViewModel @Inject constructor(
                     }
                 }
                 _events.emit(
-                    NotesUiEvent.ShareLinkReady(result.url, result.shareId, note.title, result.deleteToken)
+                    NotesUiEvent.ShareLinkReady(result.url, result.shareId, note.title, result.deleteToken, result.expiresAt)
                 )
             }
             .onFailure {

@@ -168,7 +168,8 @@ fun NavGraph(
 
     LaunchedEffect(sharedNoteId) {
         if (!sharedNoteId.isNullOrBlank()) {
-            navController.navigate(Destination.SharedNote(sharedNoteId)) {
+            // The decryption key rides along in the deep link's fragment / intent extra.
+            navController.navigate(Destination.SharedNote(sharedNoteId, mainViewModel.sharedNoteKey.value)) {
                 launchSingleTop = true
             }
         }

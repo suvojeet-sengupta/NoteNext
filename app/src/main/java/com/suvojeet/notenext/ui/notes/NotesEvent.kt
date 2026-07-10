@@ -31,8 +31,16 @@ sealed class NotesEvent {
     object CopySelectedNotes : NotesEvent()
     object SendSelectedNotes : NotesEvent()
     object ShareSelectedNotesViaLink : NotesEvent()
-    /** Share the note currently open in the editor as a collaborative link. */
+    /** Share the note currently open in the editor as an encrypted link (prompts for options). */
     object ShareCurrentNoteViaLink : NotesEvent()
+    /**
+     * Confirm creating the encrypted share link after the user picked an expiry and
+     * whether it should burn after reading. Acts on the previously-stashed target.
+     */
+    data class ConfirmShareViaLink(
+        val expiry: com.suvojeet.notenext.data.share.ShareExpiry,
+        val burnAfterRead: Boolean
+    ) : NotesEvent()
     /**
      * Stop sharing (delete from backend) the note behind a share link. Carries the
      * creator's secret delete-token; the local row's shareId/token are cleared on success.

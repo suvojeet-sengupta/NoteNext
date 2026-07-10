@@ -89,7 +89,7 @@ fun NotesScreen(
     onMenuClick: () -> Unit = {},
     onDrawingClick: () -> Unit = {},
     onTodoClick: () -> Unit = {},
-    onOpenSharedNote: (String) -> Unit = {},
+    onOpenSharedNote: (String, String?) -> Unit = { _, _ -> },
     events: SharedFlow<NotesUiEvent>
 ) {
     val listState by viewModel.listState.collectAsStateWithLifecycle()
@@ -114,6 +114,7 @@ fun NotesScreen(
     var showShareOptionsDialog by remember { mutableStateOf(false) }
     var showPinnedReorderSheet by remember { mutableStateOf(false) }
     var shareLinkReady by remember { mutableStateOf<NotesUiEvent.ShareLinkReady?>(null) }
+    var showShareLinkConfig by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -167,6 +168,9 @@ fun NotesScreen(
                 is NotesUiEvent.ScrollToSearchResult -> {}
                 is NotesUiEvent.ShareLinkReady -> {
                     shareLinkReady = event
+                }
+                is NotesUiEvent.ShowShareOptions -> {
+                    showShareLinkConfig = true
                 }
             }
         }
@@ -421,6 +425,16 @@ fun NotesScreen(
                             )
                         }
 
+                        if (showShareLinkConfig) {
+                            ShareLinkConfigDialog(
+                                onDismiss = { showShareLinkConfig = false },
+                                onCreate = { expiry, burn ->
+                                    showShareLinkConfig = false
+                                    viewModel.onEvent(NotesEvent.ConfirmShareViaLink(expiry, burn))
+                                }
+                            )
+                        }
+
                         shareLinkReady?.let { link ->
                             ShareLinkDialog(
                                 url = link.url,
@@ -438,8 +452,10 @@ fun NotesScreen(
                                 },
                                 onOpen = {
                                     val id = link.shareId
+                                    // The decryption key rides in the link fragment (#...).
+                                    val key = link.url.substringAfter('#', "").takeIf { it.isNotBlank() }
                                     shareLinkReady = null
-                                    onOpenSharedNote(id)
+                                    onOpenSharedNote(id, key)
                                 },
                                 // Only the creator (holder of the delete-token) can revoke.
                                 onStopSharing = link.deleteToken?.let { token ->
