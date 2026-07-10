@@ -57,7 +57,7 @@ Answer: **URL के "fragment" हिस्से में।**
 एक link को देखो:
 
 ```
-https://api.notenext.suvojeetsengupta.in/s/abc123#KEYYAHAN
+https://api-notenext.suvojeetsengupta.in/s/abc123#KEYYAHAN
                                           └─ path ─┘ └fragment┘
 ```
 

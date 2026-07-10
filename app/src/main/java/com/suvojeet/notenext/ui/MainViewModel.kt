@@ -149,7 +149,7 @@ class MainViewModel @Inject constructor(
 
     /**
      * Extracts a note share id from an incoming deep-link URI, or null if it isn't one.
-     * Handles the App Link form (https://api.notenext.suvojeetsengupta.in/s/<id>) and the
+     * Handles the App Link form (https://api-notenext.suvojeetsengupta.in/s/<id>) and the
      * custom-scheme fallback (notenext://note/<id>).
      */
     private fun extractShareId(uri: Uri?): String? {
@@ -160,7 +160,7 @@ class MainViewModel @Inject constructor(
             "http", "https" -> {
                 val host = uri.host?.lowercase()
                 val segments = uri.pathSegments
-                if (host == "api.notenext.suvojeetsengupta.in" &&
+                if (host == "api-notenext.suvojeetsengupta.in" &&
                     segments.size >= 2 && segments[0] == "s"
                 ) {
                     segments[1].takeIf { it.isNotBlank() }

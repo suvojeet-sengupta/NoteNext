@@ -8,8 +8,8 @@ package com.suvojeet.notenext.data.share
  * App Links assetlinks.json live.
  */
 object ShareConstants {
-    /** Origin of the sharing backend (no trailing slash). Used for Socket.IO + URL building. */
-    const val BASE_URL = "https://api.notenext.suvojeetsengupta.in"
+    /** Origin of the sharing backend (no trailing slash). Used for API calling. */
+    const val BASE_URL = "https://api-notenext.suvojeetsengupta.in"
 
     /** Retrofit base URL (must end with a slash). */
     const val API_BASE_URL = "$BASE_URL/"

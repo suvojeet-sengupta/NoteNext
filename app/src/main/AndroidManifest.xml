@@ -81,7 +81,7 @@
                 <data android:pathPattern=".*\\.json" />
                 <data android:pathPattern=".*\\.xml" />
             </intent-filter>
-            <!-- Shared-note App Links: https://api.notenext.suvojeetsengupta.in/s/<id>
+            <!-- Shared-note App Links: https://api-notenext.suvojeetsengupta.in/s/<id>
                  Opens directly in the app once the domain is verified via
                  /.well-known/assetlinks.json (served by the backend). -->
             <intent-filter android:autoVerify="true">
@@ -90,7 +90,7 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="https" />
                 <data android:scheme="http" />
-                <data android:host="api.notenext.suvojeetsengupta.in" />
+                <data android:host="api-notenext.suvojeetsengupta.in" />
                 <data android:pathPrefix="/s/" />
             </intent-filter>
 
