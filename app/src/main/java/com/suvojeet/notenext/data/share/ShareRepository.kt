@@ -23,6 +23,7 @@ class ShareRepository @Inject constructor(
         content: String,
         expiry: ShareExpiry = ShareExpiry.DEFAULT,
         burnAfterRead: Boolean = false,
+        maxReads: Int = 1,
         sharedBy: String? = null
     ): Result<ShareResult> = runCatching {
         val enc = ShareCrypto.encrypt(title, content)
@@ -32,16 +33,27 @@ class ShareRepository @Inject constructor(
                 iv = enc.iv,
                 sharedBy = sharedBy,
                 expiresIn = expiry.apiValue,
-                burnAfterRead = burnAfterRead
+                burnAfterRead = burnAfterRead,
+                maxReads = maxReads
             )
         )
         val base = response.shareUrl ?: ShareConstants.shareUrl(response.shareId)
         ShareResult(
             shareId = response.shareId,
             url = "$base#${enc.keyFragment}",
+            key = enc.keyFragment,
             deleteToken = response.deleteToken,
             expiresAt = response.expiresAt
         )
+    }
+
+    /**
+     * Non-consuming check of whether a previously-created share still exists (not
+     * expired / not fully burned). Used to decide whether a re-share can reuse the
+     * existing link. Fails with an HttpException(404/410) when the share is gone.
+     */
+    suspend fun checkStatus(shareId: String): Result<ShareStatusDto> = runCatching {
+        api.getStatus(shareId)
     }
 
     /**

@@ -39,7 +39,9 @@ sealed class NotesEvent {
      */
     data class ConfirmShareViaLink(
         val expiry: com.suvojeet.notenext.data.share.ShareExpiry,
-        val burnAfterRead: Boolean
+        val burnAfterRead: Boolean,
+        /** Reads allowed before a burn-after-read note self-destructs (only used when burn is on). */
+        val maxReads: Int = 1
     ) : NotesEvent()
     /**
      * Stop sharing (delete from backend) the note behind a share link. Carries the

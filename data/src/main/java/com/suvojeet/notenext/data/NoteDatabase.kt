@@ -20,7 +20,7 @@ import com.suvojeet.notenext.data.ai.AIUsageEvent
 import com.suvojeet.notenext.data.ai.AIUsageDao
 import kotlinx.serialization.builtins.ListSerializer
 
-@Database(entities = [Note::class, Label::class, Attachment::class, Project::class, NoteFts::class, ChecklistItem::class, NoteVersion::class, TodoItem::class, TodoSubtask::class, AIUsageEvent::class], version = 32, exportSchema = true)
+@Database(entities = [Note::class, Label::class, Attachment::class, Project::class, NoteFts::class, ChecklistItem::class, NoteVersion::class, TodoItem::class, TodoSubtask::class, AIUsageEvent::class], version = 33, exportSchema = true)
 @TypeConverters(Converters::class)
 abstract class NoteDatabase : RoomDatabase() {
 
@@ -32,6 +32,14 @@ abstract class NoteDatabase : RoomDatabase() {
     abstract fun aiUsageDao(): AIUsageDao
 
     companion object {
+        val MIGRATION_32_33 = object : Migration(32, 33) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Stores the E2E key of the last share link so a re-share can reuse
+                // the same link (dedup) instead of minting a new one.
+                db.execSQL("ALTER TABLE notes ADD COLUMN shareKey TEXT")
+            }
+        }
+
         val MIGRATION_31_32 = object : Migration(31, 32) {
             override fun migrate(db: SupportSQLiteDatabase) {
                 db.execSQL("ALTER TABLE notes ADD COLUMN shareDeleteToken TEXT")

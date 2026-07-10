@@ -17,6 +17,8 @@ sealed class NotesUiEvent {
     ) : NotesUiEvent()
     /** Ask the UI to show the expiry / burn-after-read picker before creating a share link. */
     object ShowShareOptions : NotesUiEvent()
+    /** Toggle a "checking existing link…" progress indicator during re-share dedup. */
+    data class ShareLinkChecking(val checking: Boolean) : NotesUiEvent()
     data class ShowSnackbar(
         val message: String,
         val actionLabel: String? = null,

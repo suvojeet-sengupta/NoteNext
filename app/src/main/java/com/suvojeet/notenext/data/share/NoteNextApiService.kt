@@ -22,6 +22,13 @@ interface NoteNextApiService {
     suspend fun getNote(@Path("shareId") shareId: String): SharedNoteDto
 
     /**
+     * Non-consuming existence/metadata check — does NOT count as a read, so it never
+     * burns a burn-after-read note. Throws on 404 (missing) / 410 (expired).
+     */
+    @GET("api/notes/{shareId}/status")
+    suspend fun getStatus(@Path("shareId") shareId: String): ShareStatusDto
+
+    /**
      * Delete (unshare) a note. The backend authorizes via the secret delete-token
      * (creator-only), supplied in the x-delete-token header — a public shareId
      * alone cannot delete a note.

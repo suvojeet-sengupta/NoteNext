@@ -40,8 +40,10 @@ data class ShareNoteRequest(
     val sharedBy: String? = null,
     /** Expiry preset key ("10m" | "1h" | "1d" | "7d"). Server defaults to 1d if null/unknown. */
     val expiresIn: String? = null,
-    /** When true, the note is deleted on its first read. */
-    val burnAfterRead: Boolean = false
+    /** When true, the note is deleted after [maxReads] reads. */
+    val burnAfterRead: Boolean = false,
+    /** Reads allowed before a burn-after-read note self-destructs (server clamps 1..10). */
+    val maxReads: Int = 1
 )
 
 /**
@@ -57,9 +59,21 @@ data class SharedNoteDto(
     val sharedBy: String? = null,
     val expiresAt: String? = null,
     val burnAfterRead: Boolean = false,
-    /** True on the response that consumed a burn-after-read note. */
+    val maxReads: Int = 1,
+    /** True on the response that consumed the last allowed read of a burn note. */
     val burned: Boolean = false,
     val createdAt: String? = null
+)
+
+/** Lightweight status of a share, from GET /api/notes/:id/status (does NOT consume a read). */
+@Serializable
+data class ShareStatusDto(
+    val exists: Boolean = false,
+    val shareId: String? = null,
+    val expiresAt: String? = null,
+    val burnAfterRead: Boolean = false,
+    val maxReads: Int = 1,
+    val views: Int = 0
 )
 
 /** Response from POST /api/notes/share. */
@@ -75,7 +89,8 @@ data class ShareNoteResponse(
      */
     val deleteToken: String? = null,
     val expiresAt: String? = null,
-    val burnAfterRead: Boolean = false
+    val burnAfterRead: Boolean = false,
+    val maxReads: Int = 1
 )
 
 /** Result of creating a share link, ready to hand to the UI. */
@@ -83,6 +98,8 @@ data class ShareResult(
     val shareId: String,
     /** Full shareable link INCLUDING the "#<key>" fragment. */
     val url: String,
+    /** Base64url AES key (the "#<key>" fragment), stored locally to reuse the link. */
+    val key: String,
     /** Secret token required to later unshare this note (creator-only proof). */
     val deleteToken: String? = null,
     /** ISO-8601 expiry timestamp, for display. */

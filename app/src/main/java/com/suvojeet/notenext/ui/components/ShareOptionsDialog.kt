@@ -240,10 +240,12 @@ fun ShareLinkDialog(
 @Composable
 fun ShareLinkConfigDialog(
     onDismiss: () -> Unit,
-    onCreate: (expiry: ShareExpiry, burnAfterRead: Boolean) -> Unit
+    onCreate: (expiry: ShareExpiry, burnAfterRead: Boolean, maxReads: Int) -> Unit
 ) {
+    val readChoices = listOf(1, 2, 3, 5)
     var expiry by remember { mutableStateOf(ShareExpiry.DEFAULT) }
     var burnAfterRead by remember { mutableStateOf(false) }
+    var maxReads by remember { mutableStateOf(1) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -325,6 +327,26 @@ fun ShareLinkConfigDialog(
                     Switch(checked = burnAfterRead, onCheckedChange = { burnAfterRead = it })
                 }
 
+                // Configurable read count — only relevant when burn-after-read is on.
+                if (burnAfterRead) {
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        text = "Delete after how many reads?",
+                        style = MaterialTheme.typography.titleSmall,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Spacer(Modifier.height(10.dp))
+                    FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        readChoices.forEach { n ->
+                            FilterChip(
+                                selected = maxReads == n,
+                                onClick = { maxReads = n },
+                                label = { Text(if (n == 1) "1 read" else "$n reads") }
+                            )
+                        }
+                    }
+                }
+
                 Spacer(Modifier.height(20.dp))
 
                 Row(
@@ -333,12 +355,37 @@ fun ShareLinkConfigDialog(
                 ) {
                     TextButton(onClick = onDismiss) { Text("Cancel") }
                     Spacer(Modifier.width(8.dp))
-                    Button(onClick = { onCreate(expiry, burnAfterRead) }) {
+                    Button(onClick = { onCreate(expiry, burnAfterRead, if (burnAfterRead) maxReads else 1) }) {
                         Icon(Icons.Default.Link, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
                         Text("Create link")
                     }
                 }
+            }
+        }
+    }
+}
+
+/** Small blocking progress shown while we check whether an existing share link can be reused. */
+@Composable
+fun ShareLinkCheckingDialog() {
+    Dialog(onDismissRequest = { /* not dismissable — quick check */ }) {
+        Card(
+            shape = RoundedCornerShape(24.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
+        ) {
+            Row(
+                modifier = Modifier.padding(24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CircularProgressIndicator(modifier = Modifier.size(22.dp), strokeWidth = 2.5.dp)
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = "Checking existing link…",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
             }
         }
     }

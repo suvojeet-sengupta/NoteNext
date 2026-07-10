@@ -115,6 +115,7 @@ fun NotesScreen(
     var showPinnedReorderSheet by remember { mutableStateOf(false) }
     var shareLinkReady by remember { mutableStateOf<NotesUiEvent.ShareLinkReady?>(null) }
     var showShareLinkConfig by remember { mutableStateOf(false) }
+    var shareLinkChecking by remember { mutableStateOf(false) }
 
     val context = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -171,6 +172,9 @@ fun NotesScreen(
                 }
                 is NotesUiEvent.ShowShareOptions -> {
                     showShareLinkConfig = true
+                }
+                is NotesUiEvent.ShareLinkChecking -> {
+                    shareLinkChecking = event.checking
                 }
             }
         }
@@ -428,11 +432,15 @@ fun NotesScreen(
                         if (showShareLinkConfig) {
                             ShareLinkConfigDialog(
                                 onDismiss = { showShareLinkConfig = false },
-                                onCreate = { expiry, burn ->
+                                onCreate = { expiry, burn, maxReads ->
                                     showShareLinkConfig = false
-                                    viewModel.onEvent(NotesEvent.ConfirmShareViaLink(expiry, burn))
+                                    viewModel.onEvent(NotesEvent.ConfirmShareViaLink(expiry, burn, maxReads))
                                 }
                             )
+                        }
+
+                        if (shareLinkChecking) {
+                            ShareLinkCheckingDialog()
                         }
 
                         shareLinkReady?.let { link ->

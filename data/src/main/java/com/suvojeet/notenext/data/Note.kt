@@ -58,7 +58,13 @@ data class Note(
      * delete (unshare) the note later — proves we are the creator, since the app
      * has no accounts. Stored only on this device; never displayed.
      */
-    val shareDeleteToken: String? = null
+    val shareDeleteToken: String? = null,
+    /**
+     * Base64url AES key from the last share link's fragment. The server never sees
+     * it, so we keep it here to rebuild the SAME link on a re-share (dedup) instead
+     * of minting a new one. Cleared when the note is unshared.
+     */
+    val shareKey: String? = null
 ) {
     fun toNoteSummary(): NoteSummary {
         return NoteSummary(
