@@ -26,8 +26,10 @@ jobs:
     - name: Extract Version Info
       id: version_info
       run: |
-        VERSION_NAME=$(grep "appVersionName=" gradle.properties | cut -d'=' -f2)
-        VERSION_CODE=$(grep "appVersionCode=" gradle.properties | cut -d'=' -f2)
+        # tr strips any stray CR (gradle.properties uses CRLF) / whitespace so the
+        # value can't smuggle a carriage return into the git tag and break the release.
+        VERSION_NAME=$(grep "appVersionName=" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
+        VERSION_CODE=$(grep "appVersionCode=" gradle.properties | cut -d'=' -f2 | tr -d '[:space:]')
         echo "VERSION_NAME=$VERSION_NAME" >> $GITHUB_ENV
         echo "VERSION_CODE=$VERSION_CODE" >> $GITHUB_ENV
         echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
@@ -124,4 +126,3 @@ jobs:
         files: |
           ${{ env.APK_PATH }}
           ${{ env.AAB_PATH }}
-        overwrite: true
