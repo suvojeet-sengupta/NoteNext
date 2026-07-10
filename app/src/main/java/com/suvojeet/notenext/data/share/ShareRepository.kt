@@ -37,7 +37,7 @@ class ShareRepository @Inject constructor(
                 maxReads = maxReads
             )
         )
-        val base = response.shareUrl ?: ShareConstants.shareUrl(response.shareId)
+        val base = ShareConstants.shareUrl(response.shareId)
         ShareResult(
             shareId = response.shareId,
             url = "$base#${enc.keyFragment}",
