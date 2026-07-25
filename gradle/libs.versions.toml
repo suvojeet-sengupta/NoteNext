@@ -1,8 +1,9 @@
 [versions]
 # SDK Versions
-# compileSdk must be 37: the Compose BOM 2026.02.01 / material3 1.5.0-alpha21 alphas
-# declare a minCompileSdk of 37 via AAR metadata. targetSdk stays 36 so runtime
-# behavior is unchanged (compileSdk only widens the APIs available at compile time).
+# compileSdk stays 37 for the Compose BOM 2026.02.01 alphas. material3 dropped its
+# own minCompileSdk 37 requirement in 1.5.0-alpha23, but the BOM still pulls other
+# artifacts that want it. targetSdk stays 36 so runtime behavior is unchanged
+# (compileSdk only widens the APIs available at compile time).
 compileSdk = "37"
 minSdk     = "24"
 targetSdk  = "36"
@@ -17,7 +18,7 @@ kotlin-serialization = "2.3.21"         # must stay in sync with kotlin
 
 # ── Compose & Material ──────────────────────────────────────────
 composeBom     = "2026.02.01"
-material3      = "1.5.0-alpha21"        # M3 Expressive — stabilized alpha
+material3      = "1.5.0-alpha24"        # M3 Expressive — stabilized alpha
 dynamicColor   = "1.0.0"
 graphicsShapes = "1.0.1"
 animation      = "1.1.0"
@@ -32,7 +33,7 @@ activity-compose        = "1.10.1"
 room                    = "2.8.4"
 navigation-compose      = "2.9.5"
 datastore               = "1.2.1"
-biometric               = "1.4.0-alpha05"
+biometric               = "1.4.0-alpha07"
 work                    = "2.11.0"
 hilt-navigation-compose = "1.3.0"
 hilt-work               = "1.3.0"
@@ -41,7 +42,11 @@ google-fonts            = "1.7.8"
 paging                  = "3.4.1"
 documentfile            = "1.1.0"
 core-splashscreen       = "1.0.1"
-security-crypto         = "1.1.0-alpha06"
+# 1.1.0 is the final stable release. Google has deprecated every API in this
+# artifact (EncryptedSharedPreferences / EncryptedFile / MasterKey) in favour of
+# using the Android Keystore directly, so this is a stability stop-gap, not a
+# long-term home — see SecurityUtils.kt.
+security-crypto         = "1.1.0"
 
 # ── Image Loading (MAJOR: Coil 2 → Coil 3) ─────────────────────
 # Group ID changes from io.coil-kt  →  io.coil-kt.coil3
