@@ -238,35 +238,46 @@ class BackupRepository @Inject constructor(
             writeEntryWithHash("todo_subtasks.json", json.encodeToString(ListSerializer(TodoSubtask.serializer()), subtasks).toByteArray())
         }
 
-        // Backup attachments with deduplication
+        // Backup attachments with deduplication.
+        // distinctBy(uri) so a file attached to several notes is hashed and written
+        // once; every note's attachment row still resolves through attachmentUriMap,
+        // which is keyed by that same URI.
         if (includeAttachments && notes.isNotEmpty()) {
             val processedHashes = mutableSetOf<String>()
-            val attachments = notes.flatMap { it.attachments }
-            
+            val attachments = notes.flatMap { it.attachments }.distinctBy { it.uri }
+
             attachments.forEach { attachment ->
                 try {
                     val attachmentUri = Uri.parse(attachment.uri)
-                    context.contentResolver.openInputStream(attachmentUri)?.use { inputStream ->
-                        val bytes = inputStream.readBytes()
-                        val hash = MessageDigest.getInstance("SHA-256").digest(bytes).joinToString("") { "%02x".format(it) }
-                        
-                        val documentFile = androidx.documentfile.provider.DocumentFile.fromSingleUri(context, attachmentUri)
-                        val fileName = documentFile?.name ?: File(attachmentUri.path ?: "attachment").name
-                        val ext = fileName.substringAfterLast('.', "")
-                        val entryName = if (ext.isNotEmpty()) "attachments/$hash.$ext" else "attachments/$hash"
-                        
-                        // Map original URI to the ZIP entry name for later restoration (Fix 1)
-                        attachmentUriMap[attachment.uri] = entryName
 
-                        if (hash !in processedHashes) {
+                    // Pass 1: hash the file without holding it in memory. The old
+                    // readBytes() pulled every attachment in whole — a handful of
+                    // voice notes or videos was enough to OOM the backup.
+                    val hash = hashAttachment(attachmentUri)
+                    if (hash == null) {
+                        missingAttachmentsCount++
+                        return@forEach
+                    }
+
+                    val entryName = attachmentEntryName(hash, attachmentUri, attachment.mimeType)
+                    attachmentUriMap[attachment.uri] = entryName
+
+                    if (hash !in processedHashes) {
+                        // Pass 2: stream the bytes straight into the archive.
+                        val streamed = context.contentResolver.openInputStream(attachmentUri)?.use { input ->
                             zos.putNextEntry(ZipEntry(entryName))
-                            zos.write(bytes)
+                            input.copyTo(zos, ATTACHMENT_BUFFER_SIZE)
                             zos.closeEntry()
-                            
+                            true
+                        } ?: false
+
+                        if (streamed) {
                             manifest[entryName] = hash
                             processedHashes.add(hash)
+                        } else {
+                            missingAttachmentsCount++
                         }
-                    } ?: run { missingAttachmentsCount++ }
+                    }
                 } catch (e: Exception) {
                     missingAttachmentsCount++
                     e.printStackTrace()
@@ -488,24 +499,90 @@ class BackupRepository @Inject constructor(
         }
     }
 
-    suspend fun extractAttachmentsFromZip(uri: Uri, attachmentsToExtract: List<Pair<String, File>>) {
+    /**
+     * Streams the SHA-256 of an attachment without materialising it in memory.
+     * Returns null when the URI can no longer be opened (file moved or the
+     * permission grant was revoked), which the caller counts as missing.
+     */
+    private fun hashAttachment(uri: Uri): String? {
+        val md = MessageDigest.getInstance("SHA-256")
+        val input = context.contentResolver.openInputStream(uri) ?: return null
+        input.use {
+            val buffer = ByteArray(ATTACHMENT_BUFFER_SIZE)
+            var read: Int
+            while (it.read(buffer).also { n -> read = n } > 0) {
+                md.update(buffer, 0, read)
+            }
+        }
+        return md.digest().joinToString("") { "%02x".format(it) }
+    }
+
+    /**
+     * Names an archive entry after its content hash, keeping a file extension so
+     * restored attachments still open in a player or viewer.
+     *
+     * The declared mime type is consulted first: attachments coming from
+     * MediaStore — camera photos and voice recordings especially — routinely
+     * have a display name with no extension, and deriving the name from the
+     * filename alone restored them as extensionless files that some players and
+     * gallery apps refuse to open.
+     */
+    private fun attachmentEntryName(hash: String, uri: Uri, mimeType: String): String {
+        val fromMime = android.webkit.MimeTypeMap.getSingleton()
+            .getExtensionFromMimeType(mimeType)
+            ?.takeIf { it.isNotBlank() }
+
+        val ext = fromMime ?: run {
+            val fileName = androidx.documentfile.provider.DocumentFile.fromSingleUri(context, uri)?.name
+                ?: File(uri.path ?: "attachment").name
+            fileName.substringAfterLast('.', "").takeIf { it.isNotBlank() }
+        }
+        return if (ext != null) "attachments/$hash.$ext" else "attachments/$hash"
+    }
+
+    /**
+     * Writes the requested archive entries out to their target files.
+     *
+     * Attachments are deduplicated by content hash when the backup is written,
+     * so a single entry can back several attachment rows. A zip entry's bytes
+     * can only be read once, so the first target is streamed from the archive
+     * and the remaining targets are copied from that file — re-reading the
+     * stream per target left every target after the first as a 0-byte file,
+     * silently corrupting any image or voice note shared across notes.
+     *
+     * Returns the number of targets that could not be written, so callers can
+     * tell the user rather than leaving notes pointing at files that never
+     * arrived.
+     */
+    suspend fun extractAttachmentsFromZip(
+        uri: Uri,
+        attachmentsToExtract: List<Pair<String, File>>
+    ): Int {
+        if (attachmentsToExtract.isEmpty()) return 0
+
+        // Grouped up front: matching by scanning the whole list per entry made
+        // restore O(entries × attachments).
+        val targetsByEntry: Map<String, List<File>> =
+            attachmentsToExtract.groupBy({ it.first }, { it.second })
+        val extracted = mutableSetOf<String>()
+
         context.contentResolver.openInputStream(uri)?.use { inputStream ->
             ZipInputStream(inputStream).use { zis ->
                 var zipEntry = zis.nextEntry
                 while (zipEntry != null) {
-                    val entryName = zipEntry.name
-                    // Find all targets that need this entry
-                    val targets = attachmentsToExtract.filter { it.first == entryName }
-                    targets.forEach { (_, targetFile) ->
+                    val targets = targetsByEntry[zipEntry.name]
+                    if (!targets.isNullOrEmpty()) {
                         try {
-                            FileOutputStream(targetFile).use { fos ->
-                                // Copy without closing the ZIS
-                                val buffer = ByteArray(8192)
-                                var length: Int
-                                while (zis.read(buffer).also { length = it } > 0) {
-                                    fos.write(buffer, 0, length)
-                                }
+                            val first = targets.first()
+                            first.parentFile?.mkdirs()
+                            FileOutputStream(first).use { fos ->
+                                zis.copyTo(fos, ATTACHMENT_BUFFER_SIZE)
                             }
+                            targets.drop(1).forEach { target ->
+                                target.parentFile?.mkdirs()
+                                first.copyTo(target, overwrite = true)
+                            }
+                            extracted.add(zipEntry.name)
                         } catch (e: Exception) {
                             e.printStackTrace()
                         }
@@ -514,5 +591,14 @@ class BackupRepository @Inject constructor(
                 }
             }
         }
+
+        return targetsByEntry
+            .filterKeys { it !in extracted }
+            .values
+            .sumOf { it.size }
+    }
+
+    private companion object {
+        const val ATTACHMENT_BUFFER_SIZE = 8192
     }
 }

@@ -353,12 +353,13 @@ class BackupRestoreViewModel @Inject constructor(
                 }
                 
                 try {
-                    application.contentResolver.openInputStream(uri)?.use { inputStream ->
+                    val missing = application.contentResolver.openInputStream(uri)?.use { inputStream ->
                         ZipInputStream(inputStream).use { zis ->
                             readBackupFromZip(zis, merge, uri)
                         }
-                    }
-                    _state.update { it.copy(isRestoring = false, restoreResult = if (merge) "Merge successful" else "Local Restore successful") }
+                    } ?: 0
+                    val result = if (merge) "Merge successful" else "Local Restore successful"
+                    _state.update { it.copy(isRestoring = false, restoreResult = withMissingAttachments(result, missing)) }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     _state.update { it.copy(isRestoring = false, restoreResult = "Local Restore failed: ${e.message}") }
@@ -378,12 +379,13 @@ class BackupRestoreViewModel @Inject constructor(
                 try {
                     val tempZipFile = backupRepository.decryptBackupToTempFile(uri, password)
                     try {
-                        java.io.FileInputStream(tempZipFile).use { inputStream ->
+                        val missing = java.io.FileInputStream(tempZipFile).use { inputStream ->
                             ZipInputStream(inputStream).use { zis ->
                                 readBackupFromZip(zis, merge, Uri.fromFile(tempZipFile))
                             }
                         }
-                        _state.update { it.copy(isRestoring = false, restoreResult = if (merge) "Encrypted Merge successful" else "Encrypted Restore successful", pendingRestoreUri = null, pendingMerge = false) }
+                        val result = if (merge) "Encrypted Merge successful" else "Encrypted Restore successful"
+                        _state.update { it.copy(isRestoring = false, restoreResult = withMissingAttachments(result, missing), pendingRestoreUri = null, pendingMerge = false) }
                     } finally {
                         if (tempZipFile.exists()) tempZipFile.delete()
                     }
@@ -410,7 +412,8 @@ class BackupRestoreViewModel @Inject constructor(
         _state.update { it.copy(isPasswordRequired = false, pendingRestoreUri = null) }
     }
     
-    private suspend fun readBackupFromZip(zis: ZipInputStream, merge: Boolean = false, zipUri: Uri) {
+    /** Returns the number of attachments the archive could not supply. */
+    private suspend fun readBackupFromZip(zis: ZipInputStream, merge: Boolean = false, zipUri: Uri): Int {
         val oldToNewProjectIds = mutableMapOf<Int, Int>()
         var notesJson: String? = null
         var labelsJson: String? = null
@@ -631,10 +634,20 @@ class BackupRestoreViewModel @Inject constructor(
         }
 
         // Pass 4: Extract Attachment Files (Fix 2)
-        if (attachmentsToExtract.isNotEmpty()) {
+        return if (attachmentsToExtract.isNotEmpty()) {
             backupRepository.extractAttachmentsFromZip(zipUri, attachmentsToExtract)
+        } else {
+            0
         }
     }
+
+    /**
+     * Appends a note about attachments the archive could not supply. Restoring
+     * the text but silently dropping images and voice notes reads as success
+     * otherwise, and the user only finds out when they open the note.
+     */
+    private fun withMissingAttachments(message: String, missing: Int): String =
+        if (missing > 0) "$message ($missing attachment(s) missing)" else message
 
     fun importFromGoogleKeep(uri: Uri) {
         viewModelScope.launch {
