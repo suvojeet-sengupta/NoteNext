@@ -833,17 +833,15 @@ class NotesViewModel @Inject constructor(
                                 AnnotatedString("")
                             }
                             
-                            val checklist = if (note.noteType == NoteType.CHECKLIST) {
-                                noteWithAttachments.checklistItems.sortedBy { it.position }.map { item ->
-                                    if (note.isLocked && item.isEncrypted) {
-                                        com.suvojeet.notenext.util.CryptoUtils.decryptChecklistItem(item, isLocked = true)
-                                    } else {
-                                        item
-                                    }
-                                }.toImmutableList()
-                            } else {
-                                persistentListOf<ChecklistItem>()
-                            }
+                            // Loaded for every note type: a TEXT note can also carry tick
+                            // boxes appended below its body, not just CHECKLIST notes.
+                            val checklist = noteWithAttachments.checklistItems.sortedBy { it.position }.map { item ->
+                                if (note.isLocked && item.isEncrypted) {
+                                    com.suvojeet.notenext.util.CryptoUtils.decryptChecklistItem(item, isLocked = true)
+                                } else {
+                                    item
+                                }
+                            }.toImmutableList()
 
                             viewModelScope.launch {
                                 repository.getNoteVersions(event.noteId).collect { versions ->
@@ -1330,14 +1328,18 @@ class NotesViewModel @Inject constructor(
             is NotesEvent.OnToggleNoteType -> {
                 val currentType = editState.value.editingNoteType
                 if (currentType == NoteType.TEXT) {
-                    // Convert TEXT to CHECKLIST
+                    // Convert TEXT to CHECKLIST. Tick boxes the note already carried are
+                    // kept and the converted body lines are appended after them, so the
+                    // conversion never discards existing items.
+                    val existingItems = editState.value.editingChecklist
                     val lines = editState.value.editingContent.text.split("\n")
-                    val checklistItems = lines.filter { it.isNotBlank() }.mapIndexed { index, text ->
-                        ChecklistItem(text = text.trim(), isChecked = false, position = index)
+                    val convertedItems = lines.filter { it.isNotBlank() }.mapIndexed { index, text ->
+                        ChecklistItem(text = text.trim(), isChecked = false, position = existingItems.size + index)
                     }
+                    val merged = existingItems + convertedItems
                     // If empty, add one empty item
-                    val finalItems = if (checklistItems.isEmpty()) listOf(ChecklistItem(text = "", isChecked = false, position = 0)) else checklistItems
-                    
+                    val finalItems = merged.ifEmpty { listOf(ChecklistItem(text = "", isChecked = false, position = 0)) }
+
                     savedStateHandle[KEY_NOTE_TYPE] = NoteType.CHECKLIST.name
                     savedStateHandle[KEY_EDITING_CONTENT] = ""
 
@@ -1818,7 +1820,16 @@ class NotesViewModel @Inject constructor(
             ""
         }
 
-        if (title.isBlank() && (editState.value.editingNoteType == NoteType.TEXT && content.isBlank() || editState.value.editingNoteType == NoteType.CHECKLIST && editState.value.editingChecklist.all { it.text.isBlank() })) {
+        // A TEXT note is only "empty" when its tick boxes are blank too — otherwise a
+        // note holding nothing but checkboxes would be silently binned.
+        val checklistIsBlank = editState.value.editingChecklist.all { it.text.isBlank() }
+        val bodyIsBlank = if (editState.value.editingNoteType == NoteType.CHECKLIST) {
+            checklistIsBlank
+        } else {
+            content.isBlank() && checklistIsBlank
+        }
+
+        if (title.isBlank() && bodyIsBlank) {
             if (noteId != -1) { // It's an existing note, so delete it
                 repository.getNoteById(noteId)?.let { repository.updateNote(it.note.copy(isBinned = true, binnedOn = System.currentTimeMillis())) }
             }
@@ -1897,8 +1908,9 @@ class NotesViewModel @Inject constructor(
                     noteId
                 }
 
-                // Handle Checklist Items
-                if (editState.value.editingNoteType == NoteType.CHECKLIST) {
+                // Handle Checklist Items — persisted for TEXT notes too, since tick
+                // boxes can be appended below a text body.
+                run {
                     val checklistItems = editState.value.editingChecklist.mapIndexed { index, item ->
                         item.copy(noteId = currentNoteId, position = index)
                     }

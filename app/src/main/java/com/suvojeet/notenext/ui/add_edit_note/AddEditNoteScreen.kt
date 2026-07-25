@@ -532,6 +532,20 @@ fun AddEditNoteScreen(
                                     onSlashCommand = { showSlashCommandSheet = true },
                                     onTextLayout = { textLayoutResult = it }
                                 )
+
+                                // A text note can carry tick boxes appended below its body.
+                                // They only appear once the user actually adds one, so plain
+                                // notes look unchanged.
+                                if (state.editingChecklist.isNotEmpty()) {
+                                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                                    ChecklistEditor(
+                                        state = state,
+                                        onEvent = onEvent,
+                                        isCheckedItemsExpanded = state.isCheckedItemsExpanded,
+                                        onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) },
+                                        backgroundColor = backgroundColor
+                                    )
+                                }
                             }
 
                             if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
@@ -706,16 +720,20 @@ fun AddEditNoteScreen(
         com.suvojeet.notenext.ui.components.ShareOptionsDialog(
             onDismiss = { showShareOptions = false },
             onShareAsText = {
-                val shareContent = if (state.editingNoteType == com.suvojeet.notenext.core.model.NoteType.CHECKLIST) {
-                    buildString {
+                val shareContent = buildString {
+                    if (state.editingNoteType != com.suvojeet.notenext.core.model.NoteType.CHECKLIST) {
+                        append(state.editingContent.text)
+                    }
+                    // Tick boxes belong to both note types — a text note's checkboxes
+                    // used to be dropped from the shared text entirely.
+                    if (state.editingChecklist.isNotEmpty()) {
+                        if (isNotEmpty()) append('\n')
                         state.editingChecklist.forEach { item ->
                             append(if (item.isChecked) "[x] " else "[ ] ")
                             append(item.text)
                             append('\n')
                         }
                     }
-                } else {
-                    state.editingContent.text
                 }
                 val sendIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
                     type = "text/plain"
@@ -862,7 +880,10 @@ fun AddEditNoteScreen(
                     showSlashCommandSheet = false
                     when (command.title) {
                         "Heading 1" -> onEvent(NotesEvent.ApplyHeadingStyle(1))
-                        "Checklist" -> if (state.editingNoteType == NoteType.TEXT) onEvent(NotesEvent.OnToggleNoteType)
+                        // Appends a single tick box below the note. Converting the whole
+                        // note to a checklist is a separate, explicit action in the
+                        // "More options" sheet ("List View").
+                        "Checklist" -> onEvent(NotesEvent.AddChecklistItem)
                         "Image" -> getContent.launch("image/*")
                         "Bulleted List" -> onEvent(NotesEvent.ApplyBulletedList)
                     }
@@ -913,7 +934,7 @@ fun AddEditNoteScreen(
             onAudioClick = {
                 Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
             },
-            onTickBoxesClick = { onEvent(NotesEvent.OnToggleNoteType) }
+            onTickBoxesClick = { onEvent(NotesEvent.AddChecklistItem) }
         )
     }
 }

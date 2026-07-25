@@ -220,8 +220,10 @@ fun NoteItem(
                         )
                     }
                 } else {
-                    if ((decryptedNote.noteType == NoteType.TEXT && decryptedNote.content.isNotEmpty()) || (decryptedNote.noteType == NoteType.CHECKLIST && note.checklistItems.isNotEmpty())) {
-                        if (decryptedNote.noteType == NoteType.TEXT) {
+                    // A TEXT note can carry tick boxes below its body, so checklist items
+                    // alone are enough to render a preview for either note type.
+                    if ((decryptedNote.noteType == NoteType.TEXT && decryptedNote.content.isNotEmpty()) || note.checklistItems.isNotEmpty()) {
+                        if (decryptedNote.noteType == NoteType.TEXT && decryptedNote.content.isNotEmpty()) {
                             val rawContentLength = decryptedNote.content.length
                             
                             val typography = MaterialTheme.typography
@@ -320,6 +322,15 @@ fun NoteItem(
                                 }
                             )
                         } else {
+                            ChecklistPreview(note.checklistItems, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor, searchQuery)
+                        }
+
+                        // Text body was rendered above — append its tick boxes underneath.
+                        if (decryptedNote.noteType == NoteType.TEXT &&
+                            decryptedNote.content.isNotEmpty() &&
+                            note.checklistItems.isNotEmpty()
+                        ) {
+                            Spacer(modifier = Modifier.height(8.dp))
                             ChecklistPreview(note.checklistItems, if (isDefaultColor) MaterialTheme.colorScheme.onSurface else contentColor, searchQuery)
                         }
                     }
