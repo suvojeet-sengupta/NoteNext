@@ -23,6 +23,18 @@ class DonationViewModel @Inject constructor(
         billingManager.launchPurchaseFlow(activity, product)
     }
 
+    /**
+     * Re-check Play on every resume: a deferred payment (UPI, cash) can settle
+     * while the user is outside the app, and that purchase still needs consuming.
+     */
+    fun refresh() {
+        billingManager.refresh()
+    }
+
+    fun retry() {
+        billingManager.retry()
+    }
+
     fun resetPurchaseState() {
         billingManager.resetPurchaseState()
     }

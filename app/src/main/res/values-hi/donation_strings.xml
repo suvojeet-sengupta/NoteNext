@@ -21,8 +21,16 @@
     <string name="thank_you_confirm">आपका स्वागत है! 😊</string>
     <string name="connecting_play_store">Play Store से जुड़ रहा है…</string>
     <string name="could_not_connect_play_store">Play Store से कनेक्ट नहीं हो सका</string>
-    <string name="check_internet_try_again">अपना इंटरनेट कनेक्शन जांचें और फिर से प्रयास करें।</string>
-    <string name="loading_options">दान के विकल्प लोड हो रहे हैं…</string>
     <string name="secure_google_play">सभी खरीदारी Google Play के माध्यम से सुरक्षित रूप से संसाधित की जाती हैं।</string>
-    <string name="purchase_failed">खरीदारी विफल रही: %1$s</string>
+    <string name="billing_retry">फिर से प्रयास करें</string>
+    <string name="billing_error_network">अपना इंटरनेट कनेक्शन जांचें और फिर से प्रयास करें।</string>
+    <string name="billing_error_play_unavailable">इस डिवाइस पर Google Play बिलिंग उपलब्ध नहीं है।</string>
+    <string name="billing_error_products_unavailable">दान के विकल्प अभी लोड नहीं हो सके।</string>
+    <string name="billing_error_unknown">Google Play से कनेक्ट करते समय कुछ गलत हो गया।</string>
+    <string name="purchase_error_insufficient_funds">भुगतान अस्वीकृत — आपके भुगतान माध्यम में पर्याप्त राशि नहीं है।</string>
+    <string name="purchase_error_ineligible">आप इस ऑफ़र के लिए पात्र नहीं हैं।</string>
+    <string name="purchase_error_already_owned">पिछला दान अभी भी संसाधित हो रहा है। कृपया थोड़ी देर बाद फिर से प्रयास करें।</string>
+    <string name="purchase_error_generic">खरीदारी पूरी नहीं हो सकी। कृपया फिर से प्रयास करें।</string>
+    <string name="purchase_pending_title">भुगतान संसाधित हो रहा है</string>
+    <string name="purchase_pending_msg">Google Play अभी भी आपके भुगतान की पुष्टि कर रहा है। इसमें कुछ मिनट लग सकते हैं — आपको दोबारा भुगतान करने की ज़रूरत नहीं है।</string>
 </resources>

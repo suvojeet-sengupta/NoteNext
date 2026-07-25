@@ -21,8 +21,16 @@
     <string name="thank_you_confirm">तुमचे स्वागत आहे! 😊</string>
     <string name="connecting_play_store">Play Store शी कनेक्ट करत आहे…</string>
     <string name="could_not_connect_play_store">Play Store शी कनेक्ट करता आले नाही</string>
-    <string name="check_internet_try_again">तुमचे इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.</string>
-    <string name="loading_options">देणगी पर्याय लोड करत आहे…</string>
     <string name="secure_google_play">सर्व खरेदी Google Play द्वारे सुरक्षितपणे प्रक्रिया केल्या जातात.</string>
-    <string name="purchase_failed">खरेदी अयशस्वी झाली: %1$s</string>
+    <string name="billing_retry">पुन्हा प्रयत्न करा</string>
+    <string name="billing_error_network">तुमचे इंटरनेट कनेक्शन तपासा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="billing_error_play_unavailable">या डिव्हाइसवर Google Play बिलिंग उपलब्ध नाही.</string>
+    <string name="billing_error_products_unavailable">देणगी पर्याय सध्या लोड करता आले नाहीत.</string>
+    <string name="billing_error_unknown">Google Play शी कनेक्ट करताना काहीतरी चूक झाली.</string>
+    <string name="purchase_error_insufficient_funds">पेमेंट नाकारले — तुमच्या पेमेंट पद्धतीत पुरेशी रक्कम नाही.</string>
+    <string name="purchase_error_ineligible">तुम्ही या ऑफरसाठी पात्र नाही.</string>
+    <string name="purchase_error_already_owned">मागील देणगी अद्याप प्रक्रियेत आहे. कृपया थोड्या वेळाने पुन्हा प्रयत्न करा.</string>
+    <string name="purchase_error_generic">खरेदी पूर्ण करता आली नाही. कृपया पुन्हा प्रयत्न करा.</string>
+    <string name="purchase_pending_title">पेमेंट प्रक्रियेत आहे</string>
+    <string name="purchase_pending_msg">Google Play अद्याप तुमच्या पेमेंटची पुष्टी करत आहे. यास काही मिनिटे लागू शकतात — तुम्हाला पुन्हा पैसे भरण्याची गरज नाही.</string>
 </resources>

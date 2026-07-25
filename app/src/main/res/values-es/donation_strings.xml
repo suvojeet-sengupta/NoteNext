@@ -21,8 +21,16 @@
     <string name="thank_you_confirm">¡De nada! 😊</string>
     <string name="connecting_play_store">Conectando con Play Store…</string>
     <string name="could_not_connect_play_store">No se pudo conectar con Play Store</string>
-    <string name="check_internet_try_again">Comprueba tu conexión a internet e inténtalo de nuevo.</string>
-    <string name="loading_options">Cargando opciones de donación…</string>
     <string name="secure_google_play">Todas las compras se procesan de forma segura a través de Google Play.</string>
-    <string name="purchase_failed">Compra fallida: %1$s</string>
+    <string name="billing_retry">Reintentar</string>
+    <string name="billing_error_network">Comprueba tu conexión a internet e inténtalo de nuevo.</string>
+    <string name="billing_error_play_unavailable">La facturación de Google Play no está disponible en este dispositivo.</string>
+    <string name="billing_error_products_unavailable">No se pudieron cargar las opciones de donación en este momento.</string>
+    <string name="billing_error_unknown">Se produjo un error al conectar con Google Play.</string>
+    <string name="purchase_error_insufficient_funds">Pago rechazado: tu método de pago no tiene fondos suficientes.</string>
+    <string name="purchase_error_ineligible">No cumples los requisitos para esta oferta.</string>
+    <string name="purchase_error_already_owned">Una donación anterior aún se está procesando. Inténtalo de nuevo en un momento.</string>
+    <string name="purchase_error_generic">No se pudo completar la compra. Inténtalo de nuevo.</string>
+    <string name="purchase_pending_title">Procesando el pago</string>
+    <string name="purchase_pending_msg">Google Play aún está confirmando tu pago. Esto puede tardar unos minutos; no necesitas pagar otra vez.</string>
 </resources>

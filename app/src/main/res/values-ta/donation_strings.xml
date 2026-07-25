@@ -21,8 +21,16 @@
     <string name="thank_you_confirm">வரவேற்கிறோம்! 😊</string>
     <string name="connecting_play_store">Play Store-உடன் இணைக்கிறது…</string>
     <string name="could_not_connect_play_store">Play Store-உடன் இணைக்க முடியவில்லை</string>
-    <string name="check_internet_try_again">உங்கள் இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
-    <string name="loading_options">நன்கொடை விருப்பங்களை ஏற்றுகிறது…</string>
     <string name="secure_google_play">அனைத்து வாங்குதல்களும் Google Play மூலம் பாதுகாப்பாகச் செயலாக்கப்படுகின்றன.</string>
-    <string name="purchase_failed">வாங்குதல் தோல்வியடைந்தது: %1$s</string>
+    <string name="billing_retry">மீண்டும் முயற்சிக்கவும்</string>
+    <string name="billing_error_network">உங்கள் இணைய இணைப்பைச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="billing_error_play_unavailable">இந்தச் சாதனத்தில் Google Play பில்லிங் கிடைக்கவில்லை.</string>
+    <string name="billing_error_products_unavailable">நன்கொடை விருப்பங்களை இப்போது ஏற்ற முடியவில்லை.</string>
+    <string name="billing_error_unknown">Google Play-உடன் இணைக்கும்போது ஏதோ தவறு நடந்தது.</string>
+    <string name="purchase_error_insufficient_funds">கட்டணம் நிராகரிக்கப்பட்டது — உங்கள் கட்டண முறையில் போதுமான தொகை இல்லை.</string>
+    <string name="purchase_error_ineligible">இந்த சலுகைக்கு நீங்கள் தகுதியானவர் அல்ல.</string>
+    <string name="purchase_error_already_owned">முந்தைய நன்கொடை இன்னும் செயலாக்கத்தில் உள்ளது. சிறிது நேரம் கழித்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="purchase_error_generic">வாங்குதலை முடிக்க முடியவில்லை. மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="purchase_pending_title">கட்டணம் செயலாக்கத்தில் உள்ளது</string>
+    <string name="purchase_pending_msg">Google Play உங்கள் கட்டணத்தை இன்னும் உறுதிப்படுத்துகிறது. இதற்குச் சில நிமிடங்கள் ஆகலாம் — நீங்கள் மீண்டும் பணம் செலுத்த வேண்டியதில்லை.</string>
 </resources>

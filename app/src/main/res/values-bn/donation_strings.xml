@@ -21,8 +21,16 @@
     <string name="thank_you_confirm">স্বাগতম! 😊</string>
     <string name="connecting_play_store">Play Store-এ সংযোগ করা হচ্ছে…</string>
     <string name="could_not_connect_play_store">Play Store-এ সংযোগ করা যায়নি</string>
-    <string name="check_internet_try_again">আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।</string>
-    <string name="loading_options">দান বিকল্প লোড হচ্ছে…</string>
     <string name="secure_google_play">সমস্ত ক্রয় Google Play-এর মাধ্যমে নিরাপদে প্রক্রিয়া করা হয়।</string>
-    <string name="purchase_failed">ক্রয় ব্যর্থ হয়েছে: %1$s</string>
+    <string name="billing_retry">আবার চেষ্টা করুন</string>
+    <string name="billing_error_network">আপনার ইন্টারনেট সংযোগ পরীক্ষা করুন এবং আবার চেষ্টা করুন।</string>
+    <string name="billing_error_play_unavailable">এই ডিভাইসে Google Play বিলিং উপলব্ধ নয়।</string>
+    <string name="billing_error_products_unavailable">দান বিকল্পগুলি এখন লোড করা যায়নি।</string>
+    <string name="billing_error_unknown">Google Play-এ সংযোগ করার সময় কিছু ভুল হয়েছে।</string>
+    <string name="purchase_error_insufficient_funds">পেমেন্ট প্রত্যাখ্যাত — আপনার পেমেন্ট পদ্ধতিতে পর্যাপ্ত ব্যালেন্স নেই।</string>
+    <string name="purchase_error_ineligible">আপনি এই অফারের জন্য যোগ্য নন।</string>
+    <string name="purchase_error_already_owned">আগের একটি দান এখনও প্রক্রিয়াধীন। অনুগ্রহ করে কিছুক্ষণ পরে আবার চেষ্টা করুন।</string>
+    <string name="purchase_error_generic">ক্রয় সম্পূর্ণ করা যায়নি। অনুগ্রহ করে আবার চেষ্টা করুন।</string>
+    <string name="purchase_pending_title">পেমেন্ট প্রক্রিয়াকরণ চলছে</string>
+    <string name="purchase_pending_msg">Google Play এখনও আপনার পেমেন্ট নিশ্চিত করছে। এতে কয়েক মিনিট লাগতে পারে — আপনাকে আবার পেমেন্ট করতে হবে না।</string>
 </resources>

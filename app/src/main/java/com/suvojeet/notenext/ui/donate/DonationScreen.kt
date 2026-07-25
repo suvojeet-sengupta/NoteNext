@@ -32,9 +32,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.LifecycleResumeEffect
 import com.suvojeet.notenext.R
 import com.suvojeet.notenext.billing.BillingState
 import com.suvojeet.notenext.billing.PurchaseState
+import com.suvojeet.notenext.billing.donationPrice
 import com.suvojeet.notenext.ui.components.ExpressiveSection
 import com.suvojeet.notenext.ui.components.springPress
 
@@ -50,6 +52,13 @@ fun DonationScreen(
     val products by viewModel.products.collectAsStateWithLifecycle()
 
     var showThankYouDialog by remember { mutableStateOf(false) }
+
+    // A deferred payment (UPI, cash, carrier billing) can settle while the user is
+    // outside the app; re-query Play on resume so that purchase gets consumed.
+    LifecycleResumeEffect(Unit) {
+        viewModel.refresh()
+        onPauseOrDispose { }
+    }
 
     LaunchedEffect(purchaseState) {
         if (purchaseState is PurchaseState.Success) {
@@ -100,7 +109,7 @@ fun DonationScreen(
     val failedState = purchaseState as? PurchaseState.Failed
     LaunchedEffect(failedState) {
         failedState?.let {
-            snackbarHostState.showSnackbar(context.getString(R.string.purchase_failed, it.message))
+            snackbarHostState.showSnackbar(context.getString(it.messageRes))
             viewModel.resetPurchaseState()
         }
     }
@@ -188,7 +197,7 @@ fun DonationScreen(
                     title = stringResource(R.string.choose_amount),
                     description = stringResource(R.string.secure_google_play)
                 ) {
-                    when (billingState) {
+                    when (val state = billingState) {
                         is BillingState.Loading -> {
                             Box(
                                 modifier = Modifier.fillMaxWidth().height(150.dp),
@@ -203,38 +212,19 @@ fun DonationScreen(
                         }
 
                         is BillingState.Error -> {
-                            Surface(
-                                modifier = Modifier.fillMaxWidth(),
-                                shape = MaterialTheme.shapes.extraLarge,
-                                color = MaterialTheme.colorScheme.errorContainer
-                            ) {
-                                Row(
-                                    modifier = Modifier.padding(20.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    Icon(Icons.Rounded.CloudOff, null, tint = MaterialTheme.colorScheme.onErrorContainer)
-                                    Column {
-                                        Text(stringResource(R.string.could_not_connect_play_store), fontWeight = FontWeight.Bold)
-                                        Text(stringResource(R.string.check_internet_try_again), style = MaterialTheme.typography.bodySmall)
-                                    }
-                                }
-                            }
+                            BillingErrorCard(
+                                message = stringResource(state.error.messageRes),
+                                onRetry = viewModel::retry
+                            )
                         }
 
                         is BillingState.Ready -> {
                             Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                if (products.isEmpty()) {
-                                    Box(
-                                        modifier = Modifier.fillMaxWidth().height(100.dp),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Text(stringResource(R.string.loading_options))
-                                    }
+                                if (purchaseState is PurchaseState.AwaitingPayment) {
+                                    PendingPaymentCard()
                                 }
-                                
+
                                 products.forEach { product ->
-                                    val priceStr = product.oneTimePurchaseOfferDetails?.formattedPrice ?: ""
                                     val (emoji, label, subtitle) = when (product.productId) {
                                         "donate_small" -> Triple("☕", stringResource(R.string.donate_small_label), stringResource(R.string.donate_small_desc))
                                         "donate_medium" -> Triple("🍕", stringResource(R.string.donate_medium_label), stringResource(R.string.donate_medium_desc))
@@ -242,13 +232,13 @@ fun DonationScreen(
                                         else -> Triple("💙", product.name, "")
                                     }
 
-                                    val isPurchasing = purchaseState is PurchaseState.Pending
+                                    val isPurchasing = purchaseState is PurchaseState.InProgress
 
                                     DonationActionCard(
                                         emoji = emoji,
                                         title = label,
                                         description = subtitle,
-                                        price = priceStr,
+                                        price = product.donationPrice(),
                                         isLoading = isPurchasing,
                                         onClick = {
                                             if (!isPurchasing && activity != null) {
@@ -265,6 +255,83 @@ fun DonationScreen(
             
             item {
                 Spacer(modifier = Modifier.height(24.dp))
+            }
+        }
+    }
+}
+
+@Composable
+private fun BillingErrorCard(message: String, onRetry: () -> Unit) {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.errorContainer
+    ) {
+        Column(modifier = Modifier.padding(20.dp)) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                Icon(Icons.Rounded.CloudOff, null, tint = MaterialTheme.colorScheme.onErrorContainer)
+                Column {
+                    Text(
+                        stringResource(R.string.could_not_connect_play_store),
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                    Text(
+                        message,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onErrorContainer
+                    )
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            Button(
+                onClick = onRetry,
+                modifier = Modifier.align(Alignment.End).springPress(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.onErrorContainer,
+                    contentColor = MaterialTheme.colorScheme.errorContainer
+                )
+            ) {
+                Icon(Icons.Rounded.Refresh, null, modifier = Modifier.size(18.dp))
+                Spacer(Modifier.width(8.dp))
+                Text(stringResource(R.string.billing_retry), fontWeight = FontWeight.Bold)
+            }
+        }
+    }
+}
+
+@Composable
+private fun PendingPaymentCard() {
+    Surface(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.extraLarge,
+        color = MaterialTheme.colorScheme.tertiaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        ) {
+            Icon(
+                Icons.Rounded.HourglassTop,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onTertiaryContainer
+            )
+            Column {
+                Text(
+                    stringResource(R.string.purchase_pending_title),
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+                Text(
+                    stringResource(R.string.purchase_pending_msg),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onTertiaryContainer.copy(alpha = 0.85f),
+                    lineHeight = 18.sp
+                )
             }
         }
     }
