@@ -1,6 +1,37 @@
 {
   "releases": [
     {
+      "version": "1.5.1",
+      "date": "July 25, 2026",
+      "items": [
+        {
+          "title": "Voice Note Recording & Playback",
+          "description": "Record audio notes directly inside the editor and play them back seamlessly with the integrated inline player.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Play Billing 9.1.0 Upgrade",
+          "description": "Migrated to Google Play Billing Library 9.1.0 and resolved issues with unconsumed in-app purchases.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Robust Backup & Memory Optimization",
+          "description": "Fixed shared attachment restoration during backups and optimized memory usage when handling large media files.",
+          "type": "FIX"
+        },
+        {
+          "title": "Unified Bulk Note Operations",
+          "description": "Streamlined note selection and bulk management actions across main notes, archive, and trash screens.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Editor Polish & Fixes",
+          "description": "Fixed cursor glow animation pulsing, live note expiry chip countdown timers, and checklist item insertion behavior.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
       "version": "1.5.0",
       "date": "July 10, 2026",
       "items": [
