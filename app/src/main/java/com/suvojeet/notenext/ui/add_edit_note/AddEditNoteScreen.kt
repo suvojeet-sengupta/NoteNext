@@ -224,6 +224,43 @@ fun AddEditNoteScreen(
         }
     )
 
+    // Voice notes
+    var showAudioRecorder by remember { mutableStateOf(false) }
+    val micPermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+        onResult = { isGranted ->
+            if (isGranted) {
+                showAudioRecorder = true
+            } else {
+                Toast.makeText(
+                    context,
+                    context.getString(com.suvojeet.notenext.R.string.audio_permission_required),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
+    )
+    val startAudioRecording: () -> Unit = {
+        if (androidx.core.content.ContextCompat.checkSelfPermission(
+                context, android.Manifest.permission.RECORD_AUDIO
+            ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            showAudioRecorder = true
+        } else {
+            micPermissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
+        }
+    }
+
+    if (showAudioRecorder) {
+        AudioRecorderSheet(
+            onDismiss = { showAudioRecorder = false },
+            onSaved = { uri, mimeType ->
+                showAudioRecorder = false
+                onEvent(NotesEvent.AddAttachment(uri.toString(), mimeType))
+            }
+        )
+    }
+
     PredictiveBackHandler { progress ->
         try {
             progress.collectLatest { /* handle progress */ }
@@ -931,9 +968,7 @@ fun AddEditNoteScreen(
             onDrawingClick = {
                 Toast.makeText(context, "Drawing not implemented yet", Toast.LENGTH_SHORT).show()
             },
-            onAudioClick = {
-                Toast.makeText(context, "Audio recording not implemented yet", Toast.LENGTH_SHORT).show()
-            },
+            onAudioClick = startAudioRecording,
             onTickBoxesClick = { onEvent(NotesEvent.AddChecklistItem) }
         )
     }

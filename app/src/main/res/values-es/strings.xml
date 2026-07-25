@@ -88,6 +88,15 @@
     <string name="add_image">Añadir imagen</string>
     <string name="take_photo">Tomar foto</string>
     <string name="audio_recording">Grabación de audio</string>
+    <string name="audio_save">Guardar</string>
+    <string name="audio_discard">Descartar</string>
+    <string name="audio_close">Cerrar</string>
+    <string name="audio_play">Reproducir grabación</string>
+    <string name="audio_pause">Pausar grabación</string>
+    <string name="audio_remove">Eliminar grabación</string>
+    <string name="audio_unavailable">No se pudo reproducir esta grabación.</string>
+    <string name="audio_record_failed">No se pudo grabar el audio. Comprueba que ninguna otra aplicación esté usando el micrófono e inténtalo de nuevo.</string>
+    <string name="audio_permission_required">Se necesita acceso al micrófono para grabar una nota de voz.</string>
     <string name="add_checklist">Añadir lista de tareas</string>
     <string name="pin_note">Fijar nota</string>
     <string name="unpin_note">Dejar de fijar nota</string>

@@ -30,7 +30,20 @@ fun NoteAttachmentsList(
     onImageClick: (ImageViewerData) -> Unit
 ) {
     val imageAttachments = attachments.filter { it.type == AttachmentType.IMAGE }
-    
+    val audioAttachments = attachments.filter { it.type == AttachmentType.AUDIO }
+
+    if (audioAttachments.isNotEmpty()) {
+        Spacer(modifier = Modifier.height(16.dp))
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            audioAttachments.forEach { attachment ->
+                AudioAttachmentPlayer(
+                    uri = attachment.uri,
+                    onRemove = { onEvent(NotesEvent.RemoveAttachment(attachment.tempId)) }
+                )
+            }
+        }
+    }
+
     if (imageAttachments.isNotEmpty()) {
         Spacer(modifier = Modifier.height(16.dp))
         val imageCount = imageAttachments.size

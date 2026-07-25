@@ -88,6 +88,15 @@
     <string name="add_image">ছবি যোগ করুন</string>
     <string name="take_photo">ছবি তুলুন</string>
     <string name="audio_recording">অডিও রেকর্ডিং</string>
+    <string name="audio_save">সংরক্ষণ করুন</string>
+    <string name="audio_discard">বাতিল করুন</string>
+    <string name="audio_close">বন্ধ করুন</string>
+    <string name="audio_play">রেকর্ডিং চালান</string>
+    <string name="audio_pause">রেকর্ডিং থামান</string>
+    <string name="audio_remove">রেকর্ডিং সরান</string>
+    <string name="audio_unavailable">এই রেকর্ডিংটি চালানো যায়নি।</string>
+    <string name="audio_record_failed">অডিও রেকর্ড করা যায়নি। অন্য কোনো অ্যাপ মাইক্রোফোন ব্যবহার করছে কিনা দেখে আবার চেষ্টা করুন।</string>
+    <string name="audio_permission_required">ভয়েস নোট রেকর্ড করতে মাইক্রোফোনের অনুমতি প্রয়োজন।</string>
     <string name="add_checklist">চেকলিস্ট যোগ করুন</string>
     <string name="pin_note">নোট পিন করুন</string>
     <string name="unpin_note">নোট আনপিন করুন</string>

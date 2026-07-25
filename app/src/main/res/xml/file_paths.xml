@@ -8,6 +8,9 @@
         <files-path name="images" path="images/" />
         <external-files-path name="external_images" path="images/" />
 
+        <!-- Voice notes recorded in-app, stored in filesDir/audio_notes -->
+        <files-path name="audio_notes" path="audio_notes/" />
+
         <!-- Attachments restored from backup stored in filesDir/attachments -->
         <files-path name="attachments" path="attachments/" />
 

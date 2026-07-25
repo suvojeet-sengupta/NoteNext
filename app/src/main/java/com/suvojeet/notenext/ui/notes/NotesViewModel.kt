@@ -1302,6 +1302,11 @@ class NotesViewModel @Inject constructor(
                         if (it.id != 0) { // Only delete from DB if it has a real ID
                             repository.deleteAttachmentById(it.id)
                         }
+                        // Voice notes live in app-private storage, so dropping the row
+                        // would otherwise orphan the recording on disk forever.
+                        if (it.type == AttachmentType.AUDIO) {
+                            com.suvojeet.notenext.util.deleteRecording(context, it.uri)
+                        }
                         val updatedAttachments = editState.value.editingAttachments.filter { attachment -> attachment.tempId != event.tempId }.toImmutableList()
                         editorDelegate.updateState { it.copy(editingAttachments = updatedAttachments) }
                         scheduleAutoSave()

@@ -88,6 +88,15 @@
     <string name="add_image">படத்தைச் சேர்</string>
     <string name="take_photo">புகைப்படம் எடு</string>
     <string name="audio_recording">ஆடியோ பதிவு</string>
+    <string name="audio_save">சேமி</string>
+    <string name="audio_discard">நிராகரி</string>
+    <string name="audio_close">மூடு</string>
+    <string name="audio_play">பதிவை இயக்கு</string>
+    <string name="audio_pause">பதிவை இடைநிறுத்து</string>
+    <string name="audio_remove">பதிவை அகற்று</string>
+    <string name="audio_unavailable">இந்தப் பதிவை இயக்க முடியவில்லை.</string>
+    <string name="audio_record_failed">ஆடியோவைப் பதிவு செய்ய முடியவில்லை. வேறு ஏதேனும் ஆப்ஸ் மைக்ரோஃபோனைப் பயன்படுத்துகிறதா எனச் சரிபார்த்து மீண்டும் முயற்சிக்கவும்.</string>
+    <string name="audio_permission_required">குரல் குறிப்பைப் பதிவு செய்ய மைக்ரோஃபோன் அனுமதி தேவை.</string>
     <string name="add_checklist">சரிபார்ப்புப் பட்டியலைச் சேர்</string>
     <string name="pin_note">குறிப்பைப் பின் செய்</string>
     <string name="unpin_note">குறிப்பை பின் நீக்கு</string>

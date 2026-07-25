@@ -88,6 +88,15 @@
     <string name="add_image">Add Image</string>
     <string name="take_photo">Take Photo</string>
     <string name="audio_recording">Audio Recording</string>
+    <string name="audio_save">Save</string>
+    <string name="audio_discard">Discard</string>
+    <string name="audio_close">Close</string>
+    <string name="audio_play">Play recording</string>
+    <string name="audio_pause">Pause recording</string>
+    <string name="audio_remove">Remove recording</string>
+    <string name="audio_unavailable">This recording could not be played.</string>
+    <string name="audio_record_failed">Couldn\'t record audio. Check that no other app is using the microphone, then try again.</string>
+    <string name="audio_permission_required">Microphone access is required to record a voice note.</string>
     <string name="add_checklist">Add Checklist</string>
     <string name="pin_note">Pin Note</string>
     <string name="unpin_note">Unpin Note</string>

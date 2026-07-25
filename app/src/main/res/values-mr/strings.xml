@@ -88,6 +88,15 @@
     <string name="add_image">प्रतिमा जोडा</string>
     <string name="take_photo">फोटो काढा</string>
     <string name="audio_recording">ऑडिओ रेकॉर्डिंग</string>
+    <string name="audio_save">जतन करा</string>
+    <string name="audio_discard">रद्द करा</string>
+    <string name="audio_close">बंद करा</string>
+    <string name="audio_play">रेकॉर्डिंग प्ले करा</string>
+    <string name="audio_pause">रेकॉर्डिंग थांबवा</string>
+    <string name="audio_remove">रेकॉर्डिंग काढा</string>
+    <string name="audio_unavailable">हे रेकॉर्डिंग प्ले करता आले नाही.</string>
+    <string name="audio_record_failed">ऑडिओ रेकॉर्ड करता आले नाही. दुसरे कोणतेही अ‍ॅप मायक्रोफोन वापरत नाही ना ते तपासा आणि पुन्हा प्रयत्न करा.</string>
+    <string name="audio_permission_required">व्हॉइस नोट रेकॉर्ड करण्यासाठी मायक्रोफोनची परवानगी आवश्यक आहे.</string>
     <string name="add_checklist">चेकलिस्ट जोडा</string>
     <string name="pin_note">नोंद पिन करा</string>
     <string name="unpin_note">नोंद अनपिन करा</string>
