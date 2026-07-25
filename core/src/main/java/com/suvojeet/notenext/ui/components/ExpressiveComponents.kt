@@ -257,12 +257,26 @@ fun ExpressiveLoading(modifier: Modifier = Modifier) {
     }
 }
 
+/**
+ * ButtonGroup graduated to stable in material3 1.5.0-alpha22, which changed its
+ * shape: `overflowIndicator` is now required, and `content` is a plain scope
+ * lambda (you declare items via [ButtonGroupScope]) rather than a @Composable
+ * one. The indicator defaults to Material's own so callers keep the original
+ * modifier-plus-content ergonomics.
+ */
 @Composable
 fun ExpressiveButtonGroup(
     modifier: Modifier = Modifier,
-    content: @Composable ButtonGroupScope.() -> Unit
+    overflowIndicator: @Composable (ButtonGroupMenuState) -> Unit = { menuState ->
+        ButtonGroupDefaults.OverflowIndicator(menuState)
+    },
+    content: ButtonGroupScope.() -> Unit
 ) {
-    ButtonGroup(modifier = modifier, content = content)
+    ButtonGroup(
+        overflowIndicator = overflowIndicator,
+        modifier = modifier,
+        content = content
+    )
 }
 
 @Composable
