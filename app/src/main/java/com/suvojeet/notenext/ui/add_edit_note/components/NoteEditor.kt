@@ -143,6 +143,29 @@ fun LazyListScope.NoteContentItems(
     }
 }
 
+/**
+ * Pulsing alpha for the cursor glow, animated only while [active].
+ *
+ * Returning a flat 0 when inactive keeps the animation clock out of every chunk
+ * that isn't being edited — the caller skips drawing entirely at that point.
+ */
+@Composable
+private fun cursorGlowAlpha(active: Boolean): Float {
+    if (!active) return 0f
+
+    val infiniteTransition = rememberInfiniteTransition(label = "cursor_glow")
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.1f,
+        targetValue = 0.4f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1200),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "glow_alpha"
+    )
+    return alpha
+}
+
 @Composable
 fun NoteContentChunkEditor(
     index: Int,
@@ -160,26 +183,25 @@ fun NoteContentChunkEditor(
     val currentOnUrlClick by rememberUpdatedState(onUrlClick)
     val currentOnEvent by rememberUpdatedState(onEvent)
     
-    val infiniteTransition = rememberInfiniteTransition(label = "cursor_glow")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.1f,
-        targetValue = 0.4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "glow_alpha"
-    )
-    
+    // The glow pulses only in the chunk that actually holds the cursor. Every
+    // chunk used to start its own infinite transition, so a long note kept one
+    // never-ending animation alive per chunk, each invalidating its draw pass
+    // every frame for a decoration only one of them could show.
+    val cursorSelection = state.editingContent.selection
+    val hasCursor = cursorSelection.collapsed && cursorSelection.start in startOffset..endOffset
+    val glowAlpha = cursorGlowAlpha(active = hasCursor)
+
     val cursorColor = MaterialTheme.colorScheme.primary
-    val glowBrush = Brush.radialGradient(
-        colors = listOf(
-            cursorColor.copy(alpha = glowAlpha),
-            cursorColor.copy(alpha = glowAlpha * 0.4f),
-            Color.Transparent
-        ),
-        radius = 60f
-    )
+    val glowBrush = remember(cursorColor, glowAlpha) {
+        Brush.radialGradient(
+            colors = listOf(
+                cursorColor.copy(alpha = glowAlpha),
+                cursorColor.copy(alpha = glowAlpha * 0.4f),
+                Color.Transparent
+            ),
+            radius = 60f
+        )
+    }
 
     val contentTextColor = MaterialTheme.colorScheme.onSurface
     val contentTextStyle = when (state.activeHeadingStyle) {
@@ -243,8 +265,26 @@ fun NoteContentChunkEditor(
         TextFieldValue(chunkAnnotated, localSelection)
     }
 
-    // Apply search highlighting
-    val highlightedChunk = remember(chunk, state.noteSearchQuery, state.searchResultIndices, state.currentSearchResultIndex, startOffset) {
+    // Search highlight colours come from the theme. The fixed amber background
+    // with black text was chosen against a light surface and turned into a
+    // glaring, barely readable band in dark mode.
+    val currentMatchBackground = MaterialTheme.colorScheme.primary
+    val currentMatchForeground = MaterialTheme.colorScheme.onPrimary
+    val otherMatchBackground = MaterialTheme.colorScheme.primaryContainer
+    val otherMatchForeground = MaterialTheme.colorScheme.onPrimaryContainer
+
+    // isSearchingInNote is a key as well: it gates the branch below, so leaving
+    // it out kept stale highlights on screen after search was dismissed.
+    val highlightedChunk = remember(
+        chunk,
+        state.isSearchingInNote,
+        state.noteSearchQuery,
+        state.searchResultIndices,
+        state.currentSearchResultIndex,
+        startOffset,
+        currentMatchBackground,
+        otherMatchBackground
+    ) {
         if (state.isSearchingInNote && state.noteSearchQuery.isNotBlank()) {
             val annotatedString = chunk.annotatedString
             val builder = androidx.compose.ui.text.AnnotatedString.Builder(annotatedString)
@@ -260,11 +300,8 @@ fun NoteContentChunkEditor(
                     
                     builder.addStyle(
                         style = androidx.compose.ui.text.SpanStyle(
-                            background = if (isCurrent) 
-                                Color(0xFFFFD54F) // Brighter yellow for current
-                            else 
-                                Color(0xFFFFD54F).copy(alpha = 0.4f),
-                            color = Color.Black
+                            background = if (isCurrent) currentMatchBackground else otherMatchBackground,
+                            color = if (isCurrent) currentMatchForeground else otherMatchForeground
                         ),
                         start = localIndex,
                         end = (localIndex + query.length).coerceAtMost(chunkText.length)
@@ -313,6 +350,7 @@ fun NoteContentChunkEditor(
                 .fillMaxWidth()
                 .bringIntoViewRequester(bringIntoViewRequester)
                 .drawBehind {
+                    if (glowAlpha <= 0f) return@drawBehind
                     chunkLayoutResult?.let { layout ->
                         val globalCursor = state.editingContent.selection.start
                         val localCursor = globalCursor - startOffset
@@ -423,32 +461,44 @@ fun ExpiryDisplay(
     expiryTime: Long?,
     onClick: () -> Unit
 ) {
-    if (expiryTime != null) {
-        val remaining = expiryTime - System.currentTimeMillis()
-        if (remaining > 0) {
-            val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(remaining)
-            val minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(remaining) % 60
-            val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(remaining)
-            
-            val remainingText = when {
-                days > 0 -> "${days}d"
-                hours > 0 -> "${hours}h ${minutes}m"
-                else -> "${minutes}m"
-            }
+    if (expiryTime == null) return
 
-            AssistChip(
-                onClick = onClick,
-                label = { Text(text = "Self-destruct: $remainingText") },
-                leadingIcon = { Icon(Icons.Default.Timer, contentDescription = "Self-destruct") },
-                shape = MaterialTheme.shapes.medium,
-                colors = AssistChipDefaults.assistChipColors(
-                    labelColor = MaterialTheme.colorScheme.error,
-                    leadingIconContentColor = MaterialTheme.colorScheme.error,
-                    containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
-                ),
-                modifier = Modifier.springPress()
-            )
-            Spacer(modifier = Modifier.height(12.dp))
+    // The clock used to be read once while composing and then left alone, so the
+    // chip kept advertising whatever was true when the editor opened — a note
+    // could still claim "2h" left well after it had self-destructed. Re-read it
+    // on a ticker so the countdown actually counts down.
+    var now by remember { mutableStateOf(System.currentTimeMillis()) }
+    LaunchedEffect(expiryTime) {
+        while (true) {
+            now = System.currentTimeMillis()
+            kotlinx.coroutines.delay(30_000L)
         }
     }
+
+    val remaining = expiryTime - now
+    if (remaining <= 0) return
+
+    val hours = java.util.concurrent.TimeUnit.MILLISECONDS.toHours(remaining)
+    val minutes = java.util.concurrent.TimeUnit.MILLISECONDS.toMinutes(remaining) % 60
+    val days = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(remaining)
+
+    val remainingText = when {
+        days > 0 -> "${days}d"
+        hours > 0 -> "${hours}h ${minutes}m"
+        else -> "${minutes}m"
+    }
+
+    AssistChip(
+        onClick = onClick,
+        label = { Text(text = "Self-destruct: $remainingText") },
+        leadingIcon = { Icon(Icons.Default.Timer, contentDescription = "Self-destruct") },
+        shape = MaterialTheme.shapes.medium,
+        colors = AssistChipDefaults.assistChipColors(
+            labelColor = MaterialTheme.colorScheme.error,
+            leadingIconContentColor = MaterialTheme.colorScheme.error,
+            containerColor = MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.1f)
+        ),
+        modifier = Modifier.springPress()
+    )
+    Spacer(modifier = Modifier.height(12.dp))
 }
