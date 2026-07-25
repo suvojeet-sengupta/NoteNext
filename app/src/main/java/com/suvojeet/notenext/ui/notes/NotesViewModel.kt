@@ -140,6 +140,28 @@ class NotesViewModel @Inject constructor(
         }
     }
 
+    /**
+     * Shared plumbing behind every multi-select action: take the current
+     * selection, run [action] against it, clear the selection, then show
+     * whatever message came back. Returning null means "no snackbar".
+     *
+     * [refreshWidgets] is off for actions the home-screen widget doesn't render
+     * (importance, for instance), so they skip the widget broadcast.
+     */
+    private fun runBulkAction(
+        refreshWidgets: Boolean = true,
+        action: suspend (List<Int>) -> String?
+    ) {
+        val selectedIds = listState.value.selectedNoteIds.toList()
+        if (selectedIds.isEmpty()) return
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val message = action(selectedIds)
+            listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
+            message?.let { _events.emit(NotesUiEvent.ShowSnackbar(it)) }
+            if (refreshWidgets) updateWidgets()
+        }
+    }
+
     init {
         listDelegate.observeNotes(viewModelScope)
 
@@ -535,26 +557,7 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.TogglePinForSelectedNotes -> {
-                viewModelScope.launch {
-                    val allSelectedNotes = getSelectedNotes()
-                    if (allSelectedNotes.isEmpty()) return@launch
-
-                    val areNotesBeingPinned = allSelectedNotes.any { !it.note.isPinned }
-                    
-                    for (note in allSelectedNotes) {
-                        repository.updateNote(note.note.copy(isPinned = areNotesBeingPinned))
-                    }
-
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
-                    val message = if (areNotesBeingPinned) {
-
-                        if (allSelectedNotes.size > 1) "${allSelectedNotes.size} notes pinned" else "Note pinned"
-                    } else {
-                        if (allSelectedNotes.size > 1) "${allSelectedNotes.size} notes unpinned" else "Note unpinned"
-                    }
-                    _events.emit(NotesUiEvent.ShowSnackbar(message))
-                    updateWidgets()
-                }
+                runBulkAction { ids -> bulkActionDelegate.togglePin(ids) }
             }
             is NotesEvent.ReorderPinnedNotes -> {
                 viewModelScope.launch {
@@ -567,55 +570,13 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.ToggleLockForSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = getSelectedNotes()
-                    if (selectedNotes.isEmpty()) return@launch
-                    val areNotesBeingLocked = selectedNotes.firstOrNull()?.note?.isLocked == false
-                    try {
-                        for (note in selectedNotes) {
-                            var noteToUpdate = note.note.copy(isLocked = areNotesBeingLocked)
-                            if (!areNotesBeingLocked && note.note.isEncrypted) {
-                                val decrypted = com.suvojeet.notenext.util.CryptoUtils.decryptNote(note.note)
-                                noteToUpdate = decrypted.copy(isLocked = false)
-                            }
-                            repository.updateNote(noteToUpdate)
-                            }
-                            listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
-                            val message = if (areNotesBeingLocked) {
-
-                            if (selectedNotes.size > 1) "${selectedNotes.size} notes locked" else "Note locked"
-                        } else {
-                            if (selectedNotes.size > 1) "${selectedNotes.size} notes unlocked" else "Note unlocked"
-                        }
-                        _events.emit(NotesUiEvent.ShowSnackbar(message))
-                        updateWidgets()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        val errorMessage = if (areNotesBeingLocked) "Failed to lock notes" else "Failed to unlock notes: Authentication may be required"
-                        _events.emit(NotesUiEvent.ShowSnackbar(errorMessage))
-                    }
-                }
+                runBulkAction { ids -> bulkActionDelegate.toggleLock(ids)?.message }
             }
             is NotesEvent.DeleteSelectedNotes -> {
-                viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    val selectedNotes = getSelectedNotes()
-                    for (note in selectedNotes) {
-                        repository.updateNote(note.note.copy(isBinned = true, binnedOn = System.currentTimeMillis()))
-                    }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
-                    _events.emit(NotesUiEvent.ShowSnackbar("${selectedNotes.size} notes moved to Bin"))
-                    updateWidgets()
-                }
+                runBulkAction { ids -> bulkActionDelegate.moveToBin(ids) }
             }
             is NotesEvent.ArchiveSelectedNotes -> {
-                viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    val selectedNotes = getSelectedNotes()
-                    for (note in selectedNotes) {
-                        repository.updateNote(note.note.copy(isArchived = !note.note.isArchived))
-                    }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
-                    updateWidgets()
-                }
+                runBulkAction { ids -> bulkActionDelegate.toggleArchive(ids); null }
             }
             // Single-note swipe actions (from the note list). Both show an Undo
             // snackbar that restores the original flag state.
@@ -658,75 +619,22 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.ToggleImportantForSelectedNotes -> {
-                viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-                    val selectedNotes = getSelectedNotes()
-                    for (note in selectedNotes) {
-                        repository.updateNote(note.note.copy(isImportant = !note.note.isImportant))
-                    }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
+                runBulkAction(refreshWidgets = false) { ids ->
+                    bulkActionDelegate.toggleImportant(ids); null
                 }
             }
             is NotesEvent.ChangeColorForSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = getSelectedNotes()
-                    for (note in selectedNotes) {
-                        repository.updateNote(note.note.copy(color = event.color))
-                    }
-                    listDelegate.updateState { it.copy(
-                        selectedNoteIds = persistentListOf()
-                    ) }
-                    _events.emit(NotesUiEvent.ShowSnackbar("Color updated"))
-                }
+                runBulkAction { ids -> bulkActionDelegate.changeColor(ids, event.color) }
             }
             is NotesEvent.CopySelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = getSelectedNotes()
-                    for (noteWithAttachments in selectedNotes) {
-                        val copiedNote = noteWithAttachments.note.copy(
-                            id = 0, 
-                            title = "${noteWithAttachments.note.title} (Copy)",
-                            isDecoy = isDecoySession
-                        )
-                        val newNoteId = repository.insertNote(copiedNote)
-                        require(newNoteId <= Int.MAX_VALUE) { "Note ID overflow" }
-                        noteWithAttachments.attachments.forEach { attachment ->
-                            repository.insertAttachment(attachment.copy(id = 0, noteId = newNoteId.toInt()))
-                        }
-                        // Copy checklist items
-                        val newChecklistItems = noteWithAttachments.checklistItems.map { item ->
-                            item.copy(id = java.util.UUID.randomUUID().toString(), noteId = newNoteId.toInt())
-                        }
-                        repository.insertChecklistItems(newChecklistItems)
-                    }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
-                    val message = if (selectedNotes.size > 1) "${selectedNotes.size} notes copied" else "Note copied"
-                    _events.emit(NotesUiEvent.ShowSnackbar(message))
-                }
+                runBulkAction { ids -> bulkActionDelegate.copyNotes(ids, isDecoySession) }
             }
             is NotesEvent.SendSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = getSelectedNotes()
-                    if (selectedNotes.isNotEmpty()) {
-                        val title = if (selectedNotes.size == 1) selectedNotes.first().note.title else "Multiple Notes"
-                        val contentBuilder = StringBuilder()
-                        selectedNotes.forEachIndexed { index, it ->
-                            contentBuilder.append("Title: ${it.note.title}\n\n")
-                            if (it.note.noteType == NoteType.CHECKLIST) {
-                                it.checklistItems.sortedBy { item -> item.position }.forEach { item ->
-                                    val status = if (item.isChecked) "[x]" else "[ ]"
-                                    contentBuilder.append("$status ${item.text}\n")
-                                }
-                            } else {
-                                contentBuilder.append(HtmlConverter.htmlToPlainText(it.note.content))
-                            }
-                            
-                            if (index < selectedNotes.size - 1) {
-                                contentBuilder.append("\n\n---\n\n")
-                            }
-                        }
-                        _events.emit(NotesUiEvent.SendNotes(title, contentBuilder.toString()))
+                runBulkAction(refreshWidgets = false) { ids ->
+                    bulkActionDelegate.buildSharePayload(ids)?.let { payload ->
+                        _events.emit(NotesUiEvent.SendNotes(payload.title, payload.content))
                     }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
+                    null
                 }
             }
             is NotesEvent.ShareSelectedNotesViaLink -> {
@@ -784,33 +692,15 @@ class NotesViewModel @Inject constructor(
                 }
             }
             is NotesEvent.SetReminderForSelectedNotes -> {
-                viewModelScope.launch {
-                    val selectedNotes = getSelectedNotes()
-                    val reminderDateTime = LocalDateTime.of(event.date, event.time)
-                    val reminderMillis = reminderDateTime.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-
-                    for (noteWithAttachments in selectedNotes) {
-                        val updatedNote = noteWithAttachments.note.copy(
-                            reminderTime = reminderMillis,
-                            repeatOption = event.repeatOption.name // Store enum name as string
-                        )
-                        repository.updateNote(updatedNote)
-                        reminderScheduler.scheduleNoteReminder(updatedNote)
-                    }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
-                    _events.emit(NotesUiEvent.ShowSnackbar("Reminder set for ${selectedNotes.size} notes"))
+                val reminderMillis = LocalDateTime.of(event.date, event.time)
+                    .atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                runBulkAction(refreshWidgets = false) { ids ->
+                    bulkActionDelegate.setReminder(ids, reminderMillis, event.repeatOption.name)
                 }
             }
             is NotesEvent.SetLabelForSelectedNotes -> {
-                viewModelScope.launch {
-                    if (event.label.isNotBlank()) {
-                        repository.insertLabel(Label(event.label))
-                    }
-                    val selectedNotes = getSelectedNotes()
-                    for (note in selectedNotes) {
-                        repository.updateNote(note.note.copy(label = event.label))
-                    }
-                    listDelegate.updateState { it.copy(selectedNoteIds = persistentListOf()) }
+                runBulkAction(refreshWidgets = false) { ids ->
+                    bulkActionDelegate.setLabel(ids, event.label); null
                 }
             }
             is NotesEvent.ExpandNote -> {
