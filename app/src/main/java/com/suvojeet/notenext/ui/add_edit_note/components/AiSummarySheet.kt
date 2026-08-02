@@ -177,15 +177,11 @@ fun AiSummarySheet(
                                     val thoughtRegex = Regex("<thought>(.*?)</thought>", RegexOption.DOT_MATCHES_ALL)
                                     val thoughtMatch = thoughtRegex.find(text)
                                     val thought = thoughtMatch?.groupValues?.get(1)?.let {
-                                        // Strip HTML from thinking
-                                        val plain = it.replace(Regex("<[^>]*>"), " ")
-                                        androidx.core.text.HtmlCompat.fromHtml(plain, androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT).toString().trim()
+                                        com.suvojeet.notenext.util.HtmlConverter.cleanHtmlToPlain(it)
                                     }
-                                    
+                                     
                                     val summaryWithoutThought = text.replace(thoughtRegex, "").trim()
-                                    // Strip HTML from summary
-                                    val plainSummary = summaryWithoutThought.replace(Regex("<[^>]*>"), " ")
-                                    val clean = androidx.core.text.HtmlCompat.fromHtml(plainSummary, androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT).toString().trim()
+                                    val clean = com.suvojeet.notenext.util.HtmlConverter.cleanHtmlToPlain(summaryWithoutThought)
                                     
                                     thought to clean
                                 }

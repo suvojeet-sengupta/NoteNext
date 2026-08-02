@@ -7,10 +7,12 @@ import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Path
 
+import retrofit2.http.PUT
+
 /** Retrofit interface for the NoteNext end-to-end encrypted sharing backend. */
 interface NoteNextApiService {
 
-    /** Uploads an encrypted note (ciphertext + iv only) and returns the share link + delete-token. */
+    /** Uploads an encrypted note (ciphertext + iv only) and returns the share link + delete-token/noteToken. */
     @POST("api/notes/share")
     suspend fun shareNote(@Body body: ShareNoteRequest): ShareNoteResponse
 
@@ -29,13 +31,24 @@ interface NoteNextApiService {
     suspend fun getStatus(@Path("shareId") shareId: String): ShareStatusDto
 
     /**
-     * Delete (unshare) a note. The backend authorizes via the secret delete-token
-     * (creator-only), supplied in the x-delete-token header — a public shareId
-     * alone cannot delete a note.
+     * Updates an existing note. Backend authorizes via x-note-token / x-delete-token headers.
+     */
+    @PUT("api/notes/{shareId}")
+    suspend fun updateNote(
+        @Path("shareId") shareId: String,
+        @Header("x-note-token") noteToken: String,
+        @Header("x-delete-token") deleteToken: String = noteToken,
+        @Body body: ShareNoteRequest
+    ): ShareNoteResponse
+
+    /**
+     * Delete (unshare) a note. The backend authorizes via the secret token
+     * supplied in x-note-token / x-delete-token headers.
      */
     @DELETE("api/notes/{shareId}")
     suspend fun deleteNote(
         @Path("shareId") shareId: String,
-        @Header("x-delete-token") deleteToken: String
+        @Header("x-note-token") noteToken: String,
+        @Header("x-delete-token") deleteToken: String = noteToken
     )
 }

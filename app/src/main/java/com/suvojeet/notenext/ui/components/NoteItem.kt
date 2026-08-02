@@ -242,10 +242,8 @@ fun NoteItem(
                             }
     
                             val annotatedContent = remember(decryptedNote.content) {
-                                // Strip HTML tags for preview and unescape entities
-                                val plainText = decryptedNote.content.replace(Regex("<[^>]*>"), "")
-                                val unescaped = androidx.core.text.HtmlCompat.fromHtml(plainText, androidx.core.text.HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
-                                androidx.compose.ui.text.AnnotatedString(unescaped)
+                                val plainText = HtmlConverter.cleanHtmlToPlain(decryptedNote.content)
+                                androidx.compose.ui.text.AnnotatedString(plainText)
                             }
 
                             val primaryContainer = MaterialTheme.colorScheme.primaryContainer

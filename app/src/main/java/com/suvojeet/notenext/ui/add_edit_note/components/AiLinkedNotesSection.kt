@@ -78,14 +78,11 @@ fun AiLinkedNotesSection(
 @Composable
 private fun LinkedNoteCard(note: Note, onClick: () -> Unit) {
     val cleanTitle = remember(note.title) {
-        val plainTitle = note.title.replace(Regex("<[^>]*>"), " ")
-        androidx.core.text.HtmlCompat.fromHtml(plainTitle, androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT).toString().trim()
+        com.suvojeet.notenext.util.HtmlConverter.cleanHtmlToPlain(note.title)
     }
 
     val previewText = remember(note.content) {
-        // Strip HTML tags for preview and unescape entities
-        val plainText = note.content.replace(Regex("<[^>]*>"), " ")
-        androidx.core.text.HtmlCompat.fromHtml(plainText, androidx.core.text.HtmlCompat.FROM_HTML_MODE_COMPACT).toString().trim()
+        com.suvojeet.notenext.util.HtmlConverter.cleanHtmlToPlain(note.content)
     }
 
     Card(

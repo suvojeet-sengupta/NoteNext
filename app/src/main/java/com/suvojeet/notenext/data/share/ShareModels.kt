@@ -84,10 +84,12 @@ data class ShareNoteResponse(
     /** Key-less link; the client appends "#<key>" before sharing it. */
     val shareUrl: String? = null,
     /**
-     * Secret delete-token, returned exactly once at share time. Must be stored
+     * Secret delete-token, returned at share time. Must be stored
      * on-device and presented to delete (unshare) the note later.
      */
     val deleteToken: String? = null,
+    /** Secret note-token for editing or deleting notes on server. */
+    val noteToken: String? = null,
     val expiresAt: String? = null,
     val burnAfterRead: Boolean = false,
     val maxReads: Int = 1
@@ -100,8 +102,10 @@ data class ShareResult(
     val url: String,
     /** Base64url AES key (the "#<key>" fragment), stored locally to reuse the link. */
     val key: String,
-    /** Secret token required to later unshare this note (creator-only proof). */
+    /** Secret token required to later unshare/edit this note. */
     val deleteToken: String? = null,
+    /** Secret note token required for edit/delete operations in x-note-token header. */
+    val noteToken: String? = null,
     /** ISO-8601 expiry timestamp, for display. */
     val expiresAt: String? = null
 )

@@ -45,11 +45,59 @@ class ShareRepository @Inject constructor(
             rawUrl
         }
         val finalUrl = if (base.contains("#")) base else "$base#${enc.keyFragment}"
+        val token = response.noteToken ?: response.deleteToken
         ShareResult(
             shareId = response.shareId,
             url = finalUrl,
             key = enc.keyFragment,
-            deleteToken = response.deleteToken,
+            deleteToken = token,
+            noteToken = token,
+            expiresAt = response.expiresAt
+        )
+    }
+
+    /**
+     * Updates an existing note on the backend using its token.
+     */
+    suspend fun updateNote(
+        shareId: String,
+        token: String,
+        title: String,
+        content: String,
+        expiry: ShareExpiry = ShareExpiry.DEFAULT,
+        burnAfterRead: Boolean = false,
+        maxReads: Int = 1,
+        sharedBy: String? = null
+    ): Result<ShareResult> = runCatching {
+        val enc = ShareCrypto.encrypt(title, content)
+        val response = api.updateNote(
+            shareId = shareId,
+            noteToken = token,
+            deleteToken = token,
+            body = ShareNoteRequest(
+                ciphertext = enc.ciphertext,
+                iv = enc.iv,
+                sharedBy = sharedBy,
+                expiresIn = expiry.apiValue,
+                burnAfterRead = burnAfterRead,
+                maxReads = maxReads
+            )
+        )
+        val rawUrl = response.shareUrl?.takeIf { it.isNotBlank() }
+            ?: ShareConstants.shareUrl(response.shareId)
+        val base = if (!rawUrl.startsWith("http://") && !rawUrl.startsWith("https://")) {
+            "https://$rawUrl"
+        } else {
+            rawUrl
+        }
+        val finalUrl = if (base.contains("#")) base else "$base#${enc.keyFragment}"
+        val returnedToken = response.noteToken ?: response.deleteToken ?: token
+        ShareResult(
+            shareId = response.shareId,
+            url = finalUrl,
+            key = enc.keyFragment,
+            deleteToken = returnedToken,
+            noteToken = returnedToken,
             expiresAt = response.expiresAt
         )
     }
@@ -64,11 +112,10 @@ class ShareRepository @Inject constructor(
     }
 
     /**
-     * Deletes (unshares) a note from the backend. Requires the secret delete-token
-     * issued at share time; only the creator holds it.
+     * Deletes (unshares) a note from the backend. Requires the secret noteToken/deleteToken.
      */
     suspend fun deleteNote(shareId: String, deleteToken: String): Result<Unit> = runCatching {
-        api.deleteNote(shareId, deleteToken)
+        api.deleteNote(shareId = shareId, noteToken = deleteToken, deleteToken = deleteToken)
         Unit
     }
 

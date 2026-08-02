@@ -41,31 +41,65 @@ object HtmlConverter {
         return spannable
     }
 
+    fun cleanHtmlToPlain(html: String): String {
+        if (html.isBlank()) return ""
+        var s = html
+        var prev = ""
+        var pass = 0
+        while (s != prev && pass < 3) {
+            prev = s
+            if (s.contains("&lt;") || s.contains("&gt;") || s.contains("&amp;") || s.contains("&#")) {
+                s = HtmlCompat.fromHtml(s, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+            }
+            if (s.contains("<") && s.contains(">")) {
+                s = HtmlCompat.fromHtml(s, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+            }
+            pass++
+        }
+        if (s.contains("<") && s.contains(">")) {
+            s = s.replace(Regex("<[^>]*>"), "")
+        }
+        return s.replace(Regex("\n{3,}"), "\n\n").trim()
+    }
+
     suspend fun htmlToPlainText(html: String): String = withContext(Dispatchers.Default) {
-        HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_COMPACT).toString()
+        cleanHtmlToPlain(html)
     }
 
     suspend fun htmlToAnnotatedString(html: String): AnnotatedString = withContext(Dispatchers.Default) {
-        val spanned = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        if (html.isBlank()) return@withContext AnnotatedString("")
+        var rawHtml = html
+        if (rawHtml.contains("&lt;") || rawHtml.contains("&gt;") || rawHtml.contains("&amp;") || rawHtml.contains("&#")) {
+            rawHtml = HtmlCompat.fromHtml(rawHtml, HtmlCompat.FROM_HTML_MODE_LEGACY).toString()
+        }
+        val spanned = HtmlCompat.fromHtml(rawHtml, HtmlCompat.FROM_HTML_MODE_LEGACY)
+        var spannedText = spanned.toString()
+        if (spannedText.contains("<") && spannedText.contains(">")) {
+            spannedText = cleanHtmlToPlain(spannedText)
+        }
+        spannedText = spannedText.replace(Regex("\n{3,}"), "\n\n").trim()
+
         buildAnnotatedString {
-            append(spanned.toString())
+            append(spannedText)
             spanned.getSpans(0, spanned.length, Any::class.java).forEach { span ->
                 val start = spanned.getSpanStart(span)
                 val end = spanned.getSpanEnd(span)
-                when (span) {
-                    is StyleSpan -> {
-                        when (span.style) {
-                            android.graphics.Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
-                            android.graphics.Typeface.ITALIC -> addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
-                            android.graphics.Typeface.BOLD_ITALIC -> addStyle(SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic), start, end)
+                if (start in 0..spannedText.length && end in 0..spannedText.length && start < end) {
+                    when (span) {
+                        is StyleSpan -> {
+                            when (span.style) {
+                                android.graphics.Typeface.BOLD -> addStyle(SpanStyle(fontWeight = FontWeight.Bold), start, end)
+                                android.graphics.Typeface.ITALIC -> addStyle(SpanStyle(fontStyle = FontStyle.Italic), start, end)
+                                android.graphics.Typeface.BOLD_ITALIC -> addStyle(SpanStyle(fontWeight = FontWeight.Bold, fontStyle = FontStyle.Italic), start, end)
+                            }
                         }
+                        is UnderlineSpan -> addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
                     }
-                    is UnderlineSpan -> addStyle(SpanStyle(textDecoration = TextDecoration.Underline), start, end)
                 }
             }
             
             // Detect [[Note Title]] and add styling/annotation
-            val text = spanned.toString()
+            val text = spannedText
             val noteLinkRegex = "\\[\\[(.*?)\\]\\]".toRegex()
             noteLinkRegex.findAll(text).forEach { matchResult ->
                 val start = matchResult.range.first
