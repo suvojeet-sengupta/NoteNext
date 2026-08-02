@@ -22,8 +22,9 @@ fun NotesEvent.toProjectNotesEvent(): ProjectNotesEvent {
         is NotesEvent.ShareCurrentNoteViaLink -> ProjectNotesEvent.NoOp
         // Encrypted-link confirmation is only wired into the main notes graph.
         is NotesEvent.ConfirmShareViaLink -> ProjectNotesEvent.NoOp
-        // Unshare is likewise only wired into the main notes graph.
+        // Unshare and UpdateSharedNote are likewise only wired into the main notes graph.
         is NotesEvent.UnshareNote -> ProjectNotesEvent.NoOp
+        is NotesEvent.UpdateSharedNote -> ProjectNotesEvent.NoOp
         is NotesEvent.SetReminderForSelectedNotes -> ProjectNotesEvent.SetReminderForSelectedNotes(this.date, this.time, this.repeatOption)
         is NotesEvent.ToggleImportantForSelectedNotes -> ProjectNotesEvent.ToggleImportantForSelectedNotes
         is NotesEvent.SetLabelForSelectedNotes -> ProjectNotesEvent.SetLabelForSelectedNotes(this.label)

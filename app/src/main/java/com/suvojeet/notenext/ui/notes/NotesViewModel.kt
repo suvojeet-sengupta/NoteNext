@@ -1633,7 +1633,7 @@ class NotesViewModel @Inject constructor(
      * Updates an existing shared note on the server using its noteToken.
      */
     private suspend fun updateSharedNote(shareId: String, noteToken: String?) {
-        val note = repository.getNoteByShareId(shareId)?.note
+        val note = repository.getNoteByShareId(shareId)
             ?: pendingShareNote
             ?: return
         val token = noteToken ?: note.shareNoteToken
