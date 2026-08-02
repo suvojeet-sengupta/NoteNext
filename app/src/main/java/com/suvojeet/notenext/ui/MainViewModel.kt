@@ -164,6 +164,12 @@ class MainViewModel @Inject constructor(
                     segments.size >= 2 && segments[0] == "s"
                 ) {
                     segments[1].takeIf { it.isNotBlank() }
+                } else if (host == "paste.suvojeetsengupta.in") {
+                    if (segments.size >= 2 && segments[0] == "s") {
+                        segments[1].takeIf { it.isNotBlank() }
+                    } else if (segments.isNotEmpty()) {
+                        segments.last().takeIf { it.isNotBlank() }
+                    } else null
                 } else null
             }
             else -> null

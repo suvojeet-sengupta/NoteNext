@@ -15,5 +15,5 @@ object ShareConstants {
     const val API_BASE_URL = "$BASE_URL/"
 
     /** Public, shareable link for a note. Opens the app via App Links, or the web page as fallback. */
-    fun shareUrl(shareId: String): String = "$BASE_URL/s/$shareId"
+    fun shareUrl(shareId: String): String = "https://paste.suvojeetsengupta.in/$shareId"
 }

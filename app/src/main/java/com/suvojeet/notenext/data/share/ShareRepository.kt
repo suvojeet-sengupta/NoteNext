@@ -37,10 +37,17 @@ class ShareRepository @Inject constructor(
                 maxReads = maxReads
             )
         )
-        val base = ShareConstants.shareUrl(response.shareId)
+        val rawUrl = response.shareUrl?.takeIf { it.isNotBlank() }
+            ?: ShareConstants.shareUrl(response.shareId)
+        val base = if (!rawUrl.startsWith("http://") && !rawUrl.startsWith("https://")) {
+            "https://$rawUrl"
+        } else {
+            rawUrl
+        }
+        val finalUrl = if (base.contains("#")) base else "$base#${enc.keyFragment}"
         ShareResult(
             shareId = response.shareId,
-            url = "$base#${enc.keyFragment}",
+            url = finalUrl,
             key = enc.keyFragment,
             deleteToken = response.deleteToken,
             expiresAt = response.expiresAt

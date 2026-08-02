@@ -92,6 +92,7 @@
                 <data android:scheme="https" />
                 <data android:scheme="http" />
                 <data android:host="api-notenext.suvojeetsengupta.in" />
+                <data android:host="paste.suvojeetsengupta.in" />
                 <data android:pathPrefix="/s/" />
             </intent-filter>
 
