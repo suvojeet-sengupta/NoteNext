@@ -44,10 +44,15 @@ sealed class NotesEvent {
         val maxReads: Int = 1
     ) : NotesEvent()
     /**
-     * Stop sharing (delete from backend) the note behind a share link. Carries the
-     * creator's secret delete-token; the local row's shareId/token are cleared on success.
+     * Stop sharing (delete from backend) the note behind a share link using noteToken.
      */
-    data class UnshareNote(val shareId: String, val deleteToken: String?) : NotesEvent()
+    data class UnshareNote(val shareId: String, val noteToken: String? = null) : NotesEvent() {
+        val deleteToken: String? get() = noteToken
+    }
+    /**
+     * Update an existing shared note on the backend using its universal noteToken.
+     */
+    data class UpdateSharedNote(val shareId: String, val noteToken: String? = null) : NotesEvent()
     data class SetReminderForSelectedNotes(val date: LocalDate, val time: LocalTime, val repeatOption: RepeatOption) : NotesEvent()
     data class SetLabelForSelectedNotes(val label: String) : NotesEvent()
     data class ExpandNote(

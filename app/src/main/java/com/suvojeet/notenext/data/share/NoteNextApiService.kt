@@ -31,24 +31,21 @@ interface NoteNextApiService {
     suspend fun getStatus(@Path("shareId") shareId: String): ShareStatusDto
 
     /**
-     * Updates an existing note. Backend authorizes via x-note-token / x-delete-token headers.
+     * Updates an existing note. Backend authorizes via x-note-token header.
      */
     @PUT("api/notes/{shareId}")
     suspend fun updateNote(
         @Path("shareId") shareId: String,
         @Header("x-note-token") noteToken: String,
-        @Header("x-delete-token") deleteToken: String = noteToken,
         @Body body: ShareNoteRequest
     ): ShareNoteResponse
 
     /**
-     * Delete (unshare) a note. The backend authorizes via the secret token
-     * supplied in x-note-token / x-delete-token headers.
+     * Delete (unshare) a note. Backend authorizes via x-note-token header.
      */
     @DELETE("api/notes/{shareId}")
     suspend fun deleteNote(
         @Path("shareId") shareId: String,
-        @Header("x-note-token") noteToken: String,
-        @Header("x-delete-token") deleteToken: String = noteToken
+        @Header("x-note-token") noteToken: String
     )
 }

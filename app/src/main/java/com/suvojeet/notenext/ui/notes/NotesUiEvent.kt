@@ -11,10 +11,12 @@ sealed class NotesUiEvent {
         val url: String,
         val shareId: String,
         val title: String,
-        val deleteToken: String? = null,
+        val noteToken: String? = null,
         /** ISO-8601 expiry of the share, for display in the link dialog. */
         val expiresAt: String? = null
-    ) : NotesUiEvent()
+    ) : NotesUiEvent() {
+        val deleteToken: String? get() = noteToken
+    }
     /** Ask the UI to show the expiry / burn-after-read picker before creating a share link. */
     object ShowShareOptions : NotesUiEvent()
     /** Toggle a "checking existing link…" progress indicator during re-share dedup. */

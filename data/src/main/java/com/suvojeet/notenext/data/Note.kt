@@ -54,18 +54,19 @@ data class Note(
      */
     val shareId: String? = null,
     /**
-     * Secret capability token returned by the backend at share time. Required to
-     * delete (unshare) the note later — proves we are the creator, since the app
-     * has no accounts. Stored only on this device; never displayed.
+     * Secret note token returned by the backend at share time. Required to
+     * edit or delete (unshare) the note later on the server.
      */
-    val shareDeleteToken: String? = null,
+    @androidx.room.ColumnInfo(name = "shareDeleteToken")
+    val shareNoteToken: String? = null,
     /**
-     * Base64url AES key from the last share link's fragment. The server never sees
-     * it, so we keep it here to rebuild the SAME link on a re-share (dedup) instead
-     * of minting a new one. Cleared when the note is unshared.
+     * Base64url AES key from the share link's fragment. Saved locally to rebuild
+     * the exact same link and key while valid.
      */
     val shareKey: String? = null
 ) {
+    val noteToken: String? get() = shareNoteToken
+    val shareDeleteToken: String? get() = shareNoteToken
     fun toNoteSummary(): NoteSummary {
         return NoteSummary(
             id = id,

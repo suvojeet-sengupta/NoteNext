@@ -45,23 +45,22 @@ class ShareRepository @Inject constructor(
             rawUrl
         }
         val finalUrl = if (base.contains("#")) base else "$base#${enc.keyFragment}"
-        val token = response.noteToken ?: response.deleteToken
+        val token = response.noteToken
         ShareResult(
             shareId = response.shareId,
             url = finalUrl,
             key = enc.keyFragment,
-            deleteToken = token,
             noteToken = token,
             expiresAt = response.expiresAt
         )
     }
 
     /**
-     * Updates an existing note on the backend using its token.
+     * Updates an existing note on the backend using its universal noteToken.
      */
     suspend fun updateNote(
         shareId: String,
-        token: String,
+        noteToken: String,
         title: String,
         content: String,
         expiry: ShareExpiry = ShareExpiry.DEFAULT,
@@ -72,8 +71,7 @@ class ShareRepository @Inject constructor(
         val enc = ShareCrypto.encrypt(title, content)
         val response = api.updateNote(
             shareId = shareId,
-            noteToken = token,
-            deleteToken = token,
+            noteToken = noteToken,
             body = ShareNoteRequest(
                 ciphertext = enc.ciphertext,
                 iv = enc.iv,
@@ -91,12 +89,11 @@ class ShareRepository @Inject constructor(
             rawUrl
         }
         val finalUrl = if (base.contains("#")) base else "$base#${enc.keyFragment}"
-        val returnedToken = response.noteToken ?: response.deleteToken ?: token
+        val returnedToken = response.noteToken ?: noteToken
         ShareResult(
             shareId = response.shareId,
             url = finalUrl,
             key = enc.keyFragment,
-            deleteToken = returnedToken,
             noteToken = returnedToken,
             expiresAt = response.expiresAt
         )
@@ -112,10 +109,10 @@ class ShareRepository @Inject constructor(
     }
 
     /**
-     * Deletes (unshares) a note from the backend. Requires the secret noteToken/deleteToken.
+     * Deletes (unshares) a note from the backend. Requires the secret noteToken.
      */
-    suspend fun deleteNote(shareId: String, deleteToken: String): Result<Unit> = runCatching {
-        api.deleteNote(shareId = shareId, noteToken = deleteToken, deleteToken = deleteToken)
+    suspend fun deleteNote(shareId: String, noteToken: String): Result<Unit> = runCatching {
+        api.deleteNote(shareId = shareId, noteToken = noteToken)
         Unit
     }
 

@@ -128,6 +128,7 @@ fun ShareLinkDialog(
     onDismiss: () -> Unit,
     onShare: () -> Unit,
     onOpen: () -> Unit,
+    onUpdateSharedNote: (() -> Unit)? = null,
     onStopSharing: (() -> Unit)? = null
 ) {
     val clipboard = LocalClipboardManager.current
@@ -212,6 +213,17 @@ fun ShareLinkDialog(
                     Icon(Icons.Default.OpenInNew, contentDescription = null, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(stringResource(R.string.share_link_open))
+                }
+
+                if (onUpdateSharedNote != null) {
+                    TextButton(
+                        onClick = onUpdateSharedNote,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.Edit, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text("Update Shared Note")
+                    }
                 }
 
                 // Creator-only: revoke the link (deletes the note from the backend).

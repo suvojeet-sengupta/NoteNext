@@ -676,7 +676,7 @@ class NotesViewModel @Inject constructor(
                         snapshot != null -> {
                             shareRepository.shareNote(snapshot.first, snapshot.second, event.expiry, event.burnAfterRead, event.maxReads)
                                 .onSuccess { result ->
-                                    _events.emit(NotesUiEvent.ShareLinkReady(result.url, result.shareId, snapshot.first, result.deleteToken, result.expiresAt))
+                                    _events.emit(NotesUiEvent.ShareLinkReady(result.url, result.shareId, snapshot.first, result.noteToken, result.expiresAt))
                                 }
                                 .onFailure {
                                     _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_failed)))
@@ -688,7 +688,12 @@ class NotesViewModel @Inject constructor(
             }
             is NotesEvent.UnshareNote -> {
                 viewModelScope.launch {
-                    unshareNote(event.shareId, event.deleteToken)
+                    unshareNote(event.shareId, event.noteToken)
+                }
+            }
+            is NotesEvent.UpdateSharedNote -> {
+                viewModelScope.launch {
+                    updateSharedNote(event.shareId, event.noteToken)
                 }
             }
             is NotesEvent.SetReminderForSelectedNotes -> {
@@ -1561,7 +1566,7 @@ class NotesViewModel @Inject constructor(
                     // Existing link is still alive → reuse it, no duplicate.
                     _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_reusing)))
                     _events.emit(
-                        NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareDeleteToken, s.expiresAt)
+                        NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareNoteToken, s.expiresAt)
                     )
                 }
                 .onFailure { t ->
@@ -1569,7 +1574,7 @@ class NotesViewModel @Inject constructor(
                     if (code == 404 || code == 410) {
                         // Definitively gone (expired / burned / deleted) → drop the stale link
                         // and prompt to mint a fresh one.
-                        val cleared = note.copy(shareId = null, shareKey = null, shareDeleteToken = null)
+                        val cleared = note.copy(shareId = null, shareKey = null, shareNoteToken = null)
                         if (note.id != 0) runCatching { repository.updateNote(cleared) }
                         pendingShareNote = cleared
                         pendingShareSnapshot = null
@@ -1580,7 +1585,7 @@ class NotesViewModel @Inject constructor(
                         // duplicate. Reuse the link we already hold and let the user retry later.
                         _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_verify_failed)))
                         _events.emit(
-                            NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareDeleteToken, null)
+                            NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareNoteToken, null)
                         )
                     }
                 }
@@ -1593,11 +1598,8 @@ class NotesViewModel @Inject constructor(
     }
 
     /**
-     * Publishes [note] as an end-to-end encrypted, ephemeral share link with the
-     * chosen [expiry], optional [burnAfterRead] and [maxReads]. The content is
-     * encrypted on-device (server stores only ciphertext). The new share id, the
-     * decryption key and the delete-token are persisted onto the local row so the
-     * same link can be reused on a re-share, and the note can later be unshared.
+     * Publishes [note] as an end-to-end encrypted share link with [expiry].
+     * The new shareId, decryption key and noteToken are persisted onto the local row.
      */
     private suspend fun shareNoteViaLink(
         note: com.suvojeet.notenext.data.Note,
@@ -1613,13 +1615,13 @@ class NotesViewModel @Inject constructor(
                             note.copy(
                                 shareId = result.shareId,
                                 shareKey = result.key,
-                                shareDeleteToken = result.deleteToken
+                                shareNoteToken = result.noteToken
                             )
                         )
                     }
                 }
                 _events.emit(
-                    NotesUiEvent.ShareLinkReady(result.url, result.shareId, note.title, result.deleteToken, result.expiresAt)
+                    NotesUiEvent.ShareLinkReady(result.url, result.shareId, note.title, result.noteToken, result.expiresAt)
                 )
             }
             .onFailure {
@@ -1628,13 +1630,33 @@ class NotesViewModel @Inject constructor(
     }
 
     /**
-     * Stops sharing a note: deletes it from the backend (proving ownership with
-     * the secret delete-token) and clears the local shareId/token so a future
-     * share starts fresh. A public shareId without the token cannot delete.
+     * Updates an existing shared note on the server using its noteToken.
      */
-    private suspend fun unshareNote(shareId: String, deleteToken: String?) {
-        // Fall back to the locally-stored token if the caller didn't carry one.
-        val token = deleteToken ?: repository.getNoteByShareId(shareId)?.shareDeleteToken
+    private suspend fun updateSharedNote(shareId: String, noteToken: String?) {
+        val note = repository.getNoteByShareId(shareId)?.note
+            ?: pendingShareNote
+            ?: return
+        val token = noteToken ?: note.shareNoteToken
+        if (token.isNullOrEmpty()) {
+            _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_unshare_no_token)))
+            return
+        }
+        val title = note.title
+        val plainContent = HtmlConverter.htmlToPlainText(note.content)
+        shareRepository.updateNote(shareId, token, title, plainContent)
+            .onSuccess {
+                _events.emit(NotesUiEvent.ShowSnackbar("Shared note updated on server"))
+            }
+            .onFailure {
+                _events.emit(NotesUiEvent.ShowSnackbar("Couldn't update shared note on server"))
+            }
+    }
+
+    /**
+     * Stops sharing a note: deletes it from backend using noteToken and clears local share details.
+     */
+    private suspend fun unshareNote(shareId: String, noteToken: String?) {
+        val token = noteToken ?: repository.getNoteByShareId(shareId)?.shareNoteToken
         if (token.isNullOrEmpty()) {
             _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_unshare_no_token)))
             return
@@ -1643,7 +1665,7 @@ class NotesViewModel @Inject constructor(
             .onSuccess {
                 runCatching {
                     repository.getNoteByShareId(shareId)?.let { local ->
-                        repository.updateNote(local.copy(shareId = null, shareKey = null, shareDeleteToken = null))
+                        repository.updateNote(local.copy(shareId = null, shareKey = null, shareNoteToken = null))
                     }
                 }
                 _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_unshared)))
