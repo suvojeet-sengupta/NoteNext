@@ -44,7 +44,7 @@ android {
         versionCode = if (generatedVersionCode > baseVersionCode) generatedVersionCode else baseVersionCode
         
         // Version name includes the manual version and the build timestamp for clarity
-        val baseVersionName = (project.findProperty("appVersionName") as? String) ?: "1.5.1"
+        val baseVersionName = (project.findProperty("appVersionName") as? String) ?: "1.5.2"
         versionName = "$baseVersionName (${SimpleDateFormat("yyyy.MM.dd", Locale.US).format(date)})"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

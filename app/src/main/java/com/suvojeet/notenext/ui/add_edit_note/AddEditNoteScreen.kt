@@ -809,6 +809,7 @@ fun AddEditNoteScreen(
         com.suvojeet.notenext.ui.components.ShareLinkDialog(
             url = link.url,
             statusState = link.statusState,
+            noteToken = link.noteToken,
             onDismiss = { shareLinkReady = null },
             onShare = {
                 val sendIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {

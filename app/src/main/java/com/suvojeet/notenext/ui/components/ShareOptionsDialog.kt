@@ -19,6 +19,7 @@ import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.Warning
 import com.suvojeet.notenext.ui.notes.ShareStatusState
 import androidx.compose.material3.*
@@ -131,6 +132,7 @@ fun ShareOptionsDialog(
 fun ShareLinkDialog(
     url: String,
     statusState: ShareStatusState = ShareStatusState.Checking,
+    noteToken: String? = null,
     onDismiss: () -> Unit,
     onShare: () -> Unit,
     onOpen: () -> Unit,
@@ -140,6 +142,7 @@ fun ShareLinkDialog(
     val clipboard = LocalClipboardManager.current
     val context = LocalContext.current
     val copiedText = stringResource(R.string.share_link_copied)
+    var showNoteTokenDialog by remember { mutableStateOf(false) }
 
     Dialog(onDismissRequest = onDismiss) {
         Card(
@@ -317,6 +320,17 @@ fun ShareLinkDialog(
                     Text(stringResource(R.string.share_link_open))
                 }
 
+                if (!noteToken.isNullOrBlank()) {
+                    TextButton(
+                        onClick = { showNoteTokenDialog = true },
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Icon(Icons.Default.VpnKey, contentDescription = null, modifier = Modifier.size(18.dp))
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.share_link_view_token))
+                    }
+                }
+
                 if (onUpdateSharedNote != null) {
                     TextButton(
                         onClick = onUpdateSharedNote,
@@ -340,6 +354,105 @@ fun ShareLinkDialog(
                         Icon(Icons.Default.LinkOff, contentDescription = null, modifier = Modifier.size(18.dp))
                         Spacer(Modifier.width(6.dp))
                         Text(stringResource(R.string.share_link_stop))
+                    }
+                }
+            }
+        }
+    }
+
+    if (showNoteTokenDialog && !noteToken.isNullOrBlank()) {
+        NoteTokenDialog(
+            token = noteToken,
+            onDismiss = { showNoteTokenDialog = false }
+        )
+    }
+}
+
+/**
+ * Dialog displaying the secret Note Token with option to copy it.
+ */
+@Composable
+fun NoteTokenDialog(
+    token: String,
+    onDismiss: () -> Unit
+) {
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            shape = RoundedCornerShape(28.dp),
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 8.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.padding(24.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = Icons.Default.VpnKey,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary
+                    )
+                    Spacer(Modifier.width(10.dp))
+                    Text(
+                        text = stringResource(R.string.note_token_title),
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.note_token_subtitle),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+
+                Spacer(Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(MaterialTheme.colorScheme.surfaceContainerHigh)
+                        .padding(14.dp)
+                ) {
+                    Text(
+                        text = token,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace
+                        ),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    TextButton(onClick = onDismiss) {
+                        Text("Close")
+                    }
+                    Spacer(Modifier.width(8.dp))
+                    Button(
+                        onClick = {
+                            clipboard.setText(AnnotatedString(token))
+                            Toast.makeText(
+                                context,
+                                context.getString(R.string.note_token_copied),
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
+                    ) {
+                        Icon(
+                            Icons.Default.ContentCopy,
+                            contentDescription = null,
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Spacer(Modifier.width(6.dp))
+                        Text(stringResource(R.string.share_link_copy))
                     }
                 }
             }

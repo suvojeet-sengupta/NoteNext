@@ -457,6 +457,7 @@ fun NotesScreen(
                             ShareLinkDialog(
                                 url = link.url,
                                 statusState = link.statusState,
+                                noteToken = link.noteToken,
                                 onDismiss = { shareLinkReady = null },
                                 onShare = {
                                     val sendIntent = Intent(Intent.ACTION_SEND).apply {

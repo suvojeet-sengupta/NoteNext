@@ -147,7 +147,11 @@
     <string name="share_link_unshared">सामायिक करणे थांबवले. दुवा आता कार्य करणार नाही.</string>
     <string name="share_link_unshare_failed">सामायिक करणे थांबवता आले नाही. तुमचे कनेक्शन तपासा.</string>
     <string name="share_link_unshare_no_token">फक्त हा दुवा तयार करणारी व्यक्तीच सामायिक करणे थांबवू शकते.</string>
-    <string name="share_via_link">दुवा याद्वारे सामायिक करा</string>
+    <string name="share_link_view_token">नोंद टोकन पहा</string>
+    <string name="note_token_title">नोंद टोकन</string>
+    <string name="note_token_subtitle">NoteNext वेब UI मध्ये तुमची सामायिक नोंद संपादित करण्यासाठी किंवा हटवण्यासाठी हे टोकन वापरा.</string>
+    <string name="note_token_copied">नोंद टोकन क्लिपबोर्डवर कॉपी केले</string>
+    <string name="share_via_link">द्वारे दुवा सामायिक करा</string>
 
     <!-- Heading Styles -->
     <string name="normal_text">सामान्य मजकूर</string>

@@ -147,6 +147,10 @@
     <string name="share_link_unshared">শেয়ার করা বন্ধ হয়েছে। লিঙ্কটি আর কাজ করবে না।</string>
     <string name="share_link_unshare_failed">শেয়ার করা বন্ধ করা যায়নি। আপনার সংযোগ পরীক্ষা করুন।</string>
     <string name="share_link_unshare_no_token">শুধুমাত্র যিনি এই লিঙ্ক তৈরি করেছেন তিনিই শেয়ার করা বন্ধ করতে পারবেন।</string>
+    <string name="share_link_view_token">নোট টোকেন দেখুন</string>
+    <string name="note_token_title">নোট টোকেন</string>
+    <string name="note_token_subtitle">NoteNext ওয়েব UI / ফন্টে নোট সম্পাদনা বা মুছে ফেলার জন্য এই গোপন টোকেনটি ব্যবহার করুন।</string>
+    <string name="note_token_copied">নোট টোকেন অনুলিপি করা হয়েছে</string>
     <string name="share_via_link">লিঙ্ক শেয়ার করুন এর মাধ্যমে</string>
 
     <!-- Heading Styles -->

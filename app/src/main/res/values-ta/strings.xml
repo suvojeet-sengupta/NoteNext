@@ -147,7 +147,11 @@
     <string name="share_link_unshared">பகிர்வு நிறுத்தப்பட்டது. இணைப்பு இனி வேலை செய்யாது.</string>
     <string name="share_link_unshare_failed">பகிர்வை நிறுத்த முடியவில்லை. உங்கள் இணைப்பைச் சரிபார்க்கவும்.</string>
     <string name="share_link_unshare_no_token">இந்த இணைப்பை உருவாக்கியவர் மட்டுமே பகிர்வதை நிறுத்த முடியும்.</string>
-    <string name="share_via_link">இணைப்பை இதன் மூலம் பகிர்</string>
+    <string name="share_link_view_token">குறிப்பு டோக்கனைக் காண்க</string>
+    <string name="note_token_title">குறிப்பு டோக்கன்</string>
+    <string name="note_token_subtitle">NoteNext வலை UI இல் உங்கள் பகிர்ந்த குறிப்பைத் திருத்த அல்லது நீக்க இந்த டோக்கனைப் பயன்படுத்தவும்.</string>
+    <string name="note_token_copied">குறிப்பு டோக்கன் நகலெடுக்கப்பட்டது</string>
+    <string name="share_via_link">இணைப்பைப் பகிரவும்</string>
 
     <!-- Heading Styles -->
     <string name="normal_text">சாதாரண உரை</string>

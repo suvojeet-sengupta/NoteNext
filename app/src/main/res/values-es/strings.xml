@@ -147,6 +147,10 @@
     <string name="share_link_unshared">Se dejó de compartir. El enlace ya no funciona.</string>
     <string name="share_link_unshare_failed">No se pudo dejar de compartir. Comprueba tu conexión.</string>
     <string name="share_link_unshare_no_token">Solo la persona que creó este enlace puede dejar de compartirlo.</string>
+    <string name="share_link_view_token">Ver token de la nota</string>
+    <string name="note_token_title">Token de la nota</string>
+    <string name="note_token_subtitle">Usa este token secreto en la interfaz web de NoteNext para editar o eliminar tu nota compartida.</string>
+    <string name="note_token_copied">Token de la nota copiado al portapapeles</string>
     <string name="share_via_link">Compartir enlace mediante</string>
 
     <!-- Heading Styles -->

@@ -1,6 +1,22 @@
 {
   "releases": [
     {
+      "version": "1.5.2",
+      "date": "August 3, 2026",
+      "items": [
+        {
+          "title": "7-Day Default Share Expiry",
+          "description": "Encrypted share links now default to 7 days expiration for longer, uninterrupted collaboration.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "View Note Token Option",
+          "description": "Added a 'View Note Token' option in share link dialogs allowing users to copy the secret note token to edit or delete shared notes in the NoteNext Web UI / frontend.",
+          "type": "FEATURE"
+        }
+      ]
+    },
+    {
       "version": "1.5.1",
       "date": "July 25, 2026",
       "items": [

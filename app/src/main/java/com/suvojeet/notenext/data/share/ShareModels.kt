@@ -28,7 +28,7 @@ enum class ShareExpiry(val apiValue: String) {
     SEVEN_DAYS("7d");
 
     companion object {
-        val DEFAULT = ONE_DAY
+        val DEFAULT = SEVEN_DAYS
     }
 }
 
@@ -38,7 +38,7 @@ data class ShareNoteRequest(
     val ciphertext: String,
     val iv: String,
     val sharedBy: String? = null,
-    /** Expiry preset key ("10m" | "1h" | "1d" | "7d"). Server defaults to 1d if null/unknown. */
+    /** Expiry preset key ("10m" | "1h" | "1d" | "7d"). Server defaults to 7d if null/unknown. */
     val expiresIn: String? = null,
     /** When true, the note is deleted after [maxReads] reads. */
     val burnAfterRead: Boolean = false,

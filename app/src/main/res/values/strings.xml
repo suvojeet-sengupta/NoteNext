@@ -147,6 +147,10 @@
     <string name="share_link_unshared">Sharing stopped. Link no longer works.</string>
     <string name="share_link_unshare_failed">Couldn\'t stop sharing. Check your connection.</string>
     <string name="share_link_unshare_no_token">Only the person who created this link can stop sharing it.</string>
+    <string name="share_link_view_token">View Note Token</string>
+    <string name="note_token_title">Note Token</string>
+    <string name="note_token_subtitle">Use this secret note token in NoteNext Web UI / frontend to edit or delete your shared note.</string>
+    <string name="note_token_copied">Note token copied to clipboard</string>
     <!-- Re-share dedup feedback -->
     <string name="share_link_checking">Checking your existing link…</string>
     <string name="share_link_reusing">This note is already shared — reusing the same link.</string>
