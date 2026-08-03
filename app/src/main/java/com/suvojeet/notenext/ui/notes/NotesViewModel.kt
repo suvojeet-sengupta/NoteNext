@@ -113,6 +113,13 @@ class NotesViewModel @Inject constructor(
     val listState = listDelegate.listState
     val editState = editorDelegate.editState
     val aiPromptHistory = settingsRepository.aiPromptHistory.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    val lastSeenVersion = settingsRepository.lastSeenVersion.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    fun onFeatureGuideDismissed(versionCode: Int) {
+        viewModelScope.launch {
+            settingsRepository.saveLastSeenVersion(versionCode)
+        }
+    }
 
     // High-frequency editing flows to isolate recomposition
     val editingContent = editState.map { it.editingContent }.distinctUntilChanged()
@@ -1602,12 +1609,15 @@ class NotesViewModel @Inject constructor(
                         } else {
                             val cleared = note.copy(shareId = null, shareKey = null, shareNoteToken = null)
                             if (note.id != 0) runCatching { repository.updateNote(cleared) }
+                            pendingShareNote = cleared
+                            _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_expired_new)))
                             _events.emit(
                                 NotesUiEvent.ShareLinkStatusUpdated(
                                     shareId = shareId,
                                     statusState = ShareStatusState.Expired
                                 )
                             )
+                            _events.emit(NotesUiEvent.ShowShareOptions)
                         }
                     }
                     .onFailure { t ->
@@ -1615,12 +1625,15 @@ class NotesViewModel @Inject constructor(
                         if (code == 404 || code == 410) {
                             val cleared = note.copy(shareId = null, shareKey = null, shareNoteToken = null)
                             if (note.id != 0) runCatching { repository.updateNote(cleared) }
+                            pendingShareNote = cleared
+                            _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_expired_new)))
                             _events.emit(
                                 NotesUiEvent.ShareLinkStatusUpdated(
                                     shareId = shareId,
                                     statusState = ShareStatusState.Expired
                                 )
                             )
+                            _events.emit(NotesUiEvent.ShowShareOptions)
                         } else {
                             _events.emit(
                                 NotesUiEvent.ShareLinkStatusUpdated(

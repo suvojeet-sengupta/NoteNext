@@ -55,6 +55,7 @@ import com.suvojeet.notenext.ui.notes.NotesEditState
 import com.suvojeet.notenext.ui.notes.NotesListState
 import com.suvojeet.notenext.core.model.NoteType
 import com.suvojeet.notenext.ui.notes.NotesUiEvent
+import com.suvojeet.notenext.ui.notes.ShareStatusState
 import com.suvojeet.notenext.ui.theme.NoteGradients
 import com.suvojeet.notenext.ui.theme.ThemeMode
 import com.suvojeet.notenext.ui.reminder.ReminderSheetContent
@@ -302,7 +303,9 @@ fun AddEditNoteScreen(
                     shareLinkReady = event
                 }
                 is NotesUiEvent.ShareLinkStatusUpdated -> {
-                    if (shareLinkReady?.shareId == event.shareId) {
+                    if (event.statusState is ShareStatusState.Expired) {
+                        shareLinkReady = null
+                    } else if (shareLinkReady?.shareId == event.shareId) {
                         shareLinkReady = shareLinkReady?.copy(statusState = event.statusState)
                     }
                 }

@@ -94,8 +94,10 @@ fun NotesScreen(
 ) {
     val listState by viewModel.listState.collectAsStateWithLifecycle()
     val editState by viewModel.editState.collectAsStateWithLifecycle()
+    val lastSeenVersion by viewModel.lastSeenVersion.collectAsStateWithLifecycle()
     var isFabExpanded by remember { mutableStateOf(false) }
     var isSearchActive by remember { mutableStateOf(false) }
+    var showFeatureGuide by remember { mutableStateOf(false) }
     
     val systemInDarkTheme = androidx.compose.foundation.isSystemInDarkTheme()
     val isDarkTheme = when (themeMode) {
@@ -127,6 +129,12 @@ fun NotesScreen(
         }
     } else {
         null
+    }
+
+    LaunchedEffect(lastSeenVersion) {
+        if (lastSeenVersion < 38) {
+            showFeatureGuide = true
+        }
     }
 
     LaunchedEffect(Unit) {
@@ -176,8 +184,12 @@ fun NotesScreen(
                     if (viewModel.editState.value.expandedNoteId == null) shareLinkReady = event
                 }
                 is NotesUiEvent.ShareLinkStatusUpdated -> {
-                    if (viewModel.editState.value.expandedNoteId == null && shareLinkReady?.shareId == event.shareId) {
-                        shareLinkReady = shareLinkReady?.copy(statusState = event.statusState)
+                    if (viewModel.editState.value.expandedNoteId == null) {
+                        if (event.statusState is ShareStatusState.Expired) {
+                            shareLinkReady = null
+                        } else if (shareLinkReady?.shareId == event.shareId) {
+                            shareLinkReady = shareLinkReady?.copy(statusState = event.statusState)
+                        }
                     }
                 }
                 is NotesUiEvent.ShowShareOptions -> {
@@ -488,6 +500,15 @@ fun NotesScreen(
                                         viewModel.onEvent(NotesEvent.UnshareNote(link.shareId, token))
                                         shareLinkReady = null
                                     }
+                                }
+                            )
+                        }
+
+                        if (showFeatureGuide) {
+                            com.suvojeet.notenext.ui.components.ShareFeatureGuideDialog(
+                                onDismiss = {
+                                    showFeatureGuide = false
+                                    viewModel.onFeatureGuideDismissed(38)
                                 }
                             )
                         }

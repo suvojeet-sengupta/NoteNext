@@ -83,6 +83,7 @@
                 <data android:pathPattern=".*\\.xml" />
             </intent-filter>
             <!-- Shared-note App Links: https://api-notenext.suvojeetsengupta.in/s/<id>
+                 and https://paste.suvojeetsengupta.in/<id>
                  Opens directly in the app once the domain is verified via
                  /.well-known/assetlinks.json (served by the backend). -->
             <intent-filter android:autoVerify="true">
@@ -92,8 +93,16 @@
                 <data android:scheme="https" />
                 <data android:scheme="http" />
                 <data android:host="api-notenext.suvojeetsengupta.in" />
-                <data android:host="paste.suvojeetsengupta.in" />
                 <data android:pathPrefix="/s/" />
+            </intent-filter>
+
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" />
+                <data android:scheme="http" />
+                <data android:host="paste.suvojeetsengupta.in" />
             </intent-filter>
 
             <!-- Custom-scheme fallback used by the web page's "Open in app" button:
