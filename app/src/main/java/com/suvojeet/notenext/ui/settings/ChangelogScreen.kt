@@ -39,10 +39,12 @@ fun ChangelogScreen(
 ) {
     val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
     
+    val context = androidx.compose.ui.platform.LocalContext.current
     var changelogResult by remember { mutableStateOf<Result<ChangelogList>?>(null) }
+    var retryTrigger by remember { mutableIntStateOf(0) }
     
-    LaunchedEffect(Unit) {
-        changelogResult = ChangelogRepository.getChangelog()
+    LaunchedEffect(retryTrigger) {
+        changelogResult = ChangelogRepository.getChangelog(context)
     }
 
     Scaffold(
@@ -89,7 +91,7 @@ fun ChangelogScreen(
                         Spacer(modifier = Modifier.height(24.dp))
                         Button(onClick = { 
                             changelogResult = null
-                            // Trigger re-fetch
+                            retryTrigger++
                         }, modifier = Modifier.springPress()) {
                             Text("Retry")
                         }

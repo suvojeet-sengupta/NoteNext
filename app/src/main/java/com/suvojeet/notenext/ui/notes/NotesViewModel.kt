@@ -113,7 +113,7 @@ class NotesViewModel @Inject constructor(
     val listState = listDelegate.listState
     val editState = editorDelegate.editState
     val aiPromptHistory = settingsRepository.aiPromptHistory.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
-    val lastSeenVersion = settingsRepository.lastSeenVersion.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+    val lastSeenVersion = settingsRepository.lastSeenVersion.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), -1)
 
     fun onFeatureGuideDismissed(versionCode: Int) {
         viewModelScope.launch {

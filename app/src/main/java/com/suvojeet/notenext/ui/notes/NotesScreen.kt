@@ -132,7 +132,7 @@ fun NotesScreen(
     }
 
     LaunchedEffect(lastSeenVersion) {
-        if (lastSeenVersion < 38) {
+        if (lastSeenVersion != -1 && lastSeenVersion < 39) {
             showFeatureGuide = true
         }
     }
@@ -508,7 +508,7 @@ fun NotesScreen(
                             com.suvojeet.notenext.ui.components.ShareFeatureGuideDialog(
                                 onDismiss = {
                                     showFeatureGuide = false
-                                    viewModel.onFeatureGuideDismissed(38)
+                                    viewModel.onFeatureGuideDismissed(39)
                                 }
                             )
                         }

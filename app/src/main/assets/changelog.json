@@ -1,0 +1,465 @@
+{
+  "releases": [
+    {
+      "version": "1.5.2",
+      "date": "August 3, 2026",
+      "items": [
+        {
+          "title": "7-Day Default Share Expiry",
+          "description": "Encrypted share links now default to 7 days expiration for longer, uninterrupted collaboration.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "View Note Token Option",
+          "description": "Added a 'View Note Token' option in share link dialogs allowing users to copy the secret note token to edit or delete shared notes in the NoteNext Web UI / frontend.",
+          "type": "FEATURE"
+        }
+      ]
+    },
+    {
+      "version": "1.5.1",
+      "date": "July 25, 2026",
+      "items": [
+        {
+          "title": "Voice Note Recording & Playback",
+          "description": "Record audio notes directly inside the editor and play them back seamlessly with the integrated inline player.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Play Billing 9.1.0 Upgrade",
+          "description": "Migrated to Google Play Billing Library 9.1.0 and resolved issues with unconsumed in-app purchases.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Robust Backup & Memory Optimization",
+          "description": "Fixed shared attachment restoration during backups and optimized memory usage when handling large media files.",
+          "type": "FIX"
+        },
+        {
+          "title": "Unified Bulk Note Operations",
+          "description": "Streamlined note selection and bulk management actions across main notes, archive, and trash screens.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Editor Polish & Fixes",
+          "description": "Fixed cursor glow animation pulsing, live note expiry chip countdown timers, and checklist item insertion behavior.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.5.0",
+      "date": "July 10, 2026",
+      "items": [
+        {
+          "title": "End-to-End Encrypted Sharing",
+          "description": "Shared notes are now encrypted on your device before they ever leave it — the server only ever sees an unreadable, locked blob, and the decryption key travels only inside the share link, never to any server.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Self-Destructing Share Links",
+          "description": "Every share link now expires automatically — choose 10 minutes, 1 hour, 1 day, or 7 days. Optionally turn on 'burn after reading' to delete the note once it's opened, and pick how many reads it survives.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Smarter Re-Sharing",
+          "description": "Re-sharing a note now reuses its existing link instead of creating duplicates, and automatically generates a fresh one if the previous link has already expired.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
+      "version": "1.4.4",
+      "date": "June 7, 2026",
+      "items": [
+        {
+          "title": "Maintenance Update",
+          "description": "General performance improvements and stability fixes to ensure a smoother note-taking experience.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
+      "version": "1.4.3",
+      "date": "May 6, 2026",
+      "items": [
+        {
+          "title": "Critical App Lock Fix",
+          "description": "Resolved a critical crash when enabling App Lock on devices with modern adaptive icons. Fixed the underlying drawable compatibility issue for a more robust security experience.",
+          "type": "FIX"
+        },
+        {
+          "title": "Official Website Integration",
+          "description": "Added direct links to the official product website in About and Contact screens for easier access to support and documentation.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Improved Share Experience",
+          "description": "Sharing NoteNext now includes the official website link alongside the Play Store and GitHub links for better discoverability.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Notification Icon Compatibility",
+          "description": "Updated system notification icons to ensure perfect visibility in the status bar across all Android versions.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
+      "version": "1.4.2",
+      "date": "May 1, 2026",
+      "items": [
+        {
+          "title": "Branded Security Experience",
+          "description": "Added the NoteNext logo to the app lock screen for a more polished and professional security interface.",
+          "type": "UI"
+        },
+        {
+          "title": "Hardened PIN Security",
+          "description": "Upgraded internal PIN storage with industry-standard hashing (PBKDF2) and added screenshot protection to the lock screen for maximum privacy.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Enhanced Decoy Privacy",
+          "description": "Biometric login is now intelligently hidden when the Decoy Vault is active, preserving plausible deniability.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Pinpoint Self-Destruct",
+          "description": "Rewrote the self-destruct engine to use exact system alarms, ensuring ephemeral notes expire precisely when intended.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Security & Stability Fixes",
+          "description": "Disabled insecure cloud backups and resolved a critical bug that could lead to data loss during decryption failures.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.4.1",
+      "date": "April 30, 2026",
+      "items": [
+        {
+          "title": "Decoy Vault & Hardened Privacy",
+          "description": "Introduced the Decoy Vault—a secondary PIN system that reveals a separate set of notes. Automatically enforces App Lock when enabled for maximum security.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Custom Self-Destruct Timer",
+          "description": "Take full control of ephemeral notes with a new custom date and time picker for self-destructing content.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Material 3 Expressive Motion",
+          "description": "Enhanced the UI with fluid M3 Expressive animations, including new exit motions for AI summary sheets and polished transitions.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Modern Component Architecture",
+          "description": "Fully adopted M3 Expressive components and tokenized hardcoded colors for better theme consistency and responsiveness.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Checklist & Label Fixes",
+          "description": "Improved checklist preview visibility and fixed an issue where existing labels wouldn't populate correctly in the management dialog.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.4.0",
+      "date": "April 27, 2026",
+      "items": [
+        {
+          "title": "Privacy-First AI Subsystem",
+          "description": "Introduced a comprehensive AI hub with 9 powerful features including Tone Rewriter, Auto-Tagging, Smart Reminders, and Linked Notes. Features a master kill-switch and per-feature toggles to ensure 100% user control and privacy.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "AI Usage Dashboard",
+          "description": "New local-only dashboard to track AI feature usage and acceptance rates with zero data leaving your device.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Compact Editor UI",
+          "description": "Redesigned the Add/Edit note screen with reduced padding and scaled-down elements for better content visibility, mirroring the Google Keep experience.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Modernized Settings",
+          "description": "Refined the settings screen with a more modern look, improved dialogs, and better category organization.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
+      "version": "1.3.8",
+      "date": "April 21, 2026",
+      "items": [
+        {
+          "title": "Interactive Checklist Experience",
+          "description": "Revolutionized checklist management with smooth, real-time drag-and-drop tracking and smart keyboard integration (Enter to add, Backspace to remove).",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Indian & Open Source Identity",
+          "description": "Updated app mission to highlight our roots as a proudly Indian, 100% free, and open-source project dedicated to privacy.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Performance & State Stability",
+          "description": "Optimized recompositions using immutable collections and marked core data models as stable for a buttery-smooth UI experience.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Shared Element Transitions",
+          "description": "Implemented beautiful shared element transitions and AI streaming for project-based notes.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Reliability & Bug Fixes",
+          "description": "Fixed Room compatibility issues with immutable types, resolved lifecycle-related crashes, and improved backup/restore for Todo items.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.3.7",
+      "date": "April 16, 2026",
+      "items": [
+        {
+          "title": "Performance & Stability",
+          "description": "Improved app launch speed, reduced memory usage, and fixed rare crashes on Android 15.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Enhanced Backup Reliability",
+          "description": "Backup and restore now handle large note sets more efficiently and provide clearer error messages.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "UI Polish & Accessibility",
+          "description": "Refined button contrast, improved TalkBack support, and fixed layout glitches in landscape mode.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Bug Fixes",
+          "description": "Resolved issues with project nesting, reminders not firing, and rare sync failures.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.3.6",
+      "date": "April 05, 2026",
+      "items": [
+        {
+          "title": "Advanced Todo & Productivity",
+          "description": "Enhanced Todo feature with subtasks, reminders, and a productivity dashboard for daily progress tracking.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Nested Project Hierarchy",
+          "description": "Organize your notes with unlimited project nesting, indentation support, and hierarchical traversal.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "AI Provider Model Selection",
+          "description": "Select specific models for OpenAI, Anthropic, and Groq. Includes support for GPT-4.5 and Claude 3.5 Sonnet.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "More Options Responsiveness",
+          "description": "Fixed responsiveness issues in the More Options sheet when fully expanded and improved gesture handling.",
+          "type": "FIX"
+        },
+        {
+          "title": "Infrastructure & Modularization",
+          "description": "Modularized the Todo feature and improved AI provider infrastructure for better scalability.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
+      "version": "1.3.5",
+      "date": "March 29, 2026",
+      "items": [
+        {
+          "title": "Interactive Widgets & Lists",
+          "description": "Introduced interactive Jetpack Glance widgets for pinned notes and checklists. Added bulleted list support, link auto-detection, and project notes parity.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Search & Find Integration",
+          "description": "Added native in-note search with result highlighting and a new 'Find in Note' functionality for faster navigation.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "High-Performance Editor",
+          "description": "Optimized the editor with text chunking for smoother handling of long notes. Resolved cursor jumping, keyboard layout issues, and stabilized state management.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Polished & Responsive UI",
+          "description": "Refined the UI with thinner bottom toolbars, reduced padding, and animated sync indicators for a more modern feel.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Fast Startup & Metadata",
+          "description": "Enhanced app startup and note list scrolling by optimizing metadata fetching and implementing lifecycle-aware async initialization.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Database & Serialization Fixes",
+          "description": "Fixed SQL errors in note sorting, resolved serialization crashes in minified builds, and added database indices for performance.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.3.4",
+      "date": "March 21, 2026",
+      "items": [
+        {
+          "title": "AI Power & Customization",
+          "description": "Added support for custom Groq API keys and model selection. Enjoy faster AI with intelligent rate-limit awareness and secure key encryption.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Ultra-Reliable Backups",
+          "description": "Complete overhaul of the backup system. Now featuring atomic restores for data safety, SHA-256 integrity verification, and secure password storage.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Smart Auto-Backups",
+          "description": "Never lose a note again with incremental backups that trigger automatically when you edit or charge your device.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Privacy First",
+          "description": "Locked notes now show their titles for easier organization while keeping content fully encrypted. Added a 2-minute session timeout for enhanced security.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "New Drawing Experience",
+          "description": "Redesigned drawing canvas with a clean white background, responsive Material 3 tools, and true erasing capabilities.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Fluid UI Animations",
+          "description": "Experience the new Material 3 Expressive motion engine with smooth animations for note pinning and label management.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "System Stability",
+          "description": "Resolved critical memory leaks, fixed Android 15 compatibility issues, and improved database migration reliability.",
+          "type": "FIX"
+        }
+      ]
+    },
+    {
+      "version": "1.3.3",
+      "date": "March 19, 2026",
+      "items": [
+        {
+          "title": "Drawing Canvas & Multimedia",
+          "description": "Introduced a new drawing canvas with Material 3 Expressive controls and support for cross-note linking, allowing you to connect thoughts visually.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Performance Engine Upgrade",
+          "description": "Migrated to Paging 3 for buttery-smooth scrolling, implemented FTS4 for near-instant search results, and upgraded to Coil 3 for high-performance image loading.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Hardened Biometric Security",
+          "description": "Refactored biometric authentication with cryptographic binding and resolved critical encryption-related crashes for maximum data protection.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Expressive UI Motion",
+          "description": "Upgraded AI dialogs and system transitions to the Material 3 Expressive motion engine, featuring refined spring physics and tactile feedback.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Infrastructure & Stability",
+          "description": "Modernized the build system with Hilt 2.59.2 and AGP 9.1.0 compatibility, while resolving numerous compilation and startup stability issues.",
+          "type": "FIX"
+        },
+        {
+          "title": "Share Link Integration",
+          "description": "Added the direct Play Store link to the app share dialog to help you easily share NoteNext with others.",
+          "type": "FEATURE"
+        }
+      ]
+    },
+    {
+      "version": "1.3.2",
+      "date": "March 15, 2026",
+      "items": [
+        {
+          "title": "Assistant Integration",
+          "description": "NoteNext is now a first-class citizen! Use voice commands with Google Assistant to create notes, add to lists, or find specific notes natively.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Material 3 Expressive & Predictive Back",
+          "description": "Implemented the latest M3 Expressive motion engine and Predictive Back gestures for a more fluid, responsive, and modern user experience.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "AI Analyzer UI Fixes",
+          "description": "Restored the AI Analyzer functionality in both the Add/Edit and Project screens with new summary sheets.",
+          "type": "FIX"
+        },
+        {
+          "title": "Navigation & Backstack Cleanup",
+          "description": "Refactored the navigation drawer to ensure a clean backstack, fixing issues with unexpected screen jumping and double-clicks.",
+          "type": "FIX"
+        },
+        {
+          "title": "Startup & Splash Optimization",
+          "description": "Optimized app startup time by removing redundant delays and refining the system splash screen transition.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
+      "version": "1.3.1",
+      "date": "March 12, 2026",
+      "items": [
+        {
+          "title": "M3 Expressive Redesign",
+          "description": "Redesigned the entire app with Material 3 Expressive components, smooth spring animations, and a modern SplashScreen.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Performance Optimization",
+          "description": "Optimized note list scrolling with efficient item reuse and removed layout jumping.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Decorative Top Bar",
+          "description": "Enhanced the Add/Edit screen with decorative M3E buttons and centered alignment.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Project View AI & Sync",
+          "description": "Brought AI summarization, grammar fixes, and live sync indicators to the Project view.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Critical Bug Fixes",
+          "description": "Fixed app crashes when opening locked notes and during AI summarization in projects.",
+          "type": "FIX"
+        },
+        {
+          "title": "Update & Share",
+          "description": "Redesigned the update dialog with wavy indicators and added the Play Store link to share options.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    }
+  ]
+}
