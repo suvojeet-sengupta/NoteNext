@@ -7,16 +7,20 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.ErrorOutline
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.LinkOff
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.OpenInNew
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Share
-import androidx.compose.material.icons.filled.LinkOff
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.filled.Warning
+import com.suvojeet.notenext.ui.notes.ShareStatusState
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -126,6 +130,7 @@ fun ShareOptionsDialog(
 @Composable
 fun ShareLinkDialog(
     url: String,
+    statusState: ShareStatusState = ShareStatusState.Checking,
     onDismiss: () -> Unit,
     onShare: () -> Unit,
     onOpen: () -> Unit,
@@ -175,7 +180,103 @@ fun ShareLinkDialog(
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(12.dp))
+
+                // Link Status Banner
+                Surface(
+                    shape = RoundedCornerShape(12.dp),
+                    color = when (statusState) {
+                        is ShareStatusState.Checking -> MaterialTheme.colorScheme.surfaceContainer
+                        is ShareStatusState.Valid -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
+                        is ShareStatusState.Expired -> MaterialTheme.colorScheme.errorContainer.copy(alpha = 0.5f)
+                        is ShareStatusState.Error -> MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.5f)
+                    },
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        when (statusState) {
+                            is ShareStatusState.Checking -> {
+                                CircularProgressIndicator(
+                                    modifier = Modifier.size(16.dp),
+                                    strokeWidth = 2.dp,
+                                    color = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    text = "Checking if link is valid…",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            is ShareStatusState.Valid -> {
+                                val status = statusState.status
+                                Icon(
+                                    imageVector = Icons.Default.CheckCircle,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Column {
+                                    Text(
+                                        text = "Link is valid",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        fontWeight = FontWeight.SemiBold,
+                                        color = MaterialTheme.colorScheme.onSurface
+                                    )
+                                    val details = buildList {
+                                        if (status.burnAfterRead) {
+                                            add("Burn after read (${status.views}/${status.maxReads} views)")
+                                        } else if (status.views > 0) {
+                                            add("${status.views} views")
+                                        }
+                                    }.joinToString(" · ")
+                                    if (details.isNotBlank()) {
+                                        Text(
+                                            text = details,
+                                            style = MaterialTheme.typography.bodySmall,
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                        )
+                                    }
+                                }
+                            }
+                            is ShareStatusState.Expired -> {
+                                Icon(
+                                    imageVector = Icons.Default.ErrorOutline,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    text = "Link expired or deleted on server",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = MaterialTheme.colorScheme.error
+                                )
+                            }
+                            is ShareStatusState.Error -> {
+                                Icon(
+                                    imageVector = Icons.Default.Warning,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.size(18.dp)
+                                )
+                                Spacer(Modifier.width(10.dp))
+                                Text(
+                                    text = "Could not verify status (offline)",
+                                    style = MaterialTheme.typography.labelMedium,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                        }
+                    }
+                }
+
+                Spacer(Modifier.height(16.dp))
 
                 // Actions
                 Row(

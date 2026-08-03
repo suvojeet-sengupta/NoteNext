@@ -100,7 +100,9 @@ data class ShareResult(
     /** Universal secret note token required for edit/delete operations in x-note-token header. */
     val noteToken: String? = null,
     /** ISO-8601 expiry timestamp, for display. */
-    val expiresAt: String? = null
+    val expiresAt: String? = null,
+    val burnAfterRead: Boolean = false,
+    val maxReads: Int = 1
 ) {
     val deleteToken: String? get() = noteToken
 }

@@ -175,6 +175,11 @@ fun NotesScreen(
                 is NotesUiEvent.ShareLinkReady -> {
                     if (viewModel.editState.value.expandedNoteId == null) shareLinkReady = event
                 }
+                is NotesUiEvent.ShareLinkStatusUpdated -> {
+                    if (viewModel.editState.value.expandedNoteId == null && shareLinkReady?.shareId == event.shareId) {
+                        shareLinkReady = shareLinkReady?.copy(statusState = event.statusState)
+                    }
+                }
                 is NotesUiEvent.ShowShareOptions -> {
                     if (viewModel.editState.value.expandedNoteId == null) showShareLinkConfig = true
                 }
@@ -451,6 +456,7 @@ fun NotesScreen(
                         shareLinkReady?.let { link ->
                             ShareLinkDialog(
                                 url = link.url,
+                                statusState = link.statusState,
                                 onDismiss = { shareLinkReady = null },
                                 onShare = {
                                     val sendIntent = Intent(Intent.ACTION_SEND).apply {

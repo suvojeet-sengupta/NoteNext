@@ -301,6 +301,11 @@ fun AddEditNoteScreen(
                 is NotesUiEvent.ShareLinkReady -> {
                     shareLinkReady = event
                 }
+                is NotesUiEvent.ShareLinkStatusUpdated -> {
+                    if (shareLinkReady?.shareId == event.shareId) {
+                        shareLinkReady = shareLinkReady?.copy(statusState = event.statusState)
+                    }
+                }
                 is NotesUiEvent.ShowShareOptions -> {
                     showShareLinkConfig = true
                 }
@@ -803,6 +808,7 @@ fun AddEditNoteScreen(
     shareLinkReady?.let { link ->
         com.suvojeet.notenext.ui.components.ShareLinkDialog(
             url = link.url,
+            statusState = link.statusState,
             onDismiss = { shareLinkReady = null },
             onShare = {
                 val sendIntent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {

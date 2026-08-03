@@ -51,7 +51,9 @@ class ShareRepository @Inject constructor(
             url = finalUrl,
             key = enc.keyFragment,
             noteToken = token,
-            expiresAt = response.expiresAt
+            expiresAt = response.expiresAt,
+            burnAfterRead = response.burnAfterRead,
+            maxReads = response.maxReads
         )
     }
 

@@ -1,5 +1,14 @@
 package com.suvojeet.notenext.ui.notes
 
+import com.suvojeet.notenext.data.share.ShareStatusDto
+
+sealed interface ShareStatusState {
+    object Checking : ShareStatusState
+    data class Valid(val status: ShareStatusDto) : ShareStatusState
+    object Expired : ShareStatusState
+    data class Error(val message: String? = null) : ShareStatusState
+}
+
 sealed class NotesUiEvent {
     data class SendNotes(val title: String, val content: String) : NotesUiEvent()
     /**
@@ -13,10 +22,15 @@ sealed class NotesUiEvent {
         val title: String,
         val noteToken: String? = null,
         /** ISO-8601 expiry of the share, for display in the link dialog. */
-        val expiresAt: String? = null
+        val expiresAt: String? = null,
+        val statusState: ShareStatusState = ShareStatusState.Checking
     ) : NotesUiEvent() {
         val deleteToken: String? get() = noteToken
     }
+    data class ShareLinkStatusUpdated(
+        val shareId: String,
+        val statusState: ShareStatusState
+    ) : NotesUiEvent()
     /** Ask the UI to show the expiry / burn-after-read picker before creating a share link. */
     object ShowShareOptions : NotesUiEvent()
     /** Toggle a "checking existing link…" progress indicator during re-share dedup. */

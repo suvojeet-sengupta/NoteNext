@@ -676,7 +676,24 @@ class NotesViewModel @Inject constructor(
                         snapshot != null -> {
                             shareRepository.shareNote(snapshot.first, snapshot.second, event.expiry, event.burnAfterRead, event.maxReads)
                                 .onSuccess { result ->
-                                    _events.emit(NotesUiEvent.ShareLinkReady(result.url, result.shareId, snapshot.first, result.noteToken, result.expiresAt))
+                                    val statusDto = com.suvojeet.notenext.data.share.ShareStatusDto(
+                                        exists = true,
+                                        shareId = result.shareId,
+                                        expiresAt = result.expiresAt,
+                                        burnAfterRead = result.burnAfterRead,
+                                        maxReads = result.maxReads,
+                                        views = 0
+                                    )
+                                    _events.emit(
+                                        NotesUiEvent.ShareLinkReady(
+                                            result.url,
+                                            result.shareId,
+                                            snapshot.first,
+                                            result.noteToken,
+                                            result.expiresAt,
+                                            ShareStatusState.Valid(statusDto)
+                                        )
+                                    )
                                 }
                                 .onFailure {
                                     _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_failed)))
@@ -1554,41 +1571,66 @@ class NotesViewModel @Inject constructor(
         snapshotTitle: String?,
         snapshotContent: String?
     ) {
-        // Re-share of a saved note that already has a link → try to reuse it.
+        // Re-share of a saved note that already has a link → serve local link FAST then check validity.
         if (note != null && !note.shareId.isNullOrBlank() && !note.shareKey.isNullOrBlank()) {
-            _events.emit(NotesUiEvent.ShareLinkChecking(true))
-            val status = shareRepository.checkStatus(note.shareId!!)
-            _events.emit(NotesUiEvent.ShareLinkChecking(false))
-            // The full link is rebuilt from the stored id + key (server never had the key).
-            val reusableUrl = com.suvojeet.notenext.data.share.ShareConstants.shareUrl(note.shareId!!) + "#" + note.shareKey!!
-            status
-                .onSuccess { s ->
-                    // Existing link is still alive → reuse it, no duplicate.
-                    _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_reusing)))
-                    _events.emit(
-                        NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareNoteToken, s.expiresAt)
-                    )
-                }
-                .onFailure { t ->
-                    val code = (t as? retrofit2.HttpException)?.code()
-                    if (code == 404 || code == 410) {
-                        // Definitively gone (expired / burned / deleted) → drop the stale link
-                        // and prompt to mint a fresh one.
-                        val cleared = note.copy(shareId = null, shareKey = null, shareNoteToken = null)
-                        if (note.id != 0) runCatching { repository.updateNote(cleared) }
-                        pendingShareNote = cleared
-                        pendingShareSnapshot = null
-                        _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_expired_new)))
-                        _events.emit(NotesUiEvent.ShowShareOptions)
-                    } else {
-                        // Network/server hiccup — we can't confirm it's gone, so DON'T mint a
-                        // duplicate. Reuse the link we already hold and let the user retry later.
-                        _events.emit(NotesUiEvent.ShowSnackbar(context.getString(R.string.share_link_verify_failed)))
-                        _events.emit(
-                            NotesUiEvent.ShareLinkReady(reusableUrl, note.shareId!!, note.title, note.shareNoteToken, null)
-                        )
+            val shareId = note.shareId!!
+            val reusableUrl = com.suvojeet.notenext.data.share.ShareConstants.shareUrl(shareId) + "#" + note.shareKey!!
+            
+            // Emit local link immediately with Checking status
+            _events.emit(
+                NotesUiEvent.ShareLinkReady(
+                    url = reusableUrl,
+                    shareId = shareId,
+                    title = note.title,
+                    noteToken = note.shareNoteToken,
+                    expiresAt = null,
+                    statusState = ShareStatusState.Checking
+                )
+            )
+
+            // Async call /api/notes/{shareId}/status to verify validity
+            viewModelScope.launch {
+                shareRepository.checkStatus(shareId)
+                    .onSuccess { s ->
+                        if (s.exists) {
+                            _events.emit(
+                                NotesUiEvent.ShareLinkStatusUpdated(
+                                    shareId = shareId,
+                                    statusState = ShareStatusState.Valid(s)
+                                )
+                            )
+                        } else {
+                            val cleared = note.copy(shareId = null, shareKey = null, shareNoteToken = null)
+                            if (note.id != 0) runCatching { repository.updateNote(cleared) }
+                            _events.emit(
+                                NotesUiEvent.ShareLinkStatusUpdated(
+                                    shareId = shareId,
+                                    statusState = ShareStatusState.Expired
+                                )
+                            )
+                        }
                     }
-                }
+                    .onFailure { t ->
+                        val code = (t as? retrofit2.HttpException)?.code()
+                        if (code == 404 || code == 410) {
+                            val cleared = note.copy(shareId = null, shareKey = null, shareNoteToken = null)
+                            if (note.id != 0) runCatching { repository.updateNote(cleared) }
+                            _events.emit(
+                                NotesUiEvent.ShareLinkStatusUpdated(
+                                    shareId = shareId,
+                                    statusState = ShareStatusState.Expired
+                                )
+                            )
+                        } else {
+                            _events.emit(
+                                NotesUiEvent.ShareLinkStatusUpdated(
+                                    shareId = shareId,
+                                    statusState = ShareStatusState.Error(t.message)
+                                )
+                            )
+                        }
+                    }
+            }
             return
         }
         // No existing share (or an unsaved editor note) → prompt options for a fresh link.
@@ -1620,8 +1662,23 @@ class NotesViewModel @Inject constructor(
                         )
                     }
                 }
+                val statusDto = com.suvojeet.notenext.data.share.ShareStatusDto(
+                    exists = true,
+                    shareId = result.shareId,
+                    expiresAt = result.expiresAt,
+                    burnAfterRead = result.burnAfterRead,
+                    maxReads = result.maxReads,
+                    views = 0
+                )
                 _events.emit(
-                    NotesUiEvent.ShareLinkReady(result.url, result.shareId, note.title, result.noteToken, result.expiresAt)
+                    NotesUiEvent.ShareLinkReady(
+                        url = result.url,
+                        shareId = result.shareId,
+                        title = note.title,
+                        noteToken = result.noteToken,
+                        expiresAt = result.expiresAt,
+                        statusState = ShareStatusState.Valid(statusDto)
+                    )
                 )
             }
             .onFailure {
