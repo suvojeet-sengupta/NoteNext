@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Archive
 import androidx.compose.material.icons.filled.Delete
@@ -181,7 +182,9 @@ fun NavGraph(
         PermanentNavigationDrawer(
             drawerContent = {
                 PermanentDrawerSheet(
-                    modifier = Modifier.fillMaxWidth(0.15f),
+                    // A flat percentage is too narrow on a 10" tablet and too wide on a
+                    // desktop-class display, so clamp it to a readable band.
+                    modifier = Modifier.widthIn(min = 240.dp, max = 320.dp),
                     drawerContainerColor = MaterialTheme.colorScheme.surfaceContainerLow,
                     drawerShape = MaterialTheme.shapes.extraLarge
                 ) {

@@ -40,6 +40,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
@@ -78,7 +81,8 @@ fun AddEditNoteScreen(
     themeMode: ThemeMode,
     settingsRepository: SettingsRepository,
     events: SharedFlow<NotesUiEvent>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    windowSizeClass: WindowSizeClass? = null
 ) {
     // Local UI State
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -432,143 +436,95 @@ fun AddEditNoteScreen(
                 }
             }
         ) { padding ->
+            // A note that runs the full width of a 12" tablet is unreadable, so the
+            // writing column is capped and centred while the note colour stays full-bleed.
+            val editorMaxWidth = when (windowSizeClass?.widthSizeClass) {
+                WindowWidthSizeClass.Expanded -> 860.dp
+                WindowWidthSizeClass.Medium -> 720.dp
+                else -> Dp.Unspecified
+            }
             SelectionContainer {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(padding)
-                        .then(if (isFocusMode) Modifier.imePadding() else Modifier)
+                Box(
+                    modifier = Modifier.fillMaxSize().background(backgroundColor),
+                    contentAlignment = Alignment.TopCenter
                 ) {
-                    AnimatedVisibility(
-                        visible = state.isSearchingInNote,
-                        enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
-                        exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
-                    ) {
-                        NoteSearchBar(
-                            query = state.noteSearchQuery,
-                            onQueryChange = { onEvent(NotesEvent.OnNoteSearchQueryChange(it)) },
-                            onNext = { onEvent(NotesEvent.NextSearchResult) },
-                            onPrevious = { onEvent(NotesEvent.PreviousSearchResult) },
-                            onClose = { onEvent(NotesEvent.ToggleNoteSearch) },
-                            currentResult = state.currentSearchResultIndex + 1,
-                            totalResults = state.searchResultIndices.size,
-                            backgroundColor = backgroundColor,
-                            contentColor = contentColor
-                        )
-                    }
-
-                    if (state.editingNoteType == NoteType.TEXT) {
-                        LazyColumn(
-                            state = lazyListState,
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(backgroundColor)
-                        ) {
-                            item {
-                                NoteAttachmentsList(
-                                    attachments = state.editingAttachments,
-                                    onEvent = onEvent,
-                                    onImageClick = { data ->
-                                        selectedImageData = data
-                                        showImageViewer = true
-                                    }
-                                )
-                            }
-
-                            item {
-                                NoteTitleEditor(
-                                    state = state,
-                                    onEvent = onEvent,
-                                    onReminderClick = { checkAndRequestReminderPermissions() }
-                                )
-                            }
-
-                            // ─── AI suggestions (Auto-tag + Smart Reminder) ──────
-                            item {
-                                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                                    AiSuggestedLabelsRow(
-                                        visible = state.suggestedLabels.isNotEmpty(),
-                                        suggestions = state.suggestedLabels,
-                                        onAcceptLabel = { onEvent(NotesEvent.AcceptSuggestedLabel(it)) },
-                                        onDismiss = { onEvent(NotesEvent.DismissSuggestedLabels) }
-                                    )
-                                    if (state.suggestedLabels.isNotEmpty()) Spacer(modifier = Modifier.height(8.dp))
-                                    AiSmartReminderChip(
-                                        visible = state.extractedReminder != null,
-                                        reminder = state.extractedReminder,
-                                        onSetReminder = { onEvent(NotesEvent.AcceptExtractedReminder) },
-                                        onDismiss = { onEvent(NotesEvent.DismissExtractedReminder) }
-                                    )
-                                    if (state.extractedReminder != null) Spacer(modifier = Modifier.height(8.dp))
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .then(
+                                if (editorMaxWidth != Dp.Unspecified) {
+                                    Modifier.widthIn(max = editorMaxWidth)
+                                } else {
+                                    Modifier
                                 }
-                            }
-
-                            NoteContentItems(
-                                state = state,
-                                splitOffsets = splitOffsets,
-                                onEvent = onEvent,
-                                onUrlClick = { url -> clickedUrl = url },
-                                onSlashCommand = { showSlashCommandSheet = true },
-                                onTextLayout = { textLayoutResult = it }
                             )
-
-                            if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                                item { Spacer(modifier = Modifier.height(16.dp)) }
-                                items(items = state.linkPreviews, key = { it.url }) { linkPreview ->
-                                    LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                                    Spacer(modifier = Modifier.height(8.dp))
-                                }
-                            }
-
-                            // ─── Linked Notes section ────────────────────────────
-                            item {
-                                AiLinkedNotesSection(
-                                    visible = state.linkedNotes.isNotEmpty(),
-                                    notes = state.linkedNotes,
-                                    onOpenNote = { note -> onEvent(NotesEvent.OpenLinkedNote(note.id)) }
-                                )
-                            }
-
-                            item {
-                                Spacer(modifier = Modifier.height(120.dp))
-                            }
-                        }
-                    } else {
-                        LazyColumn(
-                            state = lazyListState,
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(backgroundColor)
+                            .padding(padding)
+                            .then(if (isFocusMode) Modifier.imePadding() else Modifier)
+                    ) {
+                        AnimatedVisibility(
+                            visible = state.isSearchingInNote,
+                            enter = slideInVertically(initialOffsetY = { -it }) + fadeIn(),
+                            exit = slideOutVertically(targetOffsetY = { -it }) + fadeOut()
                         ) {
-                            item {
-                                NoteTitleEditor(
-                                    state = state,
-                                    onEvent = onEvent,
-                                    onReminderClick = { checkAndRequestReminderPermissions() }
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                            }
+                            NoteSearchBar(
+                                query = state.noteSearchQuery,
+                                onQueryChange = { onEvent(NotesEvent.OnNoteSearchQueryChange(it)) },
+                                onNext = { onEvent(NotesEvent.NextSearchResult) },
+                                onPrevious = { onEvent(NotesEvent.PreviousSearchResult) },
+                                onClose = { onEvent(NotesEvent.ToggleNoteSearch) },
+                                currentResult = state.currentSearchResultIndex + 1,
+                                totalResults = state.searchResultIndices.size,
+                                backgroundColor = backgroundColor,
+                                contentColor = contentColor
+                            )
+                        }
 
-                            item {
-                                 NoteAttachmentsList(
-                                    attachments = state.editingAttachments,
-                                    onEvent = onEvent,
-                                    onImageClick = { data ->
-                                        selectedImageData = data
-                                        showImageViewer = true
+                        if (state.editingNoteType == NoteType.TEXT) {
+                            LazyColumn(
+                                state = lazyListState,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(backgroundColor)
+                            ) {
+                                item {
+                                    NoteAttachmentsList(
+                                        attachments = state.editingAttachments,
+                                        onEvent = onEvent,
+                                        onImageClick = { data ->
+                                            selectedImageData = data
+                                            showImageViewer = true
+                                        }
+                                    )
+                                }
+
+                                item {
+                                    NoteTitleEditor(
+                                        state = state,
+                                        onEvent = onEvent,
+                                        onReminderClick = { checkAndRequestReminderPermissions() }
+                                    )
+                                }
+
+                                // ─── AI suggestions (Auto-tag + Smart Reminder) ──────
+                                item {
+                                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                                        AiSuggestedLabelsRow(
+                                            visible = state.suggestedLabels.isNotEmpty(),
+                                            suggestions = state.suggestedLabels,
+                                            onAcceptLabel = { onEvent(NotesEvent.AcceptSuggestedLabel(it)) },
+                                            onDismiss = { onEvent(NotesEvent.DismissSuggestedLabels) }
+                                        )
+                                        if (state.suggestedLabels.isNotEmpty()) Spacer(modifier = Modifier.height(8.dp))
+                                        AiSmartReminderChip(
+                                            visible = state.extractedReminder != null,
+                                            reminder = state.extractedReminder,
+                                            onSetReminder = { onEvent(NotesEvent.AcceptExtractedReminder) },
+                                            onDismiss = { onEvent(NotesEvent.DismissExtractedReminder) }
+                                        )
+                                        if (state.extractedReminder != null) Spacer(modifier = Modifier.height(8.dp))
                                     }
-                                )
-                            }
+                                }
 
-                            if (state.editingNoteType == NoteType.CHECKLIST) {
-                                ChecklistEditor(
-                                    state = state,
-                                    onEvent = onEvent,
-                                    isCheckedItemsExpanded = state.isCheckedItemsExpanded,
-                                    onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) },
-                                    backgroundColor = backgroundColor
-                                )
-                            } else {
                                 NoteContentItems(
                                     state = state,
                                     splitOffsets = splitOffsets,
@@ -578,11 +534,55 @@ fun AddEditNoteScreen(
                                     onTextLayout = { textLayoutResult = it }
                                 )
 
-                                // A text note can carry tick boxes appended below its body.
-                                // They only appear once the user actually adds one, so plain
-                                // notes look unchanged.
-                                if (state.editingChecklist.isNotEmpty()) {
-                                    item { Spacer(modifier = Modifier.height(8.dp)) }
+                                if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                                    items(items = state.linkPreviews, key = { it.url }) { linkPreview ->
+                                        LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
+
+                                // ─── Linked Notes section ────────────────────────────
+                                item {
+                                    AiLinkedNotesSection(
+                                        visible = state.linkedNotes.isNotEmpty(),
+                                        notes = state.linkedNotes,
+                                        onOpenNote = { note -> onEvent(NotesEvent.OpenLinkedNote(note.id)) }
+                                    )
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.height(120.dp))
+                                }
+                            }
+                        } else {
+                            LazyColumn(
+                                state = lazyListState,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .background(backgroundColor)
+                            ) {
+                                item {
+                                    NoteTitleEditor(
+                                        state = state,
+                                        onEvent = onEvent,
+                                        onReminderClick = { checkAndRequestReminderPermissions() }
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                }
+
+                                item {
+                                     NoteAttachmentsList(
+                                        attachments = state.editingAttachments,
+                                        onEvent = onEvent,
+                                        onImageClick = { data ->
+                                            selectedImageData = data
+                                            showImageViewer = true
+                                        }
+                                    )
+                                }
+
+                                if (state.editingNoteType == NoteType.CHECKLIST) {
                                     ChecklistEditor(
                                         state = state,
                                         onEvent = onEvent,
@@ -590,19 +590,42 @@ fun AddEditNoteScreen(
                                         onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) },
                                         backgroundColor = backgroundColor
                                     )
-                                }
-                            }
+                                } else {
+                                    NoteContentItems(
+                                        state = state,
+                                        splitOffsets = splitOffsets,
+                                        onEvent = onEvent,
+                                        onUrlClick = { url -> clickedUrl = url },
+                                        onSlashCommand = { showSlashCommandSheet = true },
+                                        onTextLayout = { textLayoutResult = it }
+                                    )
 
-                            if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
-                                item { Spacer(modifier = Modifier.height(16.dp)) }
-                                items(items = state.linkPreviews, key = { it.url }) { linkPreview ->
-                                    LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
-                                    Spacer(modifier = Modifier.height(8.dp))
+                                    // A text note can carry tick boxes appended below its body.
+                                    // They only appear once the user actually adds one, so plain
+                                    // notes look unchanged.
+                                    if (state.editingChecklist.isNotEmpty()) {
+                                        item { Spacer(modifier = Modifier.height(8.dp)) }
+                                        ChecklistEditor(
+                                            state = state,
+                                            onEvent = onEvent,
+                                            isCheckedItemsExpanded = state.isCheckedItemsExpanded,
+                                            onToggleCheckedItems = { onEvent(NotesEvent.ToggleCheckedItemsExpanded) },
+                                            backgroundColor = backgroundColor
+                                        )
+                                    }
                                 }
-                            }
 
-                            item {
-                                Spacer(modifier = Modifier.height(120.dp))
+                                if (enableRichLinkPreview && state.linkPreviews.isNotEmpty()) {
+                                    item { Spacer(modifier = Modifier.height(16.dp)) }
+                                    items(items = state.linkPreviews, key = { it.url }) { linkPreview ->
+                                        LinkPreviewCard(linkPreview = linkPreview, onEvent = onEvent)
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                    }
+                                }
+
+                                item {
+                                    Spacer(modifier = Modifier.height(120.dp))
+                                }
                             }
                         }
                     }

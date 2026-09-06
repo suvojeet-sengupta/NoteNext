@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Marathi (mr) translations for DrawingScreen. Native review recommended. -->
 <resources>
     <string name="drawing_close_cd">बंद करा</string>
     <string name="drawing_undo_cd">पूर्ववत करा</string>
@@ -7,8 +6,69 @@
     <string name="drawing_clear_all_cd">सर्व साफ करा</string>
     <string name="drawing_settings_cd">सेटिंग्ज</string>
     <string name="drawing_stroke_width_cd">स्ट्रोक रुंदी</string>
-    <string name="drawing_placeholder">येथे चित्रकला सुरू करा…</string>
+    <string name="drawing_placeholder">स्टायलस किंवा बोटाने चित्र काढा</string>
+    <string name="drawing_placeholder_hint">दोन बोटांनी सरकवा आणि झूम करा</string>
     <string name="drawing_stroke_size_label">%1$dpx</string>
+
     <string name="drawing_tool_brush">ब्रश</string>
-    <string name="drawing_tool_eraser">इरेजर</string>
+    <string name="drawing_tool_pen">पेन</string>
+    <string name="drawing_tool_pencil">पेन्सिल</string>
+    <string name="drawing_tool_marker">मार्कर</string>
+    <string name="drawing_tool_highlighter">हायलाइटर</string>
+    <string name="drawing_tool_eraser">खोडरबर</string>
+    <string name="drawing_tool_line">रेषा</string>
+    <string name="drawing_tool_arrow">बाण</string>
+    <string name="drawing_tool_rectangle">आयत</string>
+    <string name="drawing_tool_oval">अंडाकृती</string>
+    <string name="drawing_section_tools">साधने</string>
+    <string name="drawing_section_shapes">आकार</string>
+
+    <string name="drawing_color">रंग</string>
+    <string name="drawing_custom_color">सानुकूल रंग</string>
+    <string name="drawing_recent_colors">अलीकडील</string>
+    <string name="drawing_size">आकार</string>
+    <string name="drawing_opacity">अपारदर्शकता</string>
+    <string name="drawing_hue">छटा</string>
+    <string name="drawing_saturation">संपृक्तता</string>
+    <string name="drawing_brightness">तेजस्विता</string>
+
+    <string name="drawing_eraser_mode">खोडरबर</string>
+    <string name="drawing_eraser_pixel">पुसा</string>
+    <string name="drawing_eraser_stroke">पूर्ण स्ट्रोक</string>
+
+    <string name="drawing_stylus">स्टायलस</string>
+    <string name="drawing_pressure">दाब संवेदनशीलता</string>
+    <string name="drawing_smoothing">स्ट्रोक गुळगुळीत करणे</string>
+    <string name="drawing_palm_rejection">तळहात दुर्लक्ष</string>
+    <string name="drawing_palm_rejection_desc">फक्त स्टायलस काढेल — बोटांनी सरकवा आणि झूम करा</string>
+    <string name="drawing_stylus_detected">स्टायलस आढळला — तळहात दुर्लक्ष चालू</string>
+
+    <string name="drawing_paper">कागद</string>
+    <string name="drawing_paper_plain">साधा</string>
+    <string name="drawing_paper_ruled">रेघांचा</string>
+    <string name="drawing_paper_grid">ग्रिड</string>
+    <string name="drawing_paper_dots">ठिपक्यांचा</string>
+    <string name="drawing_paper_tint">पानाचा रंग</string>
+    <string name="drawing_tint_white">पांढरा</string>
+    <string name="drawing_tint_cream">क्रीम</string>
+    <string name="drawing_tint_slate">स्लेट</string>
+    <string name="drawing_tint_black">काळा</string>
+
+    <string name="drawing_zoom_in">झूम इन</string>
+    <string name="drawing_zoom_out">झूम आउट</string>
+    <string name="drawing_fit">चित्र बसवा</string>
+    <string name="drawing_reset_view">दृश्य रीसेट करा</string>
+    <string name="drawing_zoom_label">%1$d%%</string>
+    <string name="drawing_fullscreen">पूर्ण स्क्रीन</string>
+    <string name="drawing_exit_fullscreen">पूर्ण स्क्रीनमधून बाहेर</string>
+
+    <string name="drawing_properties">साधन पर्याय</string>
+    <string name="drawing_hide_properties">साधन पर्याय लपवा</string>
+
+    <string name="drawing_export">निर्यात</string>
+    <string name="drawing_trim">चित्रापर्यंत कापा</string>
+    <string name="drawing_transparent_bg">पारदर्शक पार्श्वभूमी</string>
+
+    <string name="drawing_shortcuts">कीबोर्ड शॉर्टकट</string>
+    <string name="drawing_shortcut_hint">Ctrl+Z पूर्ववत · Ctrl+Y पुन्हा · Ctrl+S घाला</string>
 </resources>

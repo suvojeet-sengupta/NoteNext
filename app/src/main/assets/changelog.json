@@ -1,6 +1,37 @@
 {
   "releases": [
     {
+      "version": "1.6.0",
+      "date": "September 6, 2026",
+      "items": [
+        {
+          "title": "Professional Stylus Drawing",
+          "description": "The drawing canvas is rebuilt for pen input: pressure-sensitive pen and pencil nibs, marker and highlighter, palm rejection that arms itself the moment a stylus touches the glass, and support for styluses that flip to an eraser tip.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Shapes, Paper and Infinite Canvas",
+          "description": "Added line, arrow, rectangle and oval tools, ruled/grid/dotted paper on white, cream, slate or black pages, and pinch-to-zoom with two-finger panning across an unbounded canvas.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Tablet Drawing Workspace",
+          "description": "Tablets get a permanent tool rail, a docked tool-options panel with a custom color picker and recent inks, on-canvas zoom controls, a distraction-free full-screen mode, and Ctrl+Z / Ctrl+Y / Ctrl+S keyboard shortcuts.",
+          "type": "FEATURE"
+        },
+        {
+          "title": "Stroke Eraser and Smarter Export",
+          "description": "Erase whole strokes in one stroke or rub out pixels, then export trimmed to the drawing or as the whole page, with an optional transparent background.",
+          "type": "IMPROVEMENT"
+        },
+        {
+          "title": "Large-Screen Layouts Across the App",
+          "description": "Note grids now use three or four columns on tablets and foldables, list and editor widths are capped for comfortable reading, and the permanent navigation drawer no longer stretches on wide displays.",
+          "type": "IMPROVEMENT"
+        }
+      ]
+    },
+    {
       "version": "1.5.2",
       "date": "August 3, 2026",
       "items": [

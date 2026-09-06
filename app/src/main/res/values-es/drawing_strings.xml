@@ -6,8 +6,69 @@
     <string name="drawing_clear_all_cd">Borrar todo</string>
     <string name="drawing_settings_cd">Ajustes</string>
     <string name="drawing_stroke_width_cd">Grosor del trazo</string>
-    <string name="drawing_placeholder">Empieza a dibujar aquí…</string>
+    <string name="drawing_placeholder">Dibuja con el lápiz o con el dedo</string>
+    <string name="drawing_placeholder_hint">Dos dedos para desplazar y ampliar</string>
     <string name="drawing_stroke_size_label">%1$d px</string>
+
     <string name="drawing_tool_brush">Pincel</string>
+    <string name="drawing_tool_pen">Bolígrafo</string>
+    <string name="drawing_tool_pencil">Lápiz</string>
+    <string name="drawing_tool_marker">Rotulador</string>
+    <string name="drawing_tool_highlighter">Marcador</string>
     <string name="drawing_tool_eraser">Borrador</string>
+    <string name="drawing_tool_line">Línea</string>
+    <string name="drawing_tool_arrow">Flecha</string>
+    <string name="drawing_tool_rectangle">Rectángulo</string>
+    <string name="drawing_tool_oval">Óvalo</string>
+    <string name="drawing_section_tools">Herramientas</string>
+    <string name="drawing_section_shapes">Formas</string>
+
+    <string name="drawing_color">Color</string>
+    <string name="drawing_custom_color">Color personalizado</string>
+    <string name="drawing_recent_colors">Recientes</string>
+    <string name="drawing_size">Tamaño</string>
+    <string name="drawing_opacity">Opacidad</string>
+    <string name="drawing_hue">Tono</string>
+    <string name="drawing_saturation">Saturación</string>
+    <string name="drawing_brightness">Brillo</string>
+
+    <string name="drawing_eraser_mode">Borrador</string>
+    <string name="drawing_eraser_pixel">Frotar</string>
+    <string name="drawing_eraser_stroke">Trazo entero</string>
+
+    <string name="drawing_stylus">Lápiz óptico</string>
+    <string name="drawing_pressure">Sensibilidad a la presión</string>
+    <string name="drawing_smoothing">Suavizado del trazo</string>
+    <string name="drawing_palm_rejection">Rechazo de la palma</string>
+    <string name="drawing_palm_rejection_desc">Solo dibuja el lápiz; los dedos desplazan y amplían</string>
+    <string name="drawing_stylus_detected">Lápiz detectado: rechazo de la palma activado</string>
+
+    <string name="drawing_paper">Papel</string>
+    <string name="drawing_paper_plain">Liso</string>
+    <string name="drawing_paper_ruled">Rayado</string>
+    <string name="drawing_paper_grid">Cuadrícula</string>
+    <string name="drawing_paper_dots">Punteado</string>
+    <string name="drawing_paper_tint">Color de página</string>
+    <string name="drawing_tint_white">Blanco</string>
+    <string name="drawing_tint_cream">Crema</string>
+    <string name="drawing_tint_slate">Pizarra</string>
+    <string name="drawing_tint_black">Negro</string>
+
+    <string name="drawing_zoom_in">Acercar</string>
+    <string name="drawing_zoom_out">Alejar</string>
+    <string name="drawing_fit">Ajustar dibujo</string>
+    <string name="drawing_reset_view">Restablecer vista</string>
+    <string name="drawing_zoom_label">%1$d%%</string>
+    <string name="drawing_fullscreen">Pantalla completa</string>
+    <string name="drawing_exit_fullscreen">Salir de pantalla completa</string>
+
+    <string name="drawing_properties">Opciones de herramienta</string>
+    <string name="drawing_hide_properties">Ocultar opciones</string>
+
+    <string name="drawing_export">Exportar</string>
+    <string name="drawing_trim">Recortar al dibujo</string>
+    <string name="drawing_transparent_bg">Fondo transparente</string>
+
+    <string name="drawing_shortcuts">Atajos de teclado</string>
+    <string name="drawing_shortcut_hint">Ctrl+Z deshacer · Ctrl+Y rehacer · Ctrl+S insertar</string>
 </resources>

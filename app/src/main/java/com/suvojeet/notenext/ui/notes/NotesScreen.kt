@@ -37,6 +37,8 @@ import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.SwapVert
 import androidx.compose.material3.*
+import androidx.compose.material3.windowsizeclass.WindowSizeClass
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -51,6 +53,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -90,7 +93,8 @@ fun NotesScreen(
     onDrawingClick: () -> Unit = {},
     onTodoClick: () -> Unit = {},
     onOpenSharedNote: (String, String?) -> Unit = { _, _ -> },
-    events: SharedFlow<NotesUiEvent>
+    events: SharedFlow<NotesUiEvent>,
+    windowSizeClass: WindowSizeClass? = null
 ) {
     val listState by viewModel.listState.collectAsStateWithLifecycle()
     val editState by viewModel.editState.collectAsStateWithLifecycle()
@@ -107,6 +111,22 @@ fun NotesScreen(
     }
 
     val isSelectionModeActive = listState.selectedNoteIds.isNotEmpty()
+
+    // Tablets and unfolded foldables get more note columns and a capped reading
+    // width, so a wide screen stops looking like a stretched phone.
+    val widthClass = windowSizeClass?.widthSizeClass
+    val gridColumns = when (widthClass) {
+        WindowWidthSizeClass.Expanded -> 4
+        WindowWidthSizeClass.Medium -> 3
+        else -> 2
+    }
+    val listMaxWidth = when (widthClass) {
+        WindowWidthSizeClass.Expanded -> 720.dp
+        WindowWidthSizeClass.Medium -> 640.dp
+        else -> Dp.Unspecified
+    }
+    val contentPadding = if (widthClass == WindowWidthSizeClass.Compact || widthClass == null) 8.dp else 16.dp
+
     var showLabelDialog by remember { mutableStateOf(false) }
     var showDeleteDialog by remember { mutableStateOf(false) }
     var showReminderSetDialog by remember { mutableStateOf(false) }
@@ -583,10 +603,10 @@ fun NotesScreen(
                                     when (listState.layoutType) {
                                         LayoutType.GRID -> {
                                             LazyVerticalStaggeredGrid(
-                                                columns = StaggeredGridCells.Fixed(2),
+                                                columns = StaggeredGridCells.Fixed(gridColumns),
                                                 modifier = Modifier.weight(1f).fillMaxWidth(),
                                                 state = gridState,
-                                                contentPadding = PaddingValues(8.dp),
+                                                contentPadding = PaddingValues(contentPadding),
                                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                                 verticalItemSpacing = 8.dp
                                             ) {
@@ -685,9 +705,19 @@ fun NotesScreen(
                                         }
                                         LayoutType.LIST -> {
                                             LazyColumn(
-                                                modifier = Modifier.weight(1f).fillMaxWidth(),
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .then(
+                                                        if (listMaxWidth != Dp.Unspecified) {
+                                                            Modifier.widthIn(max = listMaxWidth)
+                                                        } else {
+                                                            Modifier
+                                                        }
+                                                    )
+                                                    .fillMaxWidth()
+                                                    .align(Alignment.CenterHorizontally),
                                                 state = lazyListState,
-                                                contentPadding = PaddingValues(8.dp),
+                                                contentPadding = PaddingValues(contentPadding),
                                                 verticalArrangement = Arrangement.spacedBy(8.dp)
                                             ) {
                                                 if (pinnedNotes.isNotEmpty()) {
@@ -822,6 +852,7 @@ fun NotesScreen(
                     themeMode = themeMode,
                     settingsRepository = settingsRepository,
                     events = viewModel.events,
+                    windowSizeClass = windowSizeClass,
                     modifier = Modifier.sharedElement(
                         rememberSharedContentState(key = "note-${expandedId}"),
                         animatedVisibilityScope = this@AnimatedContent

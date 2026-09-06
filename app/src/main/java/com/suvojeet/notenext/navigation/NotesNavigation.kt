@@ -68,7 +68,8 @@ fun NavGraphBuilder.notesGraph(
             onDrawingClick = { navController.navigate(Destination.Drawing) },
             onTodoClick = { navController.navigate(Destination.Todo) },
             onOpenSharedNote = { shareId, key -> navController.navigate(Destination.SharedNote(shareId, key)) },
-            events = notesViewModel.events
+            events = notesViewModel.events,
+            windowSizeClass = windowSizeClass
         )
     }
 

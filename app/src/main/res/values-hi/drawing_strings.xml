@@ -6,8 +6,69 @@
     <string name="drawing_clear_all_cd">सब साफ़ करें</string>
     <string name="drawing_settings_cd">सेटिंग्स</string>
     <string name="drawing_stroke_width_cd">स्ट्रोक चौड़ाई</string>
-    <string name="drawing_placeholder">यहाँ चित्रकारी शुरू करें…</string>
+    <string name="drawing_placeholder">स्टाइलस या उंगली से चित्र बनाएँ</string>
+    <string name="drawing_placeholder_hint">दो उंगलियों से खिसकाएँ और ज़ूम करें</string>
     <string name="drawing_stroke_size_label">%1$dpx</string>
+
     <string name="drawing_tool_brush">ब्रश</string>
+    <string name="drawing_tool_pen">पेन</string>
+    <string name="drawing_tool_pencil">पेंसिल</string>
+    <string name="drawing_tool_marker">मार्कर</string>
+    <string name="drawing_tool_highlighter">हाइलाइटर</string>
     <string name="drawing_tool_eraser">इरेज़र</string>
+    <string name="drawing_tool_line">रेखा</string>
+    <string name="drawing_tool_arrow">तीर</string>
+    <string name="drawing_tool_rectangle">आयत</string>
+    <string name="drawing_tool_oval">अंडाकार</string>
+    <string name="drawing_section_tools">उपकरण</string>
+    <string name="drawing_section_shapes">आकृतियाँ</string>
+
+    <string name="drawing_color">रंग</string>
+    <string name="drawing_custom_color">कस्टम रंग</string>
+    <string name="drawing_recent_colors">हाल के</string>
+    <string name="drawing_size">आकार</string>
+    <string name="drawing_opacity">अपारदर्शिता</string>
+    <string name="drawing_hue">वर्ण</string>
+    <string name="drawing_saturation">संतृप्ति</string>
+    <string name="drawing_brightness">चमक</string>
+
+    <string name="drawing_eraser_mode">इरेज़र</string>
+    <string name="drawing_eraser_pixel">मिटाएँ</string>
+    <string name="drawing_eraser_stroke">पूरा स्ट्रोक</string>
+
+    <string name="drawing_stylus">स्टाइलस</string>
+    <string name="drawing_pressure">दबाव संवेदनशीलता</string>
+    <string name="drawing_smoothing">स्ट्रोक स्मूदिंग</string>
+    <string name="drawing_palm_rejection">हथेली अस्वीकृति</string>
+    <string name="drawing_palm_rejection_desc">केवल स्टाइलस लिखेगा — उंगलियाँ खिसकाएँ और ज़ूम करें</string>
+    <string name="drawing_stylus_detected">स्टाइलस मिला — हथेली अस्वीकृति चालू है</string>
+
+    <string name="drawing_paper">कागज़</string>
+    <string name="drawing_paper_plain">सादा</string>
+    <string name="drawing_paper_ruled">रेखांकित</string>
+    <string name="drawing_paper_grid">ग्रिड</string>
+    <string name="drawing_paper_dots">बिंदुदार</string>
+    <string name="drawing_paper_tint">पृष्ठ का रंग</string>
+    <string name="drawing_tint_white">सफ़ेद</string>
+    <string name="drawing_tint_cream">क्रीम</string>
+    <string name="drawing_tint_slate">स्लेट</string>
+    <string name="drawing_tint_black">काला</string>
+
+    <string name="drawing_zoom_in">ज़ूम इन</string>
+    <string name="drawing_zoom_out">ज़ूम आउट</string>
+    <string name="drawing_fit">चित्र फ़िट करें</string>
+    <string name="drawing_reset_view">व्यू रीसेट करें</string>
+    <string name="drawing_zoom_label">%1$d%%</string>
+    <string name="drawing_fullscreen">पूर्ण स्क्रीन</string>
+    <string name="drawing_exit_fullscreen">पूर्ण स्क्रीन से बाहर</string>
+
+    <string name="drawing_properties">टूल विकल्प</string>
+    <string name="drawing_hide_properties">टूल विकल्प छिपाएँ</string>
+
+    <string name="drawing_export">निर्यात</string>
+    <string name="drawing_trim">चित्र तक काटें</string>
+    <string name="drawing_transparent_bg">पारदर्शी पृष्ठभूमि</string>
+
+    <string name="drawing_shortcuts">कीबोर्ड शॉर्टकट</string>
+    <string name="drawing_shortcut_hint">Ctrl+Z पूर्ववत · Ctrl+Y फिर से · Ctrl+S डालें</string>
 </resources>

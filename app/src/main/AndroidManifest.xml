@@ -23,6 +23,11 @@
 
     <uses-feature android:name="android.hardware.camera" android:required="false" />
 
+    <!-- Large screens: NoteNext is a keyboard/stylus-friendly app, so it must install
+         and resize on tablets, foldables, Chromebooks and desktop-mode displays. -->
+    <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
+    <uses-feature android:name="android.hardware.faketouch" android:required="false" />
+
     <application
         android:name=".NoteNextApp"
         android:allowBackup="false"
@@ -31,6 +36,7 @@
         android:localeConfig="@xml/locale_config"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:resizeableActivity="true"
         android:theme="@style/Theme.NoteNext"
         tools:targetApi="31">
         <activity

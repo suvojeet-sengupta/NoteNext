@@ -1,14 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Bengali (bn) translations for DrawingScreen. Native review recommended. -->
 <resources>
     <string name="drawing_close_cd">বন্ধ করুন</string>
-    <string name="drawing_undo_cd">পূর্বাবস্থায় ফেরান</string>
+    <string name="drawing_undo_cd">পূর্বাবস্থা</string>
     <string name="drawing_redo_cd">পুনরায় করুন</string>
     <string name="drawing_clear_all_cd">সব মুছুন</string>
     <string name="drawing_settings_cd">সেটিংস</string>
-    <string name="drawing_stroke_width_cd">স্ট্রোক প্রস্থ</string>
-    <string name="drawing_placeholder">এখানে আঁকা শুরু করুন…</string>
+    <string name="drawing_stroke_width_cd">স্ট্রোকের প্রস্থ</string>
+    <string name="drawing_placeholder">স্টাইলাস বা আঙুল দিয়ে আঁকুন</string>
+    <string name="drawing_placeholder_hint">দুই আঙুলে সরান ও জুম করুন</string>
     <string name="drawing_stroke_size_label">%1$dpx</string>
+
     <string name="drawing_tool_brush">ব্রাশ</string>
+    <string name="drawing_tool_pen">কলম</string>
+    <string name="drawing_tool_pencil">পেনসিল</string>
+    <string name="drawing_tool_marker">মার্কার</string>
+    <string name="drawing_tool_highlighter">হাইলাইটার</string>
     <string name="drawing_tool_eraser">ইরেজার</string>
+    <string name="drawing_tool_line">রেখা</string>
+    <string name="drawing_tool_arrow">তির</string>
+    <string name="drawing_tool_rectangle">আয়ত</string>
+    <string name="drawing_tool_oval">ডিম্বাকার</string>
+    <string name="drawing_section_tools">সরঞ্জাম</string>
+    <string name="drawing_section_shapes">আকৃতি</string>
+
+    <string name="drawing_color">রং</string>
+    <string name="drawing_custom_color">কাস্টম রং</string>
+    <string name="drawing_recent_colors">সাম্প্রতিক</string>
+    <string name="drawing_size">আকার</string>
+    <string name="drawing_opacity">অস্বচ্ছতা</string>
+    <string name="drawing_hue">বর্ণ</string>
+    <string name="drawing_saturation">সম্পৃক্তি</string>
+    <string name="drawing_brightness">উজ্জ্বলতা</string>
+
+    <string name="drawing_eraser_mode">ইরেজার</string>
+    <string name="drawing_eraser_pixel">ঘষে মুছুন</string>
+    <string name="drawing_eraser_stroke">পুরো স্ট্রোক</string>
+
+    <string name="drawing_stylus">স্টাইলাস</string>
+    <string name="drawing_pressure">চাপ সংবেদনশীলতা</string>
+    <string name="drawing_smoothing">স্ট্রোক মসৃণকরণ</string>
+    <string name="drawing_palm_rejection">হাতের তালু উপেক্ষা</string>
+    <string name="drawing_palm_rejection_desc">শুধু স্টাইলাস আঁকবে — আঙুলে সরান ও জুম করুন</string>
+    <string name="drawing_stylus_detected">স্টাইলাস শনাক্ত হয়েছে — তালু উপেক্ষা চালু</string>
+
+    <string name="drawing_paper">কাগজ</string>
+    <string name="drawing_paper_plain">সাদা</string>
+    <string name="drawing_paper_ruled">দাগ টানা</string>
+    <string name="drawing_paper_grid">গ্রিড</string>
+    <string name="drawing_paper_dots">বিন্দুযুক্ত</string>
+    <string name="drawing_paper_tint">পৃষ্ঠার রং</string>
+    <string name="drawing_tint_white">সাদা</string>
+    <string name="drawing_tint_cream">ক্রিম</string>
+    <string name="drawing_tint_slate">স্লেট</string>
+    <string name="drawing_tint_black">কালো</string>
+
+    <string name="drawing_zoom_in">জুম ইন</string>
+    <string name="drawing_zoom_out">জুম আউট</string>
+    <string name="drawing_fit">আঁকা ফিট করুন</string>
+    <string name="drawing_reset_view">ভিউ রিসেট</string>
+    <string name="drawing_zoom_label">%1$d%%</string>
+    <string name="drawing_fullscreen">পূর্ণ স্ক্রিন</string>
+    <string name="drawing_exit_fullscreen">পূর্ণ স্ক্রিন থেকে বেরোন</string>
+
+    <string name="drawing_properties">টুল বিকল্প</string>
+    <string name="drawing_hide_properties">টুল বিকল্প লুকান</string>
+
+    <string name="drawing_export">রপ্তানি</string>
+    <string name="drawing_trim">আঁকা পর্যন্ত কাটুন</string>
+    <string name="drawing_transparent_bg">স্বচ্ছ পটভূমি</string>
+
+    <string name="drawing_shortcuts">কীবোর্ড শর্টকাট</string>
+    <string name="drawing_shortcut_hint">Ctrl+Z পূর্বাবস্থা · Ctrl+Y পুনরায় · Ctrl+S যোগ</string>
 </resources>

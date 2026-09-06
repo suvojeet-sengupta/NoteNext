@@ -1,14 +1,74 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Tamil (ta) translations for DrawingScreen. Native review recommended. -->
 <resources>
     <string name="drawing_close_cd">மூடு</string>
     <string name="drawing_undo_cd">செயல்தவிர்</string>
     <string name="drawing_redo_cd">மீண்டும் செய்</string>
-    <string name="drawing_clear_all_cd">அனைத்தையும் துடை</string>
+    <string name="drawing_clear_all_cd">அனைத்தையும் அழி</string>
     <string name="drawing_settings_cd">அமைப்புகள்</string>
-    <string name="drawing_stroke_width_cd">ஸ்ட்ரோக் அகலம்</string>
-    <string name="drawing_placeholder">இங்கே வரையத் தொடங்குங்கள்…</string>
+    <string name="drawing_stroke_width_cd">கோட்டின் அகலம்</string>
+    <string name="drawing_placeholder">ஸ்டைலஸ் அல்லது விரலால் வரையுங்கள்</string>
+    <string name="drawing_placeholder_hint">இரு விரல்களால் நகர்த்தி பெரிதாக்கவும்</string>
     <string name="drawing_stroke_size_label">%1$dpx</string>
+
     <string name="drawing_tool_brush">தூரிகை</string>
+    <string name="drawing_tool_pen">பேனா</string>
+    <string name="drawing_tool_pencil">பென்சில்</string>
+    <string name="drawing_tool_marker">மார்க்கர்</string>
+    <string name="drawing_tool_highlighter">ஹைலைட்டர்</string>
     <string name="drawing_tool_eraser">அழிப்பான்</string>
+    <string name="drawing_tool_line">கோடு</string>
+    <string name="drawing_tool_arrow">அம்பு</string>
+    <string name="drawing_tool_rectangle">செவ்வகம்</string>
+    <string name="drawing_tool_oval">நீள்வட்டம்</string>
+    <string name="drawing_section_tools">கருவிகள்</string>
+    <string name="drawing_section_shapes">வடிவங்கள்</string>
+
+    <string name="drawing_color">நிறம்</string>
+    <string name="drawing_custom_color">தனிப்பயன் நிறம்</string>
+    <string name="drawing_recent_colors">சமீபத்தியவை</string>
+    <string name="drawing_size">அளவு</string>
+    <string name="drawing_opacity">ஒளிபுகாநிலை</string>
+    <string name="drawing_hue">சாயல்</string>
+    <string name="drawing_saturation">நிறச்செறிவு</string>
+    <string name="drawing_brightness">பிரகாசம்</string>
+
+    <string name="drawing_eraser_mode">அழிப்பான்</string>
+    <string name="drawing_eraser_pixel">தேய்த்து அழி</string>
+    <string name="drawing_eraser_stroke">முழுக் கோடு</string>
+
+    <string name="drawing_stylus">ஸ்டைலஸ்</string>
+    <string name="drawing_pressure">அழுத்த உணர்திறன்</string>
+    <string name="drawing_smoothing">கோடு மென்மையாக்கல்</string>
+    <string name="drawing_palm_rejection">உள்ளங்கை நிராகரிப்பு</string>
+    <string name="drawing_palm_rejection_desc">ஸ்டைலஸ் மட்டுமே வரையும் — விரல்கள் நகர்த்தும், பெரிதாக்கும்</string>
+    <string name="drawing_stylus_detected">ஸ்டைலஸ் கண்டறியப்பட்டது — உள்ளங்கை நிராகரிப்பு இயக்கத்தில்</string>
+
+    <string name="drawing_paper">தாள்</string>
+    <string name="drawing_paper_plain">வெற்று</string>
+    <string name="drawing_paper_ruled">கோடிட்ட</string>
+    <string name="drawing_paper_grid">கட்டம்</string>
+    <string name="drawing_paper_dots">புள்ளியிட்ட</string>
+    <string name="drawing_paper_tint">பக்க நிறம்</string>
+    <string name="drawing_tint_white">வெள்ளை</string>
+    <string name="drawing_tint_cream">கிரீம்</string>
+    <string name="drawing_tint_slate">சாம்பல்</string>
+    <string name="drawing_tint_black">கருப்பு</string>
+
+    <string name="drawing_zoom_in">பெரிதாக்கு</string>
+    <string name="drawing_zoom_out">சிறிதாக்கு</string>
+    <string name="drawing_fit">வரைபடத்தை பொருத்து</string>
+    <string name="drawing_reset_view">காட்சியை மீட்டமை</string>
+    <string name="drawing_zoom_label">%1$d%%</string>
+    <string name="drawing_fullscreen">முழுத் திரை</string>
+    <string name="drawing_exit_fullscreen">முழுத் திரையிலிருந்து வெளியேறு</string>
+
+    <string name="drawing_properties">கருவி விருப்பங்கள்</string>
+    <string name="drawing_hide_properties">கருவி விருப்பங்களை மறை</string>
+
+    <string name="drawing_export">ஏற்றுமதி</string>
+    <string name="drawing_trim">வரைபடம் வரை வெட்டு</string>
+    <string name="drawing_transparent_bg">ஒளிஊடுருவும் பின்னணி</string>
+
+    <string name="drawing_shortcuts">விசைப்பலகை குறுக்குவழிகள்</string>
+    <string name="drawing_shortcut_hint">Ctrl+Z செயல்தவிர் · Ctrl+Y மீண்டும் · Ctrl+S செருகு</string>
 </resources>

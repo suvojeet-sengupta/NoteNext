@@ -3,11 +3,81 @@
     <string name="drawing_close_cd">Close</string>
     <string name="drawing_undo_cd">Undo</string>
     <string name="drawing_redo_cd">Redo</string>
-    <string name="drawing_clear_all_cd">Clear All</string>
+    <string name="drawing_clear_all_cd">Clear all</string>
     <string name="drawing_settings_cd">Settings</string>
-    <string name="drawing_stroke_width_cd">Stroke Width</string>
-    <string name="drawing_placeholder">Start drawing here…</string>
+    <string name="drawing_stroke_width_cd">Stroke width</string>
+    <string name="drawing_placeholder">Draw with your stylus or finger</string>
+    <string name="drawing_placeholder_hint">Two fingers to pan and zoom</string>
     <string name="drawing_stroke_size_label">%1$dpx</string>
+
+    <!-- Tools -->
     <string name="drawing_tool_brush">Brush</string>
+    <string name="drawing_tool_pen">Pen</string>
+    <string name="drawing_tool_pencil">Pencil</string>
+    <string name="drawing_tool_marker">Marker</string>
+    <string name="drawing_tool_highlighter">Highlighter</string>
     <string name="drawing_tool_eraser">Eraser</string>
+    <string name="drawing_tool_line">Line</string>
+    <string name="drawing_tool_arrow">Arrow</string>
+    <string name="drawing_tool_rectangle">Rectangle</string>
+    <string name="drawing_tool_oval">Oval</string>
+    <string name="drawing_section_tools">Tools</string>
+    <string name="drawing_section_shapes">Shapes</string>
+
+    <!-- Ink -->
+    <string name="drawing_color">Color</string>
+    <string name="drawing_custom_color">Custom color</string>
+    <string name="drawing_recent_colors">Recent</string>
+    <string name="drawing_size">Size</string>
+    <string name="drawing_opacity">Opacity</string>
+    <string name="drawing_hue">Hue</string>
+    <string name="drawing_saturation">Saturation</string>
+    <string name="drawing_brightness">Brightness</string>
+
+    <!-- Eraser -->
+    <string name="drawing_eraser_mode">Eraser</string>
+    <string name="drawing_eraser_pixel">Rub out</string>
+    <string name="drawing_eraser_stroke">Whole stroke</string>
+
+    <!-- Stylus -->
+    <string name="drawing_stylus">Stylus</string>
+    <string name="drawing_pressure">Pressure sensitivity</string>
+    <string name="drawing_smoothing">Stroke smoothing</string>
+    <string name="drawing_palm_rejection">Palm rejection</string>
+    <string name="drawing_palm_rejection_desc">Only the stylus draws — fingers pan and zoom</string>
+    <string name="drawing_stylus_detected">Stylus detected — palm rejection is on</string>
+
+    <!-- Page -->
+    <string name="drawing_paper">Paper</string>
+    <string name="drawing_paper_plain">Plain</string>
+    <string name="drawing_paper_ruled">Ruled</string>
+    <string name="drawing_paper_grid">Grid</string>
+    <string name="drawing_paper_dots">Dotted</string>
+    <string name="drawing_paper_tint">Page color</string>
+    <string name="drawing_tint_white">White</string>
+    <string name="drawing_tint_cream">Cream</string>
+    <string name="drawing_tint_slate">Slate</string>
+    <string name="drawing_tint_black">Black</string>
+
+    <!-- Viewport -->
+    <string name="drawing_zoom_in">Zoom in</string>
+    <string name="drawing_zoom_out">Zoom out</string>
+    <string name="drawing_fit">Fit drawing</string>
+    <string name="drawing_reset_view">Reset view</string>
+    <string name="drawing_zoom_label">%1$d%%</string>
+    <string name="drawing_fullscreen">Full screen</string>
+    <string name="drawing_exit_fullscreen">Exit full screen</string>
+
+    <!-- Panels -->
+    <string name="drawing_properties">Tool options</string>
+    <string name="drawing_hide_properties">Hide tool options</string>
+
+    <!-- Export -->
+    <string name="drawing_export">Export</string>
+    <string name="drawing_trim">Trim to drawing</string>
+    <string name="drawing_transparent_bg">Transparent background</string>
+
+    <!-- Shortcuts -->
+    <string name="drawing_shortcuts">Keyboard shortcuts</string>
+    <string name="drawing_shortcut_hint">Ctrl+Z undo · Ctrl+Y redo · Ctrl+S insert</string>
 </resources>
